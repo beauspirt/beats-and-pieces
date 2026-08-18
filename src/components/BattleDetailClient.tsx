@@ -782,7 +782,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                 <div className="bg-[#121212] p-3 rounded-xl flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
                     <span className={`w-2 h-2 rounded-full ${isJurySubmitted ? "bg-emerald-500" : "bg-[#E5A93C] animate-pulse"}`} />
-                    <span className="text-xs sm:text-sm font-bold text-white">Ortega (Judge{juryViewerRole === "judge" ? " - You" : ""})</span>
+                    <span className="text-xs sm:text-sm font-bold text-white">Ortega{juryViewerRole === "judge" ? " (You)" : ""}</span>
                   </div>
                   <span className={`text-xs font-bold px-2 py-0.5 rounded ${isJurySubmitted ? "bg-emerald-500/20 text-emerald-400" : "bg-[#251E14] text-[#E5A93C]"}`}>
                     {isJurySubmitted ? "Submitted ✓" : "In Progress"}
@@ -792,7 +792,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                 <div className="bg-[#121212] p-3 rounded-xl flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                    <span className="text-xs sm:text-sm font-bold text-white">Silent Strike (Judge)</span>
+                    <span className="text-xs sm:text-sm font-bold text-white">Silent Strike</span>
                   </div>
                   <span className="text-xs font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">
                     Submitted ✓
@@ -802,7 +802,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                 <div className="bg-[#121212] p-3 rounded-xl flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
                     <span className="w-2 h-2 rounded-full bg-[#E5A93C] animate-pulse" />
-                    <span className="text-xs sm:text-sm font-bold text-white">K-Lu (Judge)</span>
+                    <span className="text-xs sm:text-sm font-bold text-white">K-Lu</span>
                   </div>
                   <span className="text-xs font-bold px-2 py-0.5 rounded bg-[#251E14] text-[#E5A93C]">
                     In Progress

@@ -52,7 +52,7 @@ export default function UserProfilePage() {
 
           <div className="flex items-center gap-3">
             <span className="text-base font-bold text-white lowercase">{profile.nickname}</span>
-            <div className="w-12 h-12 rounded-full overflow-hidden relative border border-[#2B2B2B]">
+            <div className="w-12 h-12 rounded-full overflow-hidden relative">
               <Image
                 src={profile.avatarUrl}
                 alt={profile.nickname}

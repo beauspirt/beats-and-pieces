@@ -1,14 +1,80 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { sampleProducers, sampleDiscoveryBeats, sampleSubmissions } from "@/lib/mock-data";
 import { AudioWaveformPlayer } from "@/components/AudioWaveformPlayer";
+import { DiscoveryBeat, JudgeFeedbackItem } from "@/lib/types";
 import { 
   ArrowLeft, Flame, Trophy, Mail, ExternalLink, 
-  CheckCircle2, Copy, MapPin, Calendar, Star
+  CheckCircle2, Copy, MapPin, Calendar, Star, Award
 } from "lucide-react";
+
+/**
+ * 5-Second Auto-Cycling Judge Feedback Component
+ * Cycles through multiple judge feedbacks every 5 seconds in a continuous loop.
+ */
+function JudgeFeedbackTicker({
+  feedbacks,
+}: {
+  feedbacks: JudgeFeedbackItem[];
+}) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (!feedbacks || feedbacks.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % feedbacks.length);
+    }, 5000); // 5 seconds per feedback
+
+    return () => clearInterval(interval);
+  }, [feedbacks]);
+
+  if (!feedbacks || feedbacks.length === 0) return null;
+
+  const current = feedbacks[currentIndex] || feedbacks[0];
+
+  return (
+    <div className="pt-2.5 mt-2.5 border-t border-[#242424]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+        
+        {/* Judge Feedback Quote & Name */}
+        <div className="flex-1 flex items-baseline gap-2 min-w-0 transition-all duration-300">
+          <span className="font-semibold text-[#7B61FF] shrink-0">
+            {current.judgeName}:
+          </span>
+          <span className="text-[#C4C4C4] italic truncate sm:whitespace-normal">
+            &ldquo;{current.feedback}&rdquo;
+          </span>
+        </div>
+
+        {/* Multi-Judge Cycling Indicator Dots (if > 1 judge feedback) */}
+        {feedbacks.length > 1 && (
+          <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
+            {feedbacks.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentIndex(i)}
+                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                  i === currentIndex
+                    ? "bg-[#7B61FF] scale-125"
+                    : "bg-[#444444] hover:bg-[#666666]"
+                }`}
+                title={`Feedback from ${feedbacks[i].judgeName}`}
+              />
+            ))}
+            <span className="text-[10px] text-[#666666] ml-1">
+              {currentIndex + 1}/{feedbacks.length}
+            </span>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
 
 export function ProducerProfileClient({ producerId }: { producerId: string }) {
   const producer = sampleProducers[producerId] || sampleProducers["usr-ortega"];
@@ -16,15 +82,142 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
 
-  // Find all beats uploaded by this producer
-  const producerBeats = sampleDiscoveryBeats.filter(
-    (b) => b.beatmaker.tag.toLowerCase() === producer.nickname.toLowerCase() || b.beatmaker.id === producer.id
-  );
+  // Merge and prioritize all beats for this producer
+  const prioritizedBeats = useMemo(() => {
+    // 1. Get all discovery beats matching producer
+    const baseBeats = sampleDiscoveryBeats.filter(
+      (b) =>
+        b.beatmaker.id === producer.id ||
+        b.beatmaker.tag.toLowerCase() === producer.nickname.toLowerCase()
+    );
 
-  // Find all battle submissions by this producer
-  const producerSubmissions = sampleSubmissions.filter(
-    (s) => s.beatmakerTag.toLowerCase() === producer.nickname.toLowerCase() || s.userId === producer.id
-  );
+    // 2. Get all battle submissions by producer
+    const submissions = sampleSubmissions.filter(
+      (s) =>
+        s.userId === producer.id ||
+        s.beatmakerTag.toLowerCase() === producer.nickname.toLowerCase()
+    );
+
+    // 3. Merge submissions into discovery beats or add as showcase tracks
+    const mergedList: (DiscoveryBeat & { tier: number; rank?: number; juryFeedbacksList?: JudgeFeedbackItem[] })[] = [];
+
+    // Track processed titles to prevent duplication
+    const processedTitles = new Set<string>();
+
+    // Process discovery beats first
+    baseBeats.forEach((beat) => {
+      processedTitles.add(beat.title.toLowerCase());
+
+      // Look for a matching battle submission
+      const matchingSub = submissions.find(
+        (s) => s.beatTitle.toLowerCase() === beat.title.toLowerCase()
+      );
+
+      // Determine rank & feedbacks
+      const rank = matchingSub?.rank || beat.rank;
+      const juryFeedbacksList: JudgeFeedbackItem[] = [];
+
+      if (matchingSub?.juryFeedbacks && matchingSub.juryFeedbacks.length > 0) {
+        juryFeedbacksList.push(...matchingSub.juryFeedbacks);
+      } else if (matchingSub?.juryFeedback) {
+        juryFeedbacksList.push({
+          judgeName: matchingSub.judgeName || "Judge",
+          feedback: matchingSub.juryFeedback,
+        });
+      } else if (beat.juryFeedbacks && beat.juryFeedbacks.length > 0) {
+        juryFeedbacksList.push(...beat.juryFeedbacks);
+      } else if (beat.juryFeedback) {
+        juryFeedbacksList.push({
+          judgeName: beat.judgeName || "Judge",
+          feedback: beat.juryFeedback,
+        });
+      }
+
+      // Determine Tier Hierarchy:
+      // Tier 1: Won battles (Rank 1 / Winner)
+      // Tier 2: Top 3 (Rank 2 or 3)
+      // Tier 3: Reached Jury Phase (Rank 4-15 or has Jury Feedback)
+      // Tier 4: Rest in chronological order
+      let tier = 4;
+      if (rank === 1 || beat.tags.some((t) => t.toLowerCase().includes("winner") || t.includes("1st"))) {
+        tier = 1;
+      } else if (rank === 2 || rank === 3 || beat.tags.some((t) => t.includes("2nd") || t.includes("3rd") || t.includes("Top 3"))) {
+        tier = 2;
+      } else if ((rank && rank > 3) || juryFeedbacksList.length > 0 || beat.tags.some((t) => t.toLowerCase().includes("finalist"))) {
+        tier = 3;
+      }
+
+      mergedList.push({
+        ...beat,
+        tier,
+        rank: rank || (tier === 1 ? 1 : tier === 2 ? 2 : undefined),
+        juryFeedbacksList,
+        flames: matchingSub?.flameRating || beat.flames,
+        battleSource: matchingSub ? "Beat Battle #5" : beat.battleSource,
+      });
+    });
+
+    // Process any submissions not already in discovery beats
+    submissions.forEach((sub) => {
+      if (!processedTitles.has(sub.beatTitle.toLowerCase())) {
+        processedTitles.add(sub.beatTitle.toLowerCase());
+
+        const juryFeedbacksList: JudgeFeedbackItem[] = [];
+        if (sub.juryFeedbacks && sub.juryFeedbacks.length > 0) {
+          juryFeedbacksList.push(...sub.juryFeedbacks);
+        } else if (sub.juryFeedback) {
+          juryFeedbacksList.push({
+            judgeName: sub.judgeName || "Judge",
+            feedback: sub.juryFeedback,
+          });
+        }
+
+        let tier = 4;
+        if (sub.rank === 1) tier = 1;
+        else if (sub.rank === 2 || sub.rank === 3) tier = 2;
+        else if ((sub.rank && sub.rank > 3) || juryFeedbacksList.length > 0) tier = 3;
+
+        mergedList.push({
+          id: `sub-disc-${sub.id}`,
+          title: sub.beatTitle,
+          beatmaker: {
+            id: producer.id,
+            tag: producer.nickname,
+            avatarUrl: producer.avatarUrl,
+          },
+          audioUrl: sub.audioUrl,
+          duration: sub.duration,
+          bpm: sub.bpm || 90,
+          priceTag: "For Sale",
+          genres: ["Boom Bap"],
+          tags: [sub.rank === 1 ? "1st Place Winner" : sub.rank === 2 ? "2nd Place" : sub.rank === 3 ? "3rd Place" : "Jury Finalist"],
+          flames: sub.flameRating,
+          battleSource: "Beat Battle #5",
+          tier,
+          rank: sub.rank,
+          juryFeedbacksList,
+          createdAt: sub.submittedAt,
+        });
+      }
+    });
+
+    // Sort by tier first (1 -> 2 -> 3 -> 4), then by rank, then chronological
+    return mergedList.sort((a, b) => {
+      if (a.tier !== b.tier) {
+        return a.tier - b.tier;
+      }
+      if (a.tier <= 3 && a.rank && b.rank && a.rank !== b.rank) {
+        return a.rank - b.rank;
+      }
+      // For tier 4 (or ties), sort chronological (most recent first)
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      if (dateA !== dateB) {
+        return dateB - dateA;
+      }
+      return (b.flames || 0) - (a.flames || 0);
+    });
+  }, [producer]);
 
   const handleCopyEmail = () => {
     navigator.clipboard.writeText(producer.email);
@@ -33,7 +226,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
   };
 
   return (
-    <div className="w-full space-y-10 animate-in fade-in duration-300">
+    <div className="w-full space-y-8 animate-in fade-in duration-300">
       
       {/* Top Breadcrumb */}
       <div>
@@ -47,19 +240,19 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       </div>
 
       {/* SECTION 1: PRODUCER SHOWCASE HERO */}
-      <div className="bg-[#181818] rounded-2xl p-6 sm:p-10 space-y-8 shadow-xl">
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
+      <div className="bg-[#181818] rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-6 sm:gap-8">
           
           {/* Large Avatar */}
           <div
-            className="w-28 h-28 sm:w-36 sm:h-36 max-w-[144px] max-h-[144px] rounded-full overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl border-2 border-[#262626]"
-            style={{ width: "144px", height: "144px", position: "relative" }}
+            className="w-24 h-24 sm:w-32 sm:h-32 max-w-[128px] max-h-[128px] rounded-full overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl"
+            style={{ width: "128px", height: "128px", position: "relative" }}
           >
             <Image
               src={producer.avatarUrl}
               alt={producer.nickname}
-              width={144}
-              height={144}
+              width={128}
+              height={128}
               className="w-full h-full object-cover"
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
               priority
@@ -67,21 +260,21 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
           </div>
 
           {/* Producer Info & Bio */}
-          <div className="flex-1 space-y-3">
+          <div className="flex-1 space-y-2.5">
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
                 {producer.nickname}
               </h1>
 
-              {/* Verified Discord Role Badges */}
+              {/* Discord Badges */}
               {producer.discordRoles?.map((role) => (
                 <span
                   key={role}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-semibold font-mono ${
+                  className={`px-3.5 py-1 rounded-full text-xs font-semibold ${
                     role.includes("Winner")
                       ? "bg-[#251E14] text-[#E5A93C]"
                       : role.includes("Admin")
-                      ? "bg-[#7B61FF]/20 text-[#7B61FF]"
+                      ? "bg-[#7B61FF] text-white"
                       : "bg-[#1E232A] text-[#94A3B8]"
                   }`}
                 >
@@ -90,19 +283,19 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
               ))}
             </div>
 
-            <p className="text-sm sm:text-base text-[#D1D1D1] leading-relaxed max-w-2xl font-normal">
+            <p className="text-sm text-[#D1D1D1] leading-relaxed max-w-2xl font-normal">
               {producer.bio}
             </p>
 
-            <div className="flex flex-wrap items-center gap-5 text-sm text-[#888888] pt-1">
+            <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-[#888888] pt-0.5">
               {producer.location && (
                 <span className="flex items-center gap-1.5">
-                  <MapPin className="w-4 h-4 text-[#7B61FF]" />
+                  <MapPin className="w-3.5 h-3.5 text-[#7B61FF]" />
                   <span>{producer.location}</span>
                 </span>
               )}
               <span className="flex items-center gap-1.5">
-                <Calendar className="w-4 h-4 text-[#888888]" />
+                <Calendar className="w-3.5 h-3.5 text-[#888888]" />
                 <span>Member since {new Date(producer.createdAt).getFullYear()}</span>
               </span>
             </div>
@@ -112,7 +305,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
           <div className="flex flex-col gap-3 shrink-0 w-full md:w-auto">
             <button
               onClick={() => setShowContactModal(true)}
-              className="px-8 py-3.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
+              className="px-7 py-3.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
             >
               <Mail className="w-4 h-4" />
               <span>Contact / License</span>
@@ -122,40 +315,43 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
         </div>
 
         {/* STATS STRIP & SOCIAL CHANNELS */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-[#242424]">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-[#222222]">
           
           {/* Battle Stats */}
-          <div className="flex items-center gap-8 text-xs font-mono">
+          <div className="flex items-center gap-8 text-xs">
             <div>
-              <span className="text-[#888888] uppercase block text-[11px] tracking-wider">Battles</span>
-              <span className="text-xl font-bold text-white">{producer.stats?.battlesEntered || 0}</span>
+              <span className="text-[#888888] uppercase block text-[11px] tracking-wider font-semibold">Battles</span>
+              <span className="text-lg font-bold text-white">{producer.stats?.battlesEntered || 0}</span>
             </div>
 
             <div>
-              <span className="text-[#888888] uppercase block text-[11px] tracking-wider">Victories</span>
-              <span className="text-xl font-bold text-[#E5A93C]">{producer.stats?.battlesWon || 0} 🏆</span>
+              <span className="text-[#888888] uppercase block text-[11px] tracking-wider font-semibold">Victories</span>
+              <span className="text-lg font-bold text-[#E5A93C] flex items-center gap-1">
+                <Trophy className="w-3.5 h-3.5" />
+                <span>{producer.stats?.battlesWon || 0}</span>
+              </span>
             </div>
 
             <div>
-              <span className="text-[#888888] uppercase block text-[11px] tracking-wider">Total Flames</span>
-              <span className="text-xl font-bold text-[#FF5E3A] flex items-center gap-1">
-                <Flame className="w-4 h-4 fill-current" />
-                {producer.stats?.totalFlames || 0}
+              <span className="text-[#888888] uppercase block text-[11px] tracking-wider font-semibold">Total Flames</span>
+              <span className="text-lg font-bold text-[#FF5E3A] flex items-center gap-1">
+                <Flame className="w-3.5 h-3.5 fill-current" />
+                <span>{producer.stats?.totalFlames || 0}</span>
               </span>
             </div>
           </div>
 
           {/* Social Links Row */}
-          <div className="flex flex-wrap items-center justify-start md:justify-end gap-3 text-xs">
+          <div className="flex flex-wrap items-center justify-start md:justify-end gap-2.5 text-xs">
             {producer.links?.instagram && (
               <a
                 href={producer.links.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 rounded-full bg-[#121212] hover:bg-[#1E1E1E] text-[#D1D1D1] hover:text-white transition-colors flex items-center gap-1.5"
+                className="px-3.5 py-1.5 rounded-full bg-[#121212] hover:bg-[#1E1E1E] text-[#D1D1D1] hover:text-white transition-colors flex items-center gap-1.5"
               >
                 <span>Instagram</span>
-                <ExternalLink className="w-3.5 h-3.5 text-[#666666]" />
+                <ExternalLink className="w-3 h-3 text-[#666666]" />
               </a>
             )}
 
@@ -164,10 +360,10 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                 href={producer.links.beatstars}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 rounded-full bg-[#121212] hover:bg-[#1E1E1E] text-[#D1D1D1] hover:text-white transition-colors flex items-center gap-1.5"
+                className="px-3.5 py-1.5 rounded-full bg-[#121212] hover:bg-[#1E1E1E] text-[#D1D1D1] hover:text-white transition-colors flex items-center gap-1.5"
               >
                 <span>BeatStars</span>
-                <ExternalLink className="w-3.5 h-3.5 text-[#666666]" />
+                <ExternalLink className="w-3 h-3 text-[#666666]" />
               </a>
             )}
 
@@ -176,10 +372,10 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                 href={producer.links.spotify}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 rounded-full bg-[#121212] hover:bg-[#1E1E1E] text-[#D1D1D1] hover:text-white transition-colors flex items-center gap-1.5"
+                className="px-3.5 py-1.5 rounded-full bg-[#121212] hover:bg-[#1E1E1E] text-[#D1D1D1] hover:text-white transition-colors flex items-center gap-1.5"
               >
                 <span>Spotify</span>
-                <ExternalLink className="w-3.5 h-3.5 text-[#666666]" />
+                <ExternalLink className="w-3 h-3 text-[#666666]" />
               </a>
             )}
 
@@ -188,10 +384,10 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                 href={producer.links.soundcloud}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 rounded-full bg-[#121212] hover:bg-[#1E1E1E] text-[#D1D1D1] hover:text-white transition-colors flex items-center gap-1.5"
+                className="px-3.5 py-1.5 rounded-full bg-[#121212] hover:bg-[#1E1E1E] text-[#D1D1D1] hover:text-white transition-colors flex items-center gap-1.5"
               >
                 <span>SoundCloud</span>
-                <ExternalLink className="w-3.5 h-3.5 text-[#666666]" />
+                <ExternalLink className="w-3 h-3 text-[#666666]" />
               </a>
             )}
           </div>
@@ -199,175 +395,123 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
         </div>
       </div>
 
-      {/* SECTION 2: PRODUCER'S BEATS SHOWCASE */}
+      {/* SECTION 2: UNIFIED PRIORITIZED BEATS DISCOGRAPHY */}
       <div className="space-y-4">
         <div className="flex items-center justify-between pb-1">
           <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
             <span>Beats Showcase</span>
-            <span className="px-2.5 py-0.5 rounded-full bg-[#181818] text-xs text-[#888888] font-mono">
-              {producerBeats.length} Tracks
+            <span className="px-2.5 py-0.5 rounded-full bg-[#181818] text-xs text-[#888888]">
+              {prioritizedBeats.length} Tracks
             </span>
           </h2>
         </div>
 
-        {producerBeats.length > 0 ? (
+        {prioritizedBeats.length > 0 ? (
           <div className="space-y-3.5">
-            {producerBeats.map((beat) => (
+            {prioritizedBeats.map((beat) => (
               <div
                 key={beat.id}
-                className="bg-[#181818] rounded-2xl p-5 space-y-3 hover:bg-[#1C1C1C] transition-all shadow-sm"
+                className="bg-[#181818] rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-md"
               >
-                <div className="flex items-center justify-between gap-6">
+                {/* Row 1: Header (Title, Placement Badge, BPM, License Pill, Flames) */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   
-                  {/* Beat Info */}
-                  <div className="min-w-[220px]">
-                    <h3 className="text-base font-bold text-white">{beat.title}</h3>
-                    <div className="flex items-center gap-2 text-xs text-[#888888] mt-1">
-                      <span className="font-mono">{beat.bpm} BPM</span>
-                      <span>•</span>
-                      <span className="text-[#7B61FF] font-medium">{beat.battleSource || "Uploaded Beat"}</span>
-                    </div>
+                  {/* Left: Beat Title + Battle Placement Pill */}
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <h3 className="text-base sm:text-lg font-bold text-white leading-snug">
+                      {beat.title}
+                    </h3>
+
+                    {/* Tier 1: Winner Badge */}
+                    {beat.tier === 1 && (
+                      <span className="px-3 py-1 rounded-full bg-[#251E14] text-[#E5A93C] text-xs font-bold flex items-center gap-1.5">
+                        <Trophy className="w-3.5 h-3.5" />
+                        <span>1st Place</span>
+                      </span>
+                    )}
+
+                    {/* Tier 2: Top 3 Badges */}
+                    {beat.tier === 2 && (
+                      <span className="px-3 py-1 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-bold flex items-center gap-1.5">
+                        <Award className="w-3.5 h-3.5" />
+                        <span>{beat.rank === 2 ? "2nd Place" : "3rd Place"}</span>
+                      </span>
+                    )}
+
+                    {/* Tier 3: Jury Finalist Badge */}
+                    {beat.tier === 3 && (
+                      <span className="px-3 py-1 rounded-full bg-[#7B61FF]/15 text-[#7B61FF] text-xs font-bold flex items-center gap-1.5">
+                        <Star className="w-3.5 h-3.5 fill-current" />
+                        <span>Finalist</span>
+                      </span>
+                    )}
+
+                    {beat.battleSource && (
+                      <span className="text-xs text-[#888888]">
+                        • {beat.battleSource}
+                      </span>
+                    )}
                   </div>
 
-                  {/* Waveform Scrubber */}
-                  <div className="flex-1 hidden sm:block">
-                    <AudioWaveformPlayer
-                      id={`prod-beat-${beat.id}`}
-                      title={beat.title}
-                      audioUrl={beat.audioUrl}
-                      duration={beat.duration}
-                      bpm={beat.bpm}
-                      compact={true}
-                    />
-                  </div>
+                  {/* Right: Meta Badges (BPM, Price, Flames) */}
+                  <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
+                    <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-[#121212] text-[#888888]">
+                      {beat.bpm} BPM
+                    </span>
 
-                  {/* Rating & Action */}
-                  <div className="flex items-center gap-4 shrink-0 font-mono text-xs">
-                    <div className="flex items-center gap-1 text-[#FF5E3A] font-bold">
-                      <Flame className="w-3.5 h-3.5 fill-current" />
-                      <span>{beat.flames ? beat.flames.toFixed(2) : "N/A"}</span>
-                    </div>
-
-                    <span className="px-3 py-1 rounded-full bg-[#121212] text-[#888888] text-xs">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        beat.priceTag === "Not For Sale"
+                          ? "bg-[#121212] text-[#666666]"
+                          : "bg-[#251E14] text-[#E5A93C]"
+                      }`}
+                    >
                       {beat.priceTag || "For Sale"}
                     </span>
+
+                    <div className="flex items-center gap-1 text-xs sm:text-sm text-[#FF5E3A] font-bold px-2">
+                      <Flame className="w-4 h-4 fill-current" />
+                      <span>{beat.flames ? beat.flames.toFixed(2) : "3.00"}</span>
+                    </div>
                   </div>
 
                 </div>
 
-                {/* Tags */}
-                <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
+                {/* Row 2: Full Waveform Player */}
+                <AudioWaveformPlayer
+                  id={`prod-beat-${beat.id}`}
+                  title={beat.title}
+                  audioUrl={beat.audioUrl}
+                  duration={beat.duration}
+                  bpm={beat.bpm}
+                  compact={true}
+                />
+
+                {/* Row 3: Tags */}
+                <div className="flex flex-wrap items-center gap-2 pt-0.5 text-xs">
                   {beat.genres.map((g) => (
-                    <span key={g} className="px-3 py-1 rounded-full bg-[#121212] text-[#888888]">
+                    <span key={g} className="px-3.5 py-1.5 rounded-full bg-[#121212] text-[#888888] font-medium">
                       {g}
                     </span>
                   ))}
-                  {beat.tags.map((t) => (
-                    <span
-                      key={t}
-                      className={`px-3 py-1 rounded-full ${
-                        t.includes("Winner")
-                          ? "bg-[#251E14] text-[#E5A93C]"
-                          : "bg-[#121212] text-[#888888]"
-                      }`}
-                    >
+                  {beat.tags.filter((t) => !t.toLowerCase().includes("winner") && !t.includes("Place") && !t.includes("Finalist")).map((t) => (
+                    <span key={t} className="px-3.5 py-1.5 rounded-full bg-[#121212] text-[#777777] font-medium">
                       {t}
                     </span>
                   ))}
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="bg-[#181818] rounded-2xl p-8 text-center text-xs text-[#888888]">
-            No public beats uploaded yet.
-          </div>
-        )}
-      </div>
 
-      {/* SECTION 3: BATTLE TROPHY CASE & COMPETITION HISTORY */}
-      <div className="space-y-4 pt-4">
-        <div className="flex items-center justify-between pb-1">
-          <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-[#E5A93C]" />
-            <span>Battle Entries & Trophy Case</span>
-          </h2>
-        </div>
-
-        {producerSubmissions.length > 0 ? (
-          <div className="space-y-3.5">
-            {producerSubmissions.map((sub) => (
-              <div
-                key={sub.id}
-                className="bg-[#181818] rounded-2xl p-5 space-y-3 hover:bg-[#1C1C1C] transition-all"
-              >
-                <div className="flex items-center justify-between gap-6">
-                  
-                  {/* Rank Badge + Submission Title */}
-                  <div className="flex items-center gap-4 min-w-[240px]">
-                    {sub.rank === 1 ? (
-                      <span className="px-3.5 py-1.5 rounded-full bg-[#251E14] text-[#E5A93C] text-xs font-mono font-bold">
-                        1st Place
-                      </span>
-                    ) : sub.rank === 2 ? (
-                      <span className="px-3.5 py-1.5 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-mono font-bold">
-                        2nd Place
-                      </span>
-                    ) : (
-                      <span className="px-3.5 py-1.5 rounded-full bg-[#121212] text-[#888888] text-xs font-mono font-bold">
-                        Top Finalist
-                      </span>
-                    )}
-
-                    <div>
-                      <h3 className="text-base font-bold text-white">{sub.beatTitle}</h3>
-                      <Link
-                        href={`/battles/${sub.battleId}`}
-                        className="text-xs text-[#7B61FF] hover:underline block mt-0.5"
-                      >
-                        Beat Battle #5 Entry
-                      </Link>
-                    </div>
-                  </div>
-
-                  {/* Waveform Scrubber */}
-                  <div className="flex-1 hidden sm:block">
-                    <AudioWaveformPlayer
-                      id={`trophy-${sub.id}`}
-                      title={sub.beatTitle}
-                      audioUrl={sub.audioUrl}
-                      duration={sub.duration}
-                      compact={true}
-                    />
-                  </div>
-
-                  {/* Scores */}
-                  <div className="flex items-center gap-5 shrink-0 font-mono text-sm font-bold">
-                    <div className="flex items-center gap-1 text-[#FF5E3A]">
-                      <Flame className="w-3.5 h-3.5 fill-current" />
-                      <span>{sub.flameRating?.toFixed(2)}</span>
-                    </div>
-
-                    <div className="flex items-center gap-1 text-[#7B61FF]">
-                      <Star className="w-3.5 h-3.5 fill-current" />
-                      <span>{sub.juryScore?.toFixed(2)}</span>
-                    </div>
-                  </div>
-
-                </div>
-
-                {/* Judge Feedback Snippet */}
-                {sub.juryFeedback && (
-                  <p className="text-sm text-[#A0A0A0] italic pt-1 border-t border-[#222222]/50">
-                    "{sub.juryFeedback}" - <span className="text-[#888888] not-italic font-semibold font-mono">{sub.judgeName || "Judge"}</span>
-                  </p>
+                {/* Row 4: 5-Second Cycling Judge Feedback (if available) */}
+                {beat.juryFeedbacksList && beat.juryFeedbacksList.length > 0 && (
+                  <JudgeFeedbackTicker feedbacks={beat.juryFeedbacksList} />
                 )}
+
               </div>
             ))}
           </div>
         ) : (
-          <div className="bg-[#181818] rounded-2xl p-8 text-center text-xs text-[#888888]">
-            No competition entries recorded yet.
+          <div className="bg-[#181818] rounded-2xl p-10 text-center text-sm text-[#888888]">
+            No public beats uploaded yet.
           </div>
         )}
       </div>
@@ -381,26 +525,26 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
               <h3 className="text-xl font-bold text-white">Contact {producer.nickname}</h3>
               <button
                 onClick={() => setShowContactModal(false)}
-                className="w-8 h-8 rounded-full bg-[#121212] text-[#888888] hover:text-white flex items-center justify-center text-sm"
+                className="w-8 h-8 rounded-full bg-[#121212] text-[#888888] hover:text-white flex items-center justify-center text-sm cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
-            <p className="text-xs text-[#A0A0A0] leading-relaxed">
-              Inquire about exclusive beat licenses, custom production, mixing, or collaborations directly via verified contact channels:
+            <p className="text-xs sm:text-sm text-[#A0A0A0] leading-relaxed">
+              Inquire about beat licenses, custom production, or collabs directly with {producer.nickname}:
             </p>
 
-            {/* Email Box with Copy */}
+            {/* Email Box */}
             <div className="bg-[#121212] rounded-xl p-3.5 flex items-center justify-between gap-3">
               <div className="truncate">
-                <span className="text-[11px] font-mono text-[#777777] uppercase block">Direct Email</span>
-                <span className="text-xs font-mono text-white select-all">{producer.email}</span>
+                <span className="text-[10px] text-[#777777] uppercase block">Direct Email</span>
+                <span className="text-xs sm:text-sm text-white select-all">{producer.email}</span>
               </div>
 
               <button
                 onClick={handleCopyEmail}
-                className="px-3.5 py-1.5 rounded-lg bg-[#252525] hover:bg-[#7B61FF] text-white text-xs font-medium transition-colors shrink-0 flex items-center gap-1.5"
+                className="px-3.5 py-1.5 rounded-lg bg-[#252525] hover:bg-[#7B61FF] text-white text-xs font-medium transition-colors shrink-0 flex items-center gap-1.5 cursor-pointer"
               >
                 {copiedEmail ? (
                   <>
@@ -416,9 +560,9 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
               </button>
             </div>
 
-            {/* Social Buttons */}
+            {/* Social Channels */}
             <div className="space-y-2.5 pt-1">
-              <span className="text-xs font-mono text-[#888888] uppercase block">Social Profiles</span>
+              <span className="text-xs text-[#888888] uppercase block">Producer Channels</span>
               <div className="grid grid-cols-2 gap-2.5">
                 {producer.links?.instagram && (
                   <a
@@ -443,39 +587,8 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                     <ExternalLink className="w-3.5 h-3.5 text-[#666666]" />
                   </a>
                 )}
-
-                {producer.links?.spotify && (
-                  <a
-                    href={producer.links.spotify}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-3 rounded-xl bg-[#121212] hover:bg-[#1E1E1E] text-xs font-semibold text-white flex items-center justify-between transition-colors"
-                  >
-                    <span>Spotify</span>
-                    <ExternalLink className="w-3.5 h-3.5 text-[#666666]" />
-                  </a>
-                )}
-
-                {producer.links?.soundcloud && (
-                  <a
-                    href={producer.links.soundcloud}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-3 rounded-xl bg-[#121212] hover:bg-[#1E1E1E] text-xs font-semibold text-white flex items-center justify-between transition-colors"
-                  >
-                    <span>SoundCloud</span>
-                    <ExternalLink className="w-3.5 h-3.5 text-[#666666]" />
-                  </a>
-                )}
               </div>
             </div>
-
-            <button
-              onClick={() => setShowContactModal(false)}
-              className="w-full py-3 rounded-xl bg-[#222222] hover:bg-[#2A2A2A] text-white text-xs font-bold transition-colors"
-            >
-              Close
-            </button>
 
           </div>
         </div>

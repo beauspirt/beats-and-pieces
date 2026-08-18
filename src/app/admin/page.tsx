@@ -12,7 +12,7 @@ export default function AdminDashboardPage() {
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-300">
       
       {/* Header */}
-      <div className="border-b border-surface-border pb-6 flex items-center justify-between">
+      <div className="pb-6 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
             <Shield className="w-7 h-7 text-brand" />
@@ -24,15 +24,15 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Action Options Grid (Matching Figma Admin Panel Options.png + Moderation) */}
+      {/* Action Options Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         
         {/* Option 1: Create New Competition */}
         <Link
           href="/admin/new-battle"
-          className="bg-surface-card border border-surface-border rounded-2xl p-6 hover:border-brand hover:bg-surface-hover transition-all space-y-4 group"
+          className="bg-surface-card rounded-2xl p-6 hover:bg-surface-hover transition-all space-y-4 group shadow-md"
         >
-          <div className="w-12 h-12 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center text-brand group-hover:scale-110 transition-transform">
+          <div className="w-12 h-12 rounded-xl bg-brand/10 flex items-center justify-center text-brand group-hover:scale-110 transition-transform">
             <Trophy className="w-6 h-6" />
           </div>
 
@@ -49,15 +49,15 @@ export default function AdminDashboardPage() {
         {/* Option 2: Voting Anomaly & Anti-Fraud Moderation */}
         <Link
           href="/admin/moderation"
-          className="bg-surface-card border border-surface-border rounded-2xl p-6 hover:border-[#FF5E3A] hover:bg-surface-hover transition-all space-y-4 group relative"
+          className="bg-surface-card rounded-2xl p-6 hover:bg-surface-hover transition-all space-y-4 group relative shadow-md"
         >
           {pendingFlagsCount > 0 && (
-            <span className="absolute top-6 right-6 px-2.5 py-1 rounded-full bg-[#FF5E3A]/20 border border-[#FF5E3A]/40 text-[#FF5E3A] text-xs font-mono font-bold">
+            <span className="absolute top-6 right-6 px-2.5 py-1 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-mono font-bold">
               {pendingFlagsCount} Pending Flags
             </span>
           )}
 
-          <div className="w-12 h-12 rounded-xl bg-[#FF5E3A]/10 border border-[#FF5E3A]/20 flex items-center justify-center text-[#FF5E3A] group-hover:scale-110 transition-transform">
+          <div className="w-12 h-12 rounded-xl bg-[#FF5E3A]/10 flex items-center justify-center text-[#FF5E3A] group-hover:scale-110 transition-transform">
             <AlertTriangle className="w-6 h-6" />
           </div>
 
@@ -72,9 +72,9 @@ export default function AdminDashboardPage() {
         </Link>
 
         {/* Option 3: Create New Release */}
-        <div className="bg-surface-card border border-surface-border rounded-2xl p-6 hover:border-zinc-700 transition-all space-y-4 group cursor-pointer"
+        <div className="bg-surface-card rounded-2xl p-6 hover:bg-surface-hover transition-all space-y-4 group cursor-pointer shadow-md"
              onClick={() => alert("New Release creator modal opened!")}>
-          <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+          <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
             <Disc className="w-6 h-6" />
           </div>
 
@@ -89,9 +89,9 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Option 4: User & Role Permissions */}
-        <div className="bg-surface-card border border-surface-border rounded-2xl p-6 hover:border-zinc-700 transition-all space-y-4 group cursor-pointer"
+        <div className="bg-surface-card rounded-2xl p-6 hover:bg-surface-hover transition-all space-y-4 group cursor-pointer shadow-md"
              onClick={() => alert("Role management dashboard.")}>
-          <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+          <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
             <Users className="w-6 h-6" />
           </div>
 

@@ -38,6 +38,11 @@ export interface BattleSample {
   waveform?: number[];
 }
 
+export interface JudgeFeedbackItem {
+  judgeName: string;
+  feedback: string;
+}
+
 export interface BattleSubmission {
   id: string;
   battleId: string;
@@ -53,6 +58,7 @@ export interface BattleSubmission {
   juryScore?: number;
   juryFeedback?: string;
   judgeName?: string;
+  juryFeedbacks?: JudgeFeedbackItem[];
   rank?: number;
   submittedAt: string;
 }
@@ -101,6 +107,11 @@ export interface DiscoveryBeat {
   flames?: number;
   isFavorite?: boolean;
   battleSource?: string;
+  rank?: number;
+  juryFeedback?: string;
+  judgeName?: string;
+  juryFeedbacks?: JudgeFeedbackItem[];
+  createdAt?: string;
 }
 
 export interface Release {

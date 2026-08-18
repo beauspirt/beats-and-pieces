@@ -48,75 +48,68 @@ const releasesData: ReleaseItem[] = [
 
 export default function ReleasesPage() {
   return (
-    <div className="w-full space-y-12 py-4 animate-in fade-in duration-300">
+    <div className="w-full space-y-16 py-6 animate-in fade-in duration-300">
       
       {releasesData.map((release) => (
         <div
           key={release.id}
-          className="bg-[#181818] rounded-2xl p-6 sm:p-8 shadow-xl"
+          className="flex flex-col md:flex-row items-start gap-8 sm:gap-10"
         >
-          <div className="flex flex-col md:flex-row items-start gap-8">
-            
-            {/* Square Cover Artwork */}
-            <div
-              className="w-full md:w-64 h-64 max-w-[256px] max-h-[256px] rounded-2xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl"
-              style={{ width: "256px", height: "256px", position: "relative" }}
-            >
-              <Image
-                src={release.coverImage}
-                alt={release.title}
-                width={256}
-                height={256}
-                className="w-full h-full object-cover"
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
-            </div>
-
-            {/* Release Metadata */}
-            <div className="flex-1 flex flex-col justify-between space-y-4 pt-1">
-              <div className="space-y-3">
-                <span className="px-3 py-1 rounded-full bg-[#7B61FF] text-white text-xs font-semibold inline-block">
-                  Official Beat Tape
-                </span>
-
-                <h2 className="text-3xl font-black text-white tracking-tight">
-                  {release.title}
-                </h2>
-
-                <p className="text-sm sm:text-base text-[#D1D1D1] leading-relaxed max-w-3xl">
-                  {release.description}
-                </p>
-              </div>
-
-              {/* External Streaming Links */}
-              <div className="flex flex-wrap items-center gap-3 pt-3">
-                {release.spotifyUrl && (
-                  <a
-                    href={release.spotifyUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-5 py-2.5 rounded-xl bg-[#121212] hover:bg-[#1E1E1E] text-white text-xs font-bold transition-all flex items-center gap-2"
-                  >
-                    <span>Listen on Spotify</span>
-                    <ExternalLink className="w-3.5 h-3.5 text-[#888888]" />
-                  </a>
-                )}
-
-                {release.youtubeUrl && (
-                  <a
-                    href={release.youtubeUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-5 py-2.5 rounded-xl bg-[#121212] hover:bg-[#1E1E1E] text-white text-xs font-bold transition-all flex items-center gap-2"
-                  >
-                    <span>YouTube Music</span>
-                    <ExternalLink className="w-3.5 h-3.5 text-[#888888]" />
-                  </a>
-                )}
-              </div>
-            </div>
-
+          {/* Square Cover Artwork */}
+          <div
+            className="w-full md:w-64 h-64 max-w-[256px] max-h-[256px] rounded-2xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl"
+            style={{ width: "256px", height: "256px", position: "relative" }}
+          >
+            <Image
+              src={release.coverImage}
+              alt={release.title}
+              width={256}
+              height={256}
+              className="w-full h-full object-cover"
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
           </div>
+
+          {/* Release Metadata */}
+          <div className="flex-1 flex flex-col justify-between space-y-4 pt-1">
+            <div className="space-y-3">
+              <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+                {release.title}
+              </h2>
+
+              <p className="text-sm sm:text-base text-[#D1D1D1] leading-relaxed max-w-3xl">
+                {release.description}
+              </p>
+            </div>
+
+            {/* External Streaming Links */}
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              {release.spotifyUrl && (
+                <a
+                  href={release.spotifyUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-5 py-2.5 rounded-xl bg-[#181818] hover:bg-[#222222] text-white text-xs sm:text-sm font-bold transition-all flex items-center gap-2"
+                >
+                  <span>Listen on Spotify</span>
+                  <ExternalLink className="w-3.5 h-3.5 text-[#888888]" />
+                </a>
+              )}
+
+              {release.youtubeUrl && (
+                <a
+                  href={release.youtubeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-5 py-2.5 rounded-xl bg-[#181818] hover:bg-[#222222] text-white text-xs sm:text-sm font-bold transition-all flex items-center gap-2"
+                >
+                  <span>YouTube Music</span>
+                  <ExternalLink className="w-3.5 h-3.5 text-[#888888]" />
+                </a>
+              )}
+            </div>
+          </div>
+
         </div>
       ))}
 

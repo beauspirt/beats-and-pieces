@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { sampleCompetitions } from "@/lib/mock-data";
 import { ArrowRight, Trophy } from "lucide-react";
-import { Competition, BattlePhase } from "@/lib/types";
+import { Competition } from "@/lib/types";
 
 export default function BattlesPage() {
   const [competitions] = useState<Competition[]>(sampleCompetitions);
@@ -13,201 +13,126 @@ export default function BattlesPage() {
   const ongoingBattle = competitions.find((c) => c.phase !== "completed") || competitions[0];
   const pastBattles = competitions.filter((c) => c.phase === "completed");
 
-  const getPhasePill = (phase: BattlePhase) => {
-    switch (phase) {
-      case "submission":
-        return { label: "Submissions Open", bg: "bg-[#7B61FF] text-white" };
-      case "rating":
-        return { label: "Public Rating Active", bg: "bg-[#FF5E3A] text-white" };
-      case "judging":
-        return { label: "Jury Session In Progress", bg: "bg-[#7B61FF]/30 text-[#7B61FF]" };
-      case "completed":
-        return { label: "Completed", bg: "bg-[#222222] text-[#888888]" };
-    }
-  };
-
   return (
-    <div className="space-y-12 w-full animate-in fade-in duration-300">
+    <div className="space-y-10 w-full animate-in fade-in duration-300">
       
-      {/* SECTION 1: ONGOING BATTLE */}
+      {/* SECTION 1: ONGOING BATTLE (ENTIRE CARD CLICKABLE) */}
       <section className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between h-9">
           <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2.5">
             <span className="w-2.5 h-2.5 rounded-full bg-[#FF5E3A] animate-pulse" />
             <span>Active Competition</span>
           </h2>
-          <span className="text-sm font-mono text-[#888888]">
-            {ongoingBattle.phase === "rating" ? "Public preselection active" : "Submissions close soon"}
-          </span>
         </div>
 
-        <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row gap-8 items-start hover:bg-[#1A1A1A] transition-all shadow-xl">
-          
-          {/* Cover Art Thumbnail (explicit width/height constraints) */}
+        <Link
+          href={`/battles/${ongoingBattle.id}`}
+          className="bg-[#181818] rounded-3xl p-5 sm:p-7 flex flex-col md:flex-row gap-7 items-start hover:bg-[#1A1A1A] transition-all shadow-xl block cursor-pointer group relative overflow-hidden"
+        >
+          {/* Cover Art Thumbnail (Grand 320px Square) */}
           <div
-            className="w-full md:w-64 h-64 max-w-[256px] max-h-[256px] rounded-2xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl"
-            style={{ width: "256px", height: "256px", position: "relative" }}
+            className="w-full md:w-80 h-80 max-w-[320px] max-h-[320px] rounded-2xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl"
+            style={{ width: "320px", height: "320px", position: "relative" }}
           >
             <Image
               src={ongoingBattle.coverImage}
               alt={ongoingBattle.title}
-              width={256}
-              height={256}
+              width={320}
+              height={320}
               className="w-full h-full object-cover"
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
               priority
             />
-            <div
-              className="absolute top-3 left-3 bg-[#121212]/85 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-black text-[#FF5E3A]"
-              style={{ position: "absolute", top: "12px", left: "12px" }}
-            >
-              #{ongoingBattle.number}
-            </div>
           </div>
 
-          {/* Info & Single-Column Prizes */}
-          <div className="flex-1 flex flex-col justify-between h-full space-y-6">
-            <div>
-              <div className="flex flex-wrap items-center gap-2.5 mb-3">
-                <span className={`px-3.5 py-1.5 rounded-full text-xs font-semibold ${getPhasePill(ongoingBattle.phase).bg}`}>
-                  {getPhasePill(ongoingBattle.phase).label}
-                </span>
-                <span className="px-3.5 py-1.5 rounded-full bg-[#121212] text-xs text-[#A0A0A0] font-mono">
-                  {ongoingBattle.totalSubmissions} Beats Entered
-                </span>
-              </div>
-
-              <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
+          {/* Info */}
+          <div className="flex-1 w-full min-w-0 space-y-3.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight leading-tight">
                 {ongoingBattle.title}
               </h1>
-
-              <div className="space-y-1 text-sm text-[#A0A0A0] mt-3">
-                <p>Hosted by: <span className="text-white font-medium">{ongoingBattle.hosts.join(", ")}</span></p>
-                <p>Judged by: <span className="text-white font-medium">{ongoingBattle.judges.join(", ")}</span></p>
-              </div>
-
-              <p className="text-sm sm:text-base text-[#D1D1D1] mt-3 leading-relaxed">
-                {ongoingBattle.description}
-              </p>
-
-              {/* SINGLE COLUMN PRIZES SECTION */}
-              <div className="pt-5 mt-5 border-t border-[#262626] space-y-3">
-                <span className="text-xs font-mono text-[#888888] font-bold uppercase tracking-wider flex items-center gap-1.5">
-                  <Trophy className="w-4 h-4 text-[#E5A93C]" />
-                  <span>Competition Prizes</span>
+              <div className="flex items-center gap-2 shrink-0 self-start sm:self-center flex-wrap">
+                <span className="px-3.5 py-1.5 rounded-full bg-[#7B61FF] text-xs sm:text-sm font-semibold text-white shadow-sm">
+                  {ongoingBattle.phase === "submission"
+                    ? "Stage 1: Submissions Open"
+                    : ongoingBattle.phase === "rating"
+                    ? "Stage 2: Public Rating"
+                    : ongoingBattle.phase === "judging"
+                    ? "Stage 3: Jury Evaluation"
+                    : "Stage 4: Results"}
                 </span>
-
-                <div className="flex flex-col gap-2 max-w-xl">
-                  {/* 1st Prize */}
-                  <div className="flex items-center gap-3.5 px-4 py-2.5 rounded-xl bg-[#251E14] text-[#E5A93C] text-sm font-medium">
-                    <span className="font-bold font-mono px-2 py-0.5 rounded bg-[#382B1B] text-[#E5A93C] text-xs">
-                      1st
-                    </span>
-                    <span>{ongoingBattle.prizes.first}</span>
-                  </div>
-
-                  {/* 2nd Prize */}
-                  <div className="flex items-center gap-3.5 px-4 py-2.5 rounded-xl bg-[#1E232A] text-[#94A3B8] text-sm font-medium">
-                    <span className="font-bold font-mono px-2 py-0.5 rounded bg-[#2A3441] text-[#94A3B8] text-xs">
-                      2nd
-                    </span>
-                    <span>{ongoingBattle.prizes.second}</span>
-                  </div>
-
-                  {/* 3rd Prize */}
-                  <div className="flex items-center gap-3.5 px-4 py-2.5 rounded-xl bg-[#261814] text-[#D97706] text-sm font-medium">
-                    <span className="font-bold font-mono px-2 py-0.5 rounded bg-[#3D251D] text-[#D97706] text-xs">
-                      3rd
-                    </span>
-                    <span>{ongoingBattle.prizes.third}</span>
-                  </div>
-                </div>
+                <span className="px-3.5 py-1.5 rounded-full bg-[#121212] text-xs sm:text-sm text-[#A0A0A0]">
+                  {ongoingBattle.totalSubmissions} Total Entries
+                </span>
               </div>
             </div>
 
-            {/* Action Bar */}
-            <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-[#262626] mt-4">
-              <div className="text-xs font-mono text-[#888888]">
-                Deadlines: Submissions close Aug 10 • Public rating open until Aug 22
-              </div>
+            <div className="space-y-1 text-sm sm:text-base text-[#A0A0A0]">
+              <p>Hosted by: <span className="text-white font-medium">{ongoingBattle.hosts.join(", ")}</span></p>
+              <p>Judged by: <span className="text-white font-medium">{ongoingBattle.judges.join(", ")}</span></p>
+            </div>
 
-              <Link
-                href={`/battles/${ongoingBattle.id}`}
-                className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-[#FF5E3A] hover:bg-[#E04D2B] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#FF5E3A]/20 transition-all hover:scale-[1.02] active:scale-95"
-              >
-                <span>Enter Battle Arena</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+            <p className="text-sm sm:text-base text-[#D1D1D1] leading-relaxed">
+              {ongoingBattle.description}
+            </p>
+
+            <div className="text-xs sm:text-sm text-[#888888] pt-2">
+              Submissions close Aug 10 • Public rating open until Aug 22
             </div>
           </div>
-        </div>
+        </Link>
       </section>
 
-      {/* SECTION 2: PAST BATTLES ARCHIVE */}
-      <section className="space-y-6 pt-4">
+      {/* SECTION 2: PAST COMPETITIONS ARCHIVE (COMPACT SQUARE COVER ARTS, 4-COLUMN GRID) */}
+      <section className="space-y-4 pt-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl sm:text-2xl font-bold text-white">Past Battles & Hall of Fame</h2>
-          <span className="text-sm font-mono text-[#888888]">
-            {pastBattles.length} Archived Competitions
-          </span>
+          <h2 className="text-xl sm:text-2xl font-bold text-white">Past Competitions</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
           {pastBattles.map((battle) => (
             <Link
               key={battle.id}
               href={`/battles/${battle.id}`}
-              className="bg-[#181818] rounded-2xl overflow-hidden hover:bg-[#1C1C1C] transition-all flex flex-col group border border-transparent hover:border-[#333333]"
+              className="bg-[#181818] rounded-2xl p-3.5 sm:p-4 hover:bg-[#1C1C1C] transition-all flex flex-col group shadow-lg space-y-3"
             >
-              {/* Card Cover Art */}
-              <div
-                className="h-44 w-full relative overflow-hidden bg-[#121212]"
-                style={{ width: "100%", height: "176px", position: "relative" }}
-              >
+              {/* Compact Square Card Cover Art */}
+              <div className="w-full aspect-square relative rounded-xl overflow-hidden bg-[#121212] shrink-0">
                 <Image
                   src={battle.coverImage}
                   alt={battle.title}
-                  width={400}
-                  height={176}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  fill
+                  className="object-cover"
                 />
-                <div
-                  className="absolute top-3 left-3 bg-[#121212]/85 backdrop-blur-sm px-2.5 py-0.5 rounded-full text-xs font-mono font-bold text-[#888888]"
-                  style={{ position: "absolute", top: "12px", left: "12px" }}
-                >
-                  #{battle.number}
-                </div>
-                <div
-                  className="absolute top-3 right-3 bg-[#121212]/85 backdrop-blur-sm px-2.5 py-0.5 rounded-full text-xs font-mono text-[#888888]"
-                  style={{ position: "absolute", top: "12px", right: "12px" }}
-                >
-                  {battle.totalSubmissions} Entries
-                </div>
               </div>
 
-              {/* Card Details */}
-              <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                <div className="space-y-2">
-                  <span className="text-xs font-mono text-[#7B61FF] font-semibold">
-                    Completed Battle
-                  </span>
-                  <h3 className="font-bold text-lg text-white group-hover:text-[#7B61FF] transition-colors leading-snug">
+              {/* Card Details (Entries in text section, clean typography) */}
+              <div className="flex-1 flex flex-col justify-between space-y-2.5">
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs text-[#888888]">
+                    <span>Completed</span>
+                    <span className="font-medium px-2 py-0.5 rounded-full bg-[#121212] text-[#A0A0A0] text-[11px]">
+                      {battle.totalSubmissions} Entries
+                    </span>
+                  </div>
+
+                  <h3 className="font-bold text-sm sm:text-base text-white leading-snug">
                     {battle.title}
                   </h3>
+
                   <p className="text-xs text-[#888888] line-clamp-2 leading-relaxed">
                     {battle.description}
                   </p>
                 </div>
 
-                {/* 1st Place Podium Summary */}
-                <div className="pt-3 border-t border-[#262626] flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-1.5 text-[#E5A93C] font-semibold">
-                    <Trophy className="w-3.5 h-3.5" />
+                {/* Winner Summary Footer */}
+                <div className="pt-2 flex items-center justify-between text-xs border-t border-[#222222]/80">
+                  <div className="flex items-center gap-1 text-[#E5A93C] font-semibold text-[11px] sm:text-xs">
+                    <Trophy className="w-3 h-3" />
                     <span>Winner: Ortega</span>
                   </div>
-                  <span className="text-[#888888] font-mono group-hover:text-white transition-colors flex items-center gap-1">
-                    View Results <ArrowRight className="w-3 h-3" />
+                  <span className="text-[#888888] group-hover:text-white transition-colors flex items-center gap-1 text-[11px] sm:text-xs">
+                    Results <ArrowRight className="w-3 h-3" />
                   </span>
                 </div>
               </div>

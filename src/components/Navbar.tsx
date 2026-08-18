@@ -18,6 +18,39 @@ export const Navbar: React.FC = () => {
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    try {
+      const savedTheme = localStorage.getItem("bnp_theme");
+      if (savedTheme === "light") {
+        setIsDarkMode(false);
+        document.documentElement.classList.add("light");
+        document.documentElement.classList.remove("dark");
+      } else {
+        setIsDarkMode(true);
+        document.documentElement.classList.add("dark");
+        document.documentElement.classList.remove("light");
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const handleToggleTheme = () => {
+    setIsDarkMode((prev) => {
+      const nextMode = !prev;
+      if (!nextMode) {
+        document.documentElement.classList.add("light");
+        document.documentElement.classList.remove("dark");
+        try { localStorage.setItem("bnp_theme", "light"); } catch {}
+      } else {
+        document.documentElement.classList.add("dark");
+        document.documentElement.classList.remove("light");
+        try { localStorage.setItem("bnp_theme", "dark"); } catch {}
+      }
+      return nextMode;
+    });
+  };
+
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (adminMenuRef.current && !adminMenuRef.current.contains(event.target as Node)) {
         setShowAdminMenu(false);
@@ -31,10 +64,9 @@ export const Navbar: React.FC = () => {
   }, []);
 
   const navLinks = [
+    { href: "/battles", label: "Competitions" },
     { href: "/beats", label: "Beats" },
     { href: "/releases", label: "Releases" },
-    { href: "/battles", label: "Competitions" },
-    { href: "/about", label: "About" },
   ];
 
   return (
@@ -144,25 +176,31 @@ export const Navbar: React.FC = () => {
             </div>
           )}
 
-          {/* EXACT FIGMA THEME TOGGLE (With containing dark pillbox & perfectly centered moon) */}
+          {/* REFINED THEME TOGGLE (Exact Pixel-Centered Math & Equal Top/Bottom Padding) */}
           <button
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className="w-[70px] h-[34px] rounded-full bg-[#0E0E0E] border border-[#1C1C1C] p-[3px] flex items-center justify-between relative cursor-pointer select-none transition-all active:scale-95 group shadow-inner"
+            onClick={handleToggleTheme}
+            className={`w-[64px] h-[32px] rounded-full p-[3px] flex items-center justify-between relative cursor-pointer select-none transition-all active:scale-95 group ${
+              isDarkMode
+                ? "bg-[#0E0E0E] shadow-inner"
+                : "bg-[#E4E4E7] ring-1 ring-inset ring-[#D4D4D8] shadow-inner"
+            }`}
             title="Toggle light/dark mode"
             aria-label="Toggle light/dark mode"
           >
-            {/* Sliding Circular Thumb Highlight */}
+            {/* Sliding Circular Thumb Highlight (Vertically Centered with exact equal top/bottom padding) */}
             <div
-              className={`w-[28px] h-[28px] rounded-full bg-[#1F1F1F] absolute top-[2px] transition-all duration-200 pointer-events-none shadow-sm ${
-                isDarkMode ? "left-[37px]" : "left-[2px]"
+              className={`w-[26px] h-[26px] rounded-full absolute top-1/2 -translate-y-1/2 transition-all duration-200 pointer-events-none ${
+                isDarkMode
+                  ? "left-[35px] bg-[#1F1F1F] shadow-sm"
+                  : "left-[3px] bg-white shadow-md"
               }`}
             />
 
-            {/* Left Slot: Sun Icon */}
-            <div className="w-[28px] h-[28px] flex items-center justify-center relative z-10">
+            {/* Left Slot: Sun Icon (Exact 26x26 Centering) */}
+            <div className="w-[26px] h-[26px] flex items-center justify-center relative z-10 shrink-0">
               <svg
                 className={`w-3.5 h-3.5 transition-colors duration-200 ${
-                  !isDarkMode ? "text-[#F4F6E6]" : "text-[#333333]"
+                  !isDarkMode ? "text-[#D97706]" : "text-[#444444]"
                 }`}
                 viewBox="0 0 24 24"
                 fill="none"
@@ -183,11 +221,11 @@ export const Navbar: React.FC = () => {
               </svg>
             </div>
 
-            {/* Right Slot: Crescent Moon Icon (Dead-Center) */}
-            <div className="w-[28px] h-[28px] flex items-center justify-center relative z-10">
+            {/* Right Slot: Crescent Moon Icon (Exact 26x26 Centering) */}
+            <div className="w-[26px] h-[26px] flex items-center justify-center relative z-10 shrink-0">
               <svg
                 className={`w-3.5 h-3.5 transition-colors duration-200 ${
-                  isDarkMode ? "text-[#F4F6E6] fill-[#F4F6E6]" : "text-[#333333] fill-[#333333]"
+                  isDarkMode ? "text-[#F4F6E6] fill-[#F4F6E6]" : "text-[#9CA3AF] fill-[#9CA3AF]"
                 }`}
                 viewBox="0 0 24 24"
               >

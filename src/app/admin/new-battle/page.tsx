@@ -19,9 +19,17 @@ export default function NewCompetitionPage() {
   const [description, setDescription] = useState(
     "Sample the provided Romanian vinyl chops and build your best boom bap / hip-hop groove. Maximum length 2 minutes."
   );
-  const [prizes, setPrizes] = useState(
-    "1st place: €400\n2nd place: €300\n3rd place: €200"
-  );
+  const [extraRules, setExtraRules] = useState<string[]>([]);
+  const [newRuleInput, setNewRuleInput] = useState("");
+  const [showAddRule, setShowAddRule] = useState(false);
+
+  const handleAddRule = () => {
+    if (newRuleInput.trim()) {
+      setExtraRules([...extraRules, newRuleInput.trim()]);
+      setNewRuleInput("");
+      setShowAddRule(false);
+    }
+  };
   const [startDate, setStartDate] = useState("YYYY-MM-DD HH:MM:SS");
   const [submissionDeadline, setSubmissionDeadline] = useState("YYYY-MM-DD HH:MM:SS");
   const [ratingDeadline, setRatingDeadline] = useState("YYYY-MM-DD HH:MM:SS");
@@ -216,18 +224,66 @@ export default function NewCompetitionPage() {
             </div>
           </div>
 
-          {/* Prize(s) */}
+          {/* Extra Rules */}
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-start">
-            <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1] pt-2">
-              Prize(s)
-            </label>
-            <div className="sm:col-span-9">
-              <textarea
-                rows={3}
-                value={prizes}
-                onChange={(e) => setPrizes(e.target.value)}
-                className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
-              />
+            <div className="sm:col-span-3 pt-1.5">
+              <label className="text-sm font-semibold text-[#D1D1D1] block">
+                Extra Rules
+              </label>
+              <span className="text-[11px] text-[#888888] block">Added to default rules</span>
+            </div>
+            <div className="sm:col-span-9 space-y-2.5">
+              {extraRules.map((rule, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center justify-between gap-3 pl-3.5 pr-2 py-2 rounded-xl bg-[#121212] text-xs text-white"
+                >
+                  <span>{idx + 5}. {rule}</span>
+                  <button
+                    type="button"
+                    onClick={() => setExtraRules(extraRules.filter((_, i) => i !== idx))}
+                    className="w-5 h-5 rounded-full bg-[#202020] text-[#888888] hover:text-red-400 flex items-center justify-center transition-colors cursor-pointer"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+
+              {showAddRule ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    placeholder="e.g. Include at least 1 vinyl scratch..."
+                    value={newRuleInput}
+                    onChange={(e) => setNewRuleInput(e.target.value)}
+                    className="flex-1 bg-[#121212] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddRule}
+                    className="px-3.5 py-2 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-xs text-white font-bold cursor-pointer"
+                  >
+                    Add
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddRule(false)}
+                    className="px-2 py-2 text-xs text-[#888888] hover:text-white cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowAddRule(true)}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#121212] hover:bg-[#202020] text-xs text-[#D1D1D1] font-semibold transition-all border border-[#222222] cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5 text-[#7B61FF]" />
+                  <span>Add Extra Rule</span>
+                </button>
+              )}
             </div>
           </div>
 

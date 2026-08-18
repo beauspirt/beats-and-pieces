@@ -11,6 +11,20 @@ html {
   /* Prevent horizontal layout shift when navigating between short and long pages */
   overflow-y: scroll;
   scrollbar-gutter: stable;
+  font-size: 16px;
+}
+
+/* Responsive base font scaling for 2K (1440p) and ultra-wide screens */
+@media (min-width: 1440px) {
+  html {
+    font-size: 17px;
+  }
+}
+
+@media (min-width: 1920px) {
+  html {
+    font-size: 18px;
+  }
 }
 
 body {
@@ -42,6 +56,150 @@ img {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #7B61FF;
+}
+
+/* ========================================================================= */
+/* LIGHT MODE THEME SYSTEM (HIGH CONTRAST & CLEAR CONTAINER SEPARATION) */
+/* ========================================================================= */
+html.light {
+  --background: #F0F1F5;
+  --foreground: #18181B;
+}
+
+html.light body {
+  background-color: #F0F1F5;
+  color: #18181B;
+}
+
+html.light header {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-bottom: 1px solid #E2E4E9 !important;
+}
+
+html.light footer {
+  background-color: #FFFFFF !important;
+  border-color: #E2E4E9 !important;
+}
+
+/* Main Cards & Outer Surface Containers */
+html.light .bg-\[\#181818\] {
+  background-color: #FFFFFF !important;
+  border: 1px solid #E2E4E9 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+}
+
+/* Inner Beat Containers, Waveform Player Bars, & Inset Modules (High Contrast) */
+html.light .bg-\[\#121212\] {
+  background-color: #E7E9EE !important;
+  border: 1px solid #D8DBE2 !important;
+}
+
+html.light .bg-\[\#151515\] {
+  background-color: #E2E5EB !important;
+  border: 1px solid #D5D8E0 !important;
+}
+
+/* Secondary Panels & Dropdowns */
+html.light .bg-\[\#1A1A1A\],
+html.light .bg-\[\#1C1C1C\],
+html.light .bg-\[\#1F1F1F\],
+html.light .bg-\[\#202020\],
+html.light .bg-\[\#222222\],
+html.light .bg-\[\#252525\],
+html.light .bg-\[\#262626\] {
+  background-color: #DFE2E8 !important;
+}
+
+/* Container Hover States */
+html.light .hover\:bg-\[\#1C1C1C\]:hover,
+html.light .hover\:bg-\[\#1A1A1A\]:hover {
+  background-color: #F8F9FB !important;
+}
+
+html.light .hover\:bg-\[\#151515\]:hover,
+html.light .hover\:bg-\[\#202020\]:hover,
+html.light .hover\:bg-\[\#252525\]:hover {
+  background-color: #D8DBE2 !important;
+}
+
+/* Typography Overrides */
+html.light .text-white {
+  color: #111827 !important;
+}
+
+html.light .text-\[\#D1D1D1\],
+html.light .text-\[\#A0A0A0\],
+html.light .text-\[\#9E9E9E\] {
+  color: #374151 !important;
+}
+
+html.light .text-\[\#888888\],
+html.light .text-\[\#777777\],
+html.light .text-\[\#666666\],
+html.light .text-\[\#555555\] {
+  color: #6B7280 !important;
+}
+
+html.light .border-\[\#1C1C1C\],
+html.light .border-\[\#222222\],
+html.light .border-\[\#262626\],
+html.light .border-\[\#2A2A2A\] {
+  border-color: #D8DBE2 !important;
+}
+
+/* Nav Links in Light Mode */
+html.light nav a.text-white {
+  color: #111827 !important;
+}
+
+html.light nav a:hover {
+  color: #7B61FF !important;
+}
+
+/* PURPLE & ACCENT BUTTONS (ALWAYS WHITE TEXT & CLEAN HOVERS IN LIGHT MODE) */
+html.light .bg-\[\#7B61FF\],
+html.light button.bg-\[\#7B61FF\],
+html.light a.bg-\[\#7B61FF\],
+html.light .bg-\[\#684DE6\],
+html.light .bg-\[\#FF5E3A\],
+html.light button.bg-\[\#FF5E3A\],
+html.light a.bg-\[\#FF5E3A\] {
+  color: #FFFFFF !important;
+}
+
+html.light .bg-\[\#7B61FF\] *,
+html.light button.bg-\[\#7B61FF\] *,
+html.light a.bg-\[\#7B61FF\] *,
+html.light .bg-\[\#684DE6\] *,
+html.light .bg-\[\#FF5E3A\] *,
+html.light button.bg-\[\#FF5E3A\] *,
+html.light a.bg-\[\#FF5E3A\] * {
+  color: #FFFFFF !important;
+}
+
+/* Button Hover Transitions */
+html.light .hover\:bg-\[\#7B61FF\]:hover,
+html.light .hover\:bg-\[\#684DE6\]:hover,
+html.light .group:hover .group-hover\:bg-\[\#684DE6\] {
+  background-color: #684DE6 !important;
+  color: #FFFFFF !important;
+}
+
+html.light .hover\:bg-\[\#7B61FF\]:hover *,
+html.light .hover\:bg-\[\#684DE6\]:hover *,
+html.light .group:hover .group-hover\:bg-\[\#684DE6\] * {
+  color: #FFFFFF !important;
+}
+
+/* Audio Player Play/Pause Button in Light Mode */
+html.light .audio-play-btn-active {
+  background-color: #7B61FF !important;
+  color: #FFFFFF !important;
+}
+
+/* Range Inputs / Sliders */
+html.light input[type="range"] {
+  accent-color: #7B61FF;
 }
 
 @layer utilities {

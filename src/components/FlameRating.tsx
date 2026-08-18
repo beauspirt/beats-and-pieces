@@ -51,7 +51,7 @@ export const FlameRating: React.FC<FlameRatingProps> = ({
               <Flame
                 className={`${iconSizes[size]} transition-colors ${
                   isFilled
-                    ? "text-[#FF5E3A] fill-[#FF5E3A] drop-shadow-[0_0_8px_rgba(255,94,58,0.5)]"
+                    ? "text-[#FF5E3A] fill-[#FF5E3A] drop-shadow-[0_1px_2px_rgba(255,94,58,0.2)]"
                     : "text-zinc-600 fill-transparent hover:text-zinc-400"
                 }`}
               />

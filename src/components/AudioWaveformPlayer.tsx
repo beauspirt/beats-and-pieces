@@ -141,12 +141,24 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
       const isPlayed = barProgress <= progress;
       const isHovered = hoverFraction !== null && (x / rect.width) <= hoverFraction;
 
-      if (isPlayed) {
-        ctx.fillStyle = "#F8F9EC"; // Solid crisp cream-white
-      } else if (isHovered) {
-        ctx.fillStyle = "#4A4A4A"; // Active track hover preview
+      const isLight = typeof document !== "undefined" && document.documentElement.classList.contains("light");
+
+      if (isLight) {
+        if (isPlayed) {
+          ctx.fillStyle = "#7B61FF"; // Vibrant purple for played waveform in light mode
+        } else if (isHovered) {
+          ctx.fillStyle = "#9CA3AF"; // Hover needle preview in light mode
+        } else {
+          ctx.fillStyle = "#D4D4D8"; // High-contrast clean grey for unplayed bars
+        }
       } else {
-        ctx.fillStyle = "#222222"; // Unplayed dark charcoal
+        if (isPlayed) {
+          ctx.fillStyle = "#FFFFFF"; // Pure crisp white in dark mode
+        } else if (isHovered) {
+          ctx.fillStyle = "#4A4A4A"; // Active track hover preview
+        } else {
+          ctx.fillStyle = "#262626"; // Clean unplayed dark grey
+        }
       }
 
       ctx.beginPath();
@@ -162,7 +174,8 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
     // Hover Needle (stays visible while hovering over active track)
     if (hoverFraction !== null) {
       const needleX = Math.round(hoverFraction * rect.width);
-      ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+      const isLight = typeof document !== "undefined" && document.documentElement.classList.contains("light");
+      ctx.fillStyle = isLight ? "rgba(123, 97, 255, 0.7)" : "rgba(255, 255, 255, 0.4)";
       ctx.fillRect(needleX, 0, 1, rect.height);
     }
 
@@ -184,10 +197,23 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
     };
   }, [isThisTrackPlaying, renderWaveform]);
 
-  // Redraw when progress changes
+  // Redraw when progress changes or theme toggles
   useEffect(() => {
     renderWaveform();
   }, [renderWaveform, playbackProgress]);
+
+  // Observe theme class changes on html element
+  useEffect(() => {
+    if (typeof MutationObserver === "undefined") return;
+    const observer = new MutationObserver(() => {
+      renderWaveform();
+    });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+    return () => observer.disconnect();
+  }, [renderWaveform]);
 
   // ResizeObserver for clean responsive layout adjustments
   useEffect(() => {
@@ -311,9 +337,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
   return (
     <div
       ref={containerRef}
-      className={`w-full flex items-center gap-3 bg-[#121212] hover:bg-[#151515] transition-colors rounded-xl select-none ${
-        compact ? "p-2" : "p-3 sm:p-4"
-      }`}
+      className="w-full flex items-center gap-3 bg-transparent select-none p-0"
     >
       {/* Play / Pause Toggle Button */}
       <button
@@ -323,8 +347,8 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
           compact ? "w-8 h-8" : "w-10 h-10"
         } ${
           isThisTrackPlaying
-            ? "bg-[#F8F9EC] text-black shadow-lg"
-            : "bg-[#222222] text-[#F8F9EC] hover:bg-[#7B61FF] hover:text-white"
+            ? "bg-white text-black shadow-lg"
+            : "bg-[#222222] text-white hover:bg-[#7B61FF] hover:text-white"
         }`}
       >
         {isThisTrackPlaying ? (

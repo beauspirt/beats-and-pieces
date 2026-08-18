@@ -24,11 +24,11 @@ export default function AboutPage() {
         </p>
 
         <p>
-          Today, the platform serves as both a competition arena and a living archive of Romanian beat culture—featuring past battle finalists, official compilation releases, and an open discovery catalogue where artists can explore and license beats directly from our community producers.
+          Today, the platform serves as both a competition arena and a living archive of Romanian beat culture - featuring past battle finalists, official compilation releases, and an open discovery catalogue where artists can explore and license beats directly from our community producers.
         </p>
 
         <p>
-          Whether you produce on an MPC, SP404, FL Studio, Ableton, or a tape machine—welcome home.
+          Whether you produce on an MPC, SP404, FL Studio, Ableton, or a tape machine - welcome home.
         </p>
       </div>
 

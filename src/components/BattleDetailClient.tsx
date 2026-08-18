@@ -494,7 +494,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       )}
 
       {/* ========================================================================= */}
-      {/* STAGE 3: JURY EVALUATION (CLEAN SINGLE SCORE & ASYNCHRONOUS BALLOT TRACKER) */}
+      {/* STAGE 3: BLIND JURY EVALUATION (ANONYMIZED FINALISTS FOR FAIR JUDGING) */}
       {/* ========================================================================= */}
       {activeTab === "judging" && (
         <div className="space-y-6">
@@ -504,10 +504,10 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
               <div>
                 <h3 className="text-xl font-bold text-white flex items-center gap-2">
                   <Trophy className="w-5 h-5 text-[#7B61FF]" />
-                  <span>Jury Evaluation Portal — Top 15 Finalists</span>
+                  <span>Jury Evaluation Portal - Top 15 Finalists</span>
                 </h3>
                 <p className="text-sm text-[#888888] mt-1">
-                  Logged in as Judge (<span className="text-white font-medium">{currentUser.nickname}</span>). Listen and submit your score (1.00 – 5.00).
+                  Logged in as Judge (<span className="text-white font-medium">{currentUser.nickname}</span>). All entries are anonymized to ensure fair evaluation. Submit your score (1.00 - 5.00).
                 </p>
               </div>
 
@@ -561,11 +561,12 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             </div>
           </div>
 
-          {/* Finalists list (Top 15) */}
+          {/* Anonymized Finalists list (Top 15 Blind) */}
           <div className="space-y-3.5">
             {sampleSubmissions.slice(0, 15).map((sub, idx) => {
               const currentScore = juryScores[sub.id] || sub.juryScore || 4.0;
               const isSaved = jurySaved[sub.id];
+              const blindTitle = `Finalist ${idx < 9 ? "0" + (idx + 1) : idx + 1}`;
 
               return (
                 <div
@@ -578,13 +579,9 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                         #{idx + 1}
                       </span>
                       <div>
-                        <h4 className="font-bold text-white text-base">{sub.beatTitle}</h4>
-                        <Link
-                          href={`/producers/${sub.userId}`}
-                          className="text-sm text-[#7B61FF] hover:underline font-medium"
-                        >
-                          {sub.beatmakerTag}
-                        </Link>
+                        {/* Blind Finalist Title (No artist/beat name) */}
+                        <h4 className="font-bold text-white text-base">{blindTitle}</h4>
+                        <span className="text-xs text-[#888888] font-mono">Blind Finalist Entry</span>
                       </div>
                     </div>
 
@@ -595,8 +592,8 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                   </div>
 
                   <AudioWaveformPlayer
-                    id={sub.id}
-                    title={sub.beatTitle}
+                    id={`jury-${sub.id}`}
+                    title={blindTitle}
                     audioUrl={sub.audioUrl}
                     duration={sub.duration}
                     bpm={sub.bpm}
@@ -626,7 +623,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                     <div className="sm:col-span-6">
                       <input
                         type="text"
-                        placeholder="Feedback note..."
+                        placeholder="Feedback note for the producer..."
                         value={juryFeedback[sub.id] || sub.juryFeedback || ""}
                         onChange={(e) =>
                           setJuryFeedback({ ...juryFeedback, [sub.id]: e.target.value })
@@ -657,7 +654,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       )}
 
       {/* ========================================================================= */}
-      {/* STAGE 4: RESULTS & LEADERBOARD (FULL 15 BEATS WITH CLEAN FEEDBACK PILLBOX) */}
+      {/* STAGE 4: RESULTS & LEADERBOARD (FULL 15 BEATS WITH JUDGE NAME FEEDBACK) */}
       {/* ========================================================================= */}
       {activeTab === "completed" && (
         <div className="space-y-6">
@@ -680,6 +677,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
               const isTop1 = idx === 0;
               const isTop2 = idx === 1;
               const isTop3 = idx === 2;
+              const judgeName = sub.judgeName || "Judge";
 
               return (
                 <div
@@ -744,10 +742,10 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                     compact={true}
                   />
 
-                  {/* Clean Judge Feedback Box (No purple highlight on left) */}
+                  {/* Clean Judge Feedback Box with Judge Name */}
                   {sub.juryFeedback && (
                     <div className="bg-[#121212] px-4 py-2.5 rounded-xl text-xs text-[#D1D1D1] italic">
-                      "{sub.juryFeedback}" — <span className="text-[#888888] not-italic font-semibold font-mono">Judge Feedback</span>
+                      "{sub.juryFeedback}" - <span className="text-[#888888] not-italic font-semibold font-mono">{judgeName}</span>
                     </div>
                   )}
                 </div>

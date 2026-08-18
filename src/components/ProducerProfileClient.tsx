@@ -359,7 +359,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                 {/* Judge Feedback Snippet */}
                 {sub.juryFeedback && (
                   <p className="text-sm text-[#A0A0A0] italic pt-1 border-t border-[#222222]/50">
-                    "{sub.juryFeedback}" — <span className="text-[#7B61FF] not-italic font-semibold">Jury Note</span>
+                    "{sub.juryFeedback}" - <span className="text-[#888888] not-italic font-semibold font-mono">{sub.judgeName || "Judge"}</span>
                   </p>
                 )}
               </div>

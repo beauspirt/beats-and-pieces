@@ -62,7 +62,7 @@ export const FlameRating: React.FC<FlameRatingProps> = ({
 
       {showValue && (
         <span className="text-sm font-bold text-[#FF5E3A] ml-1 font-mono">
-          {value > 0 ? value.toFixed(2) : "—"}
+          {value > 0 ? value.toFixed(2) : "-"}
         </span>
       )}
     </div>

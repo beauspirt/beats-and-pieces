@@ -12,7 +12,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Beats & Pieces — Beat Battle Platform",
+  title: "Beats & Pieces - Beat Battle Platform",
   description: "The home of Romanian beatmakers. Beat battles, blind community preselections, releases, and beats discovery.",
 };
 

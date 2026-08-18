@@ -52,6 +52,7 @@ export interface BattleSubmission {
   totalVotes?: number;
   juryScore?: number;
   juryFeedback?: string;
+  judgeName?: string;
   rank?: number;
   submittedAt: string;
 }

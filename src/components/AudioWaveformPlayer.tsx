@@ -157,7 +157,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
       ctx.fill();
     }
 
-    // Hover Needle (only drawn on active track)
+    // Hover Needle (stays visible while hovering over active track)
     if (hoverFraction !== null) {
       const needleX = Math.round(hoverFraction * rect.width);
       ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
@@ -229,11 +229,13 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
       // ignore
     }
     const p = getProgressFromPointer(e);
+    hoverFractionRef.current = p;
+
     if (!isThisTrackActive) {
-      // First click on any inactive track: Always play from the beginning (0:00)
+      // First click on inactive track: start playing from 0:00, establish hover at cursor
       playTrack(id, title, bpm, audioUrl, 0);
     } else {
-      // Already active track: Seek directly to clicked position
+      // Already active track: seek directly to clicked position
       seekTrack(p);
     }
     renderWaveform();
@@ -261,7 +263,9 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
     } catch {
       // ignore
     }
-    hoverFractionRef.current = null;
+    // Keep hover needle right where cursor was released
+    const p = getProgressFromPointer(e);
+    hoverFractionRef.current = p;
     renderWaveform();
   };
 

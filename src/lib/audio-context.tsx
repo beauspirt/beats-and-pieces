@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useRef, useEffect } from "react";
+import React, { createContext, useContext, useState, useRef, useEffect, useCallback } from "react";
 
 interface AudioContextType {
   currentTrackId: string | null;
@@ -31,6 +31,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
   const currentAudioUrlRef = useRef<string | null>(null);
+  const pendingSeekProgressRef = useRef<number | null>(null);
 
   // Stop audio on unmount
   useEffect(() => {
@@ -42,40 +43,62 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
   }, []);
 
-  const playTrack = (
+  const seekTrack = useCallback((progress: number) => {
+    if (typeof progress !== "number" || isNaN(progress) || !isFinite(progress)) return;
+    const targetProgress = Math.max(0, Math.min(1, progress));
+
+    const audio = audioElementRef.current;
+    if (audio) {
+      const dur = (typeof audio.duration === "number" && !isNaN(audio.duration) && isFinite(audio.duration) && audio.duration > 0)
+        ? audio.duration
+        : duration;
+
+      if (dur > 0) {
+        const targetTime = targetProgress * dur;
+        try {
+          audio.currentTime = targetTime;
+          setCurrentTime(targetTime);
+        } catch (e) {
+          console.warn("Could not seek audio immediately:", e);
+        }
+      }
+    } else {
+      setCurrentTime(targetProgress * duration);
+    }
+  }, [duration]);
+
+  const playTrack = useCallback((
     id: string,
     title?: string,
     bpm = 90,
     audioUrl?: string,
     startProgress?: number
   ) => {
-    // If clicking same playing track without seeking, toggle pause
-    if (currentTrackId === id && isPlaying && startProgress === undefined) {
-      pauseTrack();
-      return;
-    }
+    const validStartProgress = (typeof startProgress === "number" && !isNaN(startProgress) && isFinite(startProgress))
+      ? Math.max(0, Math.min(1, startProgress))
+      : undefined;
 
-    // If resuming the same track already loaded
+    // 1. If clicking the exact same track that is ALREADY active
     if (currentTrackId === id && audioElementRef.current && audioElementRef.current.src) {
-      if (startProgress !== undefined) {
-        const dur = (audioElementRef.current.duration && !isNaN(audioElementRef.current.duration) && isFinite(audioElementRef.current.duration))
-          ? audioElementRef.current.duration
-          : duration;
-        const targetTime = Math.max(0, Math.min(dur, startProgress * dur));
-        try {
-          audioElementRef.current.currentTime = targetTime;
-          setCurrentTime(targetTime);
-        } catch {
-          // ignore
+      if (validStartProgress !== undefined) {
+        seekTrack(validStartProgress);
+        if (!isPlaying) {
+          audioElementRef.current.play().catch(console.error);
+          setIsPlaying(true);
+        }
+      } else {
+        // Toggle play/pause
+        if (isPlaying) {
+          pauseTrack();
+        } else {
+          audioElementRef.current.play().catch(console.error);
+          setIsPlaying(true);
         }
       }
-      if (!isPlaying) {
-        audioElementRef.current.play().catch(console.error);
-        setIsPlaying(true);
-      }
       return;
     }
 
+    // 2. Switching to a new track or initial play
     setCurrentTrackId(id);
     setActiveTrackTitle(title || `Beat #${id}`);
 
@@ -90,18 +113,40 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     currentAudioUrlRef.current = sourceUrl;
     audio.src = encodeURI(sourceUrl);
 
-    audio.onloadedmetadata = () => {
-      if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
-        setDuration(audio.duration);
-        if (startProgress !== undefined) {
-          audio.currentTime = startProgress * audio.duration;
-          setCurrentTime(audio.currentTime);
+    if (validStartProgress !== undefined) {
+      pendingSeekProgressRef.current = validStartProgress;
+    } else {
+      pendingSeekProgressRef.current = null;
+    }
+
+    const applyPendingSeek = () => {
+      if (pendingSeekProgressRef.current !== null && audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
+        const targetTime = pendingSeekProgressRef.current * audio.duration;
+        try {
+          audio.currentTime = targetTime;
+          setCurrentTime(targetTime);
+        } catch {
+          // ignore
         }
+        pendingSeekProgressRef.current = null;
       }
     };
 
+    audio.onloadedmetadata = () => {
+      if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
+        setDuration(audio.duration);
+        applyPendingSeek();
+      }
+    };
+
+    audio.oncanplay = () => {
+      applyPendingSeek();
+    };
+
     audio.ontimeupdate = () => {
-      setCurrentTime(audio.currentTime);
+      if (!isNaN(audio.currentTime)) {
+        setCurrentTime(audio.currentTime);
+      }
       if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
         setDuration(audio.duration);
       }
@@ -114,39 +159,19 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     audio.play().then(() => {
       setIsPlaying(true);
-      if (startProgress !== undefined && audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
-        audio.currentTime = startProgress * audio.duration;
-      }
+      applyPendingSeek();
     }).catch((err) => {
-      console.warn("Audio autoplay or playback note:", err);
+      console.warn("Audio play notice:", err);
       setIsPlaying(true);
     });
-  };
+  }, [currentTrackId, isPlaying, seekTrack]);
 
-  const pauseTrack = () => {
+  const pauseTrack = useCallback(() => {
     if (audioElementRef.current) {
       audioElementRef.current.pause();
     }
     setIsPlaying(false);
-  };
-
-  const seekTrack = (progress: number) => {
-    const targetProgress = Math.max(0, Math.min(1, progress));
-    if (audioElementRef.current) {
-      const dur = (audioElementRef.current.duration && !isNaN(audioElementRef.current.duration) && isFinite(audioElementRef.current.duration))
-        ? audioElementRef.current.duration
-        : duration;
-      const targetTime = targetProgress * dur;
-      try {
-        audioElementRef.current.currentTime = targetTime;
-      } catch {
-        // ignore
-      }
-      setCurrentTime(targetTime);
-    } else {
-      setCurrentTime(targetProgress * duration);
-    }
-  };
+  }, []);
 
   const playbackProgress = duration > 0 ? currentTime / duration : 0;
 

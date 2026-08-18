@@ -210,11 +210,15 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
     const canvas = canvasRef.current;
     if (!canvas) return 0;
     const rect = canvas.getBoundingClientRect();
+    if (!rect || rect.width <= 0) return 0;
     const x = e.clientX - rect.left;
-    return Math.max(0, Math.min(1, x / rect.width));
+    const raw = x / rect.width;
+    if (isNaN(raw) || !isFinite(raw)) return 0;
+    return Math.max(0, Math.min(1, raw));
   };
 
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
     e.stopPropagation();
     isPointerDownRef.current = true;
     try {
@@ -236,6 +240,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
     hoverFractionRef.current = p;
 
     if (isPointerDownRef.current) {
+      e.preventDefault();
       if (isThisTrackActive) {
         seekTrack(p);
       } else {

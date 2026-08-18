@@ -192,13 +192,22 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
   // ResizeObserver for clean responsive layout adjustments
   useEffect(() => {
     const container = containerRef.current;
+    const canvas = canvasRef.current;
     if (!container) return;
 
     const observer = new ResizeObserver(() => {
       renderWaveform();
     });
     observer.observe(container);
-    return () => observer.disconnect();
+    if (canvas) observer.observe(canvas);
+
+    renderWaveform();
+    const timer = setTimeout(() => renderWaveform(), 50);
+
+    return () => {
+      observer.disconnect();
+      clearTimeout(timer);
+    };
   }, [renderWaveform]);
 
   const handlePlayToggle = (e: React.MouseEvent) => {
@@ -335,6 +344,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
           onPointerCancel={handlePointerUp}
           onPointerLeave={handlePointerLeave}
           className="w-full h-full cursor-pointer touch-none select-none block"
+          style={{ width: "100%", height: "100%", display: "block" }}
         />
       </div>
 

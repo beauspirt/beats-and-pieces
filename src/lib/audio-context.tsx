@@ -241,7 +241,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     
     // Instantly reset time so previous track progress never flashes on new track
     setCurrentTime(0);
-    setDuration(30);
+    setDuration(45);
 
     // Check if AudioBuffer is already in cache
     const cachedBuffer = audioBufferCacheRef.current.get(resolvedUrl);

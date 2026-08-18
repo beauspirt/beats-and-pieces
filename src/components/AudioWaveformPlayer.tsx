@@ -22,7 +22,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
   title = "Beat Track",
   audioUrl,
   bpm = 90,
-  duration = 32,
+  duration = 45,
   showDownload = false,
   compact = false,
 }) => {
@@ -30,6 +30,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
     currentTrackId,
     isPlaying,
     currentTime,
+    duration: contextDuration,
     playbackProgress,
     playTrack,
     pauseTrack,
@@ -39,6 +40,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const isPointerDownRef = useRef(false);
+  const wasActiveOnDownRef = useRef(false);
   const hoverFractionRef = useRef<number | null>(null);
 
   const isThisTrackActive = currentTrackId === id;
@@ -223,6 +225,8 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
     e.preventDefault();
     e.stopPropagation();
     isPointerDownRef.current = true;
+    wasActiveOnDownRef.current = isThisTrackActive;
+
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch {
@@ -232,7 +236,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
     hoverFractionRef.current = p;
 
     if (!isThisTrackActive) {
-      // First click on inactive track: start playing from 0:00, establish hover at cursor
+      // Initial click on inactive track: ALWAYS start from 0:00
       playTrack(id, title, bpm, audioUrl, 0);
     } else {
       // Already active track: seek directly to clicked position
@@ -247,7 +251,8 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
 
     if (isPointerDownRef.current) {
       e.preventDefault();
-      if (isThisTrackActive) {
+      // Only scrub on drag if the track was already active when pointer went down
+      if (wasActiveOnDownRef.current && isThisTrackActive) {
         seekTrack(p);
       }
     }
@@ -256,6 +261,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
 
   const handlePointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
     isPointerDownRef.current = false;
+    wasActiveOnDownRef.current = false;
     try {
       if (e.currentTarget.hasPointerCapture(e.pointerId)) {
         e.currentTarget.releasePointerCapture(e.pointerId);
@@ -287,6 +293,11 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
       document.body.removeChild(link);
     }
   };
+
+  // Determine accurate duration to display
+  const displayDuration = isThisTrackActive && contextDuration > 0
+    ? contextDuration
+    : duration || 45;
 
   return (
     <div
@@ -332,7 +343,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
         <span>
           {isThisTrackActive
             ? formatTime(currentTime)
-            : formatTime(duration)}
+            : formatTime(displayDuration)}
         </span>
 
         {showDownload && (

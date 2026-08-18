@@ -456,7 +456,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                         id={track.id}
                         title={track.placeholder}
                         audioUrl={track.audioUrl}
-                        duration={32}
+                        duration={45}
                         bpm={track.bpm}
                         compact={true}
                       />

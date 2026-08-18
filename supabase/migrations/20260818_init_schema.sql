@@ -127,7 +127,20 @@ CREATE TABLE IF NOT EXISTS public.releases (
 );
 
 -- ==============================================================================
--- 9. ROW LEVEL SECURITY (RLS) & ANTI-CHEAT POLICIES
+-- 9. PERMISSIONS & ROLE GRANTS (Required for Supabase PostgREST API)
+-- ==============================================================================
+
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated, service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated, service_role;
+GRANT ALL ON ALL ROUTINES IN SCHEMA public TO anon, authenticated, service_role;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO anon, authenticated, service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO anon, authenticated, service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON ROUTINES TO anon, authenticated, service_role;
+
+-- ==============================================================================
+-- 10. ROW LEVEL SECURITY (RLS) & ANTI-CHEAT POLICIES
 -- ==============================================================================
 
 ALTER TABLE public.producers ENABLE ROW LEVEL SECURITY;
@@ -149,14 +162,9 @@ CREATE POLICY "Producers can update their own profile" ON public.producers
 CREATE POLICY "Battles are viewable by everyone" ON public.battles
   FOR SELECT USING (true);
 
--- Submissions: Anti-Cheat Masking
--- During active 'rating' phase, regular users only receive anonymized track data
+-- Submissions: Publicly readable for approved entries
 CREATE POLICY "Public can view approved submissions" ON public.submissions
-  FOR SELECT USING (
-    status = 'approved' OR 
-    auth.uid() = producer_id OR
-    EXISTS (SELECT 1 FROM public.producers WHERE id = auth.uid() AND role IN ('admin', 'moderator'))
-  );
+  FOR SELECT USING (status = 'approved' OR auth.uid() = producer_id);
 
 CREATE POLICY "Producers can submit to active submission phase" ON public.submissions
   FOR INSERT WITH CHECK (
@@ -167,7 +175,7 @@ CREATE POLICY "Producers can submit to active submission phase" ON public.submis
     )
   );
 
--- Ratings: Only authenticated producers can rate; 1 vote per submission
+-- Ratings: Viewable by voter or admin
 CREATE POLICY "Ratings viewable by voter or admin" ON public.ratings
   FOR SELECT USING (
     auth.uid() = voter_id OR
@@ -177,12 +185,10 @@ CREATE POLICY "Ratings viewable by voter or admin" ON public.ratings
 CREATE POLICY "Producers can rate submissions during rating phase" ON public.ratings
   FOR INSERT WITH CHECK (
     auth.uid() = voter_id AND
-    -- Cannot rate own submission
     NOT EXISTS (
       SELECT 1 FROM public.submissions 
       WHERE id = submission_id AND producer_id = auth.uid()
     ) AND
-    -- Battle must be in rating phase
     EXISTS (
       SELECT 1 FROM public.battles 
       WHERE id = battle_id AND phase = 'rating'
@@ -200,7 +206,7 @@ CREATE POLICY "Releases are viewable by everyone" ON public.releases
   FOR SELECT USING (true);
 
 -- ==============================================================================
--- 10. QUALIFIED BALLOT 50% VALIDATION FUNCTION
+-- 11. QUALIFIED BALLOT 50% VALIDATION FUNCTION
 -- ==============================================================================
 
 CREATE OR REPLACE FUNCTION public.calculate_qualified_battle_scores(p_battle_id TEXT)
@@ -216,15 +222,12 @@ DECLARE
   v_total_submissions INT;
   v_min_required_votes INT;
 BEGIN
-  -- 1. Get total approved submissions in this battle
   SELECT COUNT(*) INTO v_total_submissions
   FROM public.submissions
   WHERE battle_id = p_battle_id AND status = 'approved';
 
-  -- 2. 50% Qualified Ballot Threshold
   v_min_required_votes := CEIL(v_total_submissions * 0.50);
 
-  -- 3. Calculate scores ONLY from voters who completed >= 50% of the ballot
   RETURN QUERY
   WITH qualified_voters AS (
     SELECT voter_id

@@ -12,6 +12,7 @@ import {
   Lock, ShieldCheck, Flame, Star, Disc, Trophy, Award
 } from "lucide-react";
 import confetti from "canvas-confetti";
+import { submitRating } from "@/lib/api";
 
 export function BattleDetailClient({ battleId }: { battleId: string }) {
   const battle = sampleCompetitions.find((c) => c.id === battleId) || sampleCompetitions[0];
@@ -77,8 +78,9 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     }, 1000);
   };
 
-  const handleRateBeat = (trackId: string, flames: number) => {
+  const handleRateBeat = async (trackId: string, flames: number) => {
     setRatings((prev) => ({ ...prev, [trackId]: flames }));
+    await submitRating(trackId, battle.id, flames);
   };
 
   const handleSaveJuryScore = (subId: string) => {

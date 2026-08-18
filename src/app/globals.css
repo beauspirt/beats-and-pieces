@@ -20,6 +20,11 @@ body {
   overflow-x: hidden;
 }
 
+img {
+  max-width: 100%;
+  display: block;
+}
+
 /* Custom Scrollbar for Beat Library & Battle Queues */
 ::-webkit-scrollbar {
   width: 8px;

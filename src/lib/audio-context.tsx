@@ -26,6 +26,9 @@ const AudioPlayerContext = createContext<AudioContextType | undefined>(undefined
 // 12ms micro-fade de-click constant (standard DAW / Web Audio anti-aliasing crossfade)
 const DECLICK_FADE_DURATION = 0.012;
 
+// Maximum number of uncompressed AudioBuffers kept in browser memory (prevents mobile OOM)
+const MAX_CACHED_BUFFERS = 4;
+
 export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const pathname = usePathname();
   const prevPathnameRef = useRef(pathname);
@@ -61,6 +64,29 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       audioContextRef.current.resume();
     }
     return audioContextRef.current;
+  }, []);
+
+  // LRU Buffer Cache helpers (keeps memory footprint under ~150MB)
+  const getCachedBuffer = useCallback((url: string): AudioBuffer | null => {
+    const cache = audioBufferCacheRef.current;
+    if (!cache.has(url)) return null;
+    const buf = cache.get(url)!;
+    cache.delete(url);
+    cache.set(url, buf);
+    return buf;
+  }, []);
+
+  const setCachedBuffer = useCallback((url: string, buffer: AudioBuffer) => {
+    const cache = audioBufferCacheRef.current;
+    if (cache.has(url)) {
+      cache.delete(url);
+    } else if (cache.size >= MAX_CACHED_BUFFERS) {
+      const oldestKey = cache.keys().next().value;
+      if (oldestKey) {
+        cache.delete(oldestKey);
+      }
+    }
+    cache.set(url, buffer);
   }, []);
 
   // Stop playback when moving to a different page
@@ -291,8 +317,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setCurrentTime(0);
     setDuration(45);
 
-    // Check if AudioBuffer is already in cache
-    const cachedBuffer = audioBufferCacheRef.current.get(resolvedUrl);
+    // Check if AudioBuffer is already in LRU cache
+    const cachedBuffer = getCachedBuffer(resolvedUrl);
     if (cachedBuffer) {
       currentBufferRef.current = cachedBuffer;
       const targetTime = initialProgress * cachedBuffer.duration;
@@ -307,7 +333,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const arrayBuffer = await response.arrayBuffer();
         const decodedBuffer = await ctx.decodeAudioData(arrayBuffer);
 
-        audioBufferCacheRef.current.set(resolvedUrl, decodedBuffer);
+        setCachedBuffer(resolvedUrl, decodedBuffer);
 
         // Verify this is still the active requested track
         if (currentUrlRef.current === resolvedUrl) {
@@ -342,7 +368,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       startTimeLoop();
     }).catch(console.error);
 
-  }, [currentTrackId, getAudioContext, isPlaying, currentTime, pauseTrack, startBufferPlayback, startTimeLoop]);
+  }, [currentTrackId, getAudioContext, isPlaying, currentTime, pauseTrack, startBufferPlayback, startTimeLoop, getCachedBuffer, setCachedBuffer]);
 
   const playbackProgress = duration > 0 ? currentTime / duration : 0;
 

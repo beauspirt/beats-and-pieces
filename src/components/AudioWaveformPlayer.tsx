@@ -228,8 +228,10 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
     }
     const p = getProgressFromPointer(e);
     if (!isThisTrackActive) {
-      playTrack(id, title, bpm, audioUrl, p);
+      // First click on any inactive track: Always play from the beginning (0:00)
+      playTrack(id, title, bpm, audioUrl, 0);
     } else {
+      // Already active track: Seek directly to clicked position
       seekTrack(p);
     }
     renderWaveform();
@@ -243,8 +245,6 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
       e.preventDefault();
       if (isThisTrackActive) {
         seekTrack(p);
-      } else {
-        playTrack(id, title, bpm, audioUrl, p);
       }
     }
     renderWaveform();

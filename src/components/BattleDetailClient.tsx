@@ -11,7 +11,7 @@ import {
 import { AudioWaveformPlayer } from "./AudioWaveformPlayer";
 import {
   ArrowLeft, Download, Upload, CheckCircle2,
-  Lock, ShieldCheck, Flame, Star, Disc, Trophy, Award, Sliders, Check
+  Lock, ShieldCheck, Flame, Star, Disc, Trophy, Award, Check
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { submitRating } from "@/lib/api";
@@ -42,22 +42,29 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     "blind-03": 4,
   });
 
-  // Stage 3: Asynchronous Jury evaluation state
-  const [juryCategories, setJuryCategories] = useState<Record<string, {
-    originality: number;
-    mix: number;
-    groove: number;
-    sampleFlip: number;
-  }>>({
-    "sub-1": { originality: 4.8, mix: 4.9, groove: 4.7, sampleFlip: 4.9 },
-    "sub-2": { originality: 4.6, mix: 4.7, groove: 4.8, sampleFlip: 4.5 },
-    "sub-3": { originality: 4.5, mix: 4.5, groove: 4.6, sampleFlip: 4.4 },
+  // Stage 3: Clean Single-Score Jury evaluation state (1.00 - 5.00)
+  const [juryScores, setJuryScores] = useState<Record<string, number>>({
+    "sub-1": 4.89,
+    "sub-2": 4.75,
+    "sub-3": 4.60,
+    "sub-4": 4.55,
+    "sub-5": 4.52,
+    "sub-6": 4.48,
+    "sub-7": 4.45,
+    "sub-8": 4.30,
+    "sub-9": 4.22,
+    "sub-10": 4.16,
+    "sub-11": 4.10,
+    "sub-12": 4.05,
+    "sub-13": 4.00,
+    "sub-14": 3.95,
+    "sub-15": 3.90,
   });
 
   const [juryFeedback, setJuryFeedback] = useState<Record<string, string>>({
-    "sub-1": "Incredible vinyl chop on the intro and punchy 90s snare snap. Mix is super clean.",
-    "sub-2": "Atmospheric lo-fi chops with warm low-end saturation. Drums groove heavily.",
-    "sub-3": "Experimental tempo switches and raw analog textures. Very unique take on the sample.",
+    "sub-1": "Flawless drum swing and incredible tape warmth on the horns. Instant favorite.",
+    "sub-2": "Heavy bassline and great texture on the snare. Very clean mix.",
+    "sub-3": "Super creative chop technique on the main loop.",
   });
   
   const [jurySaved, setJurySaved] = useState<Record<string, boolean>>({});
@@ -80,13 +87,6 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     { id: "blind-07", placeholder: "Beat 07", bpm: 93, audioUrl: "/audio/07 Ripp - Beyond.wav", duration: 130 },
     { id: "blind-08", placeholder: "Beat 08", bpm: 89, audioUrl: "/audio/08 Mr Tweaks - Dmzl 4.wav", duration: 136 },
   ];
-
-  // Helper to compute weighted jury score: Originality (30%), Mix (30%), Groove (20%), Sample (20%)
-  const computeCompositeScore = (subId: string): number => {
-    const cats = juryCategories[subId] || { originality: 4.5, mix: 4.5, groove: 4.5, sampleFlip: 4.5 };
-    const weighted = cats.originality * 0.30 + cats.mix * 0.30 + cats.groove * 0.20 + cats.sampleFlip * 0.20;
-    return Math.round(weighted * 100) / 100;
-  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -112,17 +112,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     await submitRating(trackId, battle.id, flames);
   };
 
-  const handleUpdateCategory = (subId: string, category: "originality" | "mix" | "groove" | "sampleFlip", val: number) => {
-    setJuryCategories((prev) => {
-      const current = prev[subId] || { originality: 4.5, mix: 4.5, groove: 4.5, sampleFlip: 4.5 };
-      return {
-        ...prev,
-        [subId]: { ...current, [category]: val },
-      };
-    });
-  };
-
-  const handleSaveJuryDraft = (subId: string) => {
+  const handleSaveJuryScore = (subId: string) => {
     setJurySaved((prev) => ({ ...prev, [subId]: true }));
     setTimeout(() => {
       setJurySaved((prev) => ({ ...prev, [subId]: false }));
@@ -133,7 +123,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     setHasPublishedBallot(true);
     confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
     setTimeout(() => {
-      alert("All 3 Judge Ballots are now Published! Advancing battle to Results.");
+      alert("All Judge Ballots are now Published! Advancing battle to Results.");
       setActiveTab("completed");
     }, 1200);
   };
@@ -179,7 +169,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       {/* Hero Header */}
       <div className="bg-[#181818] rounded-3xl p-6 sm:p-10 flex flex-col md:flex-row gap-8 items-start relative overflow-hidden border border-[#222222]">
         
-        {/* Cover Art Thumbnail */}
+        {/* Cover Art Thumbnail (explicit width/height constraints) */}
         <div
           className="w-full md:w-64 h-64 max-w-[256px] max-h-[256px] rounded-2xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl"
           style={{ width: "256px", height: "256px", position: "relative" }}
@@ -211,7 +201,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             }`}>
               {activeTab === "submission" && "Stage 1: Submissions Open"}
               {activeTab === "rating" && "Stage 2: Public Preselection"}
-              {activeTab === "judging" && "Stage 3: Asynchronous Jury Session"}
+              {activeTab === "judging" && "Stage 3: Jury Evaluation"}
               {activeTab === "completed" && "Stage 4: Battle Results"}
             </span>
 
@@ -504,21 +494,20 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       )}
 
       {/* ========================================================================= */}
-      {/* STAGE 3: ASYNCHRONOUS JURY EVALUATION SUITE (NO LIVESTREAMS) */}
+      {/* STAGE 3: JURY EVALUATION (CLEAN SINGLE SCORE & ASYNCHRONOUS BALLOT TRACKER) */}
       {/* ========================================================================= */}
       {activeTab === "judging" && (
         <div className="space-y-6">
           
-          {/* Asynchronous Jury Overview & Live Ballot Progress */}
           <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 space-y-5 border border-[#262626]">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                  <Sliders className="w-5 h-5 text-[#7B61FF]" />
-                  <span>Asynchronous Jury Evaluation Portal</span>
+                  <Trophy className="w-5 h-5 text-[#7B61FF]" />
+                  <span>Jury Evaluation Portal — Top 15 Finalists</span>
                 </h3>
                 <p className="text-sm text-[#888888] mt-1">
-                  Logged in as Judge (<span className="text-white font-medium">{currentUser.nickname}</span>). Evaluate finalists across weighted criteria at your own pace.
+                  Logged in as Judge (<span className="text-white font-medium">{currentUser.nickname}</span>). Listen and submit your score (1.00 – 5.00).
                 </p>
               </div>
 
@@ -527,7 +516,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                 className="px-6 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white font-bold text-xs shadow-lg active:scale-95 transition-all whitespace-nowrap flex items-center gap-2"
               >
                 <Check className="w-4 h-4" />
-                <span>Publish My Final Ballot</span>
+                <span>Publish Final Results</span>
               </button>
             </div>
 
@@ -535,11 +524,10 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             <div className="pt-4 border-t border-[#262626] space-y-3">
               <div className="flex justify-between text-xs font-mono text-[#888888]">
                 <span>Assigned Judge Ballots (2 of 3 Published)</span>
-                <span>Results unlock automatically when all 3 publish</span>
+                <span>Results unlock automatically when all judges publish</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {/* Judge 1: Nerub */}
                 <div className="bg-[#121212] p-3.5 rounded-xl flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-500" />
@@ -550,7 +538,6 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                   </span>
                 </div>
 
-                {/* Judge 2: Ortega */}
                 <div className="bg-[#121212] p-3.5 rounded-xl flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-500" />
@@ -561,34 +548,31 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                   </span>
                 </div>
 
-                {/* Judge 3: Special Guest */}
                 <div className="bg-[#121212] p-3.5 rounded-xl flex items-center justify-between border border-[#7B61FF]/40">
                   <div className="flex items-center gap-2.5">
                     <span className="w-2 h-2 rounded-full bg-[#E5A93C] animate-pulse" />
                     <span className="text-xs font-bold text-white">Guest Judge (You)</span>
                   </div>
                   <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-[#251E14] text-[#E5A93C]">
-                    {hasPublishedBallot ? "Published ✓" : "In Progress (3/3 Rated)"}
+                    {hasPublishedBallot ? "Published ✓" : "In Progress"}
                   </span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Finalists Detailed Evaluation Cards */}
-          <div className="space-y-4">
-            {sampleSubmissions.slice(0, 3).map((sub, idx) => {
-              const cats = juryCategories[sub.id] || { originality: 4.5, mix: 4.5, groove: 4.5, sampleFlip: 4.5 };
-              const composite = computeCompositeScore(sub.id);
+          {/* Finalists list (Top 15) */}
+          <div className="space-y-3.5">
+            {sampleSubmissions.slice(0, 15).map((sub, idx) => {
+              const currentScore = juryScores[sub.id] || sub.juryScore || 4.0;
               const isSaved = jurySaved[sub.id];
 
               return (
                 <div
                   key={sub.id}
-                  className="bg-[#181818] rounded-2xl p-6 space-y-4 border border-[#222222] hover:border-[#333333] transition-all"
+                  className="bg-[#181818] rounded-2xl p-5 space-y-3.5 hover:bg-[#1C1C1C] transition-all"
                 >
-                  {/* Top Bar: Finalist Rank & Composite Score */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-[#262626]">
+                  <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3.5">
                       <span className="w-8 h-8 rounded-lg bg-[#121212] font-mono text-xs font-bold text-[#888888] flex items-center justify-center">
                         #{idx + 1}
@@ -597,29 +581,21 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                         <h4 className="font-bold text-white text-base">{sub.beatTitle}</h4>
                         <Link
                           href={`/producers/${sub.userId}`}
-                          className="text-xs text-[#7B61FF] hover:underline font-medium"
+                          className="text-sm text-[#7B61FF] hover:underline font-medium"
                         >
-                          by {sub.beatmakerTag}
+                          {sub.beatmakerTag}
                         </Link>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-1.5 font-mono text-xs text-[#FF5E3A] font-bold bg-[#121212] px-3 py-1.5 rounded-xl">
-                        <Flame className="w-3.5 h-3.5 fill-current" />
-                        <span>Public: {sub.flameRating?.toFixed(2)}</span>
-                      </div>
-
-                      <div className="flex items-center gap-1.5 font-mono text-xs text-[#7B61FF] font-bold bg-[#7B61FF]/15 px-3 py-1.5 rounded-xl border border-[#7B61FF]/30">
-                        <Star className="w-3.5 h-3.5 fill-current" />
-                        <span>Your Score: {composite.toFixed(2)} / 5.00</span>
-                      </div>
+                    <div className="flex items-center gap-1.5 font-mono text-sm text-[#FF5E3A] font-bold">
+                      <Flame className="w-4 h-4 fill-current" />
+                      <span>{sub.flameRating?.toFixed(2)}</span>
                     </div>
                   </div>
 
-                  {/* Audio Waveform Player */}
                   <AudioWaveformPlayer
-                    id={`jury-${sub.id}`}
+                    id={sub.id}
                     title={sub.beatTitle}
                     audioUrl={sub.audioUrl}
                     duration={sub.duration}
@@ -627,141 +603,80 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                     compact={true}
                   />
 
-                  {/* Multi-Criteria Scoring Sliders */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 bg-[#121212] p-4 rounded-xl">
-                    {/* 1. Originality (30%) */}
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between text-xs">
-                        <span className="text-[#888888] font-medium">Originality (30%)</span>
-                        <span className="font-mono font-bold text-white">{cats.originality.toFixed(1)}</span>
-                      </div>
+                  {/* Inline Clean Score & Feedback */}
+                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-3.5 pt-1 items-center">
+                    <div className="sm:col-span-4 flex items-center gap-2.5">
+                      <label className="text-xs font-semibold text-[#888888]">Score:</label>
                       <input
-                        type="range"
+                        type="number"
                         min="1.0"
                         max="5.0"
-                        step="0.1"
-                        value={cats.originality}
-                        onChange={(e) => handleUpdateCategory(sub.id, "originality", parseFloat(e.target.value))}
-                        className="w-full accent-[#7B61FF] cursor-pointer"
+                        step="0.05"
+                        value={currentScore}
+                        onChange={(e) =>
+                          setJuryScores({
+                            ...juryScores,
+                            [sub.id]: parseFloat(e.target.value) || 0,
+                          })
+                        }
+                        className="w-24 bg-[#121212] rounded-xl px-3 py-2 text-xs font-mono font-bold text-[#7B61FF] focus:outline-none focus:ring-1 focus:ring-[#7B61FF] text-center"
                       />
                     </div>
 
-                    {/* 2. Mix Quality (30%) */}
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between text-xs">
-                        <span className="text-[#888888] font-medium">Mix & Sound (30%)</span>
-                        <span className="font-mono font-bold text-white">{cats.mix.toFixed(1)}</span>
-                      </div>
+                    <div className="sm:col-span-6">
                       <input
-                        type="range"
-                        min="1.0"
-                        max="5.0"
-                        step="0.1"
-                        value={cats.mix}
-                        onChange={(e) => handleUpdateCategory(sub.id, "mix", parseFloat(e.target.value))}
-                        className="w-full accent-[#7B61FF] cursor-pointer"
+                        type="text"
+                        placeholder="Feedback note..."
+                        value={juryFeedback[sub.id] || sub.juryFeedback || ""}
+                        onChange={(e) =>
+                          setJuryFeedback({ ...juryFeedback, [sub.id]: e.target.value })
+                        }
+                        className="w-full bg-[#121212] rounded-xl px-4 py-2 text-xs text-white placeholder-[#555555] focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
                       />
                     </div>
 
-                    {/* 3. Groove & Drums (20%) */}
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between text-xs">
-                        <span className="text-[#888888] font-medium">Groove & Drums (20%)</span>
-                        <span className="font-mono font-bold text-white">{cats.groove.toFixed(1)}</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="1.0"
-                        max="5.0"
-                        step="0.1"
-                        value={cats.groove}
-                        onChange={(e) => handleUpdateCategory(sub.id, "groove", parseFloat(e.target.value))}
-                        className="w-full accent-[#7B61FF] cursor-pointer"
-                      />
+                    <div className="sm:col-span-2 text-right">
+                      <button
+                        onClick={() => handleSaveJuryScore(sub.id)}
+                        className={`w-full py-2 px-4 rounded-xl text-xs font-bold transition-all ${
+                          isSaved
+                            ? "bg-emerald-600 text-white"
+                            : "bg-[#121212] text-[#D1D1D1] hover:bg-[#7B61FF] hover:text-white"
+                        }`}
+                      >
+                        {isSaved ? "Saved ✓" : "Save"}
+                      </button>
                     </div>
-
-                    {/* 4. Sample Flip (20%) */}
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between text-xs">
-                        <span className="text-[#888888] font-medium">Sample Chops (20%)</span>
-                        <span className="font-mono font-bold text-white">{cats.sampleFlip.toFixed(1)}</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="1.0"
-                        max="5.0"
-                        step="0.1"
-                        value={cats.sampleFlip}
-                        onChange={(e) => handleUpdateCategory(sub.id, "sampleFlip", parseFloat(e.target.value))}
-                        className="w-full accent-[#7B61FF] cursor-pointer"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Feedback Textarea & Save Draft */}
-                  <div className="flex flex-col sm:flex-row gap-3 items-center">
-                    <textarea
-                      rows={2}
-                      placeholder="Write constructive judge feedback for the producer (mix clarity, chops, groove)..."
-                      value={juryFeedback[sub.id] || ""}
-                      onChange={(e) => setJuryFeedback({ ...juryFeedback, [sub.id]: e.target.value })}
-                      className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white placeholder-[#555555] focus:outline-none focus:ring-1 focus:ring-[#7B61FF] resize-none"
-                    />
-
-                    <button
-                      onClick={() => handleSaveJuryDraft(sub.id)}
-                      className={`sm:shrink-0 px-5 py-2.5 rounded-xl text-xs font-bold transition-all w-full sm:w-auto ${
-                        isSaved
-                          ? "bg-emerald-600 text-white"
-                          : "bg-[#121212] text-[#D1D1D1] hover:bg-[#7B61FF] hover:text-white"
-                      }`}
-                    >
-                      {isSaved ? "Saved ✓" : "Save Draft"}
-                    </button>
                   </div>
                 </div>
               );
             })}
           </div>
 
-          {/* Bottom Publish CTA */}
-          <div className="bg-[#181818] p-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 border border-[#262626]">
-            <div>
-              <p className="text-sm font-bold text-white">Ready to finalize your evaluations?</p>
-              <p className="text-xs text-[#888888] mt-0.5">Publishing your ballot locks in your scores and advances the battle once all judges have published.</p>
-            </div>
-            <button
-              onClick={handlePublishJuryBallot}
-              className="px-8 py-3.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white font-bold text-xs shadow-lg active:scale-95 transition-all"
-            >
-              Publish Final Ballot
-            </button>
-          </div>
-
         </div>
       )}
 
       {/* ========================================================================= */}
-      {/* STAGE 4: RESULTS & PODIUM */}
+      {/* STAGE 4: RESULTS & LEADERBOARD (FULL 15 BEATS WITH CLEAN FEEDBACK PILLBOX) */}
       {/* ========================================================================= */}
       {activeTab === "completed" && (
         <div className="space-y-6">
           
           <div className="flex items-center justify-between pb-1">
-            <h3 className="text-xl sm:text-2xl font-bold text-white">Final Battle Standings & Podium</h3>
+            <h3 className="text-xl sm:text-2xl font-bold text-white">Leaderboard & Rankings (Top 15)</h3>
             <div className="flex items-center gap-5 text-sm font-mono text-[#888888]">
               <span className="flex items-center gap-1.5 text-[#FF5E3A] font-bold">
                 <Flame className="w-4 h-4 fill-current" /> Community
               </span>
               <span className="flex items-center gap-1.5 text-[#7B61FF] font-bold">
-                <Star className="w-4 h-4 fill-current" /> Composite Jury Score
+                <Star className="w-4 h-4 fill-current" /> Jury Score
               </span>
             </div>
           </div>
 
-          {/* Leaderboard Cards with Producer Profile Links & Judge Feedback */}
-          <div className="space-y-4">
-            {sampleSubmissions.slice(0, 3).map((sub, idx) => {
+          {/* Leaderboard Cards with 15 Beats */}
+          <div className="space-y-3.5">
+            {sampleSubmissions.slice(0, 15).map((sub, idx) => {
               const isTop1 = idx === 0;
               const isTop2 = idx === 1;
               const isTop3 = idx === 2;
@@ -769,7 +684,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
               return (
                 <div
                   key={sub.id}
-                  className="bg-[#181818] rounded-2xl p-6 space-y-4 hover:bg-[#1C1C1C] transition-all border border-[#222222]"
+                  className="bg-[#181818] rounded-2xl p-5 space-y-3.5 hover:bg-[#1C1C1C] transition-all border border-[#222222]"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     
@@ -829,10 +744,10 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                     compact={true}
                   />
 
-                  {/* Judge Feedback Quote */}
+                  {/* Clean Judge Feedback Box (No purple highlight on left) */}
                   {sub.juryFeedback && (
-                    <div className="bg-[#121212] p-3.5 rounded-xl text-xs text-[#D1D1D1] italic border-l-2 border-[#7B61FF]">
-                      "{sub.juryFeedback}" — <span className="text-[#7B61FF] not-italic font-semibold font-mono">Judge Feedback</span>
+                    <div className="bg-[#121212] px-4 py-2.5 rounded-xl text-xs text-[#D1D1D1] italic">
+                      "{sub.juryFeedback}" — <span className="text-[#888888] not-italic font-semibold font-mono">Judge Feedback</span>
                     </div>
                   )}
                 </div>

@@ -9,6 +9,7 @@
     "lint": "node \"./node_modules/next/dist/bin/next\" lint"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.112.3",
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
     "lucide-react": "^1.16.0",

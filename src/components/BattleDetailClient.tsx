@@ -43,16 +43,16 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   const currentVotesCount = Object.keys(ratings).length;
   const isBallotQualified = currentVotesCount >= requiredVotes;
 
-  // Anonymized track queue with exact matching durations
+  // Anonymized track queue with exact full original durations
   const blindTracks = [
     { id: "blind-01", placeholder: "Beat 01", bpm: 92, audioUrl: "/audio/01 Ortega - Bonita Applebong.wav", duration: 67 },
-    { id: "blind-02", placeholder: "Beat 02", bpm: 88, audioUrl: "/audio/02 C.S.T - ThunderClouds.wav", duration: 90 },
-    { id: "blind-03", placeholder: "Beat 03", bpm: 90, audioUrl: "/audio/03 flg - bule temporale.wav", duration: 110 },
+    { id: "blind-02", placeholder: "Beat 02", bpm: 88, audioUrl: "/audio/02 C.S.T - ThunderClouds.wav", duration: 119 },
+    { id: "blind-03", placeholder: "Beat 03", bpm: 90, audioUrl: "/audio/03 flg - bule temporale.wav", duration: 201 },
     { id: "blind-04", placeholder: "Beat 04", bpm: 94, audioUrl: "/audio/04 Egris - Triburi.wav", duration: 104 },
-    { id: "blind-05", placeholder: "Beat 05", bpm: 86, audioUrl: "/audio/05 Nerub - Butterflies in my lungs.wav", duration: 88 },
-    { id: "blind-06", placeholder: "Beat 06", bpm: 91, audioUrl: "/audio/06 DFB - Apollo's Lyre.wav", duration: 86 },
-    { id: "blind-07", placeholder: "Beat 07", bpm: 93, audioUrl: "/audio/07 Ripp - Beyond.wav", duration: 78 },
-    { id: "blind-08", placeholder: "Beat 08", bpm: 89, audioUrl: "/audio/08 Mr Tweaks - Dmzl 4.wav", duration: 95 },
+    { id: "blind-05", placeholder: "Beat 05", bpm: 86, audioUrl: "/audio/05 Nerub - Butterflies in my lungs.wav", duration: 124 },
+    { id: "blind-06", placeholder: "Beat 06", bpm: 91, audioUrl: "/audio/06 DFB - Apollo's Lyre.wav", duration: 87 },
+    { id: "blind-07", placeholder: "Beat 07", bpm: 93, audioUrl: "/audio/07 Ripp - Beyond.wav", duration: 130 },
+    { id: "blind-08", placeholder: "Beat 08", bpm: 89, audioUrl: "/audio/08 Mr Tweaks - Dmzl 4.wav", duration: 136 },
   ];
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

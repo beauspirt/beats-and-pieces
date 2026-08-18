@@ -119,7 +119,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
 
     for (let i = 0; i < barCount; i++) {
       // Smooth interpolation between high-resolution peak samples
-      const peakPos = (i / (barCount - 1)) * (totalPeaks - 1);
+      const peakPos = (i / Math.max(1, barCount - 1)) * (totalPeaks - 1);
       const lowIndex = Math.floor(peakPos);
       const highIndex = Math.min(totalPeaks - 1, lowIndex + 1);
       const fraction = peakPos - lowIndex;
@@ -133,7 +133,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
       const x = startX + i * step;
       const y = centerY - halfHeight;
 
-      const barProgress = (x - startX) / totalSpan;
+      const barProgress = (x - startX) / Math.max(1, totalSpan);
       const isPlayed = barProgress <= progress;
       const isHovered = hoverFraction !== null && (x / rect.width) <= hoverFraction;
 
@@ -223,9 +223,10 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
       // ignore
     }
     const p = getProgressFromPointer(e);
-    seekTrack(p);
-    if (!isThisTrackPlaying) {
-      playTrack(id, title, bpm, audioUrl);
+    if (!isThisTrackActive) {
+      playTrack(id, title, bpm, audioUrl, p);
+    } else {
+      seekTrack(p);
     }
     renderWaveform();
   };
@@ -235,7 +236,11 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
     hoverFractionRef.current = p;
 
     if (isPointerDownRef.current) {
-      seekTrack(p);
+      if (isThisTrackActive) {
+        seekTrack(p);
+      } else {
+        playTrack(id, title, bpm, audioUrl, p);
+      }
     }
     renderWaveform();
   };
@@ -249,71 +254,86 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
     } catch {
       // ignore
     }
+    hoverFractionRef.current = null;
     renderWaveform();
   };
 
-  const handlePointerLeave = () => {
+  const handlePointerLeave = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!isPointerDownRef.current) {
       hoverFractionRef.current = null;
       renderWaveform();
     }
   };
 
+  const handleDownload = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (audioUrl) {
+      const link = document.createElement("a");
+      link.href = audioUrl;
+      link.download = audioUrl.split("/").pop() || "sample.wav";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
   return (
-    <div className={`flex items-center gap-4 w-full select-none ${compact ? "py-1" : "py-2"}`}>
-      
-      {/* Royal Purple Circular Play / Pause Button (#7B61FF) */}
+    <div
+      ref={containerRef}
+      className={`w-full flex items-center gap-3 bg-[#121212] rounded-xl select-none ${
+        compact ? "p-2" : "p-3 sm:p-4"
+      }`}
+    >
+      {/* Play / Pause Toggle Button */}
       <button
         onClick={handlePlayToggle}
-        className="w-9 h-9 shrink-0 rounded-full bg-[#7B61FF] hover:bg-[#684DE6] text-white flex items-center justify-center transition-all shadow-md active:scale-90 cursor-pointer"
         aria-label={isThisTrackPlaying ? "Pause" : "Play"}
+        className={`shrink-0 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+          compact ? "w-8 h-8" : "w-10 h-10"
+        } ${
+          isThisTrackPlaying
+            ? "bg-[#F8F9EC] text-black shadow-lg"
+            : "bg-[#222222] text-[#F8F9EC] hover:bg-[#7B61FF] hover:text-white"
+        }`}
       >
         {isThisTrackPlaying ? (
-          <Pause className="w-4 h-4 fill-current" />
+          <Pause className={compact ? "w-3.5 h-3.5 fill-current" : "w-4 h-4 fill-current"} />
         ) : (
-          <Play className="w-4 h-4 fill-current ml-0.5" />
+          <Play className={compact ? "w-3.5 h-3.5 ml-0.5 fill-current" : "w-4 h-4 ml-0.5 fill-current"} />
         )}
       </button>
 
-      {/* High-Definition Contrast Audio Waveform Canvas */}
-      <div
-        ref={containerRef}
-        className="relative flex-1 h-12 flex items-center cursor-pointer group"
-      >
+      {/* HiDPI Canvas Waveform Visualizer */}
+      <div className={`flex-1 relative overflow-hidden ${compact ? "h-9" : "h-12"}`}>
         <canvas
           ref={canvasRef}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
-          onPointerLeave={handlePointerLeave}
           onPointerCancel={handlePointerUp}
-          className="w-full h-full block cursor-pointer"
+          onPointerLeave={handlePointerLeave}
+          className="w-full h-full cursor-pointer touch-none select-none block"
         />
       </div>
 
-      {/* Track Duration / Live Playback Time */}
-      <div className="text-xs font-mono text-[#888888] shrink-0 min-w-[38px] text-right font-medium">
-        {isThisTrackActive ? formatTime(currentTime) : formatTime(duration)}
+      {/* Time & Optional Download */}
+      <div className="flex items-center gap-2.5 shrink-0 text-xs font-mono text-[#888888]">
+        <span>
+          {isThisTrackActive
+            ? formatTime(currentTime)
+            : formatTime(duration)}
+        </span>
+
+        {showDownload && (
+          <button
+            onClick={handleDownload}
+            aria-label="Download audio file"
+            className="p-1.5 rounded-lg bg-[#1C1C1C] text-[#888888] hover:text-white hover:bg-[#252525] transition-colors"
+          >
+            <Download className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
-
-      {/* Download Sample Button */}
-      {showDownload && (
-        <a
-          href={audioUrl || "#"}
-          download
-          onClick={(e) => {
-            if (!audioUrl) {
-              e.preventDefault();
-              alert(`Downloading sample ${title}...`);
-            }
-          }}
-          className="p-1.5 rounded-lg bg-[#121212] text-zinc-400 hover:text-white transition-colors cursor-pointer"
-          title="Download Sample (WAV)"
-        >
-          <Download className="w-4 h-4" />
-        </a>
-      )}
-
     </div>
   );
 };

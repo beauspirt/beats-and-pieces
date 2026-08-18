@@ -23,18 +23,19 @@ export async function getBattles(): Promise<Competition[]> {
       id: b.id,
       number: b.number,
       title: b.title,
+      slug: b.id,
       description: b.description,
       coverImage: b.cover_image,
       phase: b.phase,
       hosts: b.hosts || [],
       judges: b.judges || [],
-      samplePackUrl: b.sample_pack_url,
-      sampleTracks: b.sample_tracks || [],
-      rules: b.rules || { submissionLimit: 1, maxDuration: "3:30", mustUseSamplePack: true },
       prizes: b.prizes || { first: "", second: "", third: "" },
-      deadlines: b.deadlines || { submission: "", rating: "", finalLive: "" },
+      samples: b.sample_tracks || [],
+      submissionStartsAt: b.deadlines?.submission || "2026-08-01T00:00:00Z",
+      submissionEndsAt: b.deadlines?.submission || "2026-08-10T23:59:59Z",
+      ratingEndsAt: b.deadlines?.rating || "2026-08-22T23:59:59Z",
+      judgingEndsAt: b.deadlines?.finalLive || "2026-08-25T19:00:00Z",
       totalSubmissions: b.total_submissions || 0,
-      totalVotes: 0,
     }));
   } catch (err) {
     console.error("getBattles error:", err);
@@ -100,12 +101,11 @@ export async function getReleases(): Promise<Release[]> {
     return data.map((r) => ({
       id: r.id,
       title: r.title,
-      type: r.type,
-      coverUrl: r.cover_url,
+      coverImage: r.cover_url,
       releaseDate: r.release_date,
       description: r.description || "",
-      links: r.links || {},
-      tracks: r.tracks || [],
+      streamingLinks: r.links || {},
+      tracklist: r.tracks || [],
     }));
   } catch {
     return sampleReleases;

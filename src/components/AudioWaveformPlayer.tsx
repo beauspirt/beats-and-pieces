@@ -103,7 +103,9 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
     const peaks = getPeaks();
     const totalPeaks = peaks.length;
     const progress = isThisTrackActive ? playbackProgress : 0;
-    const hoverFraction = hoverFractionRef.current;
+    
+    // Only show hover needle and brighter preview on ACTIVE tracks
+    const hoverFraction = isThisTrackActive ? hoverFractionRef.current : null;
 
     // Uniform 2px bar with 2px gap (4px step)
     const barWidth = 2;
@@ -140,7 +142,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
       if (isPlayed) {
         ctx.fillStyle = "#F8F9EC"; // Solid crisp cream-white
       } else if (isHovered) {
-        ctx.fillStyle = "#4A4A4A"; // Hover preview
+        ctx.fillStyle = "#4A4A4A"; // Active track hover preview
       } else {
         ctx.fillStyle = "#222222"; // Unplayed dark charcoal
       }
@@ -155,7 +157,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
       ctx.fill();
     }
 
-    // Hover Needle
+    // Hover Needle (only drawn on active track)
     if (hoverFraction !== null) {
       const needleX = Math.round(hoverFraction * rect.width);
       ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
@@ -285,7 +287,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
   return (
     <div
       ref={containerRef}
-      className={`w-full flex items-center gap-3 bg-[#121212] rounded-xl select-none ${
+      className={`w-full flex items-center gap-3 bg-[#121212] hover:bg-[#151515] transition-colors rounded-xl select-none ${
         compact ? "p-2" : "p-3 sm:p-4"
       }`}
     >

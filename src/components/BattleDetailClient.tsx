@@ -42,31 +42,9 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     "blind-03": 4,
   });
 
-  // Stage 3: Clean Single-Score Jury evaluation state (1.00 - 5.00)
-  const [juryScores, setJuryScores] = useState<Record<string, number>>({
-    "sub-1": 4.89,
-    "sub-2": 4.75,
-    "sub-3": 4.60,
-    "sub-4": 4.55,
-    "sub-5": 4.52,
-    "sub-6": 4.48,
-    "sub-7": 4.45,
-    "sub-8": 4.30,
-    "sub-9": 4.22,
-    "sub-10": 4.16,
-    "sub-11": 4.10,
-    "sub-12": 4.05,
-    "sub-13": 4.00,
-    "sub-14": 3.95,
-    "sub-15": 3.90,
-  });
-
-  const [juryFeedback, setJuryFeedback] = useState<Record<string, string>>({
-    "sub-1": "Flawless drum swing and incredible tape warmth on the horns. Instant favorite.",
-    "sub-2": "Heavy bassline and great texture on the snare. Very clean mix.",
-    "sub-3": "Super creative chop technique on the main loop.",
-  });
-  
+  // Stage 3: Clean Single-Score Jury evaluation state (starts unrated with 0.00 / empty)
+  const [juryScores, setJuryScores] = useState<Record<string, string>>({});
+  const [juryFeedback, setJuryFeedback] = useState<Record<string, string>>({});
   const [jurySaved, setJurySaved] = useState<Record<string, boolean>>({});
   const [hasPublishedBallot, setHasPublishedBallot] = useState(false);
 
@@ -494,7 +472,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       )}
 
       {/* ========================================================================= */}
-      {/* STAGE 3: BLIND JURY EVALUATION (ANONYMIZED FINALISTS FOR FAIR JUDGING) */}
+      {/* STAGE 3: BLIND JURY EVALUATION (ANONYMIZED FINALISTS - NO DEFAULT RANDOM SCORES) */}
       {/* ========================================================================= */}
       {activeTab === "judging" && (
         <div className="space-y-6">
@@ -564,7 +542,8 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
           {/* Anonymized Finalists list (Top 15 Blind) */}
           <div className="space-y-3.5">
             {sampleSubmissions.slice(0, 15).map((sub, idx) => {
-              const currentScore = juryScores[sub.id] || sub.juryScore || 4.0;
+              const scoreVal = juryScores[sub.id] !== undefined ? juryScores[sub.id] : "";
+              const feedbackVal = juryFeedback[sub.id] !== undefined ? juryFeedback[sub.id] : "";
               const isSaved = jurySaved[sub.id];
               const blindTitle = `Finalist ${idx < 9 ? "0" + (idx + 1) : idx + 1}`;
 
@@ -579,9 +558,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                         #{idx + 1}
                       </span>
                       <div>
-                        {/* Blind Finalist Title (No artist/beat name) */}
                         <h4 className="font-bold text-white text-base">{blindTitle}</h4>
-                        <span className="text-xs text-[#888888] font-mono">Blind Finalist Entry</span>
                       </div>
                     </div>
 
@@ -600,33 +577,32 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                     compact={true}
                   />
 
-                  {/* Inline Clean Score & Feedback */}
+                  {/* Inline Clean Score & Feedback (No Browser Arrows, 0.00 Placeholder) */}
                   <div className="grid grid-cols-1 sm:grid-cols-12 gap-3.5 pt-1 items-center">
                     <div className="sm:col-span-4 flex items-center gap-2.5">
                       <label className="text-xs font-semibold text-[#888888]">Score:</label>
                       <input
-                        type="number"
-                        min="1.0"
-                        max="5.0"
-                        step="0.05"
-                        value={currentScore}
-                        onChange={(e) =>
-                          setJuryScores({
-                            ...juryScores,
-                            [sub.id]: parseFloat(e.target.value) || 0,
-                          })
-                        }
-                        className="w-24 bg-[#121212] rounded-xl px-3 py-2 text-xs font-mono font-bold text-[#7B61FF] focus:outline-none focus:ring-1 focus:ring-[#7B61FF] text-center"
+                        type="text"
+                        inputMode="decimal"
+                        placeholder="0.00"
+                        value={scoreVal}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === "" || /^[0-5](\.[0-9]{0,2})?$/.test(val)) {
+                            setJuryScores((prev) => ({ ...prev, [sub.id]: val }));
+                          }
+                        }}
+                        className="w-20 bg-[#121212] rounded-xl px-3 py-2 text-xs font-mono font-bold text-[#7B61FF] placeholder-[#555555] focus:outline-none focus:ring-1 focus:ring-[#7B61FF] text-center"
                       />
                     </div>
 
                     <div className="sm:col-span-6">
                       <input
                         type="text"
-                        placeholder="Feedback note for the producer..."
-                        value={juryFeedback[sub.id] || sub.juryFeedback || ""}
+                        placeholder="Leave feedback note for the producer (optional)..."
+                        value={feedbackVal}
                         onChange={(e) =>
-                          setJuryFeedback({ ...juryFeedback, [sub.id]: e.target.value })
+                          setJuryFeedback((prev) => ({ ...prev, [sub.id]: e.target.value }))
                         }
                         className="w-full bg-[#121212] rounded-xl px-4 py-2 text-xs text-white placeholder-[#555555] focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
                       />

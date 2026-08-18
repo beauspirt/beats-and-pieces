@@ -329,7 +329,7 @@ export default function BeatsDiscoveryPage() {
                     className={`px-3 py-1 rounded-full text-xs font-bold ${
                       beat.priceTag === "Not For Sale"
                         ? "bg-[#121212] text-[#666666]"
-                        : "bg-[#251E14] text-[#E5A93C]"
+                        : "bg-[#FF5E3A]/20 text-[#FF5E3A]"
                     }`}
                   >
                     {beat.priceTag}

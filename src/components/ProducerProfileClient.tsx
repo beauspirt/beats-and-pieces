@@ -272,7 +272,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                   key={role}
                   className={`px-3.5 py-1 rounded-full text-xs font-semibold ${
                     role.includes("Winner")
-                      ? "bg-[#251E14] text-[#E5A93C]"
+                      ? "bg-[#FF5E3A]/20 text-[#FF5E3A]"
                       : role.includes("Admin")
                       ? "bg-[#7B61FF] text-white"
                       : "bg-[#1E232A] text-[#94A3B8]"
@@ -320,20 +320,20 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
           {/* Battle Stats */}
           <div className="flex items-center gap-8 text-xs">
             <div>
-              <span className="text-[#888888] uppercase block text-[11px] tracking-wider font-semibold">Battles</span>
+              <span className="text-[#888888] uppercase block text-xs tracking-wider font-semibold">Battles</span>
               <span className="text-lg font-bold text-white">{producer.stats?.battlesEntered || 0}</span>
             </div>
 
             <div>
-              <span className="text-[#888888] uppercase block text-[11px] tracking-wider font-semibold">Victories</span>
-              <span className="text-lg font-bold text-[#E5A93C] flex items-center gap-1">
+              <span className="text-[#888888] uppercase block text-xs tracking-wider font-semibold">Victories</span>
+              <span className="text-lg font-bold text-[#FF5E3A] flex items-center gap-1">
                 <Trophy className="w-3.5 h-3.5" />
                 <span>{producer.stats?.battlesWon || 0}</span>
               </span>
             </div>
 
             <div>
-              <span className="text-[#888888] uppercase block text-[11px] tracking-wider font-semibold">Total Flames</span>
+              <span className="text-[#888888] uppercase block text-xs tracking-wider font-semibold">Total Flames</span>
               <span className="text-lg font-bold text-[#FF5E3A] flex items-center gap-1">
                 <Flame className="w-3.5 h-3.5 fill-current" />
                 <span>{producer.stats?.totalFlames || 0}</span>
@@ -424,7 +424,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
                     {/* Tier 1: Winner Badge */}
                     {beat.tier === 1 && (
-                      <span className="px-3 py-1 rounded-full bg-[#251E14] text-[#E5A93C] text-xs font-bold flex items-center gap-1.5">
+                      <span className="px-3 py-1 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold flex items-center gap-1.5">
                         <Trophy className="w-3.5 h-3.5" />
                         <span>1st Place</span>
                       </span>
@@ -463,7 +463,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                       className={`px-3 py-1 rounded-full text-xs font-bold ${
                         beat.priceTag === "Not For Sale"
                           ? "bg-[#121212] text-[#666666]"
-                          : "bg-[#251E14] text-[#E5A93C]"
+                          : "bg-[#FF5E3A]/20 text-[#FF5E3A]"
                       }`}
                     >
                       {beat.priceTag || "For Sale"}

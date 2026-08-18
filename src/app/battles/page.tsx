@@ -127,11 +127,10 @@ export default function BattlesPage() {
 
                 {/* Winner Summary Footer */}
                 <div className="pt-2 flex items-center justify-between text-xs border-t border-[#222222]/80">
-                  <div className="flex items-center gap-1 text-[#E5A93C] font-semibold text-[11px] sm:text-xs">
-                    <Trophy className="w-3 h-3" />
+                  <div className="text-white font-bold text-xs">
                     <span>Winner: Ortega</span>
                   </div>
-                  <span className="text-[#888888] group-hover:text-white transition-colors flex items-center gap-1 text-[11px] sm:text-xs">
+                  <span className="text-[#888888] group-hover:text-white transition-colors flex items-center gap-1 text-xs">
                     Results <ArrowRight className="w-3 h-3" />
                   </span>
                 </div>

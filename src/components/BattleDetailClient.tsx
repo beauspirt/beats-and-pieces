@@ -625,11 +625,11 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                 <div className="bg-[#121212] p-4 rounded-xl space-y-1.5 text-xs text-[#A0A0A0]">
                   <div className="flex items-center justify-between">
                     <span>Beats Rated So Far:</span>
-                    <strong className="text-white font-mono">{currentVotesCount} / {battle.totalSubmissions}</strong>
+                    <strong className="text-white">{currentVotesCount} / {battle.totalSubmissions}</strong>
                   </div>
                   <div className="flex items-center justify-between">
                     <span>Minimum Required to Submit:</span>
-                    <strong className="text-white font-mono">{requiredVotes} beats ({minPercentage}%)</strong>
+                    <strong className="text-white">{requiredVotes} beats ({minPercentage}%)</strong>
                   </div>
                 </div>
 
@@ -662,7 +662,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                 <div className="bg-[#121212] p-4 rounded-xl space-y-1.5 text-xs text-[#A0A0A0]">
                   <div className="flex items-center justify-between">
                     <span>Total Beats Rated:</span>
-                    <strong className="text-white font-mono">{currentVotesCount} / {blindTracks.length}</strong>
+                    <strong className="text-white">{currentVotesCount} / {blindTracks.length}</strong>
                   </div>
                   <div className="flex items-center justify-between">
                     <span>Qualification Status:</span>
@@ -781,10 +781,10 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
               <div className="space-y-2">
                 <div className="bg-[#121212] p-3 rounded-xl flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <span className={`w-2 h-2 rounded-full ${isJurySubmitted ? "bg-emerald-500" : "bg-[#E5A93C] animate-pulse"}`} />
+                    <span className={`w-2 h-2 rounded-full ${isJurySubmitted ? "bg-emerald-500" : "bg-[#FF5E3A] animate-pulse"}`} />
                     <span className="text-xs sm:text-sm font-bold text-white">Ortega{juryViewerRole === "judge" ? " (You)" : ""}</span>
                   </div>
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded ${isJurySubmitted ? "bg-emerald-500/20 text-emerald-400" : "bg-[#251E14] text-[#E5A93C]"}`}>
+                  <span className={`text-xs font-bold px-2 py-0.5 rounded ${isJurySubmitted ? "bg-emerald-500/20 text-emerald-400" : "bg-[#FF5E3A]/20 text-[#FF5E3A]"}`}>
                     {isJurySubmitted ? "Submitted ✓" : "In Progress"}
                   </span>
                 </div>
@@ -801,10 +801,10 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
                 <div className="bg-[#121212] p-3 rounded-xl flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <span className="w-2 h-2 rounded-full bg-[#E5A93C] animate-pulse" />
+                    <span className="w-2 h-2 rounded-full bg-[#FF5E3A] animate-pulse" />
                     <span className="text-xs sm:text-sm font-bold text-white">K-Lu</span>
                   </div>
-                  <span className="text-xs font-bold px-2 py-0.5 rounded bg-[#251E14] text-[#E5A93C]">
+                  <span className="text-xs font-bold px-2 py-0.5 rounded bg-[#FF5E3A]/20 text-[#FF5E3A]">
                     In Progress
                   </span>
                 </div>
@@ -871,7 +871,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                         />
                         <div className="flex items-center gap-1 text-[#7B61FF] shrink-0">
                           <Star className="w-3.5 h-3.5 fill-current" />
-                          <span className="text-xs sm:text-sm font-bold font-mono min-w-[32px] text-right">
+                          <span className="text-xs sm:text-sm font-bold min-w-[32px] text-right">
                             {typeof scoreVal === "number" || (typeof scoreVal === "string" && scoreVal !== "") ? Number(scoreVal).toFixed(2) : "0.00"}
                           </span>
                         </div>
@@ -882,13 +882,13 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                         <input
                           type="text"
                           disabled={isJurySubmitted}
-                          placeholder={isJurySubmitted ? "Feedback submitted and locked" : "Leave feedback note for the producer (optional)..."}
+                          placeholder={isJurySubmitted ? "Feedback submitted and locked" : "Leave feedback note for the beatmaker (optional)"}
                           value={feedbackVal}
                           onChange={(e) => {
                             if (isJurySubmitted) return;
                             setJuryFeedback((prev) => ({ ...prev, [sub.id]: e.target.value }));
                           }}
-                          className={`w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white placeholder-[#555555] focus:outline-none focus:ring-1 focus:ring-[#7B61FF] ${isJurySubmitted ? "opacity-70 cursor-not-allowed" : ""}`}
+                          className={`w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white placeholder-[#555555] focus:outline-none ${isJurySubmitted ? "opacity-70 cursor-not-allowed" : ""}`}
                         />
                       </div>
                     </div>
@@ -937,15 +937,15 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                     {/* Rank Badge + Producer Info */}
                     <div className="flex items-center gap-4 min-w-[240px]">
                       {isTop1 ? (
-                        <span className="px-3.5 py-1.5 rounded-full bg-[#251E14] text-[#E5A93C] text-xs sm:text-sm font-bold">
-                          1st Place 🏆
+                        <span className="px-3.5 py-1.5 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs sm:text-sm font-bold">
+                          1st Place
                         </span>
                       ) : isTop2 ? (
                         <span className="px-3.5 py-1.5 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs sm:text-sm font-bold">
                           2nd Place
                         </span>
                       ) : isTop3 ? (
-                        <span className="px-3.5 py-1.5 rounded-full bg-[#261814] text-[#D97706] text-xs sm:text-sm font-bold">
+                        <span className="px-3.5 py-1.5 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs sm:text-sm font-bold">
                           3rd Place
                         </span>
                       ) : (

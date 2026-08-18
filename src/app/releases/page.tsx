@@ -48,36 +48,35 @@ const releasesData: ReleaseItem[] = [
 
 export default function ReleasesPage() {
   return (
-    <div className="w-full space-y-16 py-6 animate-in fade-in duration-300">
+    <div className="w-full space-y-12 py-2 animate-in fade-in duration-300">
       
       {releasesData.map((release) => (
         <div
           key={release.id}
-          className="flex flex-col md:flex-row items-start gap-8 sm:gap-10"
+          className="flex flex-col md:flex-row items-start gap-8 sm:gap-10 w-full"
         >
           {/* Square Cover Artwork */}
           <div
-            className="w-full md:w-64 h-64 max-w-[256px] max-h-[256px] rounded-2xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl"
-            style={{ width: "256px", height: "256px", position: "relative" }}
+            className="w-48 h-48 sm:w-56 sm:h-56 md:w-60 md:h-60 rounded-2xl overflow-hidden relative shrink-0 bg-[#181818] shadow-2xl"
           >
             <Image
               src={release.coverImage}
               alt={release.title}
-              width={256}
-              height={256}
-              className="w-full h-full object-cover"
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 240px"
+              priority
             />
           </div>
 
           {/* Release Metadata */}
-          <div className="flex-1 flex flex-col justify-between space-y-4 pt-1">
-            <div className="space-y-3">
-              <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+          <div className="flex-1 w-full flex flex-col justify-between space-y-4 pt-1">
+            <div className="space-y-3 w-full">
+              <h2 className="text-2xl font-bold text-white tracking-tight">
                 {release.title}
               </h2>
 
-              <p className="text-sm sm:text-base text-[#D1D1D1] leading-relaxed max-w-3xl">
+              <p className="text-sm text-[#D1D1D1] leading-relaxed w-full">
                 {release.description}
               </p>
             </div>

@@ -37,9 +37,9 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   const [juryFeedback, setJuryFeedback] = useState<Record<string, string>>({});
   const [jurySaved, setJurySaved] = useState<Record<string, boolean>>({});
 
-  // Dynamic Percentage-based Ballot Validation (min 25% of total entries)
-  const minPercentage = 25;
-  const requiredVotes = Math.ceil(battle.totalSubmissions * (minPercentage / 100)); // 34 for 134 entries
+  // Dynamic Percentage-based Ballot Validation (min 50% of total entries)
+  const minPercentage = 50;
+  const requiredVotes = Math.ceil(battle.totalSubmissions * (minPercentage / 100));
   const currentVotesCount = Object.keys(ratings).length;
   const isBallotQualified = currentVotesCount >= requiredVotes;
 

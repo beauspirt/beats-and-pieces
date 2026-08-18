@@ -65,6 +65,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       pauseTrack();
       setCurrentTrackId(null);
       setCurrentTime(0);
+      setDuration(30);
       prevPathnameRef.current = pathname;
     }
   }, [pathname]);
@@ -213,10 +214,14 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const sourceUrl = audioUrl || `/audio/01 Ortega - Bonita Applebong.wav`;
     const resolvedUrl = encodeURI(sourceUrl);
 
+    const initialProgress = (typeof startProgress === "number" && !isNaN(startProgress) && isFinite(startProgress))
+      ? Math.max(0, Math.min(1, startProgress))
+      : 0;
+
     // 1. If clicking the currently active track
     if (currentTrackId === id && currentBufferRef.current) {
       if (startProgress !== undefined) {
-        const targetTime = startProgress * currentBufferRef.current.duration;
+        const targetTime = initialProgress * currentBufferRef.current.duration;
         startBufferPlayback(currentBufferRef.current, targetTime);
       } else {
         if (isPlaying) {
@@ -228,15 +233,15 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return;
     }
 
-    // 2. Switching to a new track or fresh playback
+    // 2. Switching to a new track: Instantly stop previous track & reset progress
     pauseTrack();
     setCurrentTrackId(id);
     setActiveTrackTitle(title || `Beat #${id}`);
     currentUrlRef.current = resolvedUrl;
-
-    const initialProgress = (typeof startProgress === "number" && !isNaN(startProgress) && isFinite(startProgress))
-      ? Math.max(0, Math.min(1, startProgress))
-      : 0;
+    
+    // Instantly reset time so previous track progress never flashes on new track
+    setCurrentTime(0);
+    setDuration(30);
 
     // Check if AudioBuffer is already in cache
     const cachedBuffer = audioBufferCacheRef.current.get(resolvedUrl);
@@ -247,7 +252,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return;
     }
 
-    // Fetch and decode via Web Audio API for 100% precision seeking without server Range errors
+    // Fetch and decode via Web Audio API
     try {
       if (ctx) {
         const response = await fetch(resolvedUrl);

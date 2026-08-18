@@ -58,12 +58,17 @@ export default function ReleasesPage() {
           <div className="flex flex-col md:flex-row items-start gap-8">
             
             {/* Square Cover Artwork */}
-            <div className="w-full md:w-64 h-64 rounded-2xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl">
+            <div
+              className="w-full md:w-64 h-64 max-w-[256px] max-h-[256px] rounded-2xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl"
+              style={{ width: "256px", height: "256px", position: "relative" }}
+            >
               <Image
                 src={release.coverImage}
                 alt={release.title}
-                fill
-                className="object-cover"
+                width={256}
+                height={256}
+                className="w-full h-full object-cover"
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
               />
             </div>
 

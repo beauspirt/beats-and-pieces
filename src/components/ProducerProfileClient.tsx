@@ -51,12 +51,17 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
         <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
           
           {/* Large Avatar */}
-          <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-full overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl border-2 border-[#262626]">
+          <div
+            className="w-28 h-28 sm:w-36 sm:h-36 max-w-[144px] max-h-[144px] rounded-full overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl border-2 border-[#262626]"
+            style={{ width: "144px", height: "144px", position: "relative" }}
+          >
             <Image
               src={producer.avatarUrl}
               alt={producer.nickname}
-              fill
-              className="object-cover"
+              width={144}
+              height={144}
+              className="w-full h-full object-cover"
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
               priority
             />
           </div>

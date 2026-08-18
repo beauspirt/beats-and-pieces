@@ -43,15 +43,24 @@ export default function BattlesPage() {
 
         <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row gap-8 items-start hover:bg-[#1A1A1A] transition-all shadow-xl">
           
-          {/* Cover Art Thumbnail (w-64 h-64 consistent with detail page) */}
-          <div className="w-full md:w-64 h-64 rounded-2xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl">
+          {/* Cover Art Thumbnail (explicit width/height constraints) */}
+          <div
+            className="w-full md:w-64 h-64 max-w-[256px] max-h-[256px] rounded-2xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl"
+            style={{ width: "256px", height: "256px", position: "relative" }}
+          >
             <Image
               src={ongoingBattle.coverImage}
               alt={ongoingBattle.title}
-              fill
-              className="object-cover"
+              width={256}
+              height={256}
+              className="w-full h-full object-cover"
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              priority
             />
-            <div className="absolute top-3 left-3 bg-[#121212]/85 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-black text-[#FF5E3A]">
+            <div
+              className="absolute top-3 left-3 bg-[#121212]/85 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-black text-[#FF5E3A]"
+              style={{ position: "absolute", top: "12px", left: "12px" }}
+            >
               #{ongoingBattle.number}
             </div>
           </div>
@@ -99,7 +108,7 @@ export default function BattlesPage() {
 
                   {/* 2nd Prize */}
                   <div className="flex items-center gap-3.5 px-4 py-2.5 rounded-xl bg-[#1E232A] text-[#94A3B8] text-sm font-medium">
-                    <span className="font-bold font-mono px-2 py-0.5 rounded bg-[#2A313C] text-[#94A3B8] text-xs">
+                    <span className="font-bold font-mono px-2 py-0.5 rounded bg-[#2A3441] text-[#94A3B8] text-xs">
                       2nd
                     </span>
                     <span>{ongoingBattle.prizes.second}</span>
@@ -107,97 +116,99 @@ export default function BattlesPage() {
 
                   {/* 3rd Prize */}
                   <div className="flex items-center gap-3.5 px-4 py-2.5 rounded-xl bg-[#261814] text-[#D97706] text-sm font-medium">
-                    <span className="font-bold font-mono px-2 py-0.5 rounded bg-[#3B251F] text-[#D97706] text-xs">
+                    <span className="font-bold font-mono px-2 py-0.5 rounded bg-[#3D251D] text-[#D97706] text-xs">
                       3rd
                     </span>
                     <span>{ongoingBattle.prizes.third}</span>
                   </div>
                 </div>
               </div>
-
             </div>
 
-            {/* Bottom Enter Action */}
-            <div className="pt-2">
+            {/* Action Bar */}
+            <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-[#262626] mt-4">
+              <div className="text-xs font-mono text-[#888888]">
+                Deadlines: Submissions close Aug 10 • Public rating open until Aug 22
+              </div>
+
               <Link
                 href={`/battles/${ongoingBattle.id}`}
-                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-sm font-bold transition-all shadow-md active:scale-95"
+                className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-[#FF5E3A] hover:bg-[#E04D2B] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#FF5E3A]/20 transition-all hover:scale-[1.02] active:scale-95"
               >
-                <span>Enter Competition</span>
+                <span>Enter Battle Arena</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
           </div>
-
         </div>
       </section>
 
-      {/* SECTION 2: PAST BATTLES & ARCHIVE */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between pb-1">
-          <h2 className="text-xl sm:text-2xl font-bold text-white">
-            Past Competitions & Results
-          </h2>
+      {/* SECTION 2: PAST BATTLES ARCHIVE */}
+      <section className="space-y-6 pt-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl sm:text-2xl font-bold text-white">Past Battles & Hall of Fame</h2>
           <span className="text-sm font-mono text-[#888888]">
-            {pastBattles.length} Editions Archived
+            {pastBattles.length} Archived Competitions
           </span>
         </div>
 
-        <div className="space-y-3.5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {pastBattles.map((battle) => (
             <Link
               key={battle.id}
               href={`/battles/${battle.id}`}
-              className="bg-[#181818] rounded-2xl p-5 sm:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:bg-[#1C1C1C] transition-all group block"
+              className="bg-[#181818] rounded-2xl overflow-hidden hover:bg-[#1C1C1C] transition-all flex flex-col group border border-transparent hover:border-[#333333]"
             >
-              {/* Left: Thumbnail & Details */}
-              <div className="flex items-center gap-5 min-w-[280px]">
-                <div className="w-16 h-16 rounded-xl bg-[#121212] relative overflow-hidden shrink-0">
-                  <Image
-                    src={battle.coverImage}
-                    alt={battle.title}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute bottom-1 right-1 bg-[#121212]/90 px-1.5 py-0.5 rounded text-xs font-bold text-[#FF5E3A]">
-                    #{battle.number}
-                  </div>
+              {/* Card Cover Art */}
+              <div
+                className="h-44 w-full relative overflow-hidden bg-[#121212]"
+                style={{ width: "100%", height: "176px", position: "relative" }}
+              >
+                <Image
+                  src={battle.coverImage}
+                  alt={battle.title}
+                  width={400}
+                  height={176}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+                <div
+                  className="absolute top-3 left-3 bg-[#121212]/85 backdrop-blur-sm px-2.5 py-0.5 rounded-full text-xs font-mono font-bold text-[#888888]"
+                  style={{ position: "absolute", top: "12px", left: "12px" }}
+                >
+                  #{battle.number}
                 </div>
-
-                <div>
-                  <h3 className="text-lg font-bold text-white group-hover:text-[#7B61FF] transition-colors leading-snug">
-                    {battle.title}
-                  </h3>
-                  <div className="flex items-center gap-3 text-sm text-[#888888] mt-1">
-                    <span>{battle.totalSubmissions} Beats</span>
-                    <span>•</span>
-                    <span>Judged by {battle.judges.join(", ")}</span>
-                  </div>
+                <div
+                  className="absolute top-3 right-3 bg-[#121212]/85 backdrop-blur-sm px-2.5 py-0.5 rounded-full text-xs font-mono text-[#888888]"
+                  style={{ position: "absolute", top: "12px", right: "12px" }}
+                >
+                  {battle.totalSubmissions} Entries
                 </div>
               </div>
 
-              {/* Center/Right: Clean Winners Pills */}
-              <div className="flex flex-wrap items-center gap-2.5 text-xs">
-                {/* 1st Place Pill */}
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#251E14] text-[#E5A93C] text-sm">
-                  <span className="font-bold font-mono">1st</span>
-                  <span className="font-medium">Stolly</span>
+              {/* Card Details */}
+              <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                <div className="space-y-2">
+                  <span className="text-xs font-mono text-[#7B61FF] font-semibold">
+                    Completed Battle
+                  </span>
+                  <h3 className="font-bold text-lg text-white group-hover:text-[#7B61FF] transition-colors leading-snug">
+                    {battle.title}
+                  </h3>
+                  <p className="text-xs text-[#888888] line-clamp-2 leading-relaxed">
+                    {battle.description}
+                  </p>
                 </div>
 
-                {/* 2nd Place Pill */}
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#1E232A] text-[#94A3B8] text-sm">
-                  <span className="font-bold font-mono">2nd</span>
-                  <span className="font-medium">mateicojo</span>
-                </div>
-
-                {/* 3rd Place Pill */}
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#261814] text-[#D97706] text-sm">
-                  <span className="font-bold font-mono">3rd</span>
-                  <span className="font-medium">BENJAHMIN</span>
-                </div>
-
-                <div className="hidden lg:flex items-center text-[#666666] group-hover:text-white pl-2 transition-colors">
-                  <ArrowRight className="w-4 h-4" />
+                {/* 1st Place Podium Summary */}
+                <div className="pt-3 border-t border-[#262626] flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-1.5 text-[#E5A93C] font-semibold">
+                    <Trophy className="w-3.5 h-3.5" />
+                    <span>Winner: Ortega</span>
+                  </div>
+                  <span className="text-[#888888] font-mono group-hover:text-white transition-colors flex items-center gap-1">
+                    View Results <ArrowRight className="w-3 h-3" />
+                  </span>
                 </div>
               </div>
             </Link>

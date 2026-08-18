@@ -180,14 +180,23 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       <div className="bg-[#181818] rounded-3xl p-6 sm:p-10 flex flex-col md:flex-row gap-8 items-start relative overflow-hidden border border-[#222222]">
         
         {/* Cover Art Thumbnail */}
-        <div className="w-full md:w-64 h-64 rounded-2xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl">
+        <div
+          className="w-full md:w-64 h-64 max-w-[256px] max-h-[256px] rounded-2xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl"
+          style={{ width: "256px", height: "256px", position: "relative" }}
+        >
           <Image
             src={battle.coverImage}
             alt={battle.title}
-            fill
-            className="object-cover"
+            width={256}
+            height={256}
+            className="w-full h-full object-cover"
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            priority
           />
-          <div className="absolute top-3 left-3 bg-[#121212]/85 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-black text-[#FF5E3A]">
+          <div
+            className="absolute top-3 left-3 bg-[#121212]/85 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-black text-[#FF5E3A]"
+            style={{ position: "absolute", top: "12px", left: "12px" }}
+          >
             #{battle.number}
           </div>
         </div>

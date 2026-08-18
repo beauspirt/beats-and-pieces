@@ -23,6 +23,9 @@ interface AudioContextType {
 
 const AudioPlayerContext = createContext<AudioContextType | undefined>(undefined);
 
+// 12ms micro-fade de-click constant (standard DAW / Web Audio anti-aliasing crossfade)
+const DECLICK_FADE_DURATION = 0.012;
+
 export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const pathname = usePathname();
   const prevPathnameRef = useRef(pathname);
@@ -30,20 +33,21 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [currentTrackId, setCurrentTrackId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(30);
+  const [duration, setDuration] = useState(45);
   const [activeTrackTitle, setActiveTrackTitle] = useState<string | null>(null);
 
-  // Web Audio API and fallback HTML5 audio references
+  // Web Audio API and fallback references
   const audioContextRef = useRef<AudioContext | null>(null);
   const audioBufferCacheRef = useRef<Map<string, AudioBuffer>>(new Map());
   const activeSourceNodeRef = useRef<AudioBufferSourceNode | null>(null);
+  const activeGainNodeRef = useRef<GainNode | null>(null);
   const startContextTimeRef = useRef<number>(0);
   const startTrackOffsetRef = useRef<number>(0);
   const currentBufferRef = useRef<AudioBuffer | null>(null);
   const currentUrlRef = useRef<string | null>(null);
   const animFrameIdRef = useRef<number | null>(null);
 
-  // Fallback HTML5 Audio element for legacy environments
+  // Fallback HTML5 Audio element
   const fallbackAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const getAudioContext = useCallback(() => {
@@ -65,7 +69,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       pauseTrack();
       setCurrentTrackId(null);
       setCurrentTime(0);
-      setDuration(30);
+      setDuration(45);
       prevPathnameRef.current = pathname;
     }
   }, [pathname]);
@@ -78,6 +82,13 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         try {
           activeSourceNodeRef.current.stop();
           activeSourceNodeRef.current.disconnect();
+        } catch {
+          // ignore
+        }
+      }
+      if (activeGainNodeRef.current) {
+        try {
+          activeGainNodeRef.current.disconnect();
         } catch {
           // ignore
         }
@@ -125,25 +136,60 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     animFrameIdRef.current = requestAnimationFrame(update);
   }, []);
 
-  const pauseTrack = useCallback(() => {
-    if (animFrameIdRef.current) cancelAnimationFrame(animFrameIdRef.current);
+  // De-click stop helper: fades out previous audio in 12ms to eliminate DC clicks and pops
+  const stopActiveSourceWithDeclick = useCallback(() => {
+    const ctx = audioContextRef.current;
+    const prevSource = activeSourceNodeRef.current;
+    const prevGain = activeGainNodeRef.current;
 
-    if (activeSourceNodeRef.current) {
+    if (ctx && prevGain && prevSource) {
       try {
-        activeSourceNodeRef.current.stop();
-        activeSourceNodeRef.current.disconnect();
+        const now = ctx.currentTime;
+        prevGain.gain.cancelScheduledValues(now);
+        prevGain.gain.setValueAtTime(prevGain.gain.value, now);
+        prevGain.gain.linearRampToValueAtTime(0.0001, now + DECLICK_FADE_DURATION);
+        prevSource.stop(now + DECLICK_FADE_DURATION);
+      } catch {
+        try {
+          prevSource.stop();
+        } catch {
+          // ignore
+        }
+      }
+
+      const sourceToClean = prevSource;
+      const gainToClean = prevGain;
+      setTimeout(() => {
+        try {
+          sourceToClean.disconnect();
+          gainToClean.disconnect();
+        } catch {
+          // ignore
+        }
+      }, (DECLICK_FADE_DURATION + 0.04) * 1000);
+    } else if (prevSource) {
+      try {
+        prevSource.stop();
+        prevSource.disconnect();
       } catch {
         // ignore
       }
-      activeSourceNodeRef.current = null;
     }
+
+    activeSourceNodeRef.current = null;
+    activeGainNodeRef.current = null;
+  }, []);
+
+  const pauseTrack = useCallback(() => {
+    if (animFrameIdRef.current) cancelAnimationFrame(animFrameIdRef.current);
+    stopActiveSourceWithDeclick();
 
     if (fallbackAudioRef.current) {
       fallbackAudioRef.current.pause();
     }
 
     setIsPlaying(false);
-  }, []);
+  }, [stopActiveSourceWithDeclick]);
 
   const startBufferPlayback = useCallback((
     buffer: AudioBuffer,
@@ -152,21 +198,22 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const ctx = getAudioContext();
     if (!ctx) return;
 
-    // Stop existing source node
-    if (activeSourceNodeRef.current) {
-      try {
-        activeSourceNodeRef.current.stop();
-        activeSourceNodeRef.current.disconnect();
-      } catch {
-        // ignore
-      }
-      activeSourceNodeRef.current = null;
-    }
+    // Smoothly fade out any existing playback without clicks
+    stopActiveSourceWithDeclick();
 
     const safeOffset = Math.max(0, Math.min(buffer.duration - 0.05, offsetSeconds));
+    const now = ctx.currentTime;
+
+    // Create new source and gain nodes with 12ms micro-fadein envelope
     const sourceNode = ctx.createBufferSource();
     sourceNode.buffer = buffer;
-    sourceNode.connect(ctx.destination);
+
+    const gainNode = ctx.createGain();
+    gainNode.gain.setValueAtTime(0.0001, now);
+    gainNode.gain.linearRampToValueAtTime(1, now + DECLICK_FADE_DURATION);
+    gainNode.connect(ctx.destination);
+
+    sourceNode.connect(gainNode);
 
     sourceNode.onended = () => {
       if (activeSourceNodeRef.current === sourceNode) {
@@ -175,17 +222,18 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     activeSourceNodeRef.current = sourceNode;
+    activeGainNodeRef.current = gainNode;
     currentBufferRef.current = buffer;
     setDuration(buffer.duration);
     setCurrentTime(safeOffset);
 
-    startContextTimeRef.current = ctx.currentTime;
+    startContextTimeRef.current = now;
     startTrackOffsetRef.current = safeOffset;
 
-    sourceNode.start(0, safeOffset);
+    sourceNode.start(now, safeOffset);
     setIsPlaying(true);
     startTimeLoop();
-  }, [getAudioContext, startTimeLoop]);
+  }, [getAudioContext, startTimeLoop, stopActiveSourceWithDeclick]);
 
   const seekTrack = useCallback((progress: number) => {
     if (typeof progress !== "number" || isNaN(progress) || !isFinite(progress)) return;

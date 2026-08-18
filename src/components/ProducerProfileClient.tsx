@@ -7,7 +7,7 @@ import { sampleProducers, sampleDiscoveryBeats, sampleSubmissions } from "@/lib/
 import { AudioWaveformPlayer } from "@/components/AudioWaveformPlayer";
 import { DiscoveryBeat, JudgeFeedbackItem } from "@/lib/types";
 import { 
-  ArrowLeft, Flame, Trophy, Mail, ExternalLink, 
+  Flame, Trophy, Mail, ExternalLink, 
   CheckCircle2, Copy, MapPin, Calendar, Star, Award
 } from "lucide-react";
 
@@ -228,17 +228,6 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
   return (
     <div className="w-full space-y-8 animate-in fade-in duration-300">
       
-      {/* Top Breadcrumb */}
-      <div>
-        <Link
-          href="/beats"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-[#888888] hover:text-white transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to Beats Discovery</span>
-        </Link>
-      </div>
-
       {/* SECTION 1: PRODUCER SHOWCASE HERO */}
       <div className="bg-[#181818] rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
         <div className="flex flex-col md:flex-row items-start md:items-center gap-6 sm:gap-8">
@@ -326,9 +315,8 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
             <div>
               <span className="text-[#888888] uppercase block text-xs tracking-wider font-semibold">Victories</span>
-              <span className="text-lg font-bold text-[#FF5E3A] flex items-center gap-1">
-                <Trophy className="w-3.5 h-3.5" />
-                <span>{producer.stats?.battlesWon || 0}</span>
+              <span className="text-lg font-bold text-[#FF5E3A] block">
+                {producer.stats?.battlesWon || 0}
               </span>
             </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useRef, useEffect, useCallback } from "react";
+import { usePathname } from "next/navigation";
 
 interface AudioContextType {
   currentTrackId: string | null;
@@ -23,155 +24,272 @@ interface AudioContextType {
 const AudioPlayerContext = createContext<AudioContextType | undefined>(undefined);
 
 export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const pathname = usePathname();
+  const prevPathnameRef = useRef(pathname);
+
   const [currentTrackId, setCurrentTrackId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(30);
   const [activeTrackTitle, setActiveTrackTitle] = useState<string | null>(null);
 
-  const audioElementRef = useRef<HTMLAudioElement | null>(null);
-  const currentAudioUrlRef = useRef<string | null>(null);
-  const pendingSeekProgressRef = useRef<number | null>(null);
+  // Web Audio API and fallback HTML5 audio references
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const audioBufferCacheRef = useRef<Map<string, AudioBuffer>>(new Map());
+  const activeSourceNodeRef = useRef<AudioBufferSourceNode | null>(null);
+  const startContextTimeRef = useRef<number>(0);
+  const startTrackOffsetRef = useRef<number>(0);
+  const currentBufferRef = useRef<AudioBuffer | null>(null);
+  const currentUrlRef = useRef<string | null>(null);
+  const animFrameIdRef = useRef<number | null>(null);
 
-  // Stop audio on unmount
+  // Fallback HTML5 Audio element for legacy environments
+  const fallbackAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const getAudioContext = useCallback(() => {
+    if (!audioContextRef.current && typeof window !== "undefined") {
+      const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (AudioContextClass) {
+        audioContextRef.current = new AudioContextClass();
+      }
+    }
+    if (audioContextRef.current && audioContextRef.current.state === "suspended") {
+      audioContextRef.current.resume();
+    }
+    return audioContextRef.current;
+  }, []);
+
+  // Stop playback when moving to a different page
+  useEffect(() => {
+    if (prevPathnameRef.current !== pathname) {
+      pauseTrack();
+      setCurrentTrackId(null);
+      setCurrentTime(0);
+      prevPathnameRef.current = pathname;
+    }
+  }, [pathname]);
+
+  // Clean up on unmount
   useEffect(() => {
     return () => {
-      if (audioElementRef.current) {
-        audioElementRef.current.pause();
-        audioElementRef.current.src = "";
+      if (animFrameIdRef.current) cancelAnimationFrame(animFrameIdRef.current);
+      if (activeSourceNodeRef.current) {
+        try {
+          activeSourceNodeRef.current.stop();
+          activeSourceNodeRef.current.disconnect();
+        } catch {
+          // ignore
+        }
+      }
+      if (fallbackAudioRef.current) {
+        fallbackAudioRef.current.pause();
+        fallbackAudioRef.current.src = "";
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
       }
     };
   }, []);
+
+  // Continuous high-precision time update loop
+  const startTimeLoop = useCallback(() => {
+    if (animFrameIdRef.current) cancelAnimationFrame(animFrameIdRef.current);
+
+    const update = () => {
+      const ctx = audioContextRef.current;
+      const buf = currentBufferRef.current;
+
+      if (ctx && buf) {
+        const elapsed = ctx.currentTime - startContextTimeRef.current;
+        const currentPos = startTrackOffsetRef.current + elapsed;
+
+        if (currentPos >= buf.duration) {
+          setCurrentTime(buf.duration);
+          setIsPlaying(false);
+          if (animFrameIdRef.current) cancelAnimationFrame(animFrameIdRef.current);
+          return;
+        } else {
+          setCurrentTime(Math.max(0, currentPos));
+          animFrameIdRef.current = requestAnimationFrame(update);
+        }
+      } else if (fallbackAudioRef.current && !fallbackAudioRef.current.paused) {
+        setCurrentTime(fallbackAudioRef.current.currentTime);
+        if (fallbackAudioRef.current.duration && isFinite(fallbackAudioRef.current.duration)) {
+          setDuration(fallbackAudioRef.current.duration);
+        }
+        animFrameIdRef.current = requestAnimationFrame(update);
+      }
+    };
+
+    animFrameIdRef.current = requestAnimationFrame(update);
+  }, []);
+
+  const pauseTrack = useCallback(() => {
+    if (animFrameIdRef.current) cancelAnimationFrame(animFrameIdRef.current);
+
+    if (activeSourceNodeRef.current) {
+      try {
+        activeSourceNodeRef.current.stop();
+        activeSourceNodeRef.current.disconnect();
+      } catch {
+        // ignore
+      }
+      activeSourceNodeRef.current = null;
+    }
+
+    if (fallbackAudioRef.current) {
+      fallbackAudioRef.current.pause();
+    }
+
+    setIsPlaying(false);
+  }, []);
+
+  const startBufferPlayback = useCallback((
+    buffer: AudioBuffer,
+    offsetSeconds: number
+  ) => {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    // Stop existing source node
+    if (activeSourceNodeRef.current) {
+      try {
+        activeSourceNodeRef.current.stop();
+        activeSourceNodeRef.current.disconnect();
+      } catch {
+        // ignore
+      }
+      activeSourceNodeRef.current = null;
+    }
+
+    const safeOffset = Math.max(0, Math.min(buffer.duration - 0.05, offsetSeconds));
+    const sourceNode = ctx.createBufferSource();
+    sourceNode.buffer = buffer;
+    sourceNode.connect(ctx.destination);
+
+    sourceNode.onended = () => {
+      if (activeSourceNodeRef.current === sourceNode) {
+        setIsPlaying(false);
+      }
+    };
+
+    activeSourceNodeRef.current = sourceNode;
+    currentBufferRef.current = buffer;
+    setDuration(buffer.duration);
+    setCurrentTime(safeOffset);
+
+    startContextTimeRef.current = ctx.currentTime;
+    startTrackOffsetRef.current = safeOffset;
+
+    sourceNode.start(0, safeOffset);
+    setIsPlaying(true);
+    startTimeLoop();
+  }, [getAudioContext, startTimeLoop]);
 
   const seekTrack = useCallback((progress: number) => {
     if (typeof progress !== "number" || isNaN(progress) || !isFinite(progress)) return;
     const targetProgress = Math.max(0, Math.min(1, progress));
 
-    const audio = audioElementRef.current;
-    if (audio) {
-      const dur = (typeof audio.duration === "number" && !isNaN(audio.duration) && isFinite(audio.duration) && audio.duration > 0)
-        ? audio.duration
-        : duration;
-
-      if (dur > 0) {
-        const targetTime = targetProgress * dur;
-        try {
-          audio.currentTime = targetTime;
-          setCurrentTime(targetTime);
-        } catch (e) {
-          console.warn("Could not seek audio immediately:", e);
-        }
-      }
-    } else {
-      setCurrentTime(targetProgress * duration);
+    const buf = currentBufferRef.current;
+    if (buf) {
+      const targetTime = targetProgress * buf.duration;
+      startBufferPlayback(buf, targetTime);
+    } else if (fallbackAudioRef.current) {
+      const dur = isFinite(fallbackAudioRef.current.duration) ? fallbackAudioRef.current.duration : duration;
+      const targetTime = targetProgress * dur;
+      fallbackAudioRef.current.currentTime = targetTime;
+      setCurrentTime(targetTime);
     }
-  }, [duration]);
+  }, [duration, startBufferPlayback]);
 
-  const playTrack = useCallback((
+  const playTrack = useCallback(async (
     id: string,
     title?: string,
     bpm = 90,
     audioUrl?: string,
     startProgress?: number
   ) => {
-    const validStartProgress = (typeof startProgress === "number" && !isNaN(startProgress) && isFinite(startProgress))
-      ? Math.max(0, Math.min(1, startProgress))
-      : undefined;
+    const ctx = getAudioContext();
+    const sourceUrl = audioUrl || `/audio/01 Ortega - Bonita Applebong.wav`;
+    const resolvedUrl = encodeURI(sourceUrl);
 
-    // 1. If clicking the exact same track that is ALREADY active
-    if (currentTrackId === id && audioElementRef.current && audioElementRef.current.src) {
-      if (validStartProgress !== undefined) {
-        seekTrack(validStartProgress);
-        if (!isPlaying) {
-          audioElementRef.current.play().catch(console.error);
-          setIsPlaying(true);
-        }
+    // 1. If clicking the currently active track
+    if (currentTrackId === id && currentBufferRef.current) {
+      if (startProgress !== undefined) {
+        const targetTime = startProgress * currentBufferRef.current.duration;
+        startBufferPlayback(currentBufferRef.current, targetTime);
       } else {
-        // Toggle play/pause
         if (isPlaying) {
           pauseTrack();
         } else {
-          audioElementRef.current.play().catch(console.error);
-          setIsPlaying(true);
+          startBufferPlayback(currentBufferRef.current, currentTime);
         }
       }
       return;
     }
 
-    // 2. Switching to a new track or initial play
+    // 2. Switching to a new track or fresh playback
+    pauseTrack();
     setCurrentTrackId(id);
     setActiveTrackTitle(title || `Beat #${id}`);
+    currentUrlRef.current = resolvedUrl;
 
-    if (!audioElementRef.current) {
-      audioElementRef.current = new Audio();
+    const initialProgress = (typeof startProgress === "number" && !isNaN(startProgress) && isFinite(startProgress))
+      ? Math.max(0, Math.min(1, startProgress))
+      : 0;
+
+    // Check if AudioBuffer is already in cache
+    const cachedBuffer = audioBufferCacheRef.current.get(resolvedUrl);
+    if (cachedBuffer) {
+      currentBufferRef.current = cachedBuffer;
+      const targetTime = initialProgress * cachedBuffer.duration;
+      startBufferPlayback(cachedBuffer, targetTime);
+      return;
     }
 
-    const audio = audioElementRef.current;
-    audio.pause();
+    // Fetch and decode via Web Audio API for 100% precision seeking without server Range errors
+    try {
+      if (ctx) {
+        const response = await fetch(resolvedUrl);
+        const arrayBuffer = await response.arrayBuffer();
+        const decodedBuffer = await ctx.decodeAudioData(arrayBuffer);
 
-    const sourceUrl = audioUrl || `/audio/01 Ortega - Bonita Applebong.wav`;
-    currentAudioUrlRef.current = sourceUrl;
-    audio.src = encodeURI(sourceUrl);
+        audioBufferCacheRef.current.set(resolvedUrl, decodedBuffer);
 
-    if (validStartProgress !== undefined) {
-      pendingSeekProgressRef.current = validStartProgress;
-    } else {
-      pendingSeekProgressRef.current = null;
-    }
-
-    const applyPendingSeek = () => {
-      if (pendingSeekProgressRef.current !== null && audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
-        const targetTime = pendingSeekProgressRef.current * audio.duration;
-        try {
-          audio.currentTime = targetTime;
-          setCurrentTime(targetTime);
-        } catch {
-          // ignore
+        // Verify this is still the active requested track
+        if (currentUrlRef.current === resolvedUrl) {
+          currentBufferRef.current = decodedBuffer;
+          const targetTime = initialProgress * decodedBuffer.duration;
+          startBufferPlayback(decodedBuffer, targetTime);
         }
-        pendingSeekProgressRef.current = null;
+        return;
       }
-    };
+    } catch (err) {
+      console.warn("Web Audio fetch/decode failed, using HTML5 Audio fallback:", err);
+    }
+
+    // Fallback to HTML5 audio element if Web Audio API decode is unavailable
+    if (!fallbackAudioRef.current) {
+      fallbackAudioRef.current = new Audio();
+    }
+    const audio = fallbackAudioRef.current;
+    audio.src = resolvedUrl;
 
     audio.onloadedmetadata = () => {
-      if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
+      if (isFinite(audio.duration)) {
         setDuration(audio.duration);
-        applyPendingSeek();
+        if (initialProgress > 0) {
+          audio.currentTime = initialProgress * audio.duration;
+        }
       }
-    };
-
-    audio.oncanplay = () => {
-      applyPendingSeek();
-    };
-
-    audio.ontimeupdate = () => {
-      if (!isNaN(audio.currentTime)) {
-        setCurrentTime(audio.currentTime);
-      }
-      if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
-        setDuration(audio.duration);
-      }
-    };
-
-    audio.onended = () => {
-      setIsPlaying(false);
-      setCurrentTime(0);
     };
 
     audio.play().then(() => {
       setIsPlaying(true);
-      applyPendingSeek();
-    }).catch((err) => {
-      console.warn("Audio play notice:", err);
-      setIsPlaying(true);
-    });
-  }, [currentTrackId, isPlaying, seekTrack]);
+      startTimeLoop();
+    }).catch(console.error);
 
-  const pauseTrack = useCallback(() => {
-    if (audioElementRef.current) {
-      audioElementRef.current.pause();
-    }
-    setIsPlaying(false);
-  }, []);
+  }, [currentTrackId, getAudioContext, isPlaying, currentTime, pauseTrack, startBufferPlayback, startTimeLoop]);
 
   const playbackProgress = duration > 0 ? currentTime / duration : 0;
 

@@ -285,7 +285,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     startProgress?: number
   ) => {
     const ctx = getAudioContext();
-    const sourceUrl = audioUrl || `/audio/01 Ortega - Bonita Applebong.wav`;
+    const sourceUrl = audioUrl || `/audio/01 Ortega - Bonita Applebong.mp3`;
     const resolvedUrl = sourceUrl
       .split("/")
       .map((seg) => (seg ? encodeURIComponent(decodeURIComponent(seg)) : ""))

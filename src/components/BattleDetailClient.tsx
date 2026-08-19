@@ -62,21 +62,21 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
   // Complete Anonymized track queue for all 15 master battle entries
   const blindTracks = [
-    { id: "blind-01", placeholder: "Beat 01", bpm: 92, audioUrl: "/audio/01 Ortega - Bonita Applebong.wav", duration: 67 },
-    { id: "blind-02", placeholder: "Beat 02", bpm: 88, audioUrl: "/audio/02 C.S.T - ThunderClouds.wav", duration: 119 },
-    { id: "blind-03", placeholder: "Beat 03", bpm: 90, audioUrl: "/audio/03 flg - bule temporale.wav", duration: 201 },
-    { id: "blind-04", placeholder: "Beat 04", bpm: 94, audioUrl: "/audio/04 Egris - Triburi.wav", duration: 104 },
-    { id: "blind-05", placeholder: "Beat 05", bpm: 86, audioUrl: "/audio/05 Nerub - Butterflies in my lungs.wav", duration: 124 },
-    { id: "blind-06", placeholder: "Beat 06", bpm: 91, audioUrl: "/audio/06 DFB - Apollo's Lyre.wav", duration: 87 },
-    { id: "blind-07", placeholder: "Beat 07", bpm: 93, audioUrl: "/audio/07 Ripp - Beyond.wav", duration: 130 },
-    { id: "blind-08", placeholder: "Beat 08", bpm: 89, audioUrl: "/audio/08 Mr Tweaks - Dmzl 4.wav", duration: 136 },
-    { id: "blind-09", placeholder: "Beat 09", bpm: 95, audioUrl: "/audio/09 Fane Stelaru - Late to the party.wav", duration: 94 },
-    { id: "blind-10", placeholder: "Beat 10", bpm: 98, audioUrl: "/audio/10 Fu - Malibu.wav", duration: 102 },
-    { id: "blind-11", placeholder: "Beat 11", bpm: 91, audioUrl: "/audio/11 Todica Vlad - Unfound.wav", duration: 126 },
-    { id: "blind-12", placeholder: "Beat 12", bpm: 87, audioUrl: "/audio/12 Jena - Paper Wasp.wav", duration: 154 },
-    { id: "blind-13", placeholder: "Beat 13", bpm: 87, audioUrl: "/audio/13 Raven - Sacred.wav", duration: 100 },
-    { id: "blind-14", placeholder: "Beat 14", bpm: 92, audioUrl: "/audio/14 Flat Beats - Time.wav", duration: 121 },
-    { id: "blind-15", placeholder: "Beat 15", bpm: 94, audioUrl: "/audio/15 Eastern Hypocrites - Rudaj.wav", duration: 115 },
+    { id: "blind-01", placeholder: "Beat 01", bpm: 92, audioUrl: "/audio/01 Ortega - Bonita Applebong.mp3", duration: 67 },
+    { id: "blind-02", placeholder: "Beat 02", bpm: 88, audioUrl: "/audio/02 C.S.T - ThunderClouds.mp3", duration: 119 },
+    { id: "blind-03", placeholder: "Beat 03", bpm: 90, audioUrl: "/audio/03 flg - bule temporale.mp3", duration: 201 },
+    { id: "blind-04", placeholder: "Beat 04", bpm: 94, audioUrl: "/audio/04 Egris - Triburi.mp3", duration: 104 },
+    { id: "blind-05", placeholder: "Beat 05", bpm: 86, audioUrl: "/audio/05 Nerub - Butterflies in my lungs.mp3", duration: 124 },
+    { id: "blind-06", placeholder: "Beat 06", bpm: 91, audioUrl: "/audio/06 DFB - Apollo's Lyre.mp3", duration: 87 },
+    { id: "blind-07", placeholder: "Beat 07", bpm: 93, audioUrl: "/audio/07 Ripp - Beyond.mp3", duration: 130 },
+    { id: "blind-08", placeholder: "Beat 08", bpm: 89, audioUrl: "/audio/08 Mr Tweaks - Dmzl 4.mp3", duration: 136 },
+    { id: "blind-09", placeholder: "Beat 09", bpm: 95, audioUrl: "/audio/09 Fane Stelaru - Late to the party.mp3", duration: 94 },
+    { id: "blind-10", placeholder: "Beat 10", bpm: 98, audioUrl: "/audio/10 Fu - Malibu.mp3", duration: 102 },
+    { id: "blind-11", placeholder: "Beat 11", bpm: 91, audioUrl: "/audio/11 Todica Vlad - Unfound.mp3", duration: 126 },
+    { id: "blind-12", placeholder: "Beat 12", bpm: 87, audioUrl: "/audio/12 Jena - Paper Wasp.mp3", duration: 154 },
+    { id: "blind-13", placeholder: "Beat 13", bpm: 87, audioUrl: "/audio/13 Raven - Sacred.mp3", duration: 100 },
+    { id: "blind-14", placeholder: "Beat 14", bpm: 92, audioUrl: "/audio/14 Flat Beats - Time.mp3", duration: 121 },
+    { id: "blind-15", placeholder: "Beat 15", bpm: 94, audioUrl: "/audio/15 Eastern Hypocrites - Rudaj.mp3", duration: 115 },
   ];
 
   const [isDraggingOver, setIsDraggingOver] = useState(false);
@@ -88,7 +88,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       setMyEntry({
         id: "sub-user-entry",
         title: file.name.replace(/\.[^/.]+$/, ""),
-        audioUrl: "/audio/05 Nerub - Butterflies in my lungs.wav",
+        audioUrl: "/audio/05 Nerub - Butterflies in my lungs.mp3",
         duration: 124,
         bpm: 90,
         submittedAt: new Date().toISOString(),

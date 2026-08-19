@@ -87,11 +87,19 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
     return null;
   });
 
-  // Decode real AudioBuffer in background to extract exact audio waveform
+  // Decode real AudioBuffer only for custom newly uploaded tracks not in precomputed dictionary
   useEffect(() => {
     if (!audioUrl || typeof window === "undefined") return;
     if (globalWaveformCache.has(audioUrl)) {
       setWaveformData(globalWaveformCache.get(audioUrl)!);
+      return;
+    }
+
+    const dict = precomputedPeaksV2 as Record<string, WaveformData>;
+    const decodedUrl = decodeURIComponent(audioUrl);
+    const filename = decodedUrl.split("/").pop() || "";
+    if (dict[audioUrl] || dict[decodedUrl] || dict[filename]) {
+      // Already has authoritative precomputed peaks - skip redundant decoding
       return;
     }
 

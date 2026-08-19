@@ -1,0 +1,40 @@
+[
+  {
+    "id": "rel-1",
+    "title": "Flip Tape #1",
+    "slug": "flip-tape-1",
+    "coverImage": "/covers/releases/flip-tape-1.png",
+    "releaseDate": "2022-03-01",
+    "description": "This is our first beat tape, a compilation of the best beats chosen from the first flip battle. The sample used in all the beats, chosen by Nerub, is 'Steven Halpern - Apollo's Lyre'.",
+    "spotifyUrl": "https://open.spotify.com",
+    "youtubeUrl": "https://youtube.com"
+  },
+  {
+    "id": "rel-2",
+    "title": "Flip Tape #2",
+    "slug": "flip-tape-2",
+    "coverImage": "/covers/releases/flip-tape-2.png",
+    "releaseDate": "2022-06-15",
+    "description": "This is our second beat tape, a compilation of the best beats chosen from the second flip battle. The samples used in all the beats, chosen by Ortega, are: Eduard Artemyev - На Сельской Станции, Eugen Doga - Waltz.",
+    "spotifyUrl": "https://open.spotify.com",
+    "youtubeUrl": "https://youtube.com"
+  },
+  {
+    "id": "rel-3",
+    "title": "The Miles Davis Tape",
+    "slug": "miles-davis-tape",
+    "coverImage": "/covers/releases/the-miles-davis-tape.png",
+    "releaseDate": "2022-09-30",
+    "description": "Our first thematic beat tape, a compilation of beats made with samples from the music of the legendary Miles Davis.",
+    "youtubeUrl": "https://youtube.com"
+  },
+  {
+    "id": "rel-4",
+    "title": "The Christmas Tape",
+    "slug": "the-christmas-tape",
+    "coverImage": "/covers/releases/the-christmas-tape.png",
+    "releaseDate": "2022-12-24",
+    "description": "This is a Christmas themed beat tape, a compilation of beats made with samples taken from Elena Mîndru Quintet's amazing album called 'Romanian Christmas Stories' in which they created jazz reinterpretations of traditional Romanian carols.",
+    "youtubeUrl": "https://youtube.com"
+  }
+]

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { sampleModerationFlags } from "@/lib/mock-data";
 import { ModerationFlag } from "@/lib/types";
 import { ArrowLeft, ShieldAlert, CheckCircle2, Ban, AlertTriangle, Filter, Search, Flame, Clock } from "lucide-react";
+import { AdminGuard } from "@/components/AdminGuard";
 
 export default function VotingModerationPage() {
   const [flags, setFlags] = useState<ModerationFlag[]>(sampleModerationFlags);
@@ -34,7 +35,8 @@ export default function VotingModerationPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-300">
+    <AdminGuard>
+      <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-300">
       
       {/* Top Breadcrumb */}
       <Link
@@ -181,5 +183,6 @@ export default function VotingModerationPage() {
       </div>
 
     </div>
+    </AdminGuard>
   );
 }

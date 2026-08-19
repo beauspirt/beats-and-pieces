@@ -5,17 +5,22 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { User as UserIcon, LogOut } from "lucide-react";
-import { currentUser } from "@/lib/mock-data";
+import { useAuth } from "@/lib/auth-context";
 
 export const Navbar: React.FC = () => {
   const pathname = usePathname();
+  const { user: currentUser, isLoggedIn, logout } = useAuth();
+  const [mounted, setMounted] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [showAdminMenu, setShowAdminMenu] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   const adminMenuRef = useRef<HTMLDivElement>(null);
   const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     try {
@@ -112,11 +117,9 @@ export const Navbar: React.FC = () => {
           </nav>
         </div>
 
-        {/* Right Actions: Admin Panel dropdown, Theme Switch, Avatar */}
+        {/* Right Actions: Admin Panel dropdown, Theme Switch, Avatar / Log in */}
         <div className="flex items-center gap-6">
-          
-          {/* Admin Panel Dropdown */}
-          {currentUser.role === "admin" && (
+          {mounted && currentUser?.role === "admin" && (
             <div className="relative" ref={adminMenuRef}>
               <button
                 onClick={() => setShowAdminMenu(!showAdminMenu)}
@@ -176,12 +179,12 @@ export const Navbar: React.FC = () => {
             </div>
           )}
 
-          {/* User Avatar & Dropdown */}
-          {isLoggedIn ? (
+          {/* User Avatar (if logged in) or 'Log in' button */}
+          {mounted && isLoggedIn && currentUser ? (
             <div className="relative" ref={profileMenuRef}>
               <button
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="w-9 h-9 rounded-full overflow-hidden relative flex items-center justify-center focus:outline-none"
+                className="w-9 h-9 rounded-full overflow-hidden relative flex items-center justify-center focus:outline-none cursor-pointer"
               >
                 <Image
                   src={currentUser.avatarUrl}
@@ -209,10 +212,10 @@ export const Navbar: React.FC = () => {
 
                   <button
                     onClick={() => {
-                      setIsLoggedIn(false);
+                      logout();
                       setShowProfileMenu(false);
                     }}
-                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-red-400 hover:bg-[#262626] transition-colors text-left"
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-red-400 hover:bg-[#262626] transition-colors text-left cursor-pointer"
                   >
                     <LogOut className="w-4 h-4" />
                     <span>Log out</span>
@@ -223,9 +226,9 @@ export const Navbar: React.FC = () => {
           ) : (
             <Link
               href="/signin"
-              className="px-4 py-2 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-semibold transition-all shadow-md active:scale-95"
+              className="px-4 py-2 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-semibold transition-all shadow-md active:scale-95 flex items-center gap-1.5"
             >
-              Sign in
+              <span>Log in</span>
             </Link>
           )}
 

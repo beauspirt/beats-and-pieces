@@ -4,12 +4,14 @@ import React from "react";
 import Link from "next/link";
 import { Shield, PlusCircle, Disc, Trophy, AlertTriangle, Users, Settings } from "lucide-react";
 import { sampleModerationFlags } from "@/lib/mock-data";
+import { AdminGuard } from "@/components/AdminGuard";
 
 export default function AdminDashboardPage() {
   const pendingFlagsCount = sampleModerationFlags.filter((f) => f.status === "pending").length;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-300">
+    <AdminGuard>
+      <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-300">
       
       {/* Header */}
       <div className="pb-6 flex items-center justify-between">
@@ -106,7 +108,7 @@ export default function AdminDashboardPage() {
         </div>
 
       </div>
-
     </div>
+    </AdminGuard>
   );
 }

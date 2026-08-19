@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
+import { AdminGuard } from "@/components/AdminGuard";
 
 export default function NewReleasePage() {
   const router = useRouter();
@@ -34,7 +35,8 @@ export default function NewReleasePage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-300 py-4">
+    <AdminGuard>
+      <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-300 py-4">
       
       {/* Title */}
       <div className="pb-2">
@@ -158,7 +160,7 @@ export default function NewReleasePage() {
         <div className="text-right pt-2">
           <button
             type="submit"
-            className="px-10 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-sm font-bold transition-all shadow-lg active:scale-95 ml-auto"
+            className="px-10 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-sm font-bold transition-all shadow-lg active:scale-95 ml-auto cursor-pointer"
           >
             {isSaved ? "Saved ✓" : "Save"}
           </button>
@@ -167,5 +169,6 @@ export default function NewReleasePage() {
       </form>
 
     </div>
+    </AdminGuard>
   );
 }

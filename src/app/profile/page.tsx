@@ -1,27 +1,55 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { currentUser } from "@/lib/mock-data";
 import { UserProfile } from "@/lib/types";
 import { X, ShieldCheck, ExternalLink } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
+import { useRouter } from "next/navigation";
 
 export default function UserProfilePage() {
-  const [profile, setProfile] = useState<UserProfile>(currentUser);
+  const router = useRouter();
+  const { user: activeUser, logout } = useAuth();
+  const [profile, setProfile] = useState<UserProfile | null>(activeUser);
+
+  // Sync profile when active user changes
+  useEffect(() => {
+    if (!activeUser) {
+      router.push("/signin");
+    } else {
+      setProfile(activeUser);
+    }
+  }, [activeUser, router]);
+
   const [defaultLicensing, setDefaultLicensing] = useState<"for_sale" | "not_for_sale">("for_sale");
   const [defaultPrice, setDefaultPrice] = useState("$150");
   const [links, setLinks] = useState<Record<string, string>>({
-    instagram: "https://www.instagram.com/nerubsta",
-    facebook: "",
-    youtube: "https://youtube.com/@nerub",
-    spotify: "https://open.spotify.com/artist/nerub",
-    bandcamp: "",
-    soundcloud: "https://soundcloud.com/nerub",
-    beatstars: "https://beatstars.com/nerub",
-    website: "https://nerub.ro",
+    instagram: activeUser?.links?.instagram || "https://www.instagram.com/nerubsta",
+    facebook: activeUser?.links?.facebook || "",
+    youtube: activeUser?.links?.youtube || "https://youtube.com/@nerub",
+    spotify: activeUser?.links?.spotify || "https://open.spotify.com/artist/nerub",
+    bandcamp: activeUser?.links?.bandcamp || "",
+    soundcloud: activeUser?.links?.soundcloud || "https://soundcloud.com/nerub",
+    beatstars: activeUser?.links?.beatstars || "https://beatstars.com/nerub",
+    website: activeUser?.links?.website || "https://nerub.ro",
   });
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  if (!activeUser || !profile) {
+    return (
+      <div className="min-h-[50vh] flex flex-col items-center justify-center text-center space-y-4">
+        <p className="text-sm text-[#888888]">Please sign in to view your artist profile.</p>
+        <Link
+          href="/signin"
+          className="px-6 py-2.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md"
+        >
+          Sign In
+        </Link>
+      </div>
+    );
+  }
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -216,7 +244,10 @@ export default function UserProfilePage() {
         <div className="flex items-center justify-between pt-2">
           <button
             type="button"
-            onClick={() => alert("Logged out.")}
+            onClick={() => {
+              logout();
+              router.push("/signin");
+            }}
             className="px-7 py-3 rounded-xl bg-[#232323] hover:bg-[#2C2C2C] text-[#D1D1D1] text-xs font-semibold transition-all cursor-pointer"
           >
             Log out

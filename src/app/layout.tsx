@@ -4,6 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { AudioProvider } from "@/lib/audio-context";
+import { AuthProvider } from "@/lib/auth-context";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -24,13 +25,15 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${inter.variable} font-sans antialiased bg-[#121212] text-foreground min-h-screen flex flex-col`}>
-        <AudioProvider>
-          <Navbar />
-          <main className="flex-1 max-w-7xl w-full mx-auto px-6 sm:px-8 py-8">
-            {children}
-          </main>
-          <Footer />
-        </AudioProvider>
+        <AuthProvider>
+          <AudioProvider>
+            <Navbar />
+            <main className="flex-1 max-w-7xl w-full mx-auto px-6 sm:px-8 py-8">
+              {children}
+            </main>
+            <Footer />
+          </AudioProvider>
+        </AuthProvider>
       </body>
     </html>
   );

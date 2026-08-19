@@ -1,0 +1,41 @@
+[
+  {
+    "id": "flag-1",
+    "battleId": "battle-8",
+    "voterUserId": "usr-voter-99",
+    "voterNickname": "RapidClicker99",
+    "voterEmail": "rapid@user.ro",
+    "flagType": "rapid_clicking",
+    "details": "Unusual voting pattern detected: 10 consecutive minimum 1.0 flame ratings in under 20 seconds.",
+    "timestamp": "2023-08-15T14:20:00Z",
+    "status": "pending",
+    "votesCast": 10,
+    "averageRatingGiven": 1
+  },
+  {
+    "id": "flag-2",
+    "battleId": "battle-8",
+    "voterUserId": "usr-voter-42",
+    "voterNickname": "AltAccount42",
+    "voterEmail": "alt42@user.ro",
+    "flagType": "multi_account_ip",
+    "details": "Multiple rating ballots submitted from the exact same IP address within a 5-minute window.",
+    "timestamp": "2023-08-15T16:45:00Z",
+    "status": "approved",
+    "votesCast": 15,
+    "averageRatingGiven": 4.8
+  },
+  {
+    "id": "flag-3",
+    "battleId": "battle-8",
+    "voterUserId": "usr-voter-12",
+    "voterNickname": "IncompleteVoter",
+    "voterEmail": "inc@user.ro",
+    "flagType": "incomplete_votes",
+    "details": "Ballot submitted below required 50% threshold (rated 2/15 beats).",
+    "timestamp": "2023-08-15T18:10:00Z",
+    "status": "discarded",
+    "votesCast": 2,
+    "averageRatingGiven": 3.5
+  }
+]

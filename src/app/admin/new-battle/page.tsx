@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Plus, X } from "lucide-react";
+import { AdminGuard } from "@/components/AdminGuard";
 
 export default function NewCompetitionPage() {
   const router = useRouter();
@@ -60,14 +61,15 @@ export default function NewCompetitionPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-300 py-4">
-      
-      {/* Title */}
-      <div className="pb-2">
-        <h1 className="text-3xl font-black text-white">Create a new competition</h1>
-      </div>
+    <AdminGuard>
+      <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-300 py-4">
+        
+        {/* Title */}
+        <div className="pb-2">
+          <h1 className="text-3xl font-black text-white">Create a new competition</h1>
+        </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
         
         {/* CONTAINER: DETAILS */}
         <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 space-y-6">
@@ -354,7 +356,7 @@ export default function NewCompetitionPage() {
         <div className="text-right pt-2">
           <button
             type="submit"
-            className="px-10 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-sm font-bold transition-all shadow-lg active:scale-95 ml-auto"
+            className="px-10 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-sm font-bold transition-all shadow-lg active:scale-95 ml-auto cursor-pointer"
           >
             {isSaved ? "Saved ✓" : "Save"}
           </button>
@@ -363,5 +365,6 @@ export default function NewCompetitionPage() {
       </form>
 
     </div>
+    </AdminGuard>
   );
 }

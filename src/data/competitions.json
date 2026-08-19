@@ -1,0 +1,257 @@
+[
+  {
+    "id": "battle-9",
+    "number": 9,
+    "title": "Beat Battle #9 (Demo Mockup)",
+    "slug": "beat-battle-9",
+    "coverImage": "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=600&auto=format&fit=crop&q=80",
+    "hosts": [
+      "[Demo Host]"
+    ],
+    "judges": [
+      "[Placeholder Judge 1]",
+      "[Placeholder Judge 2]",
+      "[Placeholder Judge 3]"
+    ],
+    "description": "Active staging mockup for platform testing. Use this demo battle to test beat submissions, public flame voting, jury evaluation scorecards, and results generation.",
+    "prizes": {
+      "first": "[1st Place Prize Placeholder]",
+      "second": "[2nd Place Prize Placeholder]",
+      "third": "[3rd Place Prize Placeholder]"
+    },
+    "samples": [
+      {
+        "id": "s1",
+        "title": "Sample 1 - Bonita Applebong",
+        "audioUrl": "/audio/01 Ortega - Bonita Applebong.mp3",
+        "duration": 67
+      },
+      {
+        "id": "s2",
+        "title": "Sample 2 - ThunderClouds",
+        "audioUrl": "/audio/02 C.S.T - ThunderClouds.mp3",
+        "duration": 119
+      },
+      {
+        "id": "s3",
+        "title": "Sample 3 - Butterflies in my lungs",
+        "audioUrl": "/audio/05 Nerub - Butterflies in my lungs.mp3",
+        "duration": 124
+      }
+    ],
+    "phase": "rating",
+    "submissionStartsAt": "2026-08-01T00:00:00Z",
+    "submissionEndsAt": "2026-08-15T23:59:59Z",
+    "ratingEndsAt": "2026-08-22T23:59:59Z",
+    "judgingEndsAt": "2026-08-25T20:00:00Z",
+    "totalSubmissions": 15,
+    "minVotesRequired": 8,
+    "topFinalistsCutoff": 15
+  },
+  {
+    "id": "battle-8",
+    "number": 8,
+    "title": "Beat Battle #8",
+    "slug": "beat-battle-8",
+    "coverImage": "/covers/beat-battle-8.png",
+    "hosts": [
+      "Nerub"
+    ],
+    "judges": [
+      "Lu-K Beats",
+      "PRNY"
+    ],
+    "winner": "Z3nn",
+    "description": "Eighth edition of the Beats & Pieces Beat Battle series. Juried live by Lu-K Beats & PRNY.",
+    "prizes": {
+      "first": "Official Release & Showcase",
+      "second": "Beats & Pieces Merch Pack",
+      "third": "Sample Vault Access"
+    },
+    "samples": [],
+    "phase": "completed",
+    "submissionStartsAt": "2023-08-01T00:00:00Z",
+    "submissionEndsAt": "2023-08-15T23:59:59Z",
+    "ratingEndsAt": "2023-08-20T23:59:59Z",
+    "judgingEndsAt": "2023-08-28T20:00:00Z",
+    "endedAt": "2023-08-28",
+    "totalSubmissions": 95,
+    "youtubeVodUrl": "https://www.youtube.com/watch?v=aVcz09ypESA"
+  },
+  {
+    "id": "battle-7",
+    "number": 7,
+    "title": "Beat Battle #7",
+    "slug": "beat-battle-7",
+    "coverImage": "/covers/beat-battle-7.png",
+    "hosts": [
+      "Nerub"
+    ],
+    "judges": [
+      "Macanache"
+    ],
+    "winner": "GROVEEK",
+    "description": "Seventh edition of the Beats & Pieces Beat Battle series. Juried live by Macanache.",
+    "prizes": {
+      "first": "Official Release & Showcase",
+      "second": "Beats & Pieces Merch Pack",
+      "third": "Sample Vault Access"
+    },
+    "samples": [],
+    "phase": "completed",
+    "submissionStartsAt": "2023-06-15T00:00:00Z",
+    "submissionEndsAt": "2023-06-30T23:59:59Z",
+    "ratingEndsAt": "2023-07-05T23:59:59Z",
+    "judgingEndsAt": "2023-07-11T20:00:00Z",
+    "endedAt": "2023-07-11",
+    "totalSubmissions": 61,
+    "youtubeVodUrl": "https://www.youtube.com/watch?v=Wsq7g-oQolw"
+  },
+  {
+    "id": "battle-5",
+    "number": 5,
+    "title": "Beat Battle #5",
+    "slug": "beat-battle-5",
+    "coverImage": "/covers/beat-battle-5.png",
+    "hosts": [
+      "Nerub"
+    ],
+    "judges": [
+      "Deliric"
+    ],
+    "winner": "mayfourteen",
+    "description": "Fifth edition of the Beats & Pieces Beat Battle series. Juried live by Deliric.",
+    "prizes": {
+      "first": "Official Release & Showcase",
+      "second": "Beats & Pieces Merch Pack",
+      "third": "Sample Vault Access"
+    },
+    "samples": [],
+    "phase": "completed",
+    "submissionStartsAt": "2023-02-01T00:00:00Z",
+    "submissionEndsAt": "2023-02-15T23:59:59Z",
+    "ratingEndsAt": "2023-02-20T23:59:59Z",
+    "judgingEndsAt": "2023-02-28T20:00:00Z",
+    "endedAt": "2023-02-28",
+    "totalSubmissions": 150,
+    "youtubeVodUrl": "https://www.youtube.com/watch?v=Vq-Qgt4Vvl4"
+  },
+  {
+    "id": "battle-4",
+    "number": 4,
+    "title": "Beat Battle #4",
+    "slug": "beat-battle-4",
+    "coverImage": "/covers/beat-battle-4.png",
+    "hosts": [
+      "Nerub"
+    ],
+    "judges": [
+      "Tomi Marfă",
+      "Vapor"
+    ],
+    "winner": "Stolly",
+    "description": "Fourth edition of the Beats & Pieces Beat Battle series. Juried live by Nerub, Tomi Marfă & Vapor.",
+    "prizes": {
+      "first": "Official Release & Showcase",
+      "second": "Beats & Pieces Merch Pack",
+      "third": "Sample Vault Access"
+    },
+    "samples": [],
+    "phase": "completed",
+    "submissionStartsAt": "2022-11-01T00:00:00Z",
+    "submissionEndsAt": "2022-11-15T23:59:59Z",
+    "ratingEndsAt": "2022-11-20T23:59:59Z",
+    "judgingEndsAt": "2022-11-29T20:00:00Z",
+    "endedAt": "2022-11-29",
+    "totalSubmissions": 33,
+    "youtubeVodUrl": "https://www.youtube.com/watch?v=OK5kg7hN6ZQ"
+  },
+  {
+    "id": "battle-3",
+    "number": 3,
+    "title": "Beat Battle #3",
+    "slug": "beat-battle-3",
+    "coverImage": "/covers/beat-battle-3.png",
+    "hosts": [
+      "Nerub"
+    ],
+    "judges": [
+      "Gogan",
+      "nUKred"
+    ],
+    "winner": "Vulpeanu",
+    "description": "Third edition of the Beats & Pieces Beat Battle series. Juried live by Nerub, Gogan & nUKred.",
+    "prizes": {
+      "first": "Official Release & Showcase",
+      "second": "Beats & Pieces Merch Pack",
+      "third": "Sample Vault Access"
+    },
+    "samples": [],
+    "phase": "completed",
+    "submissionStartsAt": "2022-10-01T00:00:00Z",
+    "submissionEndsAt": "2022-10-15T23:59:59Z",
+    "ratingEndsAt": "2022-10-20T23:59:59Z",
+    "judgingEndsAt": "2022-11-01T20:00:00Z",
+    "endedAt": "2022-11-01",
+    "totalSubmissions": 30,
+    "youtubeVodUrl": "https://www.youtube.com/watch?v=A9frrhjTdTA"
+  },
+  {
+    "id": "battle-2",
+    "number": 2,
+    "title": "Beat Battle #2",
+    "slug": "beat-battle-2",
+    "coverImage": "/covers/beat-battle-2.png",
+    "hosts": [
+      "Nerub"
+    ],
+    "judges": [
+      "Vlad Dobrescu"
+    ],
+    "winner": "El Huron",
+    "description": "Second edition of the Beats & Pieces Beat Battle series. Juried live by Nerub & Vlad Dobrescu.",
+    "prizes": {
+      "first": "Official Release & Showcase",
+      "second": "Beats & Pieces Merch Pack",
+      "third": "Sample Vault Access"
+    },
+    "samples": [],
+    "phase": "completed",
+    "submissionStartsAt": "2022-09-01T00:00:00Z",
+    "submissionEndsAt": "2022-09-15T23:59:59Z",
+    "ratingEndsAt": "2022-09-20T23:59:59Z",
+    "judgingEndsAt": "2022-10-04T20:00:00Z",
+    "endedAt": "2022-10-04",
+    "totalSubmissions": 46,
+    "youtubeVodUrl": "https://www.youtube.com/watch?v=yYo1ZCxtbHw"
+  },
+  {
+    "id": "battle-1",
+    "number": 1,
+    "title": "Beat Battle #1",
+    "slug": "beat-battle-1",
+    "coverImage": "/covers/beat-battle-1.png",
+    "hosts": [
+      "Nerub"
+    ],
+    "judges": [
+      "C.S.T."
+    ],
+    "winner": "Vulpeanu",
+    "description": "First edition of the Beats & Pieces Beat Battle series. Juried live by Nerub & C.S.T.",
+    "prizes": {
+      "first": "Official Release & Showcase",
+      "second": "Beats & Pieces Merch Pack",
+      "third": "Sample Vault Access"
+    },
+    "samples": [],
+    "phase": "completed",
+    "submissionStartsAt": "2022-08-01T00:00:00Z",
+    "submissionEndsAt": "2022-08-15T23:59:59Z",
+    "ratingEndsAt": "2022-08-20T23:59:59Z",
+    "judgingEndsAt": "2022-09-06T20:00:00Z",
+    "endedAt": "2022-09-06",
+    "totalSubmissions": 39,
+    "youtubeVodUrl": "https://www.youtube.com/watch?v=fkBhpRuYFAg"
+  }
+]

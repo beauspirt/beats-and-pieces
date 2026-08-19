@@ -1,0 +1,493 @@
+{
+  "usr-nerub": {
+    "id": "usr-nerub",
+    "nickname": "Nerub",
+    "email": "adrian.hrihor@gmail.com",
+    "avatarUrl": "/avatars/default-avatar.png",
+    "bio": "Founder & Host at Beats & Pieces. Producer, sound designer and sample hunter.",
+    "location": "Bucharest, RO",
+    "role": "admin",
+    "discordId": "149616667792637952",
+    "discordUsername": "nerub#0001",
+    "discordRoles": [
+      "Host",
+      "Admin",
+      "OG Producer"
+    ],
+    "links": {
+      "instagram": "https://instagram.com",
+      "spotify": "https://spotify.com",
+      "youtube": "https://youtube.com"
+    },
+    "stats": {
+      "battlesEntered": 12,
+      "battlesWon": 4,
+      "totalFlames": 480
+    },
+    "isClaimed": true,
+    "createdAt": "2021-01-15T00:00:00Z"
+  },
+  "usr-ortega": {
+    "id": "usr-ortega",
+    "nickname": "Ortega",
+    "email": "ortega@producer.ro",
+    "avatarUrl": "/avatars/default-avatar.png",
+    "bio": "Hip-Hop producer & sample connoisseur. Always searching for obscure vinyl gems.",
+    "location": "Bucharest, RO",
+    "role": "judge",
+    "discordId": "ortega_beats",
+    "discordUsername": "ortega#1337",
+    "discordRoles": [
+      "Judge",
+      "Battle Champion"
+    ],
+    "links": {
+      "instagram": "https://instagram.com",
+      "spotify": "https://spotify.com",
+      "soundcloud": "https://soundcloud.com"
+    },
+    "stats": {
+      "battlesEntered": 8,
+      "battlesWon": 3,
+      "totalFlames": 395
+    },
+    "isClaimed": false,
+    "createdAt": "2021-03-20T00:00:00Z"
+  },
+  "usr-cst": {
+    "id": "usr-cst",
+    "nickname": "C.S.T.",
+    "email": "cst@soundlab.ro",
+    "avatarUrl": "/avatars/default-avatar.png",
+    "bio": "Beatmaker, sound designer, and vinyl collector. Boom bap & lo-fi aesthetic.",
+    "location": "Brasov, RO",
+    "role": "judge",
+    "discordId": "cst_audio",
+    "discordUsername": "CST#2048",
+    "discordRoles": [
+      "Judge",
+      "OG Producer"
+    ],
+    "links": {
+      "instagram": "https://instagram.com",
+      "bandcamp": "https://bandcamp.com"
+    },
+    "stats": {
+      "battlesEntered": 6,
+      "battlesWon": 2,
+      "totalFlames": 310
+    },
+    "isClaimed": false,
+    "createdAt": "2021-05-10T00:00:00Z"
+  },
+  "usr-vulpeanu": {
+    "id": "usr-vulpeanu",
+    "nickname": "Vulpeanu",
+    "email": "vulpeanumihaivalentin@gmail.com",
+    "avatarUrl": "/avatars/default-avatar.png",
+    "bio": "Multi-time Beat Battle champion. Soul chops, analog warmth, and groove master.",
+    "location": "Bucharest, RO",
+    "role": "producer",
+    "discordId": "377530897492213770",
+    "discordUsername": "vulpeanu#1122",
+    "discordRoles": [
+      "Battle Champion",
+      "Winner BB#1",
+      "Winner BB#3"
+    ],
+    "links": {
+      "instagram": "https://instagram.com",
+      "spotify": "https://spotify.com"
+    },
+    "stats": {
+      "battlesEntered": 6,
+      "battlesWon": 2,
+      "totalFlames": 450
+    },
+    "isClaimed": false,
+    "createdAt": "2021-06-01T00:00:00Z"
+  },
+  "usr-mldn": {
+    "id": "usr-mldn",
+    "nickname": "MLDN",
+    "email": "mldnbeats@gmail.com",
+    "avatarUrl": "/avatars/default-avatar.png",
+    "bio": "Romanian hip hop beatmaker with hard-hitting drums and nostalgic vinyl textures.",
+    "location": "Bucharest, RO",
+    "role": "producer",
+    "discordId": "697122865299849276",
+    "discordUsername": "mldn#3344",
+    "discordRoles": [
+      "Podium Finalist"
+    ],
+    "stats": {
+      "battlesEntered": 4,
+      "battlesWon": 0,
+      "totalFlames": 210
+    },
+    "isClaimed": false,
+    "createdAt": "2021-06-01T00:00:00Z"
+  },
+  "usr-cgr": {
+    "id": "usr-cgr",
+    "nickname": "CGR",
+    "email": "prod.cgr@gmail.com",
+    "avatarUrl": "/avatars/default-avatar.png",
+    "bio": "Versatile sound architect and producer. Podium finisher in multiple Beat Battles.",
+    "location": "Cluj-Napoca, RO",
+    "role": "producer",
+    "discordId": "cgr_official",
+    "discordUsername": "cgr#5566",
+    "discordRoles": [
+      "Podium Finalist"
+    ],
+    "stats": {
+      "battlesEntered": 7,
+      "battlesWon": 0,
+      "totalFlames": 340
+    },
+    "isClaimed": false,
+    "createdAt": "2021-06-01T00:00:00Z"
+  },
+  "usr-joeycrack": {
+    "id": "usr-joeycrack",
+    "nickname": "JoeyCrack",
+    "email": "catalinavadani01@gmail.com",
+    "avatarUrl": "/avatars/default-avatar.png",
+    "bio": "Boom bap purist and MPC head crafting raw unquantized beats.",
+    "location": "Timisoara, RO",
+    "role": "producer",
+    "discordId": "274966555874426883",
+    "discordUsername": "joeycrack#7788",
+    "discordRoles": [
+      "Podium Finalist"
+    ],
+    "stats": {
+      "battlesEntered": 5,
+      "battlesWon": 0,
+      "totalFlames": 260
+    },
+    "isClaimed": false,
+    "createdAt": "2021-06-01T00:00:00Z"
+  },
+  "usr-tinybeats": {
+    "id": "usr-tinybeats",
+    "nickname": "TinyBeats",
+    "email": "b.3a2iu@gmail.com",
+    "avatarUrl": "/avatars/default-avatar.png",
+    "bio": "Micro-sample manipulation and warm vintage grooves.",
+    "location": "Iasi, RO",
+    "role": "producer",
+    "discordId": "549548266581393423",
+    "discordUsername": "tinybeats#9900",
+    "discordRoles": [
+      "Finalist"
+    ],
+    "stats": {
+      "battlesEntered": 3,
+      "battlesWon": 0,
+      "totalFlames": 150
+    },
+    "isClaimed": false,
+    "createdAt": "2021-06-01T00:00:00Z"
+  },
+  "usr-elhuron": {
+    "id": "usr-elhuron",
+    "nickname": "El Huron",
+    "email": "basescu.florinandrei@yahoo.com",
+    "avatarUrl": "/avatars/default-avatar.png",
+    "bio": "Winner of Beat Battle #2. Film composer and organic hip hop beatsmith.",
+    "location": "Bucharest, RO",
+    "role": "producer",
+    "discordId": "715085636280909874",
+    "discordUsername": "elhuron#4321",
+    "discordRoles": [
+      "Battle Champion",
+      "Winner BB#2"
+    ],
+    "stats": {
+      "battlesEntered": 4,
+      "battlesWon": 1,
+      "totalFlames": 290
+    },
+    "isClaimed": false,
+    "createdAt": "2021-08-01T00:00:00Z"
+  },
+  "usr-mateicojo": {
+    "id": "usr-mateicojo",
+    "nickname": "mateicojo",
+    "email": "mateicojo@yahoo.com",
+    "avatarUrl": "/avatars/default-avatar.png",
+    "bio": "Consistent podium finalist across Beat Battles #2, #3, and #4.",
+    "location": "Bucharest, RO",
+    "role": "producer",
+    "discordId": "567725599960072193",
+    "discordUsername": "mateicojo#8765",
+    "discordRoles": [
+      "Podium Finalist"
+    ],
+    "stats": {
+      "battlesEntered": 8,
+      "battlesWon": 0,
+      "totalFlames": 420
+    },
+    "isClaimed": false,
+    "createdAt": "2021-08-01T00:00:00Z"
+  },
+  "usr-ceinaru": {
+    "id": "usr-ceinaru",
+    "nickname": "CEINARU",
+    "email": "qishta.ceinaru@live.com",
+    "avatarUrl": "/avatars/default-avatar.png",
+    "bio": "Heavy basslines, live instrumentation, and crisp dynamic mixes.",
+    "location": "Constanta, RO",
+    "role": "producer",
+    "discordId": "431102796025167874",
+    "discordUsername": "ceinaru#6543",
+    "discordRoles": [
+      "Podium Finalist"
+    ],
+    "stats": {
+      "battlesEntered": 4,
+      "battlesWon": 0,
+      "totalFlames": 190
+    },
+    "isClaimed": false,
+    "createdAt": "2021-08-01T00:00:00Z"
+  },
+  "usr-dinca": {
+    "id": "usr-dinca",
+    "nickname": "Dinca",
+    "email": "andreidinca317@gmail.com",
+    "avatarUrl": "/avatars/default-avatar.png",
+    "bio": "Deep musicality, intricate chords, and soulful sampling.",
+    "location": "Cluj-Napoca, RO",
+    "role": "producer",
+    "discordId": "87106786590474240",
+    "discordUsername": "dinca#1199",
+    "discordRoles": [
+      "Podium Finalist"
+    ],
+    "stats": {
+      "battlesEntered": 3,
+      "battlesWon": 0,
+      "totalFlames": 180
+    },
+    "isClaimed": false,
+    "createdAt": "2021-10-01T00:00:00Z"
+  },
+  "usr-stolly": {
+    "id": "usr-stolly",
+    "nickname": "Stolly",
+    "email": "alinionut094@gmail.com",
+    "avatarUrl": "/avatars/default-avatar.png",
+    "bio": "Winner of Beat Battle #4. Precision chopping and undeniable rhythmic drive.",
+    "location": "Bucharest, RO",
+    "role": "producer",
+    "discordId": "728548041539321888",
+    "discordUsername": "stolly#4411",
+    "discordRoles": [
+      "Battle Champion",
+      "Winner BB#4"
+    ],
+    "stats": {
+      "battlesEntered": 6,
+      "battlesWon": 1,
+      "totalFlames": 380
+    },
+    "isClaimed": false,
+    "createdAt": "2021-10-01T00:00:00Z"
+  },
+  "usr-gherman": {
+    "id": "usr-gherman",
+    "nickname": "GHERMAN",
+    "email": "florin.gherman21@yahoo.com",
+    "avatarUrl": "/avatars/default-avatar.png",
+    "bio": "Gritty chops and uncompromised boom bap bounce.",
+    "location": "Sibiu, RO",
+    "role": "producer",
+    "discordId": "629725553687003176",
+    "discordUsername": "gherman#2233",
+    "discordRoles": [
+      "Finalist"
+    ],
+    "stats": {
+      "battlesEntered": 3,
+      "battlesWon": 0,
+      "totalFlames": 140
+    },
+    "isClaimed": false,
+    "createdAt": "2021-10-01T00:00:00Z"
+  },
+  "usr-benjahmin": {
+    "id": "usr-benjahmin",
+    "nickname": "BENJAHMIN",
+    "email": "yamakasi_beni@yahoo.com",
+    "avatarUrl": "/avatars/default-avatar.png",
+    "bio": "Acid rain soundscapes and experimental hip hop beats.",
+    "location": "Oradea, RO",
+    "role": "producer",
+    "discordId": "345919753820307456",
+    "discordUsername": "benjahmin#7711",
+    "discordRoles": [
+      "Podium Finalist"
+    ],
+    "stats": {
+      "battlesEntered": 4,
+      "battlesWon": 0,
+      "totalFlames": 210
+    },
+    "isClaimed": false,
+    "createdAt": "2021-12-01T00:00:00Z"
+  },
+  "usr-mayfourteen": {
+    "id": "usr-mayfourteen",
+    "nickname": "mayfourteen",
+    "email": "erik.kecse@gmail.com",
+    "avatarUrl": "/avatars/default-avatar.png",
+    "bio": "Winner of Beat Battle #5. Fast chops, clean bounce, and infectious energy.",
+    "location": "Bucharest, RO",
+    "role": "producer",
+    "discordId": "535977236155858954",
+    "discordUsername": "mayfourteen#1414",
+    "discordRoles": [
+      "Battle Champion",
+      "Winner BB#5"
+    ],
+    "stats": {
+      "battlesEntered": 5,
+      "battlesWon": 1,
+      "totalFlames": 320
+    },
+    "isClaimed": false,
+    "createdAt": "2022-02-01T00:00:00Z"
+  },
+  "usr-oliniutza": {
+    "id": "usr-oliniutza",
+    "nickname": "oliniutza",
+    "email": "oliniutzaa@yahoo.com",
+    "avatarUrl": "/avatars/default-avatar.png",
+    "bio": "Melodic sample manipulation, hard kicks, and soulful arrangements.",
+    "location": "Cluj-Napoca, RO",
+    "role": "producer",
+    "discordId": "691723145660465172",
+    "discordUsername": "oliniutza#5511",
+    "discordRoles": [
+      "Podium Finalist"
+    ],
+    "stats": {
+      "battlesEntered": 4,
+      "battlesWon": 0,
+      "totalFlames": 240
+    },
+    "isClaimed": false,
+    "createdAt": "2022-02-01T00:00:00Z"
+  },
+  "usr-bladishv": {
+    "id": "usr-bladishv",
+    "nickname": "bladishv",
+    "email": "jurjaque@yahoo.com",
+    "avatarUrl": "/avatars/default-avatar.png",
+    "bio": "Underground hip hop beatmaker and raw sample head.",
+    "location": "Brasov, RO",
+    "role": "producer",
+    "discordId": "1011884111482335245",
+    "discordUsername": "bladishv#9922",
+    "discordRoles": [
+      "Podium Finalist"
+    ],
+    "stats": {
+      "battlesEntered": 3,
+      "battlesWon": 0,
+      "totalFlames": 160
+    },
+    "isClaimed": false,
+    "createdAt": "2022-02-01T00:00:00Z"
+  },
+  "usr-groveek": {
+    "id": "usr-groveek",
+    "nickname": "GROVEEK",
+    "email": "grooveektouch@gmail.com",
+    "avatarUrl": "/avatars/default-avatar.png",
+    "bio": "Winner of Beat Battle #7. Funk, soul, and hard James Brown chops.",
+    "location": "Bucharest, RO",
+    "role": "producer",
+    "discordId": "850192700720152586",
+    "discordUsername": "groveek#7733",
+    "discordRoles": [
+      "Battle Champion",
+      "Winner BB#7"
+    ],
+    "stats": {
+      "battlesEntered": 4,
+      "battlesWon": 1,
+      "totalFlames": 280
+    },
+    "isClaimed": false,
+    "createdAt": "2022-05-01T00:00:00Z"
+  },
+  "usr-ionbriceag": {
+    "id": "usr-ionbriceag",
+    "nickname": "ionbriceag",
+    "email": "ionut.nicola08@gmail.com",
+    "avatarUrl": "/avatars/default-avatar.png",
+    "bio": "Sharp cuts, distinct vinyl flavor, and boom bap heritage.",
+    "location": "Iasi, RO",
+    "role": "producer",
+    "discordId": "260488012222169100",
+    "discordUsername": "ionbriceag#4455",
+    "discordRoles": [
+      "Podium Finalist"
+    ],
+    "stats": {
+      "battlesEntered": 4,
+      "battlesWon": 0,
+      "totalFlames": 220
+    },
+    "isClaimed": false,
+    "createdAt": "2022-05-01T00:00:00Z"
+  },
+  "usr-z3nn": {
+    "id": "usr-z3nn",
+    "nickname": "Z3nn",
+    "email": "tudorx9gg@gmail.com",
+    "avatarUrl": "/avatars/default-avatar.png",
+    "bio": "Winner of Beat Battle #8. Modern hybrid bounce, 808 glide precision, and clean soundscapes.",
+    "location": "Bucharest, RO",
+    "role": "producer",
+    "discordId": "266322224812654592",
+    "discordUsername": "z3nn#8899",
+    "discordRoles": [
+      "Battle Champion",
+      "Winner BB#8"
+    ],
+    "stats": {
+      "battlesEntered": 5,
+      "battlesWon": 1,
+      "totalFlames": 340
+    },
+    "isClaimed": false,
+    "createdAt": "2022-08-01T00:00:00Z"
+  },
+  "usr-venr": {
+    "id": "usr-venr",
+    "nickname": "venr",
+    "email": "prod.venr@gmail.com",
+    "avatarUrl": "/avatars/default-avatar.png",
+    "bio": "Creative flips, unexpected switch-ups, and contemporary rhythms.",
+    "location": "Timisoara, RO",
+    "role": "producer",
+    "discordId": "408212093423321099",
+    "discordUsername": "venr#3311",
+    "discordRoles": [
+      "Podium Finalist"
+    ],
+    "stats": {
+      "battlesEntered": 3,
+      "battlesWon": 0,
+      "totalFlames": 190
+    },
+    "isClaimed": false,
+    "createdAt": "2022-08-01T00:00:00Z"
+  }
+}

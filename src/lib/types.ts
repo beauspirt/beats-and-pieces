@@ -28,6 +28,8 @@ export interface UserProfile {
     battlesWon: number;
     totalFlames: number;
   };
+  isClaimed?: boolean;
+  claimedAt?: string;
   createdAt: string;
 }
 
@@ -89,6 +91,7 @@ export interface Competition {
   topFinalistsCutoff?: number;
   youtubeVodUrl?: string;
   winner?: string;
+  endedAt?: string;
 }
 
 export interface DiscoveryBeat {

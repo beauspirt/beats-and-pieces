@@ -166,6 +166,20 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [lastSavedTime, setLastSavedTime] = useState<string | null>(null);
 
+  // Close modals on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setSubmitError(null);
+        setShowSubmitWarningModal(false);
+      }
+    };
+    if (submitError || showSubmitWarningModal) {
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
+    }
+  }, [submitError, showSubmitWarningModal]);
+
   // Stop any playing audio whenever phase changes
   useEffect(() => {
     pauseTrack();
@@ -244,28 +258,30 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             <span>Back to Competitions</span>
           </Link>
 
-          {/* Competition Process Timeline & Interactive Stage Switcher */}
-          <div className="flex items-center gap-1 bg-[#181818] p-1 rounded-xl">
-            {phasesList.map((p) => {
-              const isActive = activeTab === p.key;
-              return (
-                <button
-                  key={p.key}
-                  onClick={() => setActiveTab(p.key)}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                    isActive
-                      ? "bg-[#7B61FF] text-white shadow-md"
-                      : "text-[#777777] hover:text-[#D1D1D1] hover:bg-[#202020]"
-                  }`}
-                >
-                  <span className={`text-[10px] ${isActive ? "text-white/80" : "text-[#555555]"}`}>
-                    {p.number}
-                  </span>
-                  <span>{p.label}</span>
-                </button>
-              );
-            })}
-          </div>
+          {/* Competition Process Timeline & Interactive Stage Switcher (only for active/mock competitions) */}
+          {battle.phase !== "completed" && (
+            <div className="flex items-center gap-1 bg-[#181818] p-1 rounded-xl">
+              {phasesList.map((p) => {
+                const isActive = activeTab === p.key;
+                return (
+                  <button
+                    key={p.key}
+                    onClick={() => setActiveTab(p.key)}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                      isActive
+                        ? "bg-[#7B61FF] text-white shadow-md"
+                        : "text-[#777777] hover:text-[#D1D1D1] hover:bg-[#202020]"
+                    }`}
+                  >
+                    <span className={`text-xs ${isActive ? "text-white/80" : "text-[#555555]"}`}>
+                      {p.number}
+                    </span>
+                    <span>{p.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Hero Header */}
@@ -307,9 +323,17 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             {battle.description}
           </p>
 
-          <div className="text-xs sm:text-sm text-[#888888] pt-2">
-            Submissions close Aug 10 • Public rating open until Aug 22
-          </div>
+          {battle.phase === "completed" ? (
+            battle.endedAt && (
+              <div className="text-xs sm:text-sm text-[#888888] pt-2">
+                Ended on {new Date(battle.endedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+              </div>
+            )
+          ) : (
+            <div className="text-xs sm:text-sm text-[#888888] pt-2">
+              Submissions close Aug 15 • Public rating open until Aug 22
+            </div>
+          )}
         </div>
       </div>
       </section>
@@ -615,8 +639,14 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
           {/* INSUFFICIENT RATINGS ERROR MODAL */}
           {submitError && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150">
-              <div className="bg-[#181818] rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl relative border border-[#2A2A2A]">
+            <div 
+              onClick={() => setSubmitError(null)}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150 cursor-pointer"
+            >
+              <div 
+                onClick={(e) => e.stopPropagation()}
+                className="bg-[#181818] rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl relative border border-[#2A2A2A] cursor-default"
+              >
                 <div className="space-y-2">
                   <h3 className="text-xl font-bold text-[#FF5E3A] flex items-center gap-2">
                     <span>More Ratings Required</span>
@@ -651,8 +681,14 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
           {/* SUBMIT RATINGS FINAL LOCK WARNING & CONFIRMATION MODAL */}
           {showSubmitWarningModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150">
-              <div className="bg-[#181818] rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl relative border border-[#2A2A2A]">
+            <div 
+              onClick={() => setShowSubmitWarningModal(false)}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150 cursor-pointer"
+            >
+              <div 
+                onClick={(e) => e.stopPropagation()}
+                className="bg-[#181818] rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl relative border border-[#2A2A2A] cursor-default"
+              >
                 <div className="space-y-2">
                   <h3 className="text-xl font-bold text-white flex items-center gap-2">
                     <ShieldCheck className="w-5 h-5 text-[#7B61FF]" />
@@ -911,35 +947,6 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       {activeTab === "completed" && (
         <div className="space-y-6">
           
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
-            <h3 className="text-xl sm:text-2xl font-bold text-white">Leaderboard & Rankings</h3>
-            
-            <div className="flex flex-wrap items-center gap-4">
-              {currentSubmissions.some((s) => s.flameRating !== undefined || s.juryScore !== undefined) && (
-                <div className="flex items-center gap-5 text-xs sm:text-sm text-[#888888]">
-                  <span className="flex items-center gap-1.5 text-[#FF5E3A] font-bold">
-                    <Flame className="w-4 h-4 fill-current" /> Public Rating
-                  </span>
-                  <span className="flex items-center gap-1.5 text-[#7B61FF] font-bold">
-                    <Star className="w-4 h-4 fill-current" /> Jury Score
-                  </span>
-                </div>
-              )}
-
-              {battle.youtubeVodUrl && (
-                <a
-                  href={battle.youtubeVodUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2 rounded-xl bg-[#181818] hover:bg-[#222222] text-white text-xs font-bold transition-all flex items-center gap-2 border border-[#262626] w-fit"
-                >
-                  <span>Watch Live Jury Session</span>
-                  <ExternalLink className="w-3.5 h-3.5 text-[#FF5E3A]" />
-                </a>
-              )}
-            </div>
-          </div>
-
           {/* Leaderboard Cards */}
           <div className="space-y-3.5">
             {currentSubmissions.map((sub, idx) => {
@@ -959,25 +966,29 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                     {/* Rank Badge + Producer Info */}
                     <div className="flex items-center gap-4 min-w-[240px]">
                       {isTop1 ? (
-                        <span className="px-3.5 py-1.5 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs sm:text-sm font-bold">
+                        <span className="h-7 px-3.5 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
                           1st Place
                         </span>
                       ) : isTop2 ? (
-                        <span className="px-3.5 py-1.5 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs sm:text-sm font-bold">
+                        <span className="h-7 px-3.5 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
                           2nd Place
                         </span>
                       ) : isTop3 ? (
-                        <span className="px-3.5 py-1.5 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs sm:text-sm font-bold">
+                        <span className="h-7 px-3.5 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
                           3rd Place
                         </span>
                       ) : (
-                        <span className="w-8 text-center text-xs sm:text-sm font-bold text-[#666666]">
+                        <span className="h-7 w-8 text-center text-xs font-bold text-[#666666] inline-flex items-center justify-center leading-none select-none shrink-0">
                           #{sub.rank || (idx + 1)}
                         </span>
                       )}
 
                       <div>
-                        <span className="text-xs sm:text-sm text-[#888888] leading-tight block">{sub.beatTitle}</span>
+                        {sub.beatTitle && sub.beatTitle !== battle.title && !sub.beatTitle.startsWith("Beat Battle #") && (
+                          <span className="text-xs sm:text-sm text-[#888888] leading-tight block">
+                            {sub.beatTitle}
+                          </span>
+                        )}
                         <Link
                           href={`/producers/${sub.userId}`}
                           className="text-base sm:text-lg font-bold text-white hover:text-[#7B61FF] transition-colors leading-snug"
@@ -1028,6 +1039,25 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
               );
             })}
           </div>
+
+          {/* YouTube Live Jury Evaluation Session Embed below Leaderboard */}
+          {battle.youtubeVodUrl && (
+            <div className="w-full aspect-video rounded-2xl overflow-hidden bg-[#121212] shadow-2xl">
+              <iframe
+                src={
+                  battle.youtubeVodUrl.includes("watch?v=")
+                    ? `https://www.youtube-nocookie.com/embed/${battle.youtubeVodUrl.split("watch?v=")[1].split("&")[0]}`
+                    : battle.youtubeVodUrl.includes("/embed/")
+                    ? battle.youtubeVodUrl
+                    : `https://www.youtube-nocookie.com/embed/${battle.youtubeVodUrl.split("/").pop()}`
+                }
+                title={`${battle.title} Live Jury Evaluation`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full border-0"
+              />
+            </div>
+          )}
 
         </div>
       )}

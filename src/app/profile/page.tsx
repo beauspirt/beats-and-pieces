@@ -21,7 +21,6 @@ export default function UserProfilePage() {
     beatstars: "https://beatstars.com/nerub",
     website: "https://nerub.ro",
   });
-  const [isLinkedDiscord, setIsLinkedDiscord] = useState(true);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   const handleSave = (e: React.FormEvent) => {
@@ -51,8 +50,8 @@ export default function UserProfilePage() {
           </Link>
 
           <div className="flex items-center gap-3">
-            <span className="text-base font-bold text-white lowercase">{profile.nickname}</span>
-            <div className="w-12 h-12 rounded-full overflow-hidden relative">
+            <span className="text-base font-bold text-white">{profile.nickname}</span>
+            <div className="w-12 h-12 rounded-full overflow-hidden relative border border-white/10">
               <Image
                 src={profile.avatarUrl}
                 alt={profile.nickname}
@@ -67,7 +66,7 @@ export default function UserProfilePage() {
       <form onSubmit={handleSave} className="space-y-6">
         
         {/* CONTAINER 1: DETAILS */}
-        <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 space-y-5">
+        <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 space-y-5 shadow-lg">
           <h2 className="text-lg font-bold text-white">Details</h2>
 
           {/* Nickname */}
@@ -86,25 +85,36 @@ export default function UserProfilePage() {
             </div>
           </div>
 
-          {/* E-mail */}
+          {/* Google E-mail (Auto-populated from Google Auth) */}
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
             <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">
-              E-mail
+              Google E-mail
             </label>
             <div className="sm:col-span-9">
-              <input
-                type="email"
-                value={profile.email}
-                onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
-                required
-              />
+              <div className="w-full bg-[#121212] border border-white/5 rounded-xl px-4 py-3 text-sm text-[#E0E0E0] flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 min-w-0 truncate">
+                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                    <path fill="#EA4335" d="M12 5c1.5 0 2.9.5 4 1.4l3-3C17.2 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/>
+                    <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/>
+                    <path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12.3 0 15.2s.7 5.5 1.9 7.9l3.7-2.9c-.2-.7-.4-1.5-.4-2.3z"/>
+                    <path fill="#34A853" d="M12 23.5c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16.5C3.7 20.2 7.5 23.5 12 23.5z"/>
+                  </svg>
+                  <span className="font-mono text-sm text-white select-all">{profile.email}</span>
+                </div>
+                <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full flex items-center gap-1.5 shrink-0 select-none">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Google Auth</span>
+                </span>
+              </div>
+              <span className="text-[11px] text-[#666666] mt-1.5 block">
+                Your account is connected via Google OAuth.
+              </span>
             </div>
           </div>
         </div>
 
         {/* CONTAINER 2: BEAT LICENSING PREFERENCES */}
-        <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 space-y-5">
+        <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 space-y-5 shadow-lg">
           <h2 className="text-lg font-bold text-white">Beat Licensing Defaults</h2>
           <p className="text-xs text-[#888888]">
             Configure your default licensing tag when uploading beats to the platform.
@@ -159,7 +169,7 @@ export default function UserProfilePage() {
         </div>
 
         {/* CONTAINER 3: LINKS */}
-        <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 space-y-4">
+        <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 space-y-4 shadow-lg">
           <h2 className="text-lg font-bold text-white">Social & Creator Links</h2>
 
           {[
@@ -202,45 +212,19 @@ export default function UserProfilePage() {
           })}
         </div>
 
-        {/* CONTAINER 4: DISCORD INTEGRATION */}
-        <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-white">Discord Account Linking</h2>
-            {isLinkedDiscord && (
-              <span className="text-xs font-mono text-emerald-400 flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4" />
-                <span>Connected (@nerub)</span>
-              </span>
-            )}
-          </div>
-
-          <p className="text-xs sm:text-sm text-[#888888]">
-            Syncs your producer role, badges, and judge permissions with our official Discord community.
-          </p>
-
-          <div className="flex items-center gap-2.5">
-            <span className="text-xs font-mono px-3 py-1 rounded-full bg-[#7B61FF]/20 text-[#7B61FF]">
-              Host / Admin
-            </span>
-            <span className="text-xs font-mono px-3 py-1 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A]">
-              OG Producer
-            </span>
-          </div>
-        </div>
-
         {/* BOTTOM ACTION BUTTONS */}
         <div className="flex items-center justify-between pt-2">
           <button
             type="button"
             onClick={() => alert("Logged out.")}
-            className="px-7 py-3 rounded-xl bg-[#232323] hover:bg-[#2C2C2C] text-[#D1D1D1] text-xs font-semibold transition-all"
+            className="px-7 py-3 rounded-xl bg-[#232323] hover:bg-[#2C2C2C] text-[#D1D1D1] text-xs font-semibold transition-all cursor-pointer"
           >
             Log out
           </button>
 
           <button
             type="submit"
-            className="px-10 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95"
+            className="px-10 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
           >
             {saveSuccess ? "Saved ✓" : "Save"}
           </button>

@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useRef, useEffect, useCallback } from "react";
+import React, { useRef, useEffect, useCallback, useState } from "react";
 import { Play, Pause, Download } from "lucide-react";
 import { useAudioPlayer } from "@/lib/audio-context";
 import { formatTime } from "@/lib/utils";
-import precomputedPeaks from "@/lib/waveform-peaks.json";
+import precomputedPeaksV2 from "@/lib/waveform-peaks-v2.json";
 
 interface AudioWaveformPlayerProps {
   id: string;
@@ -15,6 +15,40 @@ interface AudioWaveformPlayerProps {
   downloadable?: boolean;
   showDownload?: boolean;
   compact?: boolean;
+}
+
+interface WaveformData {
+  peaks: number[];
+  body?: number[];
+  duration?: number;
+}
+
+const globalWaveformCache = new Map<string, WaveformData>();
+
+function extractRealAudioBufferWaveform(buffer: AudioBuffer, numSlices = 800): WaveformData {
+  const channelData = buffer.getChannelData(0);
+  const totalSamples = channelData.length;
+  const samplesPerSlice = Math.floor(totalSamples / numSlices);
+  const rawPeaks: number[] = [];
+  let globalMax = 0.0001;
+
+  for (let i = 0; i < numSlices; i++) {
+    const start = i * samplesPerSlice;
+    const end = Math.min(start + samplesPerSlice, totalSamples);
+    let peak = 0;
+
+    for (let s = start; s < end; s++) {
+      const val = Math.abs(channelData[s]);
+      if (val > peak) peak = val;
+    }
+
+    if (peak > globalMax) globalMax = peak;
+    rawPeaks.push(peak);
+  }
+
+  const peaks = rawPeaks.map((p) => Math.min(98, Math.max(3, Math.round((p / globalMax) * 95 + 3))));
+
+  return { peaks, duration: Math.round(buffer.duration) };
 }
 
 export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
@@ -46,39 +80,93 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
   const isThisTrackActive = currentTrackId === id;
   const isThisTrackPlaying = isThisTrackActive && isPlaying;
 
-  // Retrieve high-definition PCM waveform peaks
-  const getPeaks = useCallback((): number[] => {
-    if (audioUrl) {
-      const filename = decodeURIComponent(audioUrl.split("/").pop() || "");
-      const peaks = (precomputedPeaks as Record<string, number[]>)[filename];
-      if (peaks && peaks.length > 0) return peaks;
+  const [waveformData, setWaveformData] = useState<WaveformData | null>(() => {
+    if (audioUrl && globalWaveformCache.has(audioUrl)) {
+      return globalWaveformCache.get(audioUrl)!;
+    }
+    return null;
+  });
+
+  // Decode real AudioBuffer in background to extract exact audio waveform
+  useEffect(() => {
+    if (!audioUrl || typeof window === "undefined") return;
+    if (globalWaveformCache.has(audioUrl)) {
+      setWaveformData(globalWaveformCache.get(audioUrl)!);
+      return;
     }
 
-    for (const [file, peaks] of Object.entries(precomputedPeaks)) {
+    let isMounted = true;
+    const resolvedUrl = audioUrl
+      .split("/")
+      .map((seg) => (seg ? encodeURIComponent(decodeURIComponent(seg)) : ""))
+      .join("/");
+
+    fetch(resolvedUrl)
+      .then((res) => res.arrayBuffer())
+      .then((arrayBuf) => {
+        const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        return ctx.decodeAudioData(arrayBuf).then((decodedBuf) => {
+          ctx.close();
+          const extracted = extractRealAudioBufferWaveform(decodedBuf, 800);
+          globalWaveformCache.set(audioUrl, extracted);
+          globalWaveformCache.set(resolvedUrl, extracted);
+          if (isMounted) {
+            setWaveformData(extracted);
+          }
+        });
+      })
+      .catch(() => {
+        // ignore network error
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [audioUrl]);
+
+  // Retrieve high-definition waveform peaks
+  const getWaveformData = useCallback((): WaveformData => {
+    if (waveformData && waveformData.peaks.length > 0) {
+      return waveformData;
+    }
+
+    const dict = precomputedPeaksV2 as Record<string, WaveformData>;
+    if (audioUrl) {
+      if (dict[audioUrl]) return dict[audioUrl];
+      const decodedUrl = decodeURIComponent(audioUrl);
+      if (dict[decodedUrl]) return dict[decodedUrl];
+      const filename = decodedUrl.split("/").pop() || "";
+      if (dict[filename]) return dict[filename];
+      const rawFilename = audioUrl.split("/").pop() || "";
+      if (dict[rawFilename]) return dict[rawFilename];
+    }
+
+    for (const [file, data] of Object.entries(precomputedPeaksV2)) {
       if (
         file.toLowerCase().includes(title.toLowerCase()) ||
         file.toLowerCase().includes(id.toLowerCase())
       ) {
-        return peaks as number[];
+        return data as WaveformData;
       }
     }
 
     // Fallback dynamic peaks with strong transient contrasts
-    const fallback: number[] = [];
+    const peaks: number[] = [];
     let seed = id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 999);
-    for (let i = 0; i < 300; i++) {
+    for (let i = 0; i < 800; i++) {
       seed = (seed * 9301 + 49297) % 233280;
       const rnd = seed / 233280;
-      const env = i < 50 ? 0.3 + (i / 50) * 0.6 : i > 240 ? 0.9 - ((i - 240) / 60) * 0.6 : 0.95;
-      const isBeat = i % 8 === 0 || i % 8 === 4;
-      const amp = (rnd * 0.35 + (isBeat ? 0.65 : 0.15)) * env;
-      const contrast = Math.pow(amp, 1.8);
-      fallback.push(Math.min(98, Math.max(8, Math.round(contrast * 94 + 6))));
+      const isBeat = i % 16 === 0 || i % 16 === 8;
+      const amp = (rnd * 0.35 + (isBeat ? 0.65 : 0.15));
+      const p = Math.min(98, Math.max(4, Math.round(amp * 94 + 6)));
+      peaks.push(p);
     }
-    return fallback;
-  }, [audioUrl, title, id]);
+    return { peaks, duration: 75 };
+  }, [waveformData, audioUrl, title, id]);
 
-  // High-Definition Contrast Canvas Drawing
+  // Render Clean Continuous Single-Shade Waveform (Transparent Container Background)
   const renderWaveform = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -102,85 +190,57 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
     ctx.scale(dpr, dpr);
     ctx.clearRect(0, 0, rect.width, rect.height);
 
-    const peaks = getPeaks();
-    const totalPeaks = peaks.length;
+    const { peaks } = getWaveformData();
+    const totalSlices = peaks.length;
     const progress = isThisTrackActive ? playbackProgress : 0;
     
     // Only show hover needle and brighter preview on ACTIVE tracks
     const hoverFraction = isThisTrackActive ? hoverFractionRef.current : null;
 
-    // Uniform 2px bar with 2px gap (4px step)
-    const barWidth = 2;
-    const barGap = 2;
-    const step = barWidth + barGap;
+    const width = Math.floor(rect.width);
+    const height = Math.floor(rect.height);
+    const centerY = Math.floor(height / 2);
+    const maxAmplitude = Math.floor(height * 0.46);
 
-    const barCount = Math.floor(rect.width / step);
-    const totalSpan = barCount * step - barGap;
-    const startX = Math.floor((rect.width - totalSpan) / 2);
+    const isLight = typeof document !== "undefined" && document.documentElement.classList.contains("light");
 
-    const centerY = Math.floor(rect.height / 2);
-    const maxAmplitude = Math.floor(rect.height * 0.46);
+    // Single-Pass Solid Uniform Width Waveform (Pure crisp solid colors)
+    for (let x = 0; x < width; x++) {
+      const sliceIdx = Math.min(totalSlices - 1, Math.floor((x / Math.max(1, width - 1)) * (totalSlices - 1)));
+      const peakVal = peaks[sliceIdx] || 10;
+      const peakHeight = Math.max(1, Math.round((peakVal / 100) * maxAmplitude));
+      const y = centerY - peakHeight;
+      const barHeight = peakHeight * 2;
 
-    for (let i = 0; i < barCount; i++) {
-      // Smooth interpolation between high-resolution peak samples
-      const peakPos = (i / Math.max(1, barCount - 1)) * (totalPeaks - 1);
-      const lowIndex = Math.floor(peakPos);
-      const highIndex = Math.min(totalPeaks - 1, lowIndex + 1);
-      const fraction = peakPos - lowIndex;
-      const peakVal = (peaks[lowIndex] || 15) * (1 - fraction) + (peaks[highIndex] || 15) * fraction;
-
-      // Dynamic scaling for high definition transients and deep valleys
-      const normalizedHeight = (peakVal / 100) * maxAmplitude;
-      const halfHeight = Math.max(1.5, Math.round(normalizedHeight));
-      const barHeight = halfHeight * 2;
-
-      const x = startX + i * step;
-      const y = centerY - halfHeight;
-
-      const barProgress = (x - startX) / Math.max(1, totalSpan);
-      const isPlayed = barProgress <= progress;
-      const isHovered = hoverFraction !== null && (x / rect.width) <= hoverFraction;
-
-      const isLight = typeof document !== "undefined" && document.documentElement.classList.contains("light");
+      const progressFraction = x / Math.max(1, width - 1);
+      const isPlayed = progressFraction <= progress;
+      const isHovered = hoverFraction !== null && progressFraction <= hoverFraction;
 
       if (isLight) {
-        if (isPlayed) {
-          ctx.fillStyle = "#7B61FF"; // Vibrant purple for played waveform in light mode
-        } else if (isHovered) {
-          ctx.fillStyle = "#9CA3AF"; // Hover needle preview in light mode
-        } else {
-          ctx.fillStyle = "#D4D4D8"; // High-contrast clean grey for unplayed bars
-        }
+        ctx.fillStyle = isPlayed ? "#7B61FF" : isHovered ? "#9CA3AF" : "#D4D4D8";
       } else {
-        if (isPlayed) {
-          ctx.fillStyle = "#FFFFFF"; // Pure crisp white in dark mode
-        } else if (isHovered) {
-          ctx.fillStyle = "#4A4A4A"; // Active track hover preview
-        } else {
-          ctx.fillStyle = "#262626"; // Clean unplayed dark grey
-        }
+        ctx.fillStyle = isPlayed ? "#FFFFFF" : isHovered ? "#4A4A4A" : "#262626";
       }
 
-      ctx.beginPath();
-      const radius = 1;
-      if (ctx.roundRect) {
-        ctx.roundRect(x, y, barWidth, barHeight, radius);
-      } else {
-        ctx.rect(x, y, barWidth, barHeight);
-      }
-      ctx.fill();
+      ctx.fillRect(x, y, 1, barHeight);
     }
 
-    // Hover Needle (stays visible while hovering over active track)
+    // Playhead Needle Line (Active Track)
+    if (isThisTrackActive && progress > 0 && progress < 1) {
+      const playheadX = Math.round(progress * rect.width);
+      ctx.fillStyle = isLight ? "#7B61FF" : "#FFFFFF";
+      ctx.fillRect(playheadX, 0, 1.5, rect.height);
+    }
+
+    // Hover Needle
     if (hoverFraction !== null) {
       const needleX = Math.round(hoverFraction * rect.width);
-      const isLight = typeof document !== "undefined" && document.documentElement.classList.contains("light");
-      ctx.fillStyle = isLight ? "rgba(123, 97, 255, 0.7)" : "rgba(255, 255, 255, 0.4)";
+      ctx.fillStyle = isLight ? "rgba(123, 97, 255, 0.8)" : "rgba(255, 255, 255, 0.4)";
       ctx.fillRect(needleX, 0, 1, rect.height);
     }
 
     ctx.restore();
-  }, [getPeaks, isThisTrackActive, playbackProgress]);
+  }, [getWaveformData, isThisTrackActive, playbackProgress]);
 
   // Animation frame loop for continuous 60fps playback
   useEffect(() => {
@@ -197,7 +257,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
     };
   }, [isThisTrackPlaying, renderWaveform]);
 
-  // Redraw when progress changes or theme toggles
+  // Redraw when progress changes
   useEffect(() => {
     renderWaveform();
   }, [renderWaveform, playbackProgress]);
@@ -330,25 +390,26 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
   };
 
   // Determine accurate duration to display
+  const effectiveDuration = waveformData?.duration || (getWaveformData().duration) || duration || 60;
   const displayDuration = isThisTrackActive && contextDuration > 0
     ? contextDuration
-    : duration || 45;
+    : effectiveDuration;
 
   return (
     <div
       ref={containerRef}
-      className="w-full flex items-center gap-3 bg-transparent select-none p-0"
+      className="w-full flex items-center gap-3.5 bg-transparent select-none p-0"
     >
       {/* Play / Pause Toggle Button */}
       <button
         onClick={handlePlayToggle}
         aria-label={isThisTrackPlaying ? "Pause" : "Play"}
-        className={`shrink-0 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-          compact ? "w-8 h-8" : "w-10 h-10"
+        className={`shrink-0 rounded-full flex items-center justify-center transition-all cursor-pointer shadow-md ${
+          compact ? "w-9 h-9" : "w-11 h-11"
         } ${
           isThisTrackPlaying
-            ? "bg-white text-black shadow-lg"
-            : "bg-[#222222] text-white hover:bg-[#7B61FF] hover:text-white"
+            ? "bg-white text-black shadow-white/10"
+            : "bg-[#202020] text-white hover:bg-[#7B61FF] hover:text-white"
         }`}
       >
         {isThisTrackPlaying ? (
@@ -358,8 +419,8 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
         )}
       </button>
 
-      {/* HiDPI Canvas Waveform Visualizer */}
-      <div className={`flex-1 relative overflow-hidden ${compact ? "h-9" : "h-12"}`}>
+      {/* Waveform Visualizer on Pure Transparent Background (No background box / No layout shift) */}
+      <div className={`flex-1 relative overflow-hidden bg-transparent ${compact ? "h-14" : "h-18"}`}>
         <canvas
           ref={canvasRef}
           onPointerDown={handlePointerDown}
@@ -370,21 +431,28 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
           className="w-full h-full cursor-pointer touch-none select-none block"
           style={{ width: "100%", height: "100%", display: "block" }}
         />
-      </div>
 
-      {/* Time & Optional Download */}
-      <div className="flex items-center gap-2.5 shrink-0 text-xs font-mono text-[#888888]">
-        <span>
-          {isThisTrackActive
-            ? formatTime(currentTime)
-            : formatTime(displayDuration)}
-        </span>
+        {/* Bottom Right Corner Timecode (Zero Layout Shift) */}
+        <div className="absolute bottom-1 right-1 flex items-center gap-2 pointer-events-none select-none">
+          <span className="text-[11px] font-mono tabular-nums text-[#777777] px-1.5 py-0.5">
+            {isThisTrackActive ? (
+              <>
+                <span className="text-white font-bold">{formatTime(currentTime)}</span>
+                <span className="text-[#555555]"> / </span>
+                <span>{formatTime(displayDuration)}</span>
+              </>
+            ) : (
+              <span>{formatTime(displayDuration)}</span>
+            )}
+          </span>
+        </div>
 
+        {/* Optional Download Button in Top Right */}
         {showDownload && (
           <button
             onClick={handleDownload}
             aria-label="Download audio file"
-            className="p-1.5 rounded-lg bg-[#1C1C1C] text-[#888888] hover:text-white hover:bg-[#252525] transition-colors"
+            className="absolute top-1 right-1 p-1.5 rounded-lg bg-[#1C1C1C] text-[#888888] hover:text-white hover:bg-[#252525] transition-colors"
           >
             <Download className="w-3.5 h-3.5" />
           </button>

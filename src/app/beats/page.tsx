@@ -29,6 +29,19 @@ export default function BeatsDiscoveryPage() {
     setVisibleCount(15);
   }, [searchQuery, selectedGenre, selectedSaleFilter, showOnlyFavorites, sortBy]);
 
+  // Close modal on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setContactProducerTag(null);
+      }
+    };
+    if (contactProducerTag) {
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
+    }
+  }, [contactProducerTag]);
+
   // Load saved favorites from localStorage
   useEffect(() => {
     try {
@@ -335,11 +348,13 @@ export default function BeatsDiscoveryPage() {
                     {beat.priceTag}
                   </span>
 
-                  {/* Community Flames */}
-                  <div className="flex items-center gap-1 text-xs sm:text-sm text-[#FF5E3A] font-bold px-2">
-                    <Flame className="w-4 h-4 fill-current" />
-                    <span>{beat.flames?.toFixed(2)}</span>
-                  </div>
+                  {/* Community Flames (only if rating history exists) */}
+                  {beat.flames !== undefined && beat.flames > 0 && (
+                    <div className="flex items-center gap-1 text-xs sm:text-sm text-[#FF5E3A] font-bold px-2">
+                      <Flame className="w-4 h-4 fill-current" />
+                      <span>{beat.flames.toFixed(2)}</span>
+                    </div>
+                  )}
 
                   {/* Favorite Button */}
                   <button
@@ -370,36 +385,40 @@ export default function BeatsDiscoveryPage() {
               {/* Row 3: Clickable Genre & Tags + Contact Producer Action */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1 text-xs">
                 
-                {/* Interactive Clickable Tags */}
-                <div className="flex flex-wrap items-center gap-2">
-                  {beat.genres?.map((g) => (
-                    <button
-                      key={g}
-                      onClick={() => handleTagClick(g)}
-                      className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors cursor-pointer ${
-                        selectedGenre === g
-                          ? "bg-[#7B61FF] text-white"
-                          : "bg-[#121212] text-[#888888] hover:text-white hover:bg-[#202020]"
-                      }`}
-                    >
-                      {g}
-                    </button>
-                  ))}
+                {/* Interactive Clickable Tags (only if tags exist) */}
+                {((beat.genres && beat.genres.length > 0) || (beat.tags && beat.tags.length > 0)) ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    {beat.genres?.map((g) => (
+                      <button
+                        key={g}
+                        onClick={() => handleTagClick(g)}
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors cursor-pointer ${
+                          selectedGenre === g
+                            ? "bg-[#7B61FF] text-white"
+                            : "bg-[#121212] text-[#888888] hover:text-white hover:bg-[#202020]"
+                        }`}
+                      >
+                        {g}
+                      </button>
+                    ))}
 
-                  {beat.tags.map((t) => (
-                    <button
-                      key={t}
-                      onClick={() => handleTagClick(t)}
-                      className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer ${
-                        selectedGenre === t
-                          ? "bg-[#7B61FF] text-white"
-                          : "bg-[#121212] text-[#777777] hover:text-white hover:bg-[#202020]"
-                      }`}
-                    >
-                      {t}
-                    </button>
-                  ))}
-                </div>
+                    {beat.tags.map((t) => (
+                      <button
+                        key={t}
+                        onClick={() => handleTagClick(t)}
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer ${
+                          selectedGenre === t
+                            ? "bg-[#7B61FF] text-white"
+                            : "bg-[#121212] text-[#777777] hover:text-white hover:bg-[#202020]"
+                        }`}
+                      >
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div />
+                )}
 
                 {/* Contact Producer Button */}
                 <div className="flex items-center gap-2 self-end sm:self-center">
@@ -433,14 +452,20 @@ export default function BeatsDiscoveryPage() {
 
       {/* CONTACT MODAL DIALOG */}
       {contactProducerTag && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="bg-[#181818] rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl relative">
+        <div 
+          onClick={() => setContactProducerTag(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150 cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#181818] rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default"
+          >
             
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-bold text-white">Contact {selectedProducer.nickname}</h3>
               <button
                 onClick={() => setContactProducerTag(null)}
-                className="w-8 h-8 rounded-full bg-[#121212] text-[#888888] hover:text-white flex items-center justify-center text-sm"
+                className="w-8 h-8 rounded-full bg-[#121212] text-[#888888] hover:text-white flex items-center justify-center text-sm cursor-pointer"
               >
                 ✕
               </button>

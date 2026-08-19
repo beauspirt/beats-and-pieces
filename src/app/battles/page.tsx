@@ -52,7 +52,7 @@ export default function BattlesPage() {
                 {ongoingBattle.title}
               </h1>
               <div className="flex items-center gap-2 shrink-0 self-start sm:self-center flex-wrap">
-                <span className="px-3.5 py-1.5 rounded-full bg-[#7B61FF] text-xs sm:text-sm font-semibold text-white shadow-sm">
+                <span className="px-3.5 py-1.5 rounded-full bg-[#7B61FF] text-xs sm:text-sm font-semibold text-white shadow-sm inline-flex items-center justify-center text-center leading-none">
                   {ongoingBattle.phase === "submission"
                     ? "Stage 1: Submissions Open"
                     : ongoingBattle.phase === "rating"
@@ -61,7 +61,7 @@ export default function BattlesPage() {
                     ? "Stage 3: Jury Evaluation"
                     : "Stage 4: Results"}
                 </span>
-                <span className="px-3.5 py-1.5 rounded-full bg-[#121212] text-xs sm:text-sm text-[#A0A0A0]">
+                <span className="px-3.5 py-1.5 rounded-full bg-[#121212] text-xs sm:text-sm text-[#A0A0A0] inline-flex items-center justify-center text-center leading-none">
                   {ongoingBattle.totalSubmissions} Total Entries
                 </span>
               </div>
@@ -110,8 +110,8 @@ export default function BattlesPage() {
               <div className="flex-1 flex flex-col justify-between space-y-2.5">
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-xs text-[#888888]">
-                    <span>Completed</span>
-                    <span className="font-medium px-2 py-0.5 rounded-full bg-[#121212] text-[#A0A0A0] text-[11px]">
+                    <span>{battle.endedAt ? new Date(battle.endedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "Completed"}</span>
+                    <span className="font-medium px-2.5 py-1 rounded-full bg-[#121212] text-[#A0A0A0] text-xs inline-flex items-center justify-center text-center leading-none">
                       {battle.totalSubmissions} Entries
                     </span>
                   </div>
@@ -120,7 +120,7 @@ export default function BattlesPage() {
                     {battle.title}
                   </h3>
 
-                  <p className="text-xs text-[#888888] line-clamp-2 leading-relaxed">
+                  <p className="text-xs text-[#888888] line-clamp-3 leading-relaxed">
                     {battle.description}
                   </p>
                 </div>

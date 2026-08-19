@@ -286,7 +286,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   ) => {
     const ctx = getAudioContext();
     const sourceUrl = audioUrl || `/audio/01 Ortega - Bonita Applebong.wav`;
-    const resolvedUrl = encodeURI(sourceUrl);
+    const resolvedUrl = sourceUrl
+      .split("/")
+      .map((seg) => (seg ? encodeURIComponent(decodeURIComponent(seg)) : ""))
+      .join("/");
 
     const initialProgress = (typeof startProgress === "number" && !isNaN(startProgress) && isFinite(startProgress))
       ? Math.max(0, Math.min(1, startProgress))

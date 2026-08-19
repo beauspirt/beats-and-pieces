@@ -99,9 +99,9 @@ export const Navbar: React.FC = () => {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`text-[15px] transition-colors ${
+                  className={`text-[15px] font-medium transition-colors ${
                     isActive
-                      ? "text-white font-bold"
+                      ? "text-white"
                       : "text-[#9E9E9E] hover:text-white"
                   }`}
                 >

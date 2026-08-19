@@ -4,53 +4,13 @@ import React from "react";
 import Image from "next/image";
 import { ExternalLink } from "lucide-react";
 
-interface ReleaseItem {
-  id: string;
-  title: string;
-  coverImage: string;
-  description: string;
-  spotifyUrl?: string;
-  youtubeUrl?: string;
-}
-
-const releasesData: ReleaseItem[] = [
-  {
-    id: "rel-1",
-    title: "Flip Tape #1",
-    coverImage: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=600&auto=format&fit=crop&q=80",
-    description: "This is our first beat tape, a compilation of the best beats chosen from the first flip battle. The sample used in all the beats, chosen by Nerub, is 'Steven Halpern - Apollo's Lyre'.",
-    spotifyUrl: "https://open.spotify.com",
-    youtubeUrl: "https://youtube.com",
-  },
-  {
-    id: "rel-2",
-    title: "Flip Tape #2",
-    coverImage: "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=600&auto=format&fit=crop&q=80",
-    description: "This is our second beat tape, a compilation of the best beats chosen from the second flip battle. The samples used in all the beats, chosen by Ortega, are: Eduard Artemyev - На Сельской Станции, Eugen Doga - Waltz.",
-    spotifyUrl: "https://open.spotify.com",
-    youtubeUrl: "https://youtube.com",
-  },
-  {
-    id: "rel-3",
-    title: "The Miles Davis Tape",
-    coverImage: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80",
-    description: "Our first thematic beat tape, a compilation of beats made with samples from the music of the legendary Miles Davis.",
-    youtubeUrl: "https://youtube.com",
-  },
-  {
-    id: "rel-4",
-    title: "The Christmas Tape",
-    coverImage: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&auto=format&fit=crop&q=80",
-    description: "This is a Christmas themed beat tape, a compilation of beats made with samples taken from Elena Mîndru Quintet's amazing album called 'Romanian Christmas Stories' in which they created jazz reinterpretations of traditional Romanian carols.",
-    youtubeUrl: "https://youtube.com",
-  },
-];
+import { sampleReleases } from "@/lib/mock-data";
 
 export default function ReleasesPage() {
   return (
     <div className="w-full space-y-12 py-2 animate-in fade-in duration-300">
       
-      {releasesData.map((release) => (
+      {sampleReleases.map((release) => (
         <div
           key={release.id}
           className="flex flex-col md:flex-row items-start gap-8 sm:gap-10 w-full"

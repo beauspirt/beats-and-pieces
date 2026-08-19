@@ -145,26 +145,16 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
 
     for (const [file, data] of Object.entries(precomputedPeaksV2)) {
       if (
-        file.toLowerCase().includes(title.toLowerCase()) ||
-        file.toLowerCase().includes(id.toLowerCase())
+        (title && file.toLowerCase().includes(title.toLowerCase())) ||
+        (id && file.toLowerCase().includes(id.toLowerCase()))
       ) {
         return data as WaveformData;
       }
     }
 
-    // Fallback dynamic peaks with strong transient contrasts
-    const peaks: number[] = [];
-    let seed = id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 999);
-    for (let i = 0; i < 800; i++) {
-      seed = (seed * 9301 + 49297) % 233280;
-      const rnd = seed / 233280;
-      const isBeat = i % 16 === 0 || i % 16 === 8;
-      const amp = (rnd * 0.35 + (isBeat ? 0.65 : 0.15));
-      const p = Math.min(98, Math.max(4, Math.round(amp * 94 + 6)));
-      peaks.push(p);
-    }
-    return { peaks, duration: 75 };
-  }, [waveformData, audioUrl, title, id]);
+    // No placeholder dummy waveforms! Return empty peaks until real audio is ready.
+    return { peaks: [], duration: duration || 60 };
+  }, [waveformData, audioUrl, title, id, duration]);
 
   // Render Clean Continuous Single-Shade Waveform (Transparent Container Background)
   const renderWaveform = useCallback(() => {
@@ -191,6 +181,11 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
     ctx.clearRect(0, 0, rect.width, rect.height);
 
     const { peaks } = getWaveformData();
+    if (!peaks || peaks.length === 0) {
+      ctx.restore();
+      return;
+    }
+
     const totalSlices = peaks.length;
     const progress = isThisTrackActive ? playbackProgress : 0;
     

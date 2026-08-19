@@ -78,7 +78,7 @@ export default function BeatsDiscoveryPage() {
 
         const matchesGenre =
           selectedGenre === "all" ||
-          beat.genres.includes(selectedGenre) ||
+          (beat.genres ? beat.genres.includes(selectedGenre) : false) ||
           beat.tags.includes(selectedGenre);
 
         const matchesSale =
@@ -112,7 +112,7 @@ export default function BeatsDiscoveryPage() {
     setTimeout(() => setCopiedEmail(false), 2000);
   };
 
-  const allGenres = Array.from(new Set(beats.flatMap((b) => b.genres)));
+  const allGenres = Array.from(new Set(beats.flatMap((b) => b.genres || b.tags || [])));
   const visibleBeats = filteredBeats.slice(0, visibleCount);
 
   return (
@@ -372,7 +372,7 @@ export default function BeatsDiscoveryPage() {
                 
                 {/* Interactive Clickable Tags */}
                 <div className="flex flex-wrap items-center gap-2">
-                  {beat.genres.map((g) => (
+                  {beat.genres?.map((g) => (
                     <button
                       key={g}
                       onClick={() => handleTagClick(g)}

@@ -477,7 +477,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
                 {/* Row 3: Tags */}
                 <div className="flex flex-wrap items-center gap-2 pt-0.5 text-xs">
-                  {beat.genres.map((g) => (
+                  {beat.genres?.map((g) => (
                     <span key={g} className="px-3.5 py-1.5 rounded-full bg-[#121212] text-[#888888] font-medium">
                       {g}
                     </span>

@@ -12,7 +12,8 @@ import { AudioWaveformPlayer } from "./AudioWaveformPlayer";
 import { FlameRating } from "./FlameRating";
 import {
   ArrowLeft, Download, Upload, CheckCircle2,
-  Lock, ShieldCheck, Flame, Star, Disc, Trophy, Award, Check, FileCheck, CassetteTape
+  Lock, ShieldCheck, Flame, Star, Disc, Trophy, Award, Check, FileCheck, CassetteTape,
+  ExternalLink
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { submitRating } from "@/lib/api";
@@ -23,6 +24,9 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   const { pauseTrack } = useAudioPlayer();
   const battle = sampleCompetitions.find((c) => c.id === battleId) || sampleCompetitions[0];
   const [activeTab, setActiveTab] = useState<BattlePhase>(battle.phase);
+
+  const battleSubmissions = sampleSubmissions.filter((sub) => sub.battleId === battle.id);
+  const currentSubmissions = battleSubmissions.length > 0 ? battleSubmissions : sampleSubmissions;
 
   // Current logged in user simulation (Judge / Producer)
   const currentUser = sampleProducers["usr-nerub"];
@@ -907,25 +911,43 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       {activeTab === "completed" && (
         <div className="space-y-6">
           
-          <div className="flex items-center justify-between pb-1">
-            <h3 className="text-xl sm:text-2xl font-bold text-white">Leaderboard & Rankings (Top 15)</h3>
-            <div className="flex items-center gap-5 text-xs sm:text-sm text-[#888888]">
-              <span className="flex items-center gap-1.5 text-[#FF5E3A] font-bold">
-                <Flame className="w-4 h-4 fill-current" /> Public Rating
-              </span>
-              <span className="flex items-center gap-1.5 text-[#7B61FF] font-bold">
-                <Star className="w-4 h-4 fill-current" /> Jury Score
-              </span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
+            <h3 className="text-xl sm:text-2xl font-bold text-white">Leaderboard & Rankings</h3>
+            
+            <div className="flex flex-wrap items-center gap-4">
+              {currentSubmissions.some((s) => s.flameRating !== undefined || s.juryScore !== undefined) && (
+                <div className="flex items-center gap-5 text-xs sm:text-sm text-[#888888]">
+                  <span className="flex items-center gap-1.5 text-[#FF5E3A] font-bold">
+                    <Flame className="w-4 h-4 fill-current" /> Public Rating
+                  </span>
+                  <span className="flex items-center gap-1.5 text-[#7B61FF] font-bold">
+                    <Star className="w-4 h-4 fill-current" /> Jury Score
+                  </span>
+                </div>
+              )}
+
+              {battle.youtubeVodUrl && (
+                <a
+                  href={battle.youtubeVodUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 rounded-xl bg-[#181818] hover:bg-[#222222] text-white text-xs font-bold transition-all flex items-center gap-2 border border-[#262626] w-fit"
+                >
+                  <span>Watch Live Jury Session</span>
+                  <ExternalLink className="w-3.5 h-3.5 text-[#FF5E3A]" />
+                </a>
+              )}
             </div>
           </div>
 
-          {/* Leaderboard Cards with 15 Beats */}
+          {/* Leaderboard Cards */}
           <div className="space-y-3.5">
-            {sampleSubmissions.slice(0, 15).map((sub, idx) => {
-              const isTop1 = idx === 0;
-              const isTop2 = idx === 1;
-              const isTop3 = idx === 2;
+            {currentSubmissions.map((sub, idx) => {
+              const isTop1 = idx === 0 || sub.rank === 1;
+              const isTop2 = idx === 1 || sub.rank === 2;
+              const isTop3 = idx === 2 || sub.rank === 3;
               const judgeName = sub.judgeName || "Judge";
+              const hasScores = sub.flameRating !== undefined || sub.juryScore !== undefined;
 
               return (
                 <div
@@ -950,7 +972,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                         </span>
                       ) : (
                         <span className="w-8 text-center text-xs sm:text-sm font-bold text-[#666666]">
-                          #{idx + 1}
+                          #{sub.rank || (idx + 1)}
                         </span>
                       )}
 
@@ -965,18 +987,24 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                       </div>
                     </div>
 
-                    {/* Scores */}
-                    <div className="flex items-center gap-5 shrink-0 text-sm sm:text-base font-bold">
-                      <div className="flex items-center gap-1.5 text-[#FF5E3A]">
-                        <Flame className="w-4 h-4 fill-current" />
-                        <span>{sub.flameRating?.toFixed(2)}</span>
-                      </div>
+                    {/* Scores (only if scores exist) */}
+                    {hasScores && (
+                      <div className="flex items-center gap-5 shrink-0 text-sm sm:text-base font-bold">
+                        {sub.flameRating !== undefined && (
+                          <div className="flex items-center gap-1.5 text-[#FF5E3A]">
+                            <Flame className="w-4 h-4 fill-current" />
+                            <span>{sub.flameRating.toFixed(2)}</span>
+                          </div>
+                        )}
 
-                      <div className="flex items-center gap-1.5 text-[#7B61FF]">
-                        <Star className="w-4 h-4 fill-current" />
-                        <span>{sub.juryScore?.toFixed(2)}</span>
+                        {sub.juryScore !== undefined && (
+                          <div className="flex items-center gap-1.5 text-[#7B61FF]">
+                            <Star className="w-4 h-4 fill-current" />
+                            <span>{sub.juryScore.toFixed(2)}</span>
+                          </div>
+                        )}
                       </div>
-                    </div>
+                    )}
 
                   </div>
 

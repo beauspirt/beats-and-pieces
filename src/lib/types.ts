@@ -8,6 +8,7 @@ export interface UserProfile {
   email: string;
   avatarUrl: string;
   bio?: string;
+  location?: string;
   role: UserRole;
   discordId?: string;
   discordUsername?: string;
@@ -87,6 +88,7 @@ export interface Competition {
   minVotesRequired?: number;
   topFinalistsCutoff?: number;
   youtubeVodUrl?: string;
+  winner?: string;
 }
 
 export interface DiscoveryBeat {
@@ -102,11 +104,12 @@ export interface DiscoveryBeat {
   waveform?: number[];
   bpm: number;
   priceTag: string; // e.g. "Not For Sale", "$100 - $200", "$200+"
-  genres: string[];
+  genres?: string[];
   tags: string[];
   flames?: number;
   isFavorite?: boolean;
   battleSource?: string;
+  tier?: number;
   rank?: number;
   juryFeedback?: string;
   judgeName?: string;
@@ -117,16 +120,19 @@ export interface DiscoveryBeat {
 export interface Release {
   id: string;
   title: string;
+  slug?: string;
   coverImage: string;
-  releaseDate: string;
+  releaseDate?: string;
   description: string;
-  streamingLinks: {
+  spotifyUrl?: string;
+  youtubeUrl?: string;
+  streamingLinks?: {
     spotify?: string;
     appleMusic?: string;
     bandcamp?: string;
     youtubeMusic?: string;
   };
-  tracklist: {
+  tracklist?: {
     trackNumber: number;
     title: string;
     producer: string;

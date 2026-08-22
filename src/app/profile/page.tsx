@@ -6,7 +6,7 @@ import Link from "next/link";
 import { UserProfile } from "@/lib/types";
 import { X, ShieldCheck, ExternalLink, Sparkles, CheckCircle2, Camera } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { producerService } from "@/services";
+import { producerService, storageService } from "@/services";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { normalizeUrl } from "@/lib/utils";
@@ -26,7 +26,7 @@ function ProfileContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isOnboarding = searchParams.get("onboarding") === "true";
-  const { user: activeUser, isLoading } = useAuth();
+  const { user: activeUser, isLoading, updateUser } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
   // Sync profile when active user changes
@@ -71,19 +71,22 @@ function ProfileContent() {
     );
   }
 
-  const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && profile) {
-      const reader = new FileReader();
-      reader.onload = (uploadEvent) => {
-        if (uploadEvent.target?.result) {
-          setProfile({
-            ...profile,
-            avatarUrl: uploadEvent.target.result as string,
-          });
-        }
-      };
-      reader.readAsDataURL(file);
+      const { url } = await storageService.uploadImage(file, "avatars");
+      if (url) {
+        setProfile((prev) => prev ? { ...prev, avatarUrl: url } : null);
+      } else {
+        const reader = new FileReader();
+        reader.onload = (uploadEvent) => {
+          const res = uploadEvent.target?.result;
+          if (res) {
+            setProfile((prev) => prev ? { ...prev, avatarUrl: res as string } : null);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
     }
   };
 
@@ -118,6 +121,7 @@ function ProfileContent() {
 
     if (updated) {
       setProfile(updated);
+      updateUser(updated);
     }
     setSaveSuccess(true);
 

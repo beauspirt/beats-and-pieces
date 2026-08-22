@@ -76,7 +76,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     }
   }, [isUserJudge]);
 
-  // Stage 1: Upload state
+  // Phase 1: Upload state
   const [isUploading, setIsUploading] = useState(false);
   const [myEntry, setMyEntry] = useState<{
     id: string;
@@ -118,14 +118,14 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     }
   }, [currentUser, battleSubmissions, myEntry]);
 
-  // Stage 2: Rating state (Track ratings)
+  // Phase 2: Rating state (Track ratings)
   const [ratings, setRatings] = useState<Record<string, number>>({
     "blind-01": 5,
     "blind-02": 4,
     "blind-03": 4,
   });
 
-  // Stage 3: Clean Single-Score Jury evaluation state (slider 0.00 to 5.00)
+  // Phase 3: Clean Single-Score Jury evaluation state (slider 0.00 to 5.00)
   const [juryScores, setJuryScores] = useState<Record<string, string>>({});
   const [juryFeedback, setJuryFeedback] = useState<Record<string, string>>({});
   const [hasPublishedBallot, setHasPublishedBallot] = useState(false);
@@ -352,9 +352,9 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   return (
     <div className="w-full space-y-8 animate-in fade-in duration-300">
       
-      {/* SECTION 1: HERO & STAGE HEADER */}
+      {/* SECTION 1: HERO & PHASE HEADER */}
       <section className="space-y-4">
-        {/* Top Breadcrumb & Stages Timeline Indicator */}
+        {/* Top Breadcrumb & Phases Timeline Indicator */}
         <div className="flex items-center justify-between h-9">
           <Link
             href="/battles"
@@ -364,7 +364,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             <span>Back to Battles</span>
           </Link>
 
-          {/* Battle Stages Timeline Indicator (Read-only status, no click/mock jumping) */}
+          {/* Battle Phases Timeline Indicator (Read-only status, no click/mock jumping) */}
           <div className="flex items-center gap-1 bg-[#181818] p-1 rounded-xl select-none">
             {phasesList.map((p) => {
               const isCurrent = battle.phase === p.key;
@@ -418,8 +418,10 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
           </div>
 
           <div className="space-y-1 text-sm sm:text-base text-[#A0A0A0]">
-            <p>Hosted by: <span className="text-white font-medium">{battle.hosts?.[0] || "Nerub"}</span></p>
-            <p>Judged by: <span className="text-white font-medium">{battle.judges.join(", ")}</span></p>
+            <p>Hosted by: <span className="text-white font-medium">{Array.isArray(battle.hosts) && battle.hosts.length > 0 ? battle.hosts.join(", ") : "Nerub"}</span></p>
+            {Array.isArray(battle.judges) && battle.judges.length > 0 && (
+              <p>Judged by: <span className="text-white font-medium">{battle.judges.join(", ")}</span></p>
+            )}
           </div>
 
           <p className="text-sm sm:text-base text-[#D1D1D1] leading-relaxed">
@@ -434,7 +436,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             )
           ) : (
             <div className="text-xs sm:text-sm text-[#888888] pt-2">
-              Submissions close Aug 15 • Public rating open until Aug 22
+              Submissions close {battle.submissionEndsAt ? new Date(battle.submissionEndsAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "TBD"} • Public rating open until {battle.ratingEndsAt ? new Date(battle.ratingEndsAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "TBD"}
             </div>
           )}
         </div>
@@ -442,7 +444,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       </section>
 
       {/* ========================================================================= */}
-      {/* STAGE 1: SUBMISSIONS OPEN (RULES & COMPACT SAMPLES ON LEFT, SUBMIT ON RIGHT) */}
+      {/* PHASE 1: SUBMISSIONS OPEN (RULES & COMPACT SAMPLES ON LEFT, SUBMIT ON RIGHT) */}
       {/* ========================================================================= */}
       {battle.phase === "submission" && (
         <div className="space-y-6">
@@ -644,10 +646,8 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
           </div>
 
         </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* STAGE 2: PUBLIC RATING PHASE (ALL 15 BEATS WITH FLAME-ONLY RATING) */}
+      )}      {/* ========================================================================= */}
+      {/* PHASE 2: PUBLIC RATING PHASE (ALL 15 BEATS WITH FLAME-ONLY RATING) */}
       {/* ========================================================================= */}
       {battle.phase === "rating" && (
         <div className="space-y-6">
@@ -657,14 +657,11 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
               Public Rating Phase
             </h3>
-            <p className="text-sm sm:text-base text-[#D1D1D1] leading-relaxed">
-              Beats are randomly shuffled. Rate each beat with 1 to 5 flames (
-              <Flame className="w-4 h-4 text-[#FF5E3A] fill-current inline-block ml-0.5 mr-0.5 -mt-0.5" />
-              ) to unlock the next track.
+            <p className="text-xs sm:text-sm text-[#888888]">
+              All producer names and avatars are hidden during this phase to ensure 100% fair and unbiased listening.
             </p>
           </div>
 
-          {/* Blind Rating Track Queue (All 15 Beats) */}
           <div className="space-y-3.5">
             {blindTracks.map((track, idx) => {
               const unlocked = isTrackUnlocked(idx);
@@ -1050,7 +1047,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       )}
 
       {/* ========================================================================= */}
-      {/* STAGE 4: RESULTS & LEADERBOARD */}
+      {/* PHASE 4: RESULTS & LEADERBOARD */}
       {/* ========================================================================= */}
       {battle.phase === "completed" && (
         <div className="space-y-6">
@@ -1062,7 +1059,9 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
               const isTop2 = idx === 1 || sub.rank === 2;
               const isTop3 = idx === 2 || sub.rank === 3;
               const judgeName = sub.judgeName || "Judge";
-              const hasScores = sub.flameRating !== undefined || sub.juryScore !== undefined;
+              const hasFlame = typeof sub.flameRating === "number" && !isNaN(sub.flameRating) && sub.flameRating > 0;
+              const hasJury = typeof sub.juryScore === "number" && !isNaN(sub.juryScore) && sub.juryScore > 0;
+              const hasScores = hasFlame || hasJury;
 
               return (
                 <div
@@ -1098,28 +1097,28 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                           </span>
                         )}
                         <Link
-                          href={`/producers/${sub.userId}`}
+                          href={`/producers/${sub.userId || "guest"}`}
                           className="text-base sm:text-lg font-bold text-white hover:text-[#7B61FF] transition-colors leading-snug"
                         >
-                          {sub.beatmakerTag}
+                          {sub.beatmakerTag || "Producer"}
                         </Link>
                       </div>
                     </div>
 
-                    {/* Scores (only if scores exist) */}
+                    {/* Scores (only if valid numbers exist) */}
                     {hasScores && (
                       <div className="flex items-center gap-5 shrink-0 text-sm sm:text-base font-bold">
-                        {sub.flameRating !== undefined && (
+                        {hasFlame && (
                           <div className="flex items-center gap-1.5 text-[#FF5E3A]">
                             <Flame className="w-4 h-4 fill-current" />
-                            <span>{sub.flameRating.toFixed(2)}</span>
+                            <span>{Number(sub.flameRating).toFixed(2)}</span>
                           </div>
                         )}
 
-                        {sub.juryScore !== undefined && (
+                        {hasJury && (
                           <div className="flex items-center gap-1.5 text-[#7B61FF]">
                             <Star className="w-4 h-4 fill-current" />
-                            <span>{sub.juryScore.toFixed(2)}</span>
+                            <span>{Number(sub.juryScore).toFixed(2)}</span>
                           </div>
                         )}
                       </div>
@@ -1149,7 +1148,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
           </div>
 
           {/* YouTube Live Jury Evaluation Session Embed below Leaderboard */}
-          {battle.youtubeVodUrl && (
+          {battle.youtubeVodUrl && battle.youtubeVodUrl.trim() && (
             <div className="w-full aspect-video rounded-2xl overflow-hidden bg-[#121212] shadow-2xl">
               <iframe
                 src={

@@ -14,6 +14,7 @@ interface AuthContextType {
   signUpNewProducer: (nickname: string, email: string) => { success: boolean; isNew: boolean; user: UserProfile };
   loginWithEmail: (email: string) => { success: boolean; isMatchedProducer: boolean; user: UserProfile };
   loginWithUser: (producerId: string) => void;
+  updateUser: (updatedUser: UserProfile) => void;
   logout: () => Promise<void>;
 }
 
@@ -217,6 +218,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const updateUser = (updatedUser: UserProfile) => {
+    setUser(updatedUser);
+    try {
+      localStorage.setItem(STORAGE_KEY, updatedUser.id);
+    } catch {}
+  };
+
   const logout = async () => {
     setIsLoading(true);
     try {
@@ -245,6 +253,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signUpNewProducer,
         loginWithEmail,
         loginWithUser,
+        updateUser,
         logout,
       }}
     >

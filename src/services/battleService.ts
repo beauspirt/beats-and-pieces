@@ -244,7 +244,7 @@ export const battleService = {
       number: battleData.number || nextNumber,
       title: battleData.title || `Beat Battle #${nextNumber}`,
       slug: battleData.slug || `beat-battle-${nextNumber}`,
-      coverImage: battleData.coverImage || "/covers/beat-battle-8.png",
+      coverImage: battleData.coverImage || "/covers/default-battle.png",
       hosts: battleData.hosts && battleData.hosts.length > 0 ? battleData.hosts : ["Nerub"],
       hostDetails: battleData.hostDetails,
       judges: battleData.judges || [],

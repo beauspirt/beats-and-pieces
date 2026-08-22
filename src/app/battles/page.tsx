@@ -73,12 +73,12 @@ export default function BattlesPage() {
                 <div className="flex items-center gap-2 shrink-0 self-start sm:self-center flex-wrap">
                   <span className="px-3.5 py-1.5 rounded-full bg-[#7B61FF] text-xs sm:text-sm font-semibold text-white shadow-sm inline-flex items-center justify-center text-center leading-none">
                     {activeBattle.phase === "submission"
-                      ? "Stage 1: Submissions Open"
+                      ? "Phase 1: Submissions Open"
                       : activeBattle.phase === "rating"
-                      ? "Stage 2: Public Rating"
+                      ? "Phase 2: Public Rating"
                       : activeBattle.phase === "judging"
-                      ? "Stage 3: Jury Evaluation"
-                      : "Stage 4: Results"}
+                      ? "Phase 3: Jury Evaluation"
+                      : "Phase 4: Results"}
                   </span>
                   <span className="px-3.5 py-1.5 rounded-full bg-[#121212] text-xs sm:text-sm text-[#A0A0A0] inline-flex items-center justify-center text-center leading-none">
                     {activeBattle.totalSubmissions} Total Entries

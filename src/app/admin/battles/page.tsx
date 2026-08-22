@@ -331,12 +331,12 @@ export default function AdminBattlesManagerPage() {
                         : "bg-brand/20 text-brand"
                     }`}>
                       {battle.phase === "submission"
-                        ? "Stage 1: Submissions"
+                        ? "Phase 1: Submissions"
                         : battle.phase === "rating"
-                        ? "Stage 2: Rating"
+                        ? "Phase 2: Rating"
                         : battle.phase === "judging"
-                        ? "Stage 3: Judging"
-                        : "Stage 4: Results"}
+                        ? "Phase 3: Judging"
+                        : "Phase 4: Results"}
                     </span>
                   </div>
 
@@ -420,12 +420,12 @@ export default function AdminBattlesManagerPage() {
                         }`}
                       >
                         {phase === "submission"
-                          ? "Stage 1: Submit"
+                          ? "Phase 1: Submit"
                           : phase === "rating"
-                          ? "Stage 2: Rating"
+                          ? "Phase 2: Rating"
                           : phase === "judging"
-                          ? "Stage 3: Jury"
-                          : "Stage 4: Results"}
+                          ? "Phase 3: Jury"
+                          : "Phase 4: Results"}
                       </button>
                     ))}
                   </div>
@@ -793,7 +793,7 @@ export default function AdminBattlesManagerPage() {
                       Timeline & Deadlines
                     </label>
                     <span className="text-[10px] text-zinc-400">
-                      Active stage is automatically calculated from dates
+                      Active phase is automatically calculated from dates
                     </span>
                   </div>
 

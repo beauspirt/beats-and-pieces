@@ -21,7 +21,7 @@ export default function NewBattlePage() {
     return existing.reduce((max, b) => Math.max(max, b.number || 0), 0) + 1;
   });
   const [title, setTitle] = useState("");
-  const [coverImage, setCoverImage] = useState("/covers/beat-battle-8.png");
+  const [coverImage, setCoverImage] = useState("");
   
   // Hosts state with email accounts
   const [hosts, setHosts] = useState<PersonEntry[]>([

@@ -43,10 +43,16 @@ export default function AdminBattlesManagerPage() {
   const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
-    setBattles(battleService.getAllCompetitions());
-    battleService.syncFromSupabase().then(() => {
-      setBattles(battleService.getAllCompetitions());
-    });
+    const refresh = () => setBattles(battleService.getAllCompetitions());
+    refresh();
+    battleService.syncFromSupabase().then(refresh);
+
+    window.addEventListener("bnp_battles_updated", refresh);
+    window.addEventListener("storage", refresh);
+    return () => {
+      window.removeEventListener("bnp_battles_updated", refresh);
+      window.removeEventListener("storage", refresh);
+    };
   }, []);
 
   const handleEditClick = (battle: Competition) => {

@@ -25,6 +25,14 @@ function saveDeletedBattles(ids: string[]) {
   }
 }
 
+export function notifyBattlesUpdated() {
+  if (typeof window !== "undefined") {
+    try {
+      window.dispatchEvent(new CustomEvent("bnp_battles_updated"));
+    } catch {}
+  }
+}
+
 export function calculateBattlePhase(battle: {
   submissionStartsAt?: string;
   submissionEndsAt?: string;
@@ -33,17 +41,22 @@ export function calculateBattlePhase(battle: {
   winner?: string;
   phase?: BattlePhase;
 }): BattlePhase {
-  if (battle.winner && battle.phase === "completed") return "completed";
+  if (battle.winner || battle.phase === "completed") return "completed";
   const now = Date.now();
-  const subStart = battle.submissionStartsAt ? new Date(battle.submissionStartsAt).getTime() : 0;
-  const subEnd = battle.submissionEndsAt ? new Date(battle.submissionEndsAt).getTime() : Infinity;
-  const ratingEnd = battle.ratingEndsAt ? new Date(battle.ratingEndsAt).getTime() : Infinity;
-  const judgingEnd = battle.judgingEndsAt ? new Date(battle.judgingEndsAt).getTime() : Infinity;
+  const subEnd = battle.submissionEndsAt ? new Date(battle.submissionEndsAt).getTime() : NaN;
+  const ratingEnd = battle.ratingEndsAt ? new Date(battle.ratingEndsAt).getTime() : NaN;
+  const judgingEnd = battle.judgingEndsAt ? new Date(battle.judgingEndsAt).getTime() : NaN;
 
-  if (now < subEnd) return "submission";
-  if (now < ratingEnd) return "rating";
-  if (now < judgingEnd) return "judging";
-  return "completed";
+  if (!isNaN(subEnd) && now < subEnd) return "submission";
+  if (!isNaN(ratingEnd) && now < ratingEnd) return "rating";
+  if (!isNaN(judgingEnd) && now < judgingEnd) return "judging";
+  if (!isNaN(judgingEnd) && now >= judgingEnd) return "completed";
+
+  if (battle.phase && ["submission", "rating", "judging", "completed"].includes(battle.phase)) {
+    return battle.phase;
+  }
+
+  return "submission";
 }
 
 function loadCustomBattles(): Competition[] {
@@ -189,9 +202,21 @@ export const battleService = {
           winner: b.winner,
         }));
 
-        saveCustomBattles(mapped);
-        customBattlesList = mapped;
-        competitionsList = mapped;
+        // Clean up deleted list for any active server battles
+        const currentDeleted = loadDeletedBattles();
+        const serverIds = new Set(mapped.map((b) => b.id));
+        const prunedDeleted = currentDeleted.filter((id) => !serverIds.has(id));
+        saveDeletedBattles(prunedDeleted);
+
+        // Merge with any local custom battles not yet synced to Supabase
+        const currentCustom = loadCustomBattles();
+        const unsyncedCustom = currentCustom.filter((b) => !serverIds.has(b.id) && !prunedDeleted.includes(b.id));
+        const mergedCustom = [...mapped, ...unsyncedCustom];
+
+        saveCustomBattles(mergedCustom);
+        customBattlesList = mergedCustom;
+        competitionsList = mergedCustom;
+        notifyBattlesUpdated();
       }
 
       // 2. Sync Submissions
@@ -230,13 +255,18 @@ export const battleService = {
     const existing = this.getAllCompetitions();
     const nextNumber = existing.reduce((max, b) => Math.max(max, b.number || 0), 0) + 1;
     
+    const submissionStartsAt = battleData.submissionStartsAt || new Date().toISOString();
+    const submissionEndsAt = battleData.submissionEndsAt || new Date(Date.now() + 14 * 86400000).toISOString();
+    const ratingEndsAt = battleData.ratingEndsAt || new Date(Date.now() + 21 * 86400000).toISOString();
+    const judgingEndsAt = battleData.judgingEndsAt || new Date(Date.now() + 28 * 86400000).toISOString();
+
     const computedPhase = calculateBattlePhase({
-      submissionStartsAt: battleData.submissionStartsAt,
-      submissionEndsAt: battleData.submissionEndsAt,
-      ratingEndsAt: battleData.ratingEndsAt,
-      judgingEndsAt: battleData.judgingEndsAt,
+      submissionStartsAt,
+      submissionEndsAt,
+      ratingEndsAt,
+      judgingEndsAt,
       winner: battleData.winner,
-      phase: battleData.phase,
+      phase: battleData.phase || "submission",
     });
 
     const newBattle: Competition = {
@@ -257,21 +287,28 @@ export const battleService = {
       },
       samples: battleData.samples || [],
       phase: computedPhase,
-      submissionStartsAt: battleData.submissionStartsAt || new Date().toISOString(),
-      submissionEndsAt: battleData.submissionEndsAt || new Date(Date.now() + 14 * 86400000).toISOString(),
-      ratingEndsAt: battleData.ratingEndsAt || new Date(Date.now() + 21 * 86400000).toISOString(),
-      judgingEndsAt: battleData.judgingEndsAt || new Date(Date.now() + 28 * 86400000).toISOString(),
+      submissionStartsAt,
+      submissionEndsAt,
+      ratingEndsAt,
+      judgingEndsAt,
       totalSubmissions: 0,
       minVotesRequired: battleData.minVotesRequired || 5,
       topFinalistsCutoff: battleData.topFinalistsCutoff || 15,
       rules: battleData.rules || [],
     };
 
+    // Remove from deleted list if previously deleted
+    const deleted = loadDeletedBattles();
+    if (deleted.includes(newBattle.id)) {
+      saveDeletedBattles(deleted.filter((id) => id !== newBattle.id));
+    }
+
     const currentCustom = loadCustomBattles();
     const updatedCustom = [newBattle, ...currentCustom.filter((b) => b.id !== newBattle.id)];
     saveCustomBattles(updatedCustom);
     customBattlesList = updatedCustom;
     competitionsList = [...customBattlesList, ...(rawCompetitions as Competition[])];
+    notifyBattlesUpdated();
 
     // Write to Supabase
     try {
@@ -319,12 +356,19 @@ export const battleService = {
       phase: computedPhase,
     };
 
+    // Remove from deleted list if present
+    const deleted = loadDeletedBattles();
+    if (deleted.includes(id)) {
+      saveDeletedBattles(deleted.filter((delId) => delId !== id));
+    }
+
     const currentCustom = loadCustomBattles();
     const filtered = currentCustom.filter((b) => b.id !== id);
     const updatedCustom = [updatedBattle, ...filtered];
     saveCustomBattles(updatedCustom);
     customBattlesList = updatedCustom;
     competitionsList = [...customBattlesList, ...(rawCompetitions as Competition[])];
+    notifyBattlesUpdated();
 
     // Write to Supabase
     try {
@@ -382,6 +426,7 @@ export const battleService = {
       ...customBattlesList,
       ...(rawCompetitions as Competition[]).filter((b) => !deletedSet.has(b.id)),
     ];
+    notifyBattlesUpdated();
 
     // 4. Delete from Supabase
     try {

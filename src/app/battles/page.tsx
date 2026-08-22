@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { battleService } from "@/services";
 import { useAuth } from "@/lib/auth-context";
-import { ArrowRight, Trophy } from "lucide-react";
+import { ArrowRight, Flame, Trophy } from "lucide-react";
 import { Competition } from "@/lib/types";
 
 export default function BattlesPage() {
@@ -13,14 +13,30 @@ export default function BattlesPage() {
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
+  const refreshBattles = useCallback(() => {
     setCompetitions(battleService.getAllBattles());
+  }, []);
+
+  useEffect(() => {
+    refreshBattles();
     setMounted(true);
 
     battleService.syncFromSupabase().then(() => {
-      setCompetitions(battleService.getAllBattles());
+      refreshBattles();
     });
-  }, []);
+
+    const handleUpdate = () => {
+      refreshBattles();
+    };
+
+    window.addEventListener("bnp_battles_updated", handleUpdate);
+    window.addEventListener("storage", handleUpdate);
+
+    return () => {
+      window.removeEventListener("bnp_battles_updated", handleUpdate);
+      window.removeEventListener("storage", handleUpdate);
+    };
+  }, [refreshBattles]);
 
   if (!mounted) {
     return (
@@ -32,7 +48,9 @@ export default function BattlesPage() {
     );
   }
 
-  const activeBattle = competitions.find((c) => c.phase !== "completed");
+  const allActive = competitions.filter((c) => c.phase !== "completed");
+  const activeBattle = allActive[0];
+  const additionalActive = allActive.slice(1);
   const pastBattles = competitions.filter((c) => c.phase === "completed");
 
   return (
@@ -49,7 +67,7 @@ export default function BattlesPage() {
           </div>
 
           <Link
-            href={isLoggedIn ? `/battles/${activeBattle.id}` : "/signin"}
+            href={`/battles/${activeBattle.id}`}
             className="bg-[#181818] rounded-3xl p-5 sm:p-7 flex flex-col md:flex-row gap-7 items-start hover:bg-[#1A1A1A] transition-all shadow-xl block cursor-pointer group relative overflow-hidden"
           >
             {/* Cover Art Thumbnail (Grand 320px Square) */}
@@ -108,6 +126,69 @@ export default function BattlesPage() {
               </div>
             </div>
           </Link>
+        </section>
+      )}
+
+      {/* SECTION 1.5: ADDITIONAL ACTIVE BATTLES (IF MORE THAN ONE) */}
+      {additionalActive.length > 0 && (
+        <section className="space-y-4 pt-2">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-brand animate-pulse" />
+              <span>Other Ongoing Battles</span>
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            {additionalActive.map((battle) => (
+              <Link
+                key={battle.id}
+                href={`/battles/${battle.id}`}
+                className="bg-[#181818] rounded-2xl p-3.5 sm:p-4 hover:bg-[#1C1C1C] transition-all flex flex-col group shadow-lg space-y-3 border border-brand/20"
+              >
+                <div className="w-full aspect-square relative rounded-xl overflow-hidden bg-[#121212] shrink-0">
+                  <Image
+                    src={battle.coverImage || "/covers/default-battle.png"}
+                    alt={battle.title}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+
+                <div className="flex-1 flex flex-col justify-between space-y-2.5">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs text-[#888888]">
+                      <span className="px-2.5 py-1 rounded-full bg-brand/20 text-brand text-xs font-semibold">
+                        {battle.phase === "submission"
+                          ? "Phase 1"
+                          : battle.phase === "rating"
+                          ? "Phase 2"
+                          : battle.phase === "judging"
+                          ? "Phase 3"
+                          : "Phase 4"}
+                      </span>
+                      <span className="font-medium px-2.5 py-1 rounded-full bg-[#121212] text-[#A0A0A0] text-xs">
+                        {battle.totalSubmissions} Entries
+                      </span>
+                    </div>
+
+                    <h3 className="font-bold text-sm sm:text-base text-white leading-snug">
+                      {battle.title}
+                    </h3>
+
+                    <p className="text-xs text-[#888888] line-clamp-3 leading-relaxed">
+                      {battle.description}
+                    </p>
+                  </div>
+
+                  <div className="pt-2 flex items-center justify-between text-xs text-brand font-medium">
+                    <span>Enter Battle</span>
+                    <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
         </section>
       )}
 

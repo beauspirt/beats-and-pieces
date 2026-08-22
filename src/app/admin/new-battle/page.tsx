@@ -223,7 +223,8 @@ export default function NewBattlePage() {
 
     setTimeout(() => {
       router.push("/battles");
-    }, 600);
+      router.refresh();
+    }, 400);
   };
 
   return (

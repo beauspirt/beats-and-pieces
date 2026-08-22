@@ -32,21 +32,24 @@ export default function HostPanelPage() {
 
   useEffect(() => {
     if (user) {
-      if (user.role === "admin") {
-        setHostedBattles(battleService.getAllBattles());
-      } else {
-        const myBattles = battleService.getBattlesByHost(user.email || user.nickname);
-        setHostedBattles(myBattles);
-      }
-
-      battleService.syncFromSupabase().then(() => {
+      const refresh = () => {
         if (user.role === "admin") {
           setHostedBattles(battleService.getAllBattles());
         } else {
           const myBattles = battleService.getBattlesByHost(user.email || user.nickname);
           setHostedBattles(myBattles);
         }
-      });
+      };
+
+      refresh();
+      battleService.syncFromSupabase().then(refresh);
+
+      window.addEventListener("bnp_battles_updated", refresh);
+      window.addEventListener("storage", refresh);
+      return () => {
+        window.removeEventListener("bnp_battles_updated", refresh);
+        window.removeEventListener("storage", refresh);
+      };
     }
   }, [user]);
 

@@ -46,8 +46,8 @@ export default function ReleasesPage() {
           key={release.id}
           className="flex flex-col md:flex-row items-start gap-8 sm:gap-10 w-full"
         >
-          {/* Square Cover Artwork (1.5x - 2x Larger) */}
-          <div className="w-64 h-64 sm:w-80 sm:h-80 md:w-88 md:h-88 lg:w-[380px] lg:h-[380px] rounded-3xl overflow-hidden relative shrink-0 bg-[#181818] shadow-2xl mx-auto md:mx-0">
+          {/* Square Cover Artwork (Full width on mobile, 380px on desktop) */}
+          <div className="w-full aspect-square md:w-88 md:h-88 lg:w-[380px] lg:h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden relative shrink-0 bg-[#181818] shadow-2xl mx-auto md:mx-0">
             <Image
               src={release.coverImage}
               alt={release.title}

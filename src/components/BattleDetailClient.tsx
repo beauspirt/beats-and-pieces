@@ -1516,7 +1516,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                   const isTop1 = idx === 0 || sub.rank === 1;
                   const isTop2 = idx === 1 || sub.rank === 2;
                   const isTop3 = idx === 2 || sub.rank === 3;
-                  const hasFlame = typeof sub.flameRating === "number" && !isNaN(sub.flameRating) && sub.flameRating > 0;
+                  const hasFlame = typeof sub.flameRating === "number" && !isNaN(sub.flameRating) && sub.flameRating >= 1;
                   const hasJury = typeof sub.juryScore === "number" && !isNaN(sub.juryScore) && sub.juryScore > 0;
 
                   return (
@@ -1571,11 +1571,13 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                             </div>
                           )}
 
-                          <div className="flex items-center gap-1.5 text-[#FF5E3A] px-2" title="Public Rating Average">
-                            <Flame className="w-4 h-4 fill-current" />
-                            <span>{typeof sub.flameRating === "number" && !isNaN(sub.flameRating) ? Number(sub.flameRating).toFixed(2) : "0.00"}</span>
-                            <span className="text-[10px] text-[#A0A0A0] font-normal">Public Rating Avg</span>
-                          </div>
+                          {hasFlame && (
+                            <div className="flex items-center gap-1.5 text-[#FF5E3A] px-2" title="Public Rating Average">
+                              <Flame className="w-4 h-4 fill-current" />
+                              <span>{Number(sub.flameRating).toFixed(2)}</span>
+                              <span className="text-[10px] text-[#A0A0A0] font-normal">Public Rating Avg</span>
+                            </div>
+                          )}
                         </div>
 
                       </div>

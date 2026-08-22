@@ -260,28 +260,6 @@ export const Navbar: React.FC = () => {
                 </Link>
               );
             })}
-
-            {mounted && currentUser?.role === "admin" && (
-              <Link
-                href="/admin"
-                onClick={() => setMobileMenuOpen(false)}
-                className="px-4 py-3 rounded-xl text-sm font-semibold text-[#FF8A65] hover:bg-[#1f1f1f] transition-all flex items-center gap-2"
-              >
-                <Shield className="w-4 h-4" />
-                <span>Admin Panel</span>
-              </Link>
-            )}
-
-            {mounted && currentUser?.role !== "admin" && isHost && (
-              <Link
-                href="/host"
-                onClick={() => setMobileMenuOpen(false)}
-                className="px-4 py-3 rounded-xl text-sm font-semibold text-[#FF8A65] hover:bg-[#1f1f1f] transition-all flex items-center gap-2"
-              >
-                <Radio className="w-4 h-4" />
-                <span>Host Panel</span>
-              </Link>
-            )}
           </nav>
         </div>
       )}

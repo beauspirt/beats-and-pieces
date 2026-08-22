@@ -166,3 +166,51 @@ export interface ModerationFlag {
   votesCast: number;
   averageRatingGiven: number;
 }
+
+export const STANDARD_BEAT_TAGS = [
+  "Boom Bap",
+  "Trap",
+  "Lo-Fi",
+  "R&B / Soul",
+  "Drill",
+  "Jazz Hop",
+  "Afrobeats",
+  "Dancehall / Reggae",
+  "Electronic / Synthwave",
+  "House / Garage",
+  "Phonk",
+  "G-Funk",
+  "Grime",
+  "Pop",
+  "Rock / Alternative",
+  "Experimental",
+  "Chill",
+  "Dark",
+  "Aggressive / Hard",
+  "Melancholic / Sad",
+  "Uplifting / Happy",
+  "Soulful",
+  "Nostalgic / Vintage",
+  "Energetic / Hype",
+  "Atmospheric / Ambient",
+  "Smooth",
+  "Bouncy",
+  "Psychedelic",
+  "Cinematic",
+  "Late Night",
+  "Hypnotic",
+  "Vinyl / Sampled",
+  "Piano",
+  "Guitar",
+  "Heavy 808",
+  "Analog Synth",
+  "Brass / Horns",
+  "Strings",
+  "Vocal Chops",
+  "Live Drums",
+  "Tape Saturation",
+  "Acoustic",
+] as const;
+
+export type StandardBeatTag = (typeof STANDARD_BEAT_TAGS)[number];
+

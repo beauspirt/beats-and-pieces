@@ -10,7 +10,7 @@ import {
   globalWaveformCache,
   WaveformData,
 } from "@/components/AudioWaveformPlayer";
-import { DiscoveryBeat, JudgeFeedbackItem, UserProfile } from "@/lib/types";
+import { DiscoveryBeat, JudgeFeedbackItem, UserProfile, STANDARD_BEAT_TAGS } from "@/lib/types";
 import { producerService, battleService, beatService, storageService } from "@/services";
 import { normalizeUrl } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
@@ -19,6 +19,136 @@ import {
   CheckCircle2, Copy, MapPin, Calendar, Star, Award, Globe,
   Pencil, Plus, Lock, Trash2, AlertTriangle, Music, Sliders, X
 } from "lucide-react";
+
+/**
+ * Standard Preset Tag Selector Component from platform tag pool
+ */
+function StandardTagSelector({
+  selectedTags,
+  onChange,
+}: {
+  selectedTags: string[];
+  onChange: (tags: string[]) => void;
+}) {
+  const [search, setSearch] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const filteredOptions = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    if (!q) return STANDARD_BEAT_TAGS;
+    return STANDARD_BEAT_TAGS.filter((t) => t.toLowerCase().includes(q));
+  }, [search]);
+
+  const toggleTag = (tag: string) => {
+    if (selectedTags.includes(tag)) {
+      onChange(selectedTags.filter((t) => t !== tag));
+    } else {
+      onChange([...selectedTags, tag]);
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div ref={containerRef} className="space-y-2 relative">
+      <div className="flex items-center justify-between">
+        <label className="text-xs font-semibold text-[#D1D1D1]">Genres & Tags</label>
+        {selectedTags.length > 0 && (
+          <button
+            type="button"
+            onClick={() => onChange([])}
+            className="text-[11px] text-zinc-500 hover:text-red-400 transition-colors cursor-pointer"
+          >
+            Clear all
+          </button>
+        )}
+      </div>
+
+      {/* Selected Tags Pill Box */}
+      {selectedTags.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 pb-1">
+          {selectedTags.map((tag) => (
+            <span
+              key={tag}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#7B61FF]/15 border border-[#7B61FF]/30 text-xs text-[#A78BFA] font-medium"
+            >
+              <span>{tag}</span>
+              <button
+                type="button"
+                onClick={() => toggleTag(tag)}
+                className="text-zinc-400 hover:text-white transition-colors cursor-pointer text-xs"
+              >
+                ✕
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Search Input Box with Focus Dropdown */}
+      <div className="relative">
+        <input
+          type="text"
+          value={search}
+          onFocus={() => setIsDropdownOpen(true)}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setIsDropdownOpen(true);
+          }}
+          placeholder={selectedTags.length === 0 ? "Search or select tags (e.g. Trap, Lo-Fi, Soulful)..." : "Add more tags from list..."}
+          className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+        />
+        {search && (
+          <button
+            type="button"
+            onClick={() => setSearch("")}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white text-xs cursor-pointer"
+          >
+            ✕
+          </button>
+        )}
+      </div>
+
+      {/* Dropdown Options List */}
+      {isDropdownOpen && (
+        <div className="p-2.5 bg-[#141414] border border-[#2a2a2a] rounded-xl max-h-48 overflow-y-auto space-y-1.5 shadow-2xl z-20">
+          <div className="flex flex-wrap gap-1.5">
+            {filteredOptions.map((tag) => {
+              const isSelected = selectedTags.includes(tag);
+              return (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => toggleTag(tag)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                    isSelected
+                      ? "bg-[#7B61FF] text-white shadow-sm"
+                      : "bg-[#1f1f1f] text-zinc-300 hover:bg-[#2a2a2a] hover:text-white"
+                  }`}
+                >
+                  <span>{tag}</span>
+                  {isSelected ? <span>✓</span> : <span className="text-zinc-500 text-[10px]">+</span>}
+                </button>
+              );
+            })}
+            {filteredOptions.length === 0 && (
+              <p className="text-xs text-zinc-500 py-2 px-1">No matching tags found.</p>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 /**
  * 5-Second Auto-Cycling Judge Feedback Component
@@ -962,61 +1092,11 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                 </button>
               </div>
 
-              {/* Genre / Tags with + button */}
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-[#D1D1D1]">Genres & Tags</label>
-                
-                {editingTags.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 pb-1">
-                    {editingTags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#121212] text-xs text-zinc-200 font-medium"
-                      >
-                        <span>{tag}</span>
-                        <button
-                          type="button"
-                          onClick={() => setEditingTags((prev) => prev.filter((t) => t !== tag))}
-                          className="text-zinc-400 hover:text-white transition-colors cursor-pointer"
-                        >
-                          ✕
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={editingTagInput}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (val.includes(",")) {
-                        addEditingTags(val);
-                      } else {
-                        setEditingTagInput(val);
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === ",") {
-                        e.preventDefault();
-                        addEditingTags(editingTagInput);
-                      }
-                    }}
-                    placeholder="Add tags (press comma or enter)"
-                    className="flex-1 bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => addEditingTags(editingTagInput)}
-                    className="p-2.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white transition-all shadow-md active:scale-95 cursor-pointer flex items-center justify-center shrink-0"
-                    title="Add tag"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
+              {/* Preset Standard Tags Selector */}
+              <StandardTagSelector
+                selectedTags={editingTags}
+                onChange={setEditingTags}
+              />
 
               {/* Actions */}
               <div className="flex items-center justify-between pt-4">
@@ -1145,61 +1225,11 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                 </button>
               </div>
 
-              {/* Genre / Tags with + button */}
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-[#D1D1D1]">Genres & Tags</label>
-                
-                {newBeatTags.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 pb-1">
-                    {newBeatTags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#121212] text-xs text-zinc-200 font-medium"
-                      >
-                        <span>{tag}</span>
-                        <button
-                          type="button"
-                          onClick={() => setNewBeatTags((prev) => prev.filter((t) => t !== tag))}
-                          className="text-zinc-400 hover:text-white transition-colors cursor-pointer"
-                        >
-                          ✕
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={newBeatTagInput}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (val.includes(",")) {
-                        addNewBeatTags(val);
-                      } else {
-                        setNewBeatTagInput(val);
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === ",") {
-                        e.preventDefault();
-                        addNewBeatTags(newBeatTagInput);
-                      }
-                    }}
-                    placeholder="Add tags (press comma or enter)"
-                    className="flex-1 bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => addNewBeatTags(newBeatTagInput)}
-                    className="p-2.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white transition-all shadow-md active:scale-95 cursor-pointer flex items-center justify-center shrink-0"
-                    title="Add tag"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
+              {/* Preset Standard Tags Selector */}
+              <StandardTagSelector
+                selectedTags={newBeatTags}
+                onChange={setNewBeatTags}
+              />
 
               {/* Actions */}
               <div className="flex items-center justify-end gap-2.5 pt-4">

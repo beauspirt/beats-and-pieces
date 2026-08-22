@@ -77,13 +77,19 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     );
   }
 
-  // Determine if the currently logged in user is authorized to judge this battle
+  // Determine if the currently logged in user is explicitly assigned as a judge for THIS battle
   const isUserJudge = Boolean(
     currentUser && (
-      currentUser.role === "admin" ||
-      currentUser.role === "judge" ||
-      battle.judgeDetails?.some((j) => j.email.toLowerCase() === currentUser.email.toLowerCase()) ||
-      battle.judges?.some((j) => typeof j === "string" && (j.toLowerCase() === currentUser.nickname.toLowerCase() || j.toLowerCase() === currentUser.email.toLowerCase()))
+      battle.judgeDetails?.some((j) => 
+        (j.email && j.email.toLowerCase() === currentUser.email.toLowerCase()) ||
+        (j.name && j.name.toLowerCase() === currentUser.nickname.toLowerCase())
+      ) ||
+      battle.judges?.some((j) => 
+        typeof j === "string" && (
+          j.toLowerCase() === currentUser.nickname.toLowerCase() || 
+          j.toLowerCase() === currentUser.email.toLowerCase()
+        )
+      )
     )
   );
 
@@ -162,8 +168,39 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     }
   }, [currentUser, submissions]);
 
-  // Phase 2: Rating state (Track ratings)
-  const [ratings, setRatings] = useState<Record<string, number>>({});
+  // Phase 2: Rating state (Track ratings) with localStorage & database persistence
+  const [ratings, setRatings] = useState<Record<string, number>>(() => {
+    if (typeof window !== "undefined" && currentUser?.id) {
+      try {
+        const stored = localStorage.getItem(`bnp_ratings_${battle.id}_${currentUser.id}`);
+        if (stored) return JSON.parse(stored);
+      } catch {}
+    }
+    return {};
+  });
+
+  const [isRatingsSubmitted, setIsRatingsSubmitted] = useState<boolean>(() => {
+    if (typeof window !== "undefined" && currentUser?.id) {
+      try {
+        const subFlag = localStorage.getItem(`bnp_submitted_ratings_${battle.id}_${currentUser.id}`);
+        if (subFlag === "true") return true;
+      } catch {}
+    }
+    return false;
+  });
+
+  // Sync user's existing ratings from database on mount / auth change
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    battleService.getUserRatingsForBattle(battle.id, currentUser.id).then(({ ratings: userRatings, isSubmitted }) => {
+      if (Object.keys(userRatings).length > 0) {
+        setRatings((prev) => ({ ...userRatings, ...prev }));
+      }
+      if (isSubmitted) {
+        setIsRatingsSubmitted(true);
+      }
+    });
+  }, [battle.id, currentUser?.id]);
 
   // Phase 3: Clean Single-Score Jury evaluation state (slider 0.00 to 5.00)
   const [juryScores, setJuryScores] = useState<Record<string, string>>({});
@@ -324,7 +361,6 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     }
   };
 
-  const [isRatingsSubmitted, setIsRatingsSubmitted] = useState(false);
   const [showSubmitWarningModal, setShowSubmitWarningModal] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [lastSavedTime, setLastSavedTime] = useState<string | null>(null);
@@ -352,25 +388,21 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     }
   }, [battle.phase]);
 
-  // Clear any old test lockouts from localStorage on mount
-  useEffect(() => {
-    try {
-      localStorage.removeItem(`bnp_submitted_${battle.id}`);
-    } catch {
-      // ignore
-    }
-  }, [battle.id]);
-
   const handleRateBeat = async (trackId: string, flames: number) => {
     if (isRatingsSubmitted) return; // Locked once submitted
-    setRatings((prev) => ({ ...prev, [trackId]: flames }));
+    const updated = { ...ratings, [trackId]: flames };
+    setRatings(updated);
     setLastSavedTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
     if (currentUser?.id) {
+      try {
+        localStorage.setItem(`bnp_ratings_${battle.id}_${currentUser.id}`, JSON.stringify(updated));
+      } catch {}
       await battleService.voteSubmission(trackId, battle.id, currentUser.id, flames);
     }
   };
 
   const handleClickSubmitRatings = () => {
+    if (isRatingsSubmitted) return;
     if (currentVotesCount < requiredVotes) {
       setSubmitError(
         `You must rate at least ${requiredVotes} beats before submitting. You have rated ${currentVotesCount} so far. Please rate ${requiredVotes - currentVotesCount} more beats.`
@@ -384,6 +416,12 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   const handleConfirmSubmitRatings = () => {
     setIsRatingsSubmitted(true);
     setShowSubmitWarningModal(false);
+    if (currentUser?.id) {
+      try {
+        localStorage.setItem(`bnp_submitted_ratings_${battle.id}_${currentUser.id}`, "true");
+        localStorage.setItem(`bnp_ratings_${battle.id}_${currentUser.id}`, JSON.stringify(ratings));
+      } catch {}
+    }
     confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
   };
 
@@ -599,16 +637,6 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                               {sample.title}
                             </span>
                           </div>
-
-                          {/* Right: Dedicated Individual Download Button */}
-                          <button
-                            type="button"
-                            onClick={() => downloadAudioFile(sample.audioUrl, sample.title)}
-                            aria-label={`Download ${sample.title}`}
-                            className="relative z-10 p-2 rounded-xl bg-[#141414] hover:bg-[#7B61FF] text-[#888888] hover:text-white transition-all shrink-0 cursor-pointer shadow-sm"
-                          >
-                            <Download className="w-3.5 h-3.5" />
-                          </button>
                         </div>
                       );
                     })}
@@ -1132,100 +1160,117 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             </div>
           ) : (
             <div className="space-y-3.5">
-              {[...submissions].sort((a, b) => (a.rank || 999) - (b.rank || 999)).map((sub, idx) => {
-                const isTop1 = idx === 0 || sub.rank === 1;
-                const isTop2 = idx === 1 || sub.rank === 2;
-                const isTop3 = idx === 2 || sub.rank === 3;
-                const judgeName = sub.judgeName || "Judge";
-                const hasFlame = typeof sub.flameRating === "number" && !isNaN(sub.flameRating) && sub.flameRating > 0;
-                const hasJury = typeof sub.juryScore === "number" && !isNaN(sub.juryScore) && sub.juryScore > 0;
-                const hasScores = hasFlame || hasJury;
+              {[...submissions]
+                .sort((a, b) => {
+                  const aScore = typeof a.juryScore === "number" ? a.juryScore : -1;
+                  const bScore = typeof b.juryScore === "number" ? b.juryScore : -1;
+                  if (bScore !== aScore) return bScore - aScore;
+                  return (a.rank || 999) - (b.rank || 999);
+                })
+                .map((sub, idx) => {
+                  const isTop1 = idx === 0 || sub.rank === 1;
+                  const isTop2 = idx === 1 || sub.rank === 2;
+                  const isTop3 = idx === 2 || sub.rank === 3;
+                  const hasFlame = typeof sub.flameRating === "number" && !isNaN(sub.flameRating) && sub.flameRating > 0;
+                  const hasJury = typeof sub.juryScore === "number" && !isNaN(sub.juryScore) && sub.juryScore > 0;
 
-                return (
-                  <div
-                    key={sub.id}
-                    className="bg-[#181818] rounded-2xl p-4 sm:p-5 space-y-3.5"
-                  >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      
-                      {/* Rank Badge + Producer Info */}
-                      <div className="flex items-center gap-4 min-w-[240px]">
-                        {isTop1 ? (
-                          <span className="h-7 px-3.5 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
-                            1st Place
-                          </span>
-                        ) : isTop2 ? (
-                          <span className="h-7 px-3.5 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
-                            2nd Place
-                          </span>
-                        ) : isTop3 ? (
-                          <span className="h-7 px-3.5 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
-                            3rd Place
-                          </span>
-                        ) : (
-                          <span className="h-7 w-8 text-center text-xs font-bold text-[#666666] inline-flex items-center justify-center leading-none select-none shrink-0">
-                            #{sub.rank || (idx + 1)}
-                          </span>
-                        )}
-
-                        <div>
-                          {sub.beatTitle && sub.beatTitle !== battle.title && !sub.beatTitle.startsWith("Beat Battle #") && (
-                            <span className="text-xs sm:text-sm text-[#888888] leading-tight block">
-                              {sub.beatTitle}
+                  return (
+                    <div
+                      key={sub.id}
+                      className="bg-[#181818] rounded-2xl p-4 sm:p-5 space-y-3.5"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        
+                        {/* Rank Badge + Producer Info */}
+                        <div className="flex items-center gap-4 min-w-[240px]">
+                          {isTop1 ? (
+                            <span className="h-7 px-3.5 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
+                              1st Place
+                            </span>
+                          ) : isTop2 ? (
+                            <span className="h-7 px-3.5 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
+                              2nd Place
+                            </span>
+                          ) : isTop3 ? (
+                            <span className="h-7 px-3.5 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
+                              3rd Place
+                            </span>
+                          ) : (
+                            <span className="h-7 w-8 text-center text-xs font-bold text-[#666666] inline-flex items-center justify-center leading-none select-none shrink-0">
+                              #{sub.rank || (idx + 1)}
                             </span>
                           )}
-                          <Link
-                            href={`/producers/${sub.userId || "guest"}`}
-                            className="text-base sm:text-lg font-bold text-white hover:text-[#7B61FF] transition-colors leading-snug"
-                          >
-                            {sub.beatmakerTag || "Producer"}
-                          </Link>
-                        </div>
-                      </div>
 
-                      {/* Scores (Flame Rating and Jury Score) */}
-                      {hasScores && (
-                        <div className="flex items-center gap-4 shrink-0 text-xs sm:text-sm font-bold flex-wrap">
+                          <div>
+                            {sub.beatTitle && sub.beatTitle !== battle.title && !sub.beatTitle.startsWith("Beat Battle #") && (
+                              <span className="text-xs sm:text-sm text-[#888888] leading-tight block">
+                                {sub.beatTitle}
+                              </span>
+                            )}
+                            <Link
+                              href={`/producers/${sub.userId || "guest"}`}
+                              className="text-base sm:text-lg font-bold text-white hover:text-[#7B61FF] transition-colors leading-snug"
+                            >
+                              {sub.beatmakerTag || "Producer"}
+                            </Link>
+                          </div>
+                        </div>
+
+                        {/* Leaderboard Score: Strict Jury Score Average */}
+                        <div className="flex items-center gap-3 shrink-0 text-xs sm:text-sm font-bold flex-wrap">
+                          {hasJury && (
+                            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#7B61FF]/15 text-[#7B61FF] font-bold text-xs sm:text-sm shadow-sm" title="Jury Score Average">
+                              <Star className="w-4 h-4 fill-current text-[#7B61FF]" />
+                              <span>{Number(sub.juryScore).toFixed(2)}</span>
+                              <span className="text-[10px] text-[#A0A0A0] font-normal">Jury Avg</span>
+                            </div>
+                          )}
+
                           {hasFlame && (
-                            <div className="flex items-center gap-1.5 text-[#FF5E3A]" title="Public Rating Average">
+                            <div className="flex items-center gap-1.5 text-[#FF5E3A] px-2" title="Public Rating Average">
                               <Flame className="w-4 h-4 fill-current" />
                               <span>{Number(sub.flameRating).toFixed(2)}</span>
                               <span className="text-[10px] text-[#777777] font-normal">Public</span>
                             </div>
                           )}
-
-                          {hasJury && (
-                            <div className="flex items-center gap-1.5 text-[#7B61FF]" title="Jury Score">
-                              <Star className="w-4 h-4 fill-current" />
-                              <span>{Number(sub.juryScore).toFixed(2)}</span>
-                              <span className="text-[10px] text-[#777777] font-normal">Jury</span>
-                            </div>
-                          )}
                         </div>
-                      )}
 
-                    </div>
-
-                    {/* Waveform Scrubber with real audio */}
-                    <AudioWaveformPlayer
-                      id={`res-${sub.id}`}
-                      title={sub.beatTitle}
-                      audioUrl={sub.audioUrl}
-                      duration={sub.duration}
-                      waveformPeaks={sub.waveform}
-                      bpm={sub.bpm}
-                      compact={true}
-                    />
-
-                    {/* Clean Judge Feedback Box with Judge Name */}
-                    {sub.juryFeedback && (
-                      <div className="bg-[#121212] px-4 py-2.5 rounded-xl text-xs sm:text-sm text-[#D1D1D1] italic">
-                        "{sub.juryFeedback}" - <span className="text-[#888888] not-italic font-semibold">{judgeName}</span>
                       </div>
-                    )}
-                  </div>
-                );
-              })}
+
+                      {/* Waveform Scrubber with real audio */}
+                      <AudioWaveformPlayer
+                        id={`res-${sub.id}`}
+                        title={sub.beatTitle}
+                        audioUrl={sub.audioUrl}
+                        duration={sub.duration}
+                        waveformPeaks={sub.waveform}
+                        bpm={sub.bpm}
+                        compact={true}
+                      />
+
+                      {/* Judge Feedbacks (Multi-judge support) */}
+                      {sub.juryFeedbacks && sub.juryFeedbacks.length > 0 ? (
+                        <div className="space-y-1.5 pt-1">
+                          {sub.juryFeedbacks.map((f, fIdx) => (
+                            <div key={fIdx} className="bg-[#121212] px-4 py-2.5 rounded-xl text-xs sm:text-sm text-[#D1D1D1] flex items-center justify-between gap-3">
+                              <span className="italic">{f.feedback ? `"${f.feedback}"` : "Score submitted"}</span>
+                              <div className="flex items-center gap-2 shrink-0 not-italic">
+                                {typeof f.score === "number" && (
+                                  <span className="text-[#7B61FF] font-bold">★ {f.score.toFixed(2)}</span>
+                                )}
+                                <span className="text-[#888888] font-semibold">{f.judgeName}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : sub.juryFeedback ? (
+                        <div className="bg-[#121212] px-4 py-2.5 rounded-xl text-xs sm:text-sm text-[#D1D1D1] italic">
+                          "{sub.juryFeedback}" - <span className="text-[#888888] not-italic font-semibold">{sub.judgeName || "Judge"}</span>
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })}
             </div>
           )}
 

@@ -45,12 +45,15 @@ export function calculateBattlePhase(battle: {
   const now = Date.now();
   const subEnd = battle.submissionEndsAt ? new Date(battle.submissionEndsAt).getTime() : NaN;
   const ratingEnd = battle.ratingEndsAt ? new Date(battle.ratingEndsAt).getTime() : NaN;
-  const judgingEnd = battle.judgingEndsAt ? new Date(battle.judgingEndsAt).getTime() : NaN;
 
   if (!isNaN(subEnd) && now < subEnd) return "submission";
   if (!isNaN(ratingEnd) && now < ratingEnd) return "rating";
-  if (!isNaN(judgingEnd) && now < judgingEnd) return "judging";
-  if (!isNaN(judgingEnd) && now >= judgingEnd) return "completed";
+
+  // Once rating ends, the battle enters judging phase (Phase 3).
+  // Phase 3 has no deadline: it stays in judging until all assigned judges submit their scores.
+  if (battle.phase === "judging" || (!isNaN(ratingEnd) && now >= ratingEnd)) {
+    return "judging";
+  }
 
   if (battle.phase && ["submission", "rating", "judging", "completed"].includes(battle.phase)) {
     return battle.phase;
@@ -271,12 +274,11 @@ export const battleService = {
         for (const b of allBattles) {
           const bSubs = mappedSubs.filter((s) => s.battleId === b.id);
           if (bSubs.length > 0) {
-            // Sort by juryScore (highest first), then flameRating (highest first)
+            // Sort strictly by juryScore average (highest first)
             const sorted = [...bSubs].sort((a, b) => {
               const aJury = typeof a.juryScore === "number" ? a.juryScore : -1;
               const bJury = typeof b.juryScore === "number" ? b.juryScore : -1;
-              if (bJury !== aJury) return bJury - aJury;
-              return (b.flameRating || 0) - (a.flameRating || 0);
+              return bJury - aJury;
             });
 
             sorted.forEach((sub, idx) => {
@@ -608,6 +610,54 @@ export const battleService = {
     }
   },
 
+  async getUserRatingsForBattle(
+    battleId: string,
+    userId: string
+  ): Promise<{ ratings: Record<string, number>; isSubmitted: boolean }> {
+    if (!userId || !battleId) return { ratings: {}, isSubmitted: false };
+
+    let localRatings: Record<string, number> = {};
+    let isSubmitted = false;
+
+    // 1. Read from localStorage
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem(`bnp_ratings_${battleId}_${userId}`);
+        if (stored) localRatings = JSON.parse(stored);
+        const subFlag = localStorage.getItem(`bnp_submitted_ratings_${battleId}_${userId}`);
+        if (subFlag === "true") isSubmitted = true;
+      } catch {}
+    }
+
+    // 2. Fetch from Supabase ratings table
+    try {
+      const { data: dbRatings } = await supabase
+        .from("ratings")
+        .select("submission_id, score")
+        .eq("battle_id", battleId)
+        .eq("voter_id", userId);
+
+      if (dbRatings && dbRatings.length > 0) {
+        dbRatings.forEach((r: any) => {
+          if (r.submission_id && typeof r.score === "number") {
+            localRatings[r.submission_id] = r.score;
+          }
+        });
+        isSubmitted = true;
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.setItem(`bnp_ratings_${battleId}_${userId}`, JSON.stringify(localRatings));
+            localStorage.setItem(`bnp_submitted_ratings_${battleId}_${userId}`, "true");
+          } catch {}
+        }
+      }
+    } catch (err) {
+      console.warn("getUserRatingsForBattle error:", err);
+    }
+
+    return { ratings: localRatings, isSubmitted };
+  },
+
   async submitJuryBallot(
     battleId: string,
     judgeId: string,
@@ -619,24 +669,50 @@ export const battleService = {
       const battleSubs = this.getSubmissionsByBattleId(battleId);
       if (battleSubs.length === 0) return { success: true };
 
+      const battle = this.getBattleById(battleId);
+
       for (const sub of battleSubs) {
         const scoreVal = scores[sub.id];
         const feedbackVal = feedbacks[sub.id];
         const parsedScore = (scoreVal !== undefined && scoreVal !== "") ? parseFloat(String(scoreVal)) : null;
 
-        if (parsedScore !== null) {
+        const existingFeedbacks = sub.juryFeedbacks ? [...sub.juryFeedbacks] : [];
+        const filteredFeedbacks = existingFeedbacks.filter(
+          (f) => f.judgeName.toLowerCase() !== judgeName.toLowerCase()
+        );
+
+        if (parsedScore !== null || (feedbackVal && feedbackVal.trim())) {
+          filteredFeedbacks.push({
+            judgeId,
+            judgeName,
+            score: parsedScore !== null ? parsedScore : undefined,
+            feedback: feedbackVal ? feedbackVal.trim() : "",
+          });
+        }
+        sub.juryFeedbacks = filteredFeedbacks;
+
+        // Calculate mathematical average of all jury scores for this track
+        const scoredItems = sub.juryFeedbacks.filter(
+          (f) => typeof f.score === "number" && !isNaN(f.score)
+        );
+        if (scoredItems.length > 0) {
+          const sum = scoredItems.reduce((acc, cur) => acc + (cur.score || 0), 0);
+          sub.juryScore = Number((sum / scoredItems.length).toFixed(2));
+        } else if (parsedScore !== null) {
           sub.juryScore = parsedScore;
-          sub.juryFeedback = feedbackVal || sub.juryFeedback;
+        }
+
+        if (feedbackVal && feedbackVal.trim()) {
+          sub.juryFeedback = feedbackVal.trim();
           sub.judgeName = judgeName;
         }
       }
 
-      // Rank by highest juryScore, then flameRating
+      // Rank submissions strictly by juryScore average (highest to lowest)
       const ranked = [...battleSubs].sort((a, b) => {
         const aJury = typeof a.juryScore === "number" ? a.juryScore : -1;
         const bJury = typeof b.juryScore === "number" ? b.juryScore : -1;
-        if (bJury !== aJury) return bJury - aJury;
-        return (b.flameRating || 0) - (a.flameRating || 0);
+        return bJury - aJury;
       });
 
       ranked.forEach((s, idx) => {
@@ -653,11 +729,40 @@ export const battleService = {
       customSubsList = updatedAllSubs;
       submissionsList = updatedAllSubs;
 
-      // Assign winner to the battle if ranked[0] exists
-      if (ranked[0]) {
-        await this.updateBattle(battleId, {
-          winner: ranked[0].beatmakerTag,
+      // Determine if all assigned judges have submitted their ballots
+      const assignedJudgesList = (
+        battle?.judgeDetails?.map((j) => j.name.toLowerCase().trim()) ||
+        battle?.judges?.map((j) => (typeof j === "string" ? j.toLowerCase().trim() : "")) ||
+        []
+      ).filter(Boolean);
+
+      const submittedJudgesSet = new Set<string>();
+      battleSubs.forEach((s) => {
+        s.juryFeedbacks?.forEach((f) => {
+          if (typeof f.score === "number" && f.judgeName) {
+            submittedJudgesSet.add(f.judgeName.toLowerCase().trim());
+          }
         });
+      });
+
+      const allJudgesFinished =
+        assignedJudgesList.length > 0
+          ? assignedJudgesList.every((name) => submittedJudgesSet.has(name))
+          : submittedJudgesSet.size > 0;
+
+      if (allJudgesFinished) {
+        // Automatically transition battle to completed Results phase
+        await this.updateBattle(battleId, {
+          phase: "completed",
+          winner: ranked[0]?.beatmakerTag || battle?.winner,
+          endedAt: new Date().toISOString(),
+        });
+      } else {
+        if (ranked[0]) {
+          await this.updateBattle(battleId, {
+            winner: ranked[0].beatmakerTag,
+          });
+        }
       }
 
       // Upsert updated submissions to Supabase
@@ -677,6 +782,7 @@ export const battleService = {
           jury_score: sub.juryScore,
           jury_feedback: sub.juryFeedback,
           judge_name: sub.judgeName,
+          jury_feedbacks: sub.juryFeedbacks || [],
           rank: sub.rank,
           submitted_at: sub.submittedAt,
         });

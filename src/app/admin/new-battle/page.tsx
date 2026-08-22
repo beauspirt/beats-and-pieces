@@ -48,7 +48,6 @@ export default function NewBattlePage() {
   const [startDate, setStartDate] = useState("");
   const [submissionDeadline, setSubmissionDeadline] = useState("");
   const [ratingDeadline, setRatingDeadline] = useState("");
-  const [judgingDeadline, setJudgingDeadline] = useState("");
   const [isSaved, setIsSaved] = useState(false);
 
   const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -216,7 +215,6 @@ export default function NewBattlePage() {
         submissionStartsAt: startDate ? new Date(startDate).toISOString() : new Date().toISOString(),
         submissionEndsAt: submissionDeadline ? new Date(submissionDeadline).toISOString() : new Date(Date.now() + 14 * 86400000).toISOString(),
         ratingEndsAt: ratingDeadline ? new Date(ratingDeadline).toISOString() : new Date(Date.now() + 21 * 86400000).toISOString(),
-        judgingEndsAt: judgingDeadline ? new Date(judgingDeadline).toISOString() : new Date(Date.now() + 28 * 86400000).toISOString(),
       });
     } catch (err) {
       console.error("Failed to create battle:", err);
@@ -684,15 +682,10 @@ export default function NewBattlePage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
               <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">
-                Judging Deadline
+                Judging Phase
               </label>
-              <div className="sm:col-span-9">
-                <input
-                  type="datetime-local"
-                  value={judgingDeadline}
-                  onChange={(e) => setJudgingDeadline(e.target.value)}
-                  className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
-                />
+              <div className="sm:col-span-9 text-xs text-[#888888]">
+                No deadline required — Phase 3 concludes automatically into Results once all assigned judges have submitted their scores.
               </div>
             </div>
 

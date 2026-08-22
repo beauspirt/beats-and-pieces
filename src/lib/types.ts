@@ -42,8 +42,10 @@ export interface BattleSample {
 }
 
 export interface JudgeFeedbackItem {
+  judgeId?: string;
   judgeName: string;
-  feedback: string;
+  score?: number;
+  feedback?: string;
 }
 
 export interface BattleSubmission {
@@ -87,7 +89,7 @@ export interface Competition {
   submissionStartsAt: string;
   submissionEndsAt: string;
   ratingEndsAt: string;
-  judgingEndsAt: string;
+  judgingEndsAt?: string;
   totalSubmissions: number;
   minVotesRequired?: number;
   topFinalistsCutoff?: number;

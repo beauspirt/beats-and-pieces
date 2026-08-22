@@ -852,21 +852,6 @@ export default function AdminBattlesManagerPage() {
                         className="w-full bg-[#181818] rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-brand"
                       />
                     </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[11px] text-zinc-400">Judging Deadline</label>
-                      <input
-                        type="datetime-local"
-                        value={editingBattle.judgingEndsAt ? editingBattle.judgingEndsAt.slice(0, 16) : ""}
-                        onChange={(e) =>
-                          setEditingBattle({
-                            ...editingBattle,
-                            judgingEndsAt: e.target.value ? new Date(e.target.value).toISOString() : "",
-                          })
-                        }
-                        className="w-full bg-[#181818] rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-brand"
-                      />
-                    </div>
                   </div>
                 </div>
 

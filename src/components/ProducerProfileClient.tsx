@@ -485,11 +485,15 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
   );
   const isAtBeatLimit = customUploadedBeats.length >= MAX_FREE_BEATS;
 
-  // Compute prioritized badges: Admin -> Host -> Judge -> Battle Champion -> OG Producer / Community
+  // Compute prioritized badges: Admin -> Host -> Battle Champion -> OG Producer / Community
   const sortedBadges = useMemo(() => {
     const rawRoles = new Set<string>(
       (producer.discordRoles || []).filter(
-        (r) => !r.toLowerCase().startsWith("winner bb") && !r.toLowerCase().startsWith("winner #")
+        (r) =>
+          !r.toLowerCase().startsWith("winner bb") &&
+          !r.toLowerCase().startsWith("winner #") &&
+          r.toLowerCase() !== "judge" &&
+          r.toLowerCase() !== "jury"
       )
     );
 
@@ -501,25 +505,21 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       rawRoles.add("Battle Champion");
     }
 
-    // 2. Inject system roles if applicable
+    // 2. Inject system roles if applicable (Admin & Host)
     if (producer.role === "admin" || producer.email === "adrian.hrihor@gmail.com" || producer.nickname.toLowerCase() === "nerub") {
       rawRoles.add("Admin");
     }
     if (producer.role === "host" || (producer.email && battleService.getBattlesByHost(producer.email).length > 0)) {
       rawRoles.add("Host");
     }
-    if (producer.role === "judge") {
-      rawRoles.add("Judge");
-    }
 
     const roleRank = (roleName: string): number => {
       const lower = roleName.toLowerCase();
       if (lower === "admin") return 1;
       if (lower === "host") return 2;
-      if (lower === "judge" || lower === "jury") return 3;
-      if (lower.includes("champion") || lower.includes("winner") || lower.includes("1st")) return 4;
-      if (lower.includes("og producer") || lower.includes("og")) return 5;
-      return 6;
+      if (lower.includes("champion") || lower.includes("winner") || lower.includes("1st")) return 3;
+      if (lower.includes("og producer") || lower.includes("og")) return 4;
+      return 5;
     };
 
     return Array.from(rawRoles).sort((a, b) => roleRank(a) - roleRank(b));
@@ -736,9 +736,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                   badgeClass = "bg-brand text-white font-bold shadow-sm";
                 } else if (lower === "host") {
                   badgeClass = "bg-[#FF8A65]/20 text-[#FF8A65] font-bold";
-                } else if (lower === "judge" || lower === "jury") {
-                  badgeClass = "bg-emerald-500/20 text-emerald-400 font-bold";
-                } else if (lower.includes("winner") || lower.includes("1st")) {
+                } else if (lower.includes("champion") || lower.includes("winner") || lower.includes("1st")) {
                   badgeClass = "bg-[#FF5E3A]/20 text-[#FF5E3A] font-bold";
                 }
 

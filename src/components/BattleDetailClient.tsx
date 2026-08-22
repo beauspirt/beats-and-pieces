@@ -116,6 +116,8 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     )
   );
 
+  const [isDownloadingSamples, setIsDownloadingSamples] = useState(false);
+
   // Helper for cross-origin audio downloads preserving clean filenames
   const downloadAudioFile = async (url: string, desiredFilename: string) => {
     if (!url) return;
@@ -143,6 +145,55 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+    }
+  };
+
+  // Helper for downloading sample(s): single file or zipped bundle if multiple
+  const downloadSamples = async () => {
+    if (!battle.samples || battle.samples.length === 0) return;
+    if (battle.samples.length === 1) {
+      const sample = battle.samples[0];
+      await downloadAudioFile(sample.audioUrl, sample.title);
+      return;
+    }
+
+    setIsDownloadingSamples(true);
+    try {
+      const JSZipModule = await import("jszip");
+      const JSZip = JSZipModule.default || JSZipModule;
+      const zip = new JSZip();
+      const folderName = `${battle.title.replace(/[^a-z0-9_-]/gi, "_")}_Samples`;
+      const folder = zip.folder(folderName) || zip;
+
+      const fetchPromises = battle.samples.map(async (s) => {
+        try {
+          const res = await fetch(s.audioUrl);
+          const blob = await res.blob();
+          const ext = s.audioUrl.split("?")[0].split(".").pop() || "wav";
+          const cleanExt = ["wav", "mp3", "zip", "aif", "aiff", "flac"].includes(ext.toLowerCase()) ? ext : "wav";
+          const filename = s.title.toLowerCase().endsWith(`.${cleanExt}`) ? s.title : `${s.title}.${cleanExt}`;
+          folder.file(filename, blob);
+        } catch (err) {
+          console.warn(`Failed to add sample ${s.title} to zip:`, err);
+        }
+      });
+
+      await Promise.all(fetchPromises);
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      const blobUrl = URL.createObjectURL(zipBlob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = `${battle.title.replace(/[^a-z0-9_-]/gi, "_")}_Samples.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error("Failed to generate zip:", err);
+      // Fallback: download first sample
+      downloadAudioFile(battle.samples[0].audioUrl, battle.samples[0].title);
+    } finally {
+      setIsDownloadingSamples(false);
     }
   };
 
@@ -206,7 +257,8 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     if (typeof window !== "undefined" && currentUser?.id) {
       try {
         const subFlag = localStorage.getItem(`bnp_submitted_ratings_${battle.id}_${currentUser.id}`);
-        if (subFlag === "true") return true;
+        const stored = localStorage.getItem(`bnp_ratings_${battle.id}_${currentUser.id}`);
+        if (subFlag === "true" && stored && Object.keys(JSON.parse(stored)).length > 0) return true;
       } catch {}
     }
     return false;
@@ -216,11 +268,17 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   useEffect(() => {
     if (!currentUser?.id) return;
     battleService.getUserRatingsForBattle(battle.id, currentUser.id).then(({ ratings: userRatings, isSubmitted }) => {
-      if (Object.keys(userRatings).length > 0) {
+      const hasRatings = Object.keys(userRatings).length > 0;
+      if (hasRatings) {
         setRatings((prev) => ({ ...userRatings, ...prev }));
       }
-      if (isSubmitted) {
+      if (isSubmitted && hasRatings) {
         setIsRatingsSubmitted(true);
+      } else {
+        setIsRatingsSubmitted(false);
+        try {
+          localStorage.removeItem(`bnp_submitted_ratings_${battle.id}_${currentUser.id}`);
+        } catch {}
       }
     });
   }, [battle.id, currentUser?.id]);
@@ -356,9 +414,10 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
   const handleRemoveMyEntry = async () => {
     if (!myEntry) return;
+    pauseTrack();
     setIsUploading(true);
     try {
-      await battleService.deleteSubmission(myEntry.id, battle.id);
+      await battleService.deleteSubmission(myEntry.id, battle.id, currentUser?.id);
       setMyEntry(null);
       refreshBattleData();
     } catch (err) {
@@ -655,11 +714,16 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
                     <button
                       type="button"
-                      onClick={() => downloadAudioFile(battle.samples[0]?.audioUrl || "/sample-packs/battle-5-samples.zip", battle.samples[0]?.title || "sample")}
-                      className="px-4 py-2 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-md active:scale-95 transition-all w-fit shrink-0 cursor-pointer"
+                      onClick={downloadSamples}
+                      disabled={isDownloadingSamples}
+                      className="px-4 py-2 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-md active:scale-95 transition-all w-fit shrink-0 cursor-pointer disabled:opacity-60"
                     >
-                      <Download className="w-4 h-4" />
-                      <span>Download</span>
+                      {isDownloadingSamples ? (
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <Download className="w-4 h-4" />
+                      )}
+                      <span>{isDownloadingSamples ? "Zipping..." : "Download"}</span>
                     </button>
                   </div>
 
@@ -1316,26 +1380,37 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                         compact={true}
                       />
 
-                      {/* Judge Feedbacks (Multi-judge support) */}
-                      {sub.juryFeedbacks && sub.juryFeedbacks.length > 0 ? (
-                        <div className="space-y-1.5 pt-1">
-                          {sub.juryFeedbacks.map((f, fIdx) => (
-                            <div key={fIdx} className="bg-[#121212] px-4 py-2.5 rounded-xl text-xs sm:text-sm text-[#D1D1D1] flex items-center justify-between gap-3">
-                              <span className="italic">{f.feedback ? `"${f.feedback}"` : "Score submitted"}</span>
-                              <div className="flex items-center gap-2 shrink-0 not-italic">
-                                {typeof f.score === "number" && (
-                                  <span className="text-[#7B61FF] font-bold">★ {f.score.toFixed(2)}</span>
-                                )}
-                                <span className="text-[#888888] font-semibold">{f.judgeName}</span>
+                      {/* Judge Feedbacks (Multi-judge support: only display if written feedback was provided) */}
+                      {(() => {
+                        const writtenFeedbacks = (sub.juryFeedbacks || [])
+                          .filter((f) => f.feedback && f.feedback.trim().length > 0)
+                          .map((f) => ({
+                            feedback: f.feedback!.trim(),
+                            judgeName: f.judgeName || "Judge",
+                          }));
+
+                        const fallbackFeedback =
+                          sub.juryFeedback && sub.juryFeedback.trim().length > 0
+                            ? [{ feedback: sub.juryFeedback.trim(), judgeName: sub.judgeName || "Judge" }]
+                            : [];
+
+                        const finalFeedbacks = writtenFeedbacks.length > 0 ? writtenFeedbacks : fallbackFeedback;
+
+                        if (finalFeedbacks.length === 0) return null;
+
+                        return (
+                          <div className="space-y-1.5 pt-1">
+                            {finalFeedbacks.map((f, fIdx) => (
+                              <div
+                                key={fIdx}
+                                className="bg-[#121212] px-4 py-2.5 rounded-xl text-xs sm:text-sm text-[#D1D1D1] italic"
+                              >
+                                "{f.feedback}" - <span className="text-[#888888] not-italic font-semibold">{f.judgeName}</span>
                               </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : sub.juryFeedback ? (
-                        <div className="bg-[#121212] px-4 py-2.5 rounded-xl text-xs sm:text-sm text-[#D1D1D1] italic">
-                          "{sub.juryFeedback}" - <span className="text-[#888888] not-italic font-semibold">{sub.judgeName || "Judge"}</span>
-                        </div>
-                      ) : null}
+                            ))}
+                          </div>
+                        );
+                      })()}
                     </div>
                   );
                 })}

@@ -41,7 +41,7 @@ export function calculateBattlePhase(battle: {
   winner?: string;
   phase?: BattlePhase;
 }): BattlePhase {
-  if (battle.winner || battle.phase === "completed") return "completed";
+  if (battle.phase === "completed") return "completed";
   const now = Date.now();
   const subEnd = battle.submissionEndsAt ? new Date(battle.submissionEndsAt).getTime() : NaN;
   const ratingEnd = battle.ratingEndsAt ? new Date(battle.ratingEndsAt).getTime() : NaN;
@@ -570,16 +570,17 @@ export const battleService = {
     return newSubmission;
   },
 
-  async deleteSubmission(submissionId: string, battleId?: string): Promise<boolean> {
+  async deleteSubmission(submissionId: string, battleId?: string, userId?: string): Promise<boolean> {
     try {
       const custom = loadCustomSubmissions();
       const target = custom.find((s) => s.id === submissionId) || submissionsList.find((s) => s.id === submissionId);
       const bId = battleId || target?.battleId;
+      const uId = userId || target?.userId;
 
-      const filteredCustom = custom.filter((s) => s.id !== submissionId);
+      const filteredCustom = custom.filter((s) => s.id !== submissionId && !(uId && bId && s.userId === uId && s.battleId === bId));
       saveCustomSubmissions(filteredCustom);
       customSubsList = filteredCustom;
-      submissionsList = submissionsList.filter((s) => s.id !== submissionId);
+      submissionsList = submissionsList.filter((s) => s.id !== submissionId && !(uId && bId && s.userId === uId && s.battleId === bId));
 
       if (bId) {
         const battle = this.getBattleById(bId);
@@ -590,10 +591,18 @@ export const battleService = {
       }
 
       // Delete from Supabase submissions & ratings tables
-      await Promise.all([
-        supabase.from("submissions").delete().eq("id", submissionId),
-        supabase.from("ratings").delete().eq("submission_id", submissionId),
-      ]);
+      const deletePromises = [
+        Promise.resolve(supabase.from("submissions").delete().eq("id", submissionId)),
+        Promise.resolve(supabase.from("ratings").delete().eq("submission_id", submissionId)),
+      ];
+
+      if (uId && bId) {
+        deletePromises.push(
+          Promise.resolve(supabase.from("submissions").delete().eq("user_id", uId).eq("battle_id", bId))
+        );
+      }
+
+      await Promise.all(deletePromises);
 
       notifyBattlesUpdated();
       return true;
@@ -686,16 +695,19 @@ export const battleService = {
             localRatings[r.submission_id] = r.score;
           }
         });
-        isSubmitted = true;
-        if (typeof window !== "undefined") {
-          try {
-            localStorage.setItem(`bnp_ratings_${battleId}_${userId}`, JSON.stringify(localRatings));
-            localStorage.setItem(`bnp_submitted_ratings_${battleId}_${userId}`, "true");
-          } catch {}
-        }
       }
     } catch (err) {
       console.warn("getUserRatingsForBattle error:", err);
+    }
+
+    // If local storage had isSubmitted=true but no ratings exist or are empty, clean it up
+    if (isSubmitted && Object.keys(localRatings).length === 0) {
+      isSubmitted = false;
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.removeItem(`bnp_submitted_ratings_${battleId}_${userId}`);
+        } catch {}
+      }
     }
 
     return { ratings: localRatings, isSubmitted };
@@ -805,12 +817,29 @@ export const battleService = {
           winner: ranked[0]?.beatmakerTag || battle?.winner,
           endedAt: new Date().toISOString(),
         });
-      } else {
-        if (ranked[0]) {
-          await this.updateBattle(battleId, {
-            winner: ranked[0].beatmakerTag,
-          });
-        }
+      }
+
+      // Upsert updated submissions to Supabase
+      for (const sub of ranked) {
+        await supabase.from("submissions").upsert({
+          id: sub.id,
+          battle_id: sub.battleId,
+          user_id: sub.userId,
+          beatmaker_tag: sub.beatmakerTag,
+          beat_title: sub.beatTitle,
+          audio_url: sub.audioUrl,
+          waveform: sub.waveform || [],
+          duration: sub.duration || 120,
+          bpm: sub.bpm,
+          flame_rating: sub.flameRating || 0,
+          total_votes: sub.totalVotes || 0,
+          jury_score: sub.juryScore,
+          jury_feedback: sub.juryFeedback,
+          judge_name: sub.judgeName,
+          jury_feedbacks: sub.juryFeedbacks || [],
+          rank: sub.rank,
+          submitted_at: sub.submittedAt,
+        });
       }
 
       // Upsert updated submissions to Supabase

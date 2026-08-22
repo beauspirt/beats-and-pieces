@@ -12,14 +12,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { normalizeUrl } from "@/lib/utils";
 
 const SOCIAL_PLATFORMS = [
+  { key: "website", label: "Website" },
   { key: "instagram", label: "Instagram" },
   { key: "facebook", label: "Facebook" },
   { key: "youtube", label: "YouTube" },
   { key: "spotify", label: "Spotify" },
   { key: "bandcamp", label: "Bandcamp" },
-  { key: "soundcloud", label: "SoundCloud" },
   { key: "beatstars", label: "BeatStars" },
-  { key: "website", label: "Website" },
+  { key: "soundcloud", label: "SoundCloud" },
 ];
 
 function ProfileContent() {

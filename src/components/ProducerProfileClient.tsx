@@ -210,6 +210,17 @@ function JudgeFeedbackTicker({
   );
 }
 
+const SOCIAL_PLATFORM_ORDER = [
+  "website",
+  "instagram",
+  "facebook",
+  "youtube",
+  "spotify",
+  "bandcamp",
+  "beatstars",
+  "soundcloud",
+];
+
 // Brand SVG Icons for Social Links
 const SocialIcons: Record<string, React.FC<{ className?: string }>> = {
   instagram: ({ className }) => (
@@ -233,8 +244,11 @@ const SocialIcons: Record<string, React.FC<{ className?: string }>> = {
     </svg>
   ),
   soundcloud: ({ className }) => (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M1.65 13.1c-.1 0-.2.1-.2.2l-.3 3.5c0 .1.1.2.2.2h.3c.1 0 .2-.1.2-.2l.3-3.5c0-.1-.1-.2-.2-.2zm1.6-1.1c-.1 0-.2.1-.2.2l-.4 4.7c0 .1.1.2.2.2h.4c.1 0 .2-.1.2-.2l.4-4.7c0-.1-.1-.2-.2-.2zm1.6-.6c-.1 0-.2.1-.2.2l-.5 5.3c0 .1.1.2.2.2h.5c.1 0 .2-.1.2-.2l.5-5.3c0-.1-.1-.2-.2-.2zm1.6-.4c-.1 0-.2.1-.2.2l-.5 5.7c0 .1.1.2.2.2h.5c.1 0 .2-.1.2-.2l.5-5.7c0-.1-.1-.2-.2-.2zm1.6-.5c-.1 0-.2.1-.2.2l-.6 6.2c0 .1.1.2.2.2h.6c.1 0 .2-.1.2-.2l.6-6.2c0-.1-.1-.2-.2-.2zm1.6-.5c-.1 0-.2.1-.2.2l-.6 6.8c0 .1.1.2.2.2h.6c.1 0 .2-.1.2-.2l.6-6.8c0-.1-.1-.2-.2-.2zm1.6-.4c-.1 0-.2.1-.2.2l-.7 7.3c0 .1.1.2.2.2h.7c.1 0 .2-.1.2-.2l.7-7.3c0-.1-.1-.2-.2-.2zm1.6.1c-.1 0-.2.1-.2.2l-.7 7.2c0 .1.1.2.2.2h.7c.1 0 .2-.1.2-.2l.7-7.2c0-.1-.1-.2-.2-.2zm1.6-.8c-.1 0-.2.1-.2.2l-.7 8c0 .1.1.2.2.2h.7c.1 0 .2-.1.2-.2l.7-8c0-.1-.1-.2-.2-.2zm1.9-2.1c-.1 0-.2.1-.2.2l-.6 10.1c0 .1.1.2.2.2h.8c.1 0 .2-.1.2-.2l.6-10.1c0-.1-.1-.2-.2-.2zm6.2 2.6c-.5 0-1.1.1-1.5.3-.2-1.2-1.2-2.1-2.5-2.1-.3 0-.6.1-.9.2-.1 0-.2.1-.2.2l.4 9.3c0 .1.1.2.2.2h8.3c2.3 0 4.1-1.9 4.1-4.1 0-2.3-1.9-4.1-4.2-4.1-.6 0-1.1.1-1.6.3-.7-1.7-2.4-2.8-4.3-2.8-.2 0-.4 0-.6.1z" />
+    <svg className={className} viewBox="0 0 64 64" fill="currentColor">
+      <path
+        d="M1986.328 716.21c-.475-.183-.602-.373-.606-.74v-19.988c.01-.385.304-.706.68-.744.016-.001 17.345-.01 17.457-.01a6.3 6.3 0 0 1 6.298 6.298 6.3 6.3 0 0 1-8.733 5.809c-.5 5.675-5.26 10.128-11.066 10.128-1.42 0-2.805-.28-4.028-.754m-2.587-1.415l-.285-14.187.285-5.15c.01-.376.316-.686.694-.686a.7.7 0 0 1 .693.691v-.005l.31 5.15-.31 14.188c-.01.38-.316.69-.693.69a.7.7 0 0 1-.694-.693m-2.107-1.178l-.244-13.003c0-.01.244-5.228.244-5.228a.66.66 0 0 1 .65-.644.66.66 0 0 1 .65.647v-.003.003l.274 5.22-.274 13.01a.66.66 0 0 1-.65.646c-.352 0-.643-.3-.65-.647m-6.3-1.363l-.322-11.64.323-5.345c.01-.286.235-.512.518-.512s.51.227.52.514h0v.003l.363 5.34-.363 11.64c-.01.3-.237.516-.52.516a.52.52 0 0 1-.519-.516m2.083-.298l-.296-11.344.297-5.293c.01-.31.254-.558.563-.558s.553.247.562.56v-.003l.333 5.294-.333 11.344c-.01.314-.255.56-.562.56s-.557-.247-.564-.56m-4.15-.08l-.35-11.262.35-5.377a.48.48 0 0 1 .475-.469.48.48 0 0 1 .475.471l.393 5.375-.393 11.263c-.01.264-.22.47-.475.47a.48.48 0 0 1-.475-.472m6.25-.334l-.27-10.93.27-5.26c.01-.335.274-.6.607-.6s.598.264.605.603v-.004l.304 5.26-.304 10.93a.61.61 0 0 1-.605.604c-.333 0-.6-.266-.607-.604m-8.3-.53c0-.001-.374-10.394-.374-10.394l.374-5.433c.01-.238.2-.426.432-.426a.44.44 0 0 1 .432.427l.423 5.432-.423 10.394a.44.44 0 0 1-.432.427c-.232 0-.42-.188-.432-.427m-2.034-1.934l-.4-8.46.4-5.466c.01-.214.18-.382.387-.382s.376.168.388.383h0l.453 5.467-.453 8.46c-.013.214-.183.384-.388.384s-.377-.17-.387-.384m-4.018-2.853l-.452-5.605.452-5.422c.013-.168.142-.294.3-.294s.286.126.3.294l.512 5.422-.512 5.607c-.015.167-.143.294-.3.294s-.288-.128-.3-.296m-1.984-.148c0-.001-.478-5.456-.478-5.456l.478-5.256c.015-.147.122-.252.257-.252s.24.105.256.25l.543 5.257-.542 5.456c-.016.145-.124.25-.257.25s-.243-.107-.257-.25m3.985-.258l-.425-5.2.425-5.467a.35.35 0 0 1 .344-.34c.182 0 .33.146.344.34l.484 5.468-.484 5.202c-.015.19-.16.336-.344.336s-.332-.145-.344-.34m-5.953-.6c0-.001-.504-4.597-.504-4.597l.504-4.497c.015-.12.105-.207.214-.207s.195.084.212.206l.572 4.498-.572 4.597c-.02.122-.106.207-.213.207s-.2-.087-.214-.207m-1.885-1.754l-.374-2.843.374-2.795c.015-.118.1-.2.206-.2s.188.082.204.2l.444 2.796-.444 2.844c-.015.117-.1.2-.204.2s-.192-.082-.206-.2"
+        transform="matrix(1.25 0 0 -1.25 -2448.6946 912.30772)"
+      />
     </svg>
   ),
   beatstars: ({ className }) => (
@@ -698,7 +712,15 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     showToast("Beat added to your showcase!");
   };
 
-  const activeLinks = Object.entries(producer.links || {}).filter(([_, url]) => Boolean(url && url.trim()));
+  const activeLinks = useMemo(() => {
+    return Object.entries(producer.links || {})
+      .filter(([_, url]) => Boolean(url && url.trim()))
+      .sort(([a], [b]) => {
+        const indexA = SOCIAL_PLATFORM_ORDER.indexOf(a.toLowerCase());
+        const indexB = SOCIAL_PLATFORM_ORDER.indexOf(b.toLowerCase());
+        return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+      });
+  }, [producer.links]);
 
   return (
     <div className="w-full space-y-8 animate-in fade-in duration-300">
@@ -903,11 +925,26 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                         )}
                       </div>
 
-                      {beat.battleSource && (
-                        <span className="text-xs text-[#888888] font-medium block mt-0.5">
-                          {beat.battleSource}
-                        </span>
-                      )}
+                      {beat.battleSource && (() => {
+                        const match =
+                          beat.battleSource.match(/Beat Battle #?(\d+)/i) ||
+                          (beat.id && beat.id.match(/disc-bb(\d+)/));
+                        const battleUrl = match ? `/battles/battle-${match[1]}` : null;
+                        return battleUrl ? (
+                          <Link
+                            href={battleUrl}
+                            className="text-xs text-[#888888] hover:text-[#7B61FF] hover:underline font-medium inline-flex items-center gap-1 mt-0.5 transition-colors"
+                            title={`Go to ${beat.battleSource}`}
+                          >
+                            <span>{beat.battleSource}</span>
+                            <span className="text-[10px]">↗</span>
+                          </Link>
+                        ) : (
+                          <span className="text-xs text-[#888888] font-medium block mt-0.5">
+                            {beat.battleSource}
+                          </span>
+                        );
+                      })()}
                     </div>
                   </div>
 

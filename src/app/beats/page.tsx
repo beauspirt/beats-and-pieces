@@ -325,15 +325,55 @@ export default function BeatsDiscoveryPage() {
                       </Link>
 
                       <div className="truncate">
-                        <h3 className="font-bold text-white text-base sm:text-lg leading-snug truncate">
-                          {beat.title}
-                        </h3>
-                        <Link
-                          href={`/producers/${beat.beatmaker.id}`}
-                          className="text-xs sm:text-sm text-[#7B61FF] hover:underline font-semibold block"
-                        >
-                          {displayTag}
-                        </Link>
+                        <div className="flex items-center gap-2 truncate">
+                          <h3 className="font-bold text-white text-base sm:text-lg leading-snug truncate">
+                            {beat.title}
+                          </h3>
+                          {(() => {
+                            const match =
+                              (beat.battleSource && beat.battleSource.match(/Beat Battle #?(\d+)/i)) ||
+                              (beat.id && beat.id.match(/disc-bb(\d+)/));
+                            if (!match) return null;
+                            const battleUrl = `/battles/battle-${match[1]}`;
+                            const battleLabel = `BB#${match[1]}`;
+                            return (
+                              <Link
+                                href={battleUrl}
+                                className="px-2 py-0.5 rounded-md bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-[11px] font-bold shrink-0 transition-all inline-flex items-center gap-1"
+                                title={`View ${beat.battleSource || `Beat Battle #${match[1]}`}`}
+                              >
+                                <span>{battleLabel}</span>
+                                <span className="text-[9px]">↗</span>
+                              </Link>
+                            );
+                          })()}
+                        </div>
+                        <div className="flex items-center gap-2 mt-0.5 truncate">
+                          <Link
+                            href={`/producers/${beat.beatmaker.id}`}
+                            className="text-xs sm:text-sm text-[#7B61FF] hover:underline font-semibold block truncate"
+                          >
+                            {displayTag}
+                          </Link>
+                          {beat.battleSource && (() => {
+                            const match =
+                              beat.battleSource.match(/Beat Battle #?(\d+)/i) ||
+                              (beat.id && beat.id.match(/disc-bb(\d+)/));
+                            const battleUrl = match ? `/battles/battle-${match[1]}` : null;
+                            if (!battleUrl) return null;
+                            return (
+                              <span className="text-[11px] text-[#888888] truncate">
+                                •{" "}
+                                <Link
+                                  href={battleUrl}
+                                  className="hover:underline hover:text-zinc-300 transition-colors"
+                                >
+                                  {beat.battleSource}
+                                </Link>
+                              </span>
+                            );
+                          })()}
+                        </div>
                       </div>
                     </div>
                   );

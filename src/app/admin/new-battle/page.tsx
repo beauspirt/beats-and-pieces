@@ -150,7 +150,7 @@ export default function NewBattlePage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
 
@@ -200,8 +200,9 @@ export default function NewBattlePage() {
       }
     });
 
+    setIsSaved(true);
     try {
-      battleService.createBattle({
+      await battleService.createBattle({
         title: title.trim(),
         coverImage: coverImage || "/covers/default-battle.png",
         hosts: hosts.map((h) => h.name),
@@ -222,7 +223,7 @@ export default function NewBattlePage() {
 
     setTimeout(() => {
       router.push("/battles");
-    }, 1000);
+    }, 600);
   };
 
   return (

@@ -38,6 +38,15 @@ export default function HostPanelPage() {
         const myBattles = battleService.getBattlesByHost(user.email || user.nickname);
         setHostedBattles(myBattles);
       }
+
+      battleService.syncFromSupabase().then(() => {
+        if (user.role === "admin") {
+          setHostedBattles(battleService.getAllBattles());
+        } else {
+          const myBattles = battleService.getBattlesByHost(user.email || user.nickname);
+          setHostedBattles(myBattles);
+        }
+      });
     }
   }, [user]);
 
@@ -124,7 +133,7 @@ export default function HostPanelPage() {
     }
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingBattle) return;
 
@@ -157,7 +166,7 @@ export default function HostPanelPage() {
       samples: samples,
     };
 
-    battleService.updateBattle(updated.id, updated);
+    await battleService.updateBattle(updated.id, updated);
     if (user?.role === "admin") {
       setHostedBattles(battleService.getAllBattles());
     } else if (user) {

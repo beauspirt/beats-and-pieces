@@ -226,7 +226,7 @@ export const battleService = {
     }
   },
 
-  createBattle(battleData: Partial<Competition>): Competition {
+  async createBattle(battleData: Partial<Competition>): Promise<Competition> {
     const existing = this.getAllCompetitions();
     const nextNumber = existing.reduce((max, b) => Math.max(max, b.number || 0), 0) + 1;
     
@@ -273,40 +273,40 @@ export const battleService = {
     customBattlesList = updatedCustom;
     competitionsList = [...customBattlesList, ...(rawCompetitions as Competition[])];
 
-    // Async write to Supabase
-    supabase.from("battles").upsert({
-      id: newBattle.id,
-      number: newBattle.number,
-      title: newBattle.title,
-      slug: newBattle.slug,
-      cover_image: newBattle.coverImage,
-      hosts: newBattle.hosts,
-      host_details: newBattle.hostDetails || [],
-      judges: newBattle.judges,
-      judge_details: newBattle.judgeDetails || [],
-      description: newBattle.description,
-      prizes: newBattle.prizes,
-      samples: newBattle.samples,
-      phase: newBattle.phase,
-      submission_starts_at: newBattle.submissionStartsAt,
-      submission_ends_at: newBattle.submissionEndsAt,
-      rating_ends_at: newBattle.ratingEndsAt,
-      judging_ends_at: newBattle.judgingEndsAt,
-      total_submissions: 0,
-      min_votes_required: newBattle.minVotesRequired,
-      top_finalists_cutoff: newBattle.topFinalistsCutoff,
-      rules: newBattle.rules,
-    }).then(
-      ({ error }) => {
-        if (error) console.warn("Supabase battle insert failed:", error.message);
-      },
-      () => {}
-    );
+    // Write to Supabase
+    try {
+      const { error } = await supabase.from("battles").upsert({
+        id: newBattle.id,
+        number: newBattle.number,
+        title: newBattle.title,
+        slug: newBattle.slug,
+        cover_image: newBattle.coverImage,
+        hosts: newBattle.hosts,
+        host_details: newBattle.hostDetails || [],
+        judges: newBattle.judges,
+        judge_details: newBattle.judgeDetails || [],
+        description: newBattle.description,
+        prizes: newBattle.prizes,
+        samples: newBattle.samples,
+        phase: newBattle.phase,
+        submission_starts_at: newBattle.submissionStartsAt,
+        submission_ends_at: newBattle.submissionEndsAt,
+        rating_ends_at: newBattle.ratingEndsAt,
+        judging_ends_at: newBattle.judgingEndsAt,
+        total_submissions: 0,
+        min_votes_required: newBattle.minVotesRequired,
+        top_finalists_cutoff: newBattle.topFinalistsCutoff,
+        rules: newBattle.rules,
+      });
+      if (error) console.warn("Supabase battle insert error:", error.message);
+    } catch (err) {
+      console.warn("Supabase battle insert exception:", err);
+    }
 
     return newBattle;
   },
 
-  updateBattle(id: string, updates: Partial<Competition>): Competition | null {
+  async updateBattle(id: string, updates: Partial<Competition>): Promise<Competition | null> {
     const all = this.getAllCompetitions();
     const target = all.find((b) => b.id === id);
     if (!target) return null;
@@ -326,50 +326,50 @@ export const battleService = {
     customBattlesList = updatedCustom;
     competitionsList = [...customBattlesList, ...(rawCompetitions as Competition[])];
 
-    // Async write to Supabase
-    supabase.from("battles").upsert({
-      id: updatedBattle.id,
-      number: updatedBattle.number,
-      title: updatedBattle.title,
-      slug: updatedBattle.slug,
-      cover_image: updatedBattle.coverImage,
-      hosts: updatedBattle.hosts,
-      host_details: updatedBattle.hostDetails || [],
-      judges: updatedBattle.judges,
-      judge_details: updatedBattle.judgeDetails || [],
-      description: updatedBattle.description,
-      prizes: updatedBattle.prizes,
-      samples: updatedBattle.samples,
-      phase: updatedBattle.phase,
-      submission_starts_at: updatedBattle.submissionStartsAt,
-      submission_ends_at: updatedBattle.submissionEndsAt,
-      rating_ends_at: updatedBattle.ratingEndsAt,
-      judging_ends_at: updatedBattle.judgingEndsAt,
-      ended_at: updatedBattle.endedAt,
-      total_submissions: updatedBattle.totalSubmissions,
-      min_votes_required: updatedBattle.minVotesRequired,
-      top_finalists_cutoff: updatedBattle.topFinalistsCutoff,
-      youtube_vod_url: updatedBattle.youtubeVodUrl,
-      rules: updatedBattle.rules,
-      winner: updatedBattle.winner,
-    }).then(
-      ({ error }) => {
-        if (error) console.warn("Supabase battle update failed:", error.message);
-      },
-      () => {}
-    );
+    // Write to Supabase
+    try {
+      const { error } = await supabase.from("battles").upsert({
+        id: updatedBattle.id,
+        number: updatedBattle.number,
+        title: updatedBattle.title,
+        slug: updatedBattle.slug,
+        cover_image: updatedBattle.coverImage,
+        hosts: updatedBattle.hosts,
+        host_details: updatedBattle.hostDetails || [],
+        judges: updatedBattle.judges,
+        judge_details: updatedBattle.judgeDetails || [],
+        description: updatedBattle.description,
+        prizes: updatedBattle.prizes,
+        samples: updatedBattle.samples,
+        phase: updatedBattle.phase,
+        submission_starts_at: updatedBattle.submissionStartsAt,
+        submission_ends_at: updatedBattle.submissionEndsAt,
+        rating_ends_at: updatedBattle.ratingEndsAt,
+        judging_ends_at: updatedBattle.judgingEndsAt,
+        ended_at: updatedBattle.endedAt,
+        total_submissions: updatedBattle.totalSubmissions,
+        min_votes_required: updatedBattle.minVotesRequired,
+        top_finalists_cutoff: updatedBattle.topFinalistsCutoff,
+        youtube_vod_url: updatedBattle.youtubeVodUrl,
+        rules: updatedBattle.rules,
+        winner: updatedBattle.winner,
+      });
+      if (error) console.warn("Supabase battle update error:", error.message);
+    } catch (err) {
+      console.warn("Supabase battle update exception:", err);
+    }
 
     return updatedBattle;
   },
 
-  deleteBattle(id: string): boolean {
+  async deleteBattle(id: string): Promise<boolean> {
     // 1. Remove from custom battles if present
     const currentCustom = loadCustomBattles();
     const filtered = currentCustom.filter((b) => b.id !== id);
     saveCustomBattles(filtered);
     customBattlesList = filtered;
 
-    // 2. Add to deleted battles registry
+    // 2. Add to deleted tracking list
     const deleted = loadDeletedBattles();
     if (!deleted.includes(id)) {
       const updatedDeleted = [...deleted, id];
@@ -383,13 +383,12 @@ export const battleService = {
       ...(rawCompetitions as Competition[]).filter((b) => !deletedSet.has(b.id)),
     ];
 
-    // 4. Async delete from Supabase
-    supabase.from("battles").delete().eq("id", id).then(
-      ({ error }) => {
-        if (error) console.warn("Supabase battle delete failed:", error.message);
-      },
-      () => {}
-    );
+    // 4. Delete from Supabase
+    try {
+      await supabase.from("battles").delete().eq("id", id);
+    } catch (err) {
+      console.warn("Supabase delete battle exception:", err);
+    }
 
     return true;
   },

@@ -16,6 +16,10 @@ export default function BattlesPage() {
   useEffect(() => {
     setCompetitions(battleService.getAllBattles());
     setMounted(true);
+
+    battleService.syncFromSupabase().then(() => {
+      setCompetitions(battleService.getAllBattles());
+    });
   }, []);
 
   if (!mounted) {

@@ -36,6 +36,12 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     if (updated) {
       setBattle(updated);
     }
+    battleService.syncFromSupabase().then(() => {
+      const fresh = battleService.getCompetitionById(battleId);
+      if (fresh) {
+        setBattle(fresh);
+      }
+    });
   }, [battleId]);
 
   // Route Guard: Require login for ongoing active battles

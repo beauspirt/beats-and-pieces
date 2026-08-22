@@ -44,6 +44,9 @@ export default function AdminBattlesManagerPage() {
 
   useEffect(() => {
     setBattles(battleService.getAllCompetitions());
+    battleService.syncFromSupabase().then(() => {
+      setBattles(battleService.getAllCompetitions());
+    });
   }, []);
 
   const handleEditClick = (battle: Competition) => {
@@ -198,15 +201,15 @@ export default function AdminBattlesManagerPage() {
     }
   };
 
-  const handleDeleteBattle = () => {
+  const handleDeleteBattle = async () => {
     if (!editingBattle) return;
-    battleService.deleteBattle(editingBattle.id);
+    await battleService.deleteBattle(editingBattle.id);
     setBattles(battleService.getAllBattles());
     setShowDeleteConfirm(false);
     setEditingBattle(null);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingBattle) return;
 
@@ -264,7 +267,7 @@ export default function AdminBattlesManagerPage() {
       rules: extraRules,
     };
 
-    battleService.updateBattle(updated.id, updated);
+    await battleService.updateBattle(updated.id, updated);
     setBattles(battleService.getAllBattles());
     setIsSaved(true);
     setTimeout(() => {

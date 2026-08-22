@@ -79,7 +79,7 @@ function StandardTagSelector({
           {selectedTags.map((tag) => (
             <span
               key={tag}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#7B61FF]/15 border border-[#7B61FF]/30 text-xs text-[#A78BFA] font-medium"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#7B61FF]/15 text-xs text-[#A78BFA] font-medium"
             >
               <span>{tag}</span>
               <button
@@ -120,7 +120,7 @@ function StandardTagSelector({
 
       {/* Dropdown Options List */}
       {isDropdownOpen && (
-        <div className="p-2.5 bg-[#141414] border border-[#2a2a2a] rounded-xl max-h-48 overflow-y-auto space-y-1.5 shadow-2xl z-20">
+        <div className="p-2.5 bg-[#141414] rounded-xl max-h-48 overflow-y-auto space-y-1.5 shadow-2xl z-20">
           <div className="flex flex-wrap gap-1.5">
             {filteredOptions.map((tag) => {
               const isSelected = selectedTags.includes(tag);
@@ -367,38 +367,6 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     )
   );
 
-  // Compute prioritized badges: Admin -> Host -> Judge -> Winner -> OG Producer / Community
-  const sortedBadges = useMemo(() => {
-    const rawRoles = new Set<string>(
-      (producer.discordRoles || []).filter(
-        (r) => !r.toLowerCase().startsWith("winner bb")
-      )
-    );
-
-    // Inject system roles if applicable
-    if (producer.role === "admin" || producer.email === "adrian.hrihor@gmail.com" || producer.nickname.toLowerCase() === "nerub") {
-      rawRoles.add("Admin");
-    }
-    if (producer.role === "host" || (producer.email && battleService.getBattlesByHost(producer.email).length > 0)) {
-      rawRoles.add("Host");
-    }
-    if (producer.role === "judge") {
-      rawRoles.add("Judge");
-    }
-
-    const roleRank = (roleName: string): number => {
-      const lower = roleName.toLowerCase();
-      if (lower === "admin") return 1;
-      if (lower === "host") return 2;
-      if (lower === "judge" || lower === "jury") return 3;
-      if (lower.includes("winner") || lower.includes("1st") || lower.includes("champion")) return 4;
-      if (lower.includes("og producer") || lower.includes("og")) return 5;
-      return 6;
-    };
-
-    return Array.from(rawRoles).sort((a, b) => roleRank(a) - roleRank(b));
-  }, [producer]);
-
   // Merge and prioritize all beats for this producer dynamically from beatService
   const prioritizedBeats = useMemo(() => {
     const allBeats = beatService.getAllDiscoveryBeats();
@@ -516,6 +484,46 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       !(b.id && (b.id.startsWith("sub-") || b.id.startsWith("disc-bb")))
   );
   const isAtBeatLimit = customUploadedBeats.length >= MAX_FREE_BEATS;
+
+  // Compute prioritized badges: Admin -> Host -> Judge -> Battle Champion -> OG Producer / Community
+  const sortedBadges = useMemo(() => {
+    const rawRoles = new Set<string>(
+      (producer.discordRoles || []).filter(
+        (r) => !r.toLowerCase().startsWith("winner bb") && !r.toLowerCase().startsWith("winner #")
+      )
+    );
+
+    // 1. Automatic Battle Champion: Check if producer has won any battle (1st place) or has battlesWon > 0
+    const hasWonAnyBattle =
+      (producer.stats?.battlesWon && producer.stats.battlesWon > 0) ||
+      prioritizedBeats.some((b) => b.rank === 1);
+    if (hasWonAnyBattle) {
+      rawRoles.add("Battle Champion");
+    }
+
+    // 2. Inject system roles if applicable
+    if (producer.role === "admin" || producer.email === "adrian.hrihor@gmail.com" || producer.nickname.toLowerCase() === "nerub") {
+      rawRoles.add("Admin");
+    }
+    if (producer.role === "host" || (producer.email && battleService.getBattlesByHost(producer.email).length > 0)) {
+      rawRoles.add("Host");
+    }
+    if (producer.role === "judge") {
+      rawRoles.add("Judge");
+    }
+
+    const roleRank = (roleName: string): number => {
+      const lower = roleName.toLowerCase();
+      if (lower === "admin") return 1;
+      if (lower === "host") return 2;
+      if (lower === "judge" || lower === "jury") return 3;
+      if (lower.includes("champion") || lower.includes("winner") || lower.includes("1st")) return 4;
+      if (lower.includes("og producer") || lower.includes("og")) return 5;
+      return 6;
+    };
+
+    return Array.from(rawRoles).sort((a, b) => roleRank(a) - roleRank(b));
+  }, [producer, prioritizedBeats]);
 
   const handleCopyEmail = () => {
     navigator.clipboard.writeText(producer.email);
@@ -856,14 +864,14 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
         {/* Max Upload Limit Notice */}
         {isProfileOwner && isAtBeatLimit && (
-          <div className="bg-[#1C1A24] border border-[#7B61FF]/30 rounded-2xl p-4 flex items-center gap-3.5 text-xs text-zinc-300 animate-in fade-in duration-200">
+          <div className="bg-[#1C1A24] rounded-2xl p-4 flex items-center gap-3.5 text-xs text-zinc-300 animate-in fade-in duration-200">
             <div className="w-8 h-8 rounded-xl bg-[#7B61FF]/15 flex items-center justify-center shrink-0 text-[#7B61FF]">
               <Music className="w-4 h-4" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-white">Maximum upload limit reached ({MAX_FREE_BEATS}/{MAX_FREE_BEATS})</p>
+              <p className="font-semibold text-white">Maximum upload limit reached (3/3).</p>
               <p className="text-[#888888] mt-0.5">
-                You have reached the maximum number of custom beats you can upload. To upload a new beat, you can remove an existing one, or unlock additional slots with Patreon support in the future.
+                To upload a new beat, you can remove an existing one. Unlocking more slots will be possible in future versions of the platform.
               </p>
             </div>
           </div>

@@ -899,7 +899,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                 </h3>
 
                 {isUserJudge ? (
-                  <div className="flex-1 min-h-[260px] rounded-2xl p-6 bg-[#121212]/70 border border-[#7B61FF]/30 flex flex-col items-center justify-center text-center gap-3">
+                  <div className="flex-1 min-h-[260px] rounded-2xl p-6 bg-[#121212]/70 flex flex-col items-center justify-center text-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-[#7B61FF]/15 flex items-center justify-center text-[#7B61FF]">
                       <Star className="w-6 h-6 fill-current" />
                     </div>

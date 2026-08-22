@@ -124,7 +124,10 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
     const resolvedUrl =
       audioUrl.startsWith("http://") || audioUrl.startsWith("https://") || audioUrl.startsWith("blob:")
         ? audioUrl
-        : encodeURI(decodeURI(audioUrl));
+        : audioUrl
+            .split("/")
+            .map((seg) => (seg ? encodeURIComponent(decodeURIComponent(seg)) : ""))
+            .join("/");
 
     fetch(resolvedUrl)
       .then((res) => res.arrayBuffer())
@@ -168,17 +171,8 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
       if (dict[rawFilename]) return dict[rawFilename];
     }
 
-    for (const [file, data] of Object.entries(precomputedPeaksV2)) {
-      if (
-        (title && file.toLowerCase().includes(title.toLowerCase())) ||
-        (id && file.toLowerCase().includes(id.toLowerCase()))
-      ) {
-        return data as WaveformData;
-      }
-    }
-
-    // Return deterministic procedural waveform so tracks always render a lively waveform
-    const fallbackPeaks = generateProceduralPeaks(id + (title || "") + (audioUrl || ""), 200);
+    // Return deterministic procedural waveform so tracks always render a lively responsive waveform
+    const fallbackPeaks = generateProceduralPeaks(id + (audioUrl || "") + (title || ""), 200);
     return { peaks: fallbackPeaks, duration: duration || 60 };
   }, [waveformData, audioUrl, title, id, duration]);
 
@@ -278,10 +272,10 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
     };
   }, [isThisTrackPlaying, renderWaveform]);
 
-  // Redraw when progress changes
+  // Redraw when progress or waveformData changes
   useEffect(() => {
     renderWaveform();
-  }, [renderWaveform, playbackProgress]);
+  }, [renderWaveform, playbackProgress, waveformData]);
 
   // Observe theme class changes on html element
   useEffect(() => {
@@ -317,12 +311,18 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
     };
   }, [renderWaveform]);
 
+  // Determine accurate duration to display
+  const effectiveDuration = waveformData?.duration || (getWaveformData().duration) || duration || 60;
+  const displayDuration = isThisTrackActive && contextDuration > 0
+    ? contextDuration
+    : effectiveDuration;
+
   const handlePlayToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (isThisTrackPlaying) {
       pauseTrack();
     } else {
-      playTrack(id, title, bpm, audioUrl);
+      playTrack(id, title, bpm, audioUrl, undefined, effectiveDuration);
     }
   };
 
@@ -353,7 +353,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
 
     if (!isThisTrackActive) {
       // Initial click on inactive track: ALWAYS start from 0:00
-      playTrack(id, title, bpm, audioUrl, 0);
+      playTrack(id, title, bpm, audioUrl, 0, effectiveDuration);
     } else {
       // Already active track: seek directly to clicked position
       seekTrack(p);
@@ -409,12 +409,6 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
       document.body.removeChild(link);
     }
   };
-
-  // Determine accurate duration to display
-  const effectiveDuration = waveformData?.duration || (getWaveformData().duration) || duration || 60;
-  const displayDuration = isThisTrackActive && contextDuration > 0
-    ? contextDuration
-    : effectiveDuration;
 
   return (
     <div

@@ -14,7 +14,8 @@ interface AudioContextType {
     title?: string,
     bpm?: number,
     audioUrl?: string,
-    startProgress?: number
+    startProgress?: number,
+    knownDuration?: number
   ) => void;
   pauseTrack: () => void;
   seekTrack: (progress: number) => void;
@@ -282,14 +283,23 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     title?: string,
     bpm = 90,
     audioUrl?: string,
-    startProgress?: number
+    startProgress?: number,
+    knownDuration?: number
   ) => {
     const ctx = getAudioContext();
-    const sourceUrl = audioUrl || `/audio/01 Ortega - Bonita Applebong.mp3`;
-    const resolvedUrl = sourceUrl
-      .split("/")
-      .map((seg) => (seg ? encodeURIComponent(decodeURIComponent(seg)) : ""))
-      .join("/");
+    const sourceUrl = audioUrl || "";
+    if (!sourceUrl) {
+      console.warn("playTrack called without valid audioUrl for track:", id);
+      return;
+    }
+
+    const resolvedUrl =
+      sourceUrl.startsWith("http://") || sourceUrl.startsWith("https://") || sourceUrl.startsWith("blob:")
+        ? sourceUrl
+        : sourceUrl
+            .split("/")
+            .map((seg) => (seg ? encodeURIComponent(decodeURIComponent(seg)) : ""))
+            .join("/");
 
     const initialProgress = (typeof startProgress === "number" && !isNaN(startProgress) && isFinite(startProgress))
       ? Math.max(0, Math.min(1, startProgress))
@@ -318,12 +328,13 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     
     // Instantly reset time so previous track progress never flashes on new track
     setCurrentTime(0);
-    setDuration(45);
+    setDuration(knownDuration && knownDuration > 0 ? knownDuration : 0);
 
     // Check if AudioBuffer is already in LRU cache
     const cachedBuffer = getCachedBuffer(resolvedUrl);
     if (cachedBuffer) {
       currentBufferRef.current = cachedBuffer;
+      setDuration(cachedBuffer.duration);
       const targetTime = initialProgress * cachedBuffer.duration;
       startBufferPlayback(cachedBuffer, targetTime);
       return;
@@ -341,6 +352,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         // Verify this is still the active requested track
         if (currentUrlRef.current === resolvedUrl) {
           currentBufferRef.current = decodedBuffer;
+          setDuration(decodedBuffer.duration);
           const targetTime = initialProgress * decodedBuffer.duration;
           startBufferPlayback(decodedBuffer, targetTime);
         }
@@ -358,7 +370,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     audio.src = resolvedUrl;
 
     audio.onloadedmetadata = () => {
-      if (isFinite(audio.duration)) {
+      if (isFinite(audio.duration) && audio.duration > 0) {
         setDuration(audio.duration);
         if (initialProgress > 0) {
           audio.currentTime = initialProgress * audio.duration;

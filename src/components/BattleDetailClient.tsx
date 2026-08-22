@@ -1,14 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import {
-  sampleCompetitions,
-  sampleSubmissions,
-  sampleProducers,
-} from "@/lib/mock-data";
 import { battleService, storageService } from "@/services";
 import { AudioWaveformPlayer } from "./AudioWaveformPlayer";
 import { FlameRating } from "./FlameRating";
@@ -18,8 +13,7 @@ import {
   ExternalLink
 } from "lucide-react";
 import confetti from "canvas-confetti";
-import { submitRating } from "@/lib/api";
-import { BattlePhase, Competition } from "@/lib/types";
+import { BattlePhase, Competition, BattleSubmission } from "@/lib/types";
 import { useAudioPlayer } from "@/lib/audio-context";
 import { useAuth } from "@/lib/auth-context";
 
@@ -27,40 +21,56 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   const router = useRouter();
   const { pauseTrack } = useAudioPlayer();
   const { user: currentUser, isLoggedIn, isLoading: isAuthLoading } = useAuth();
+  
   const [battle, setBattle] = useState<Competition>(() => {
-    return battleService.getCompetitionById(battleId) || sampleCompetitions.find((c) => c.id === battleId) || sampleCompetitions[0];
+    return battleService.getCompetitionById(battleId) || battleService.getAllCompetitions()[0];
   });
 
-  useEffect(() => {
-    const updated = battleService.getCompetitionById(battleId);
-    if (updated) {
-      setBattle(updated);
+  const [submissions, setSubmissions] = useState<BattleSubmission[]>(() => {
+    return battleService.getSubmissionsByBattleId(battleId);
+  });
+
+  const refreshBattleData = useCallback(() => {
+    const freshBattle = battleService.getCompetitionById(battleId);
+    if (freshBattle) {
+      setBattle(freshBattle);
     }
-    battleService.syncFromSupabase().then(() => {
-      const fresh = battleService.getCompetitionById(battleId);
-      if (fresh) {
-        setBattle(fresh);
-      }
-    });
+    setSubmissions(battleService.getSubmissionsByBattleId(battleId));
   }, [battleId]);
+
+  useEffect(() => {
+    refreshBattleData();
+
+    battleService.syncFromSupabase().then(() => {
+      refreshBattleData();
+    });
+
+    const handleUpdate = () => {
+      refreshBattleData();
+    };
+
+    window.addEventListener("bnp_battles_updated", handleUpdate);
+    window.addEventListener("storage", handleUpdate);
+    return () => {
+      window.removeEventListener("bnp_battles_updated", handleUpdate);
+      window.removeEventListener("storage", handleUpdate);
+    };
+  }, [battleId, refreshBattleData]);
 
   // Route Guard: Require login for ongoing active battles
   useEffect(() => {
-    if (!isAuthLoading && !isLoggedIn && battle.phase !== "completed") {
-      router.replace("/signin");
+    if (!isAuthLoading && !isLoggedIn && battle?.phase !== "completed") {
+      router.replace(`/signin?redirect=/battles/${battleId}`);
     }
-  }, [isAuthLoading, isLoggedIn, battle.phase, router]);
+  }, [isAuthLoading, isLoggedIn, battle?.phase, router, battleId]);
 
-  if (!isAuthLoading && !isLoggedIn && battle.phase !== "completed") {
+  if (!isAuthLoading && !isLoggedIn && battle?.phase !== "completed") {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="w-8 h-8 rounded-full border-2 border-brand border-t-transparent animate-spin" />
       </div>
     );
   }
-
-  const battleSubmissions = battleService.getSubmissionsByBattleId(battle.id);
-  const currentSubmissions = battleSubmissions.length > 0 ? battleSubmissions : sampleSubmissions;
 
   // Determine if the currently logged in user is authorized to judge this battle
   const isUserJudge = Boolean(
@@ -93,13 +103,13 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     submittedAt: string;
   } | null>(() => {
     if (currentUser) {
-      const existing = battleSubmissions.find((s) => s.userId === currentUser.id);
+      const existing = submissions.find((s) => s.userId === currentUser.id);
       if (existing) {
         return {
           id: existing.id,
           title: existing.beatTitle,
           audioUrl: existing.audioUrl,
-          duration: existing.duration,
+          duration: existing.duration || 120,
           bpm: existing.bpm,
           submittedAt: existing.submittedAt,
         };
@@ -109,27 +119,23 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   });
 
   useEffect(() => {
-    if (currentUser && !myEntry) {
-      const existing = battleSubmissions.find((s) => s.userId === currentUser.id);
+    if (currentUser) {
+      const existing = submissions.find((s) => s.userId === currentUser.id);
       if (existing) {
         setMyEntry({
           id: existing.id,
           title: existing.beatTitle,
           audioUrl: existing.audioUrl,
-          duration: existing.duration,
+          duration: existing.duration || 120,
           bpm: existing.bpm,
           submittedAt: existing.submittedAt,
         });
       }
     }
-  }, [currentUser, battleSubmissions, myEntry]);
+  }, [currentUser, submissions]);
 
   // Phase 2: Rating state (Track ratings)
-  const [ratings, setRatings] = useState<Record<string, number>>({
-    "blind-01": 5,
-    "blind-02": 4,
-    "blind-03": 4,
-  });
+  const [ratings, setRatings] = useState<Record<string, number>>({});
 
   // Phase 3: Clean Single-Score Jury evaluation state (slider 0.00 to 5.00)
   const [juryScores, setJuryScores] = useState<Record<string, string>>({});
@@ -138,28 +144,20 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
   // Dynamic Percentage-based Ballot Validation (min 50% of total entries)
   const minPercentage = 50;
-  const requiredVotes = Math.ceil(battle.totalSubmissions * (minPercentage / 100));
-  const currentVotesCount = Object.keys(ratings).length;
-  const isBallotQualified = currentVotesCount >= requiredVotes;
+  const totalEntries = submissions.length;
+  const requiredVotes = totalEntries > 0 ? Math.max(1, Math.ceil(totalEntries * (minPercentage / 100))) : 0;
+  const currentVotesCount = Object.keys(ratings).filter((tId) => submissions.some((s) => s.id === tId)).length;
+  const isBallotQualified = totalEntries > 0 && currentVotesCount >= requiredVotes;
 
-  // Complete Anonymized track queue for all 15 master battle entries
-  const blindTracks = [
-    { id: "blind-01", placeholder: "Beat 01", bpm: 92, audioUrl: "/audio/01 Ortega - Bonita Applebong.mp3", duration: 67 },
-    { id: "blind-02", placeholder: "Beat 02", bpm: 88, audioUrl: "/audio/02 C.S.T - ThunderClouds.mp3", duration: 119 },
-    { id: "blind-03", placeholder: "Beat 03", bpm: 90, audioUrl: "/audio/03 flg - bule temporale.mp3", duration: 201 },
-    { id: "blind-04", placeholder: "Beat 04", bpm: 94, audioUrl: "/audio/04 Egris - Triburi.mp3", duration: 104 },
-    { id: "blind-05", placeholder: "Beat 05", bpm: 86, audioUrl: "/audio/05 Nerub - Butterflies in my lungs.mp3", duration: 124 },
-    { id: "blind-06", placeholder: "Beat 06", bpm: 91, audioUrl: "/audio/06 DFB - Apollo's Lyre.mp3", duration: 87 },
-    { id: "blind-07", placeholder: "Beat 07", bpm: 93, audioUrl: "/audio/07 Ripp - Beyond.mp3", duration: 130 },
-    { id: "blind-08", placeholder: "Beat 08", bpm: 89, audioUrl: "/audio/08 Mr Tweaks - Dmzl 4.mp3", duration: 136 },
-    { id: "blind-09", placeholder: "Beat 09", bpm: 95, audioUrl: "/audio/09 Fane Stelaru - Late to the party.mp3", duration: 94 },
-    { id: "blind-10", placeholder: "Beat 10", bpm: 98, audioUrl: "/audio/10 Fu - Malibu.mp3", duration: 102 },
-    { id: "blind-11", placeholder: "Beat 11", bpm: 91, audioUrl: "/audio/11 Todica Vlad - Unfound.mp3", duration: 126 },
-    { id: "blind-12", placeholder: "Beat 12", bpm: 87, audioUrl: "/audio/12 Jena - Paper Wasp.mp3", duration: 154 },
-    { id: "blind-13", placeholder: "Beat 13", bpm: 87, audioUrl: "/audio/13 Raven - Sacred.mp3", duration: 100 },
-    { id: "blind-14", placeholder: "Beat 14", bpm: 92, audioUrl: "/audio/14 Flat Beats - Time.mp3", duration: 121 },
-    { id: "blind-15", placeholder: "Beat 15", bpm: 94, audioUrl: "/audio/15 Eastern Hypocrites - Rudaj.mp3", duration: 115 },
-  ];
+  // Anonymized track queue derived directly from real submissions
+  const blindTracks = submissions.map((sub, idx) => ({
+    id: sub.id,
+    placeholder: `Beat ${idx < 9 ? "0" + (idx + 1) : idx + 1}`,
+    bpm: sub.bpm,
+    audioUrl: sub.audioUrl,
+    duration: sub.duration || 120,
+    flameRating: sub.flameRating,
+  }));
 
   const [isDraggingOver, setIsDraggingOver] = useState(false);
 
@@ -201,6 +199,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
         submittedAt: newSub.submittedAt,
       });
 
+      setSubmissions(battleService.getSubmissionsByBattleId(battle.id));
       confetti({ particleCount: 60, spread: 60, origin: { y: 0.6 } });
     } catch (err) {
       console.error("Submission failed:", err);
@@ -653,7 +652,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
         </div>
       )}      {/* ========================================================================= */}
-      {/* PHASE 2: PUBLIC RATING PHASE (ALL 15 BEATS WITH FLAME-ONLY RATING) */}
+      {/* PHASE 2: PUBLIC RATING PHASE (ACTUAL BATTLE SUBMISSIONS WITH FLAME-ONLY RATING) */}
       {/* ========================================================================= */}
       {battle.phase === "rating" && (
         <div className="space-y-6">
@@ -668,76 +667,87 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             </p>
           </div>
 
-          <div className="space-y-3.5">
-            {blindTracks.map((track, idx) => {
-              const unlocked = isTrackUnlocked(idx);
-              const currentFlames = ratings[track.id] || 0;
+          {blindTracks.length === 0 ? (
+            <div className="bg-[#181818] rounded-2xl p-8 text-center space-y-2">
+              <p className="text-white font-bold text-base">No Submissions Yet</p>
+              <p className="text-xs sm:text-sm text-[#888888]">
+                No beats have been submitted for this battle yet. When beats are entered, they will appear here anonymized for fair public rating.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3.5">
+              {blindTracks.map((track, idx) => {
+                const unlocked = isTrackUnlocked(idx);
+                const currentFlames = ratings[track.id] || 0;
 
-              return (
-                <div
-                  key={track.id}
-                  className={`bg-[#181818] rounded-2xl p-4 sm:p-5 ${
-                    unlocked ? "" : "opacity-40"
-                  }`}
-                >
-                  {unlocked ? (
-                    <div className="space-y-3.5">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <span className="font-bold text-white text-base sm:text-lg">{track.placeholder}</span>
+                return (
+                  <div
+                    key={track.id}
+                    className={`bg-[#181818] rounded-2xl p-4 sm:p-5 ${
+                      unlocked ? "" : "opacity-40"
+                    }`}
+                  >
+                    {unlocked ? (
+                      <div className="space-y-3.5">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <span className="font-bold text-white text-base sm:text-lg">{track.placeholder}</span>
+                          </div>
+
+                          {/* 5 Flames Only */}
+                          <div className="flex items-center gap-2">
+                            <FlameRating
+                              value={currentFlames}
+                              onChange={isRatingsSubmitted ? undefined : (val) => handleRateBeat(track.id, val)}
+                              readOnly={isRatingsSubmitted}
+                              size="md"
+                              showValue={false}
+                            />
+                          </div>
                         </div>
 
-                        {/* 5 Flames Only */}
+                        <AudioWaveformPlayer
+                          id={track.id}
+                          title={track.placeholder}
+                          audioUrl={track.audioUrl}
+                          duration={track.duration}
+                          bpm={track.bpm}
+                          compact={true}
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between py-2 text-xs sm:text-sm text-[#666666]">
                         <div className="flex items-center gap-2">
-                          <FlameRating
-                            value={currentFlames}
-                            onChange={isRatingsSubmitted ? undefined : (val) => handleRateBeat(track.id, val)}
-                            readOnly={isRatingsSubmitted}
-                            size="md"
-                            showValue={false}
-                          />
+                          <Lock className="w-4 h-4" />
+                          <span>{track.placeholder}</span>
                         </div>
+                        <span>Rate previous beats to unlock</span>
                       </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
-                      <AudioWaveformPlayer
-                        id={track.id}
-                        title={track.placeholder}
-                        audioUrl={track.audioUrl}
-                        duration={track.duration}
-                        bpm={track.bpm}
-                        compact={true}
-                      />
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between py-2 text-xs sm:text-sm text-[#666666]">
-                      <div className="flex items-center gap-2">
-                        <Lock className="w-4 h-4" />
-                        <span>{track.placeholder}</span>
-                      </div>
-                      <span>Rate previous beats to unlock</span>
-                    </div>
-                  )}
+          {/* Bottom Submit Action */}
+          {blindTracks.length > 0 && (
+            <div className="flex flex-col items-center justify-center gap-3 pt-6 pb-6">
+              {isRatingsSubmitted ? (
+                <div className="flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-emerald-500/15 text-emerald-300 font-bold text-sm sm:text-base shadow-lg">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                  <span>Ratings Submitted & Locked ✓</span>
                 </div>
-              );
-            })}
-          </div>
-
-          {/* Bottom Submit Action (No scrolling required after finishing) */}
-          <div className="flex flex-col items-center justify-center gap-3 pt-6 pb-6">
-            {isRatingsSubmitted ? (
-              <div className="flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-emerald-500/15 text-emerald-300 font-bold text-sm sm:text-base shadow-lg">
-                <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                <span>Ratings Submitted & Locked ✓</span>
-              </div>
-            ) : (
-              <button
-                onClick={handleClickSubmitRatings}
-                className="px-8 py-3.5 rounded-2xl bg-[#7B61FF] hover:bg-[#684DE6] text-white font-bold text-sm sm:text-base shadow-xl transition-all active:scale-95 cursor-pointer"
-              >
-                <span>Submit Ratings</span>
-              </button>
-            )}
-          </div>
+              ) : (
+                <button
+                  onClick={handleClickSubmitRatings}
+                  className="px-8 py-3.5 rounded-2xl bg-[#7B61FF] hover:bg-[#684DE6] text-white font-bold text-sm sm:text-base shadow-xl transition-all active:scale-95 cursor-pointer"
+                >
+                  <span>Submit Ratings</span>
+                </button>
+              )}
+            </div>
+          )}
 
           {/* INSUFFICIENT RATINGS ERROR MODAL */}
           {submitError && (
@@ -761,7 +771,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                 <div className="bg-[#121212] p-4 rounded-xl space-y-1.5 text-xs text-[#A0A0A0]">
                   <div className="flex items-center justify-between">
                     <span>Beats Rated So Far:</span>
-                    <strong className="text-white">{currentVotesCount} / {battle.totalSubmissions}</strong>
+                    <strong className="text-white">{currentVotesCount} / {totalEntries}</strong>
                   </div>
                   <div className="flex items-center justify-between">
                     <span>Minimum Required to Submit:</span>
@@ -804,7 +814,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                 <div className="bg-[#121212] p-4 rounded-xl space-y-1.5 text-xs text-[#A0A0A0]">
                   <div className="flex items-center justify-between">
                     <span>Total Beats Rated:</span>
-                    <strong className="text-white">{currentVotesCount} / {blindTracks.length}</strong>
+                    <strong className="text-white">{currentVotesCount} / {totalEntries}</strong>
                   </div>
                   <div className="flex items-center justify-between">
                     <span>Qualification Status:</span>
@@ -813,7 +823,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                 </div>
 
                 <p className="text-xs text-[#888888]">
-                  Are you ready to lock in your votes towards the Top 15 Finalists?
+                  Are you ready to lock in your votes towards the Finalists?
                 </p>
 
                 <div className="flex items-center justify-end gap-3 pt-2">
@@ -840,7 +850,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       )}
 
       {/* ========================================================================= */}
-      {/* STAGE 3: BLIND JURY EVALUATION */}
+      {/* PHASE 3: BLIND JURY EVALUATION */}
       {/* ========================================================================= */}
       {battle.phase === "judging" && (
         <div className="space-y-6">
@@ -964,90 +974,101 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
           </div>
 
-          {/* Anonymized Finalists list (Top 15 Blind) */}
-          <div className="space-y-3.5">
-            {sampleSubmissions.slice(0, 15).map((sub, idx) => {
-              const scoreVal = juryScores[sub.id] !== undefined ? juryScores[sub.id] : "";
-              const feedbackVal = juryFeedback[sub.id] !== undefined ? juryFeedback[sub.id] : "";
-              const blindTitle = `Finalist ${idx < 9 ? "0" + (idx + 1) : idx + 1}`;
+          {/* Anonymized Finalists list (Actual battle submissions) */}
+          {submissions.length === 0 ? (
+            <div className="bg-[#181818] rounded-2xl p-8 text-center space-y-2">
+              <p className="text-white font-bold text-base">No Finalists Yet</p>
+              <p className="text-xs sm:text-sm text-[#888888]">
+                There are currently no finalist submissions to evaluate for this battle.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3.5">
+              {submissions.map((sub, idx) => {
+                const scoreVal = juryScores[sub.id] !== undefined ? juryScores[sub.id] : "";
+                const feedbackVal = juryFeedback[sub.id] !== undefined ? juryFeedback[sub.id] : "";
+                const blindTitle = `Finalist ${idx < 9 ? "0" + (idx + 1) : idx + 1}`;
 
-              return (
-                <div
-                  key={sub.id}
-                  className="bg-[#181818] rounded-2xl p-4 sm:p-5 space-y-3.5"
-                >
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <h4 className="font-bold text-white text-base sm:text-lg">{blindTitle}</h4>
-                    </div>
-
-                    {/* Clearly labeled Public Rating Average */}
-                    <div className="flex flex-col items-end">
-                      <div className="flex items-center gap-1.5 text-sm sm:text-base text-[#FF5E3A] font-bold">
-                        <Flame className="w-4 h-4 fill-current" />
-                        <span>{sub.flameRating?.toFixed(2)}</span>
+                return (
+                  <div
+                    key={sub.id}
+                    className="bg-[#181818] rounded-2xl p-4 sm:p-5 space-y-3.5"
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <h4 className="font-bold text-white text-base sm:text-lg">{blindTitle}</h4>
                       </div>
-                      <span className="text-xs text-[#777777] font-medium">Public Rating Avg</span>
+
+                      {/* Clearly labeled Public Rating Average */}
+                      {typeof sub.flameRating === "number" && sub.flameRating > 0 && (
+                        <div className="flex flex-col items-end">
+                          <div className="flex items-center gap-1.5 text-sm sm:text-base text-[#FF5E3A] font-bold">
+                            <Flame className="w-4 h-4 fill-current" />
+                            <span>{sub.flameRating.toFixed(2)}</span>
+                          </div>
+                          <span className="text-xs text-[#777777] font-medium">Public Rating Avg</span>
+                        </div>
+                      )}
                     </div>
-                  </div>
 
-                  <AudioWaveformPlayer
-                    id={`jury-${sub.id}`}
-                    title={blindTitle}
-                    audioUrl={sub.audioUrl}
-                    duration={sub.duration}
-                    bpm={sub.bpm}
-                    compact={true}
-                  />
+                    <AudioWaveformPlayer
+                      id={`jury-${sub.id}`}
+                      title={blindTitle}
+                      audioUrl={sub.audioUrl}
+                      duration={sub.duration}
+                      bpm={sub.bpm}
+                      compact={true}
+                    />
 
-                  {/* Judge Evaluation Controls (Only visible for Judges, disabled once submitted) */}
-                  {juryViewerRole === "judge" && (
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 pt-1 items-center">
-                      {/* Score Slider */}
-                      <div className="md:col-span-5 flex items-center gap-3 bg-[#121212] px-4 py-2.5 rounded-xl">
-                        <span className="text-xs text-[#888888] font-semibold shrink-0">Score:</span>
-                        <input
-                          type="range"
-                          min="0"
-                          max="5"
-                          step="0.05"
-                          disabled={isJurySubmitted}
-                          value={typeof scoreVal === "number" || (typeof scoreVal === "string" && scoreVal !== "") ? Number(scoreVal) : 0}
-                          onChange={(e) => {
-                            if (isJurySubmitted) return;
-                            const val = parseFloat(e.target.value).toFixed(2);
-                            setJuryScores((prev) => ({ ...prev, [sub.id]: val }));
-                          }}
-                          className={`w-full h-2 bg-[#252525] rounded-lg appearance-none accent-[#7B61FF] ${isJurySubmitted ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
-                        />
-                        <div className="flex items-center gap-1 text-[#7B61FF] shrink-0">
-                          <Star className="w-3.5 h-3.5 fill-current" />
-                          <span className="text-xs sm:text-sm font-bold min-w-[32px] text-right">
-                            {typeof scoreVal === "number" || (typeof scoreVal === "string" && scoreVal !== "") ? Number(scoreVal).toFixed(2) : "0.00"}
-                          </span>
+                    {/* Judge Evaluation Controls (Only visible for Judges, disabled once submitted) */}
+                    {juryViewerRole === "judge" && (
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 pt-1 items-center">
+                        {/* Score Slider */}
+                        <div className="md:col-span-5 flex items-center gap-3 bg-[#121212] px-4 py-2.5 rounded-xl">
+                          <span className="text-xs text-[#888888] font-semibold shrink-0">Score:</span>
+                          <input
+                            type="range"
+                            min="0"
+                            max="5"
+                            step="0.05"
+                            disabled={isJurySubmitted}
+                            value={typeof scoreVal === "number" || (typeof scoreVal === "string" && scoreVal !== "") ? Number(scoreVal) : 0}
+                            onChange={(e) => {
+                              if (isJurySubmitted) return;
+                              const val = parseFloat(e.target.value).toFixed(2);
+                              setJuryScores((prev) => ({ ...prev, [sub.id]: val }));
+                            }}
+                            className={`w-full h-2 bg-[#252525] rounded-lg appearance-none accent-[#7B61FF] ${isJurySubmitted ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
+                          />
+                          <div className="flex items-center gap-1 text-[#7B61FF] shrink-0">
+                            <Star className="w-3.5 h-3.5 fill-current" />
+                            <span className="text-xs sm:text-sm font-bold min-w-[32px] text-right">
+                              {typeof scoreVal === "number" || (typeof scoreVal === "string" && scoreVal !== "") ? Number(scoreVal).toFixed(2) : "0.00"}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Feedback input */}
+                        <div className="md:col-span-7">
+                          <input
+                            type="text"
+                            disabled={isJurySubmitted}
+                            placeholder={isJurySubmitted ? "Feedback submitted and locked" : "Leave feedback note for the beatmaker (optional)"}
+                            value={feedbackVal}
+                            onChange={(e) => {
+                              if (isJurySubmitted) return;
+                              setJuryFeedback((prev) => ({ ...prev, [sub.id]: e.target.value }));
+                            }}
+                            className={`w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white placeholder-[#555555] focus:outline-none ${isJurySubmitted ? "opacity-70 cursor-not-allowed" : ""}`}
+                          />
                         </div>
                       </div>
-
-                      {/* Feedback input */}
-                      <div className="md:col-span-7">
-                        <input
-                          type="text"
-                          disabled={isJurySubmitted}
-                          placeholder={isJurySubmitted ? "Feedback submitted and locked" : "Leave feedback note for the beatmaker (optional)"}
-                          value={feedbackVal}
-                          onChange={(e) => {
-                            if (isJurySubmitted) return;
-                            setJuryFeedback((prev) => ({ ...prev, [sub.id]: e.target.value }));
-                          }}
-                          className={`w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white placeholder-[#555555] focus:outline-none ${isJurySubmitted ? "opacity-70 cursor-not-allowed" : ""}`}
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
         </div>
       )}
@@ -1059,99 +1080,108 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
         <div className="space-y-6">
           
           {/* Leaderboard Cards */}
-          <div className="space-y-3.5">
-            {currentSubmissions.map((sub, idx) => {
-              const isTop1 = idx === 0 || sub.rank === 1;
-              const isTop2 = idx === 1 || sub.rank === 2;
-              const isTop3 = idx === 2 || sub.rank === 3;
-              const judgeName = sub.judgeName || "Judge";
-              const hasFlame = typeof sub.flameRating === "number" && !isNaN(sub.flameRating) && sub.flameRating > 0;
-              const hasJury = typeof sub.juryScore === "number" && !isNaN(sub.juryScore) && sub.juryScore > 0;
-              const hasScores = hasFlame || hasJury;
+          {submissions.length === 0 ? (
+            <div className="bg-[#181818] rounded-2xl p-8 text-center space-y-2">
+              <p className="text-white font-bold text-base">No Results Recorded</p>
+              <p className="text-xs sm:text-sm text-[#888888]">
+                No submissions or rankings have been published for this battle yet.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3.5">
+              {[...submissions].sort((a, b) => (a.rank || 999) - (b.rank || 999)).map((sub, idx) => {
+                const isTop1 = idx === 0 || sub.rank === 1;
+                const isTop2 = idx === 1 || sub.rank === 2;
+                const isTop3 = idx === 2 || sub.rank === 3;
+                const judgeName = sub.judgeName || "Judge";
+                const hasFlame = typeof sub.flameRating === "number" && !isNaN(sub.flameRating) && sub.flameRating > 0;
+                const hasJury = typeof sub.juryScore === "number" && !isNaN(sub.juryScore) && sub.juryScore > 0;
+                const hasScores = hasFlame || hasJury;
 
-              return (
-                <div
-                  key={sub.id}
-                  className="bg-[#181818] rounded-2xl p-4 sm:p-5 space-y-3.5"
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    
-                    {/* Rank Badge + Producer Info */}
-                    <div className="flex items-center gap-4 min-w-[240px]">
-                      {isTop1 ? (
-                        <span className="h-7 px-3.5 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
-                          1st Place
-                        </span>
-                      ) : isTop2 ? (
-                        <span className="h-7 px-3.5 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
-                          2nd Place
-                        </span>
-                      ) : isTop3 ? (
-                        <span className="h-7 px-3.5 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
-                          3rd Place
-                        </span>
-                      ) : (
-                        <span className="h-7 w-8 text-center text-xs font-bold text-[#666666] inline-flex items-center justify-center leading-none select-none shrink-0">
-                          #{sub.rank || (idx + 1)}
-                        </span>
-                      )}
-
-                      <div>
-                        {sub.beatTitle && sub.beatTitle !== battle.title && !sub.beatTitle.startsWith("Beat Battle #") && (
-                          <span className="text-xs sm:text-sm text-[#888888] leading-tight block">
-                            {sub.beatTitle}
+                return (
+                  <div
+                    key={sub.id}
+                    className="bg-[#181818] rounded-2xl p-4 sm:p-5 space-y-3.5"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      
+                      {/* Rank Badge + Producer Info */}
+                      <div className="flex items-center gap-4 min-w-[240px]">
+                        {isTop1 ? (
+                          <span className="h-7 px-3.5 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
+                            1st Place
+                          </span>
+                        ) : isTop2 ? (
+                          <span className="h-7 px-3.5 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
+                            2nd Place
+                          </span>
+                        ) : isTop3 ? (
+                          <span className="h-7 px-3.5 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
+                            3rd Place
+                          </span>
+                        ) : (
+                          <span className="h-7 w-8 text-center text-xs font-bold text-[#666666] inline-flex items-center justify-center leading-none select-none shrink-0">
+                            #{sub.rank || (idx + 1)}
                           </span>
                         )}
-                        <Link
-                          href={`/producers/${sub.userId || "guest"}`}
-                          className="text-base sm:text-lg font-bold text-white hover:text-[#7B61FF] transition-colors leading-snug"
-                        >
-                          {sub.beatmakerTag || "Producer"}
-                        </Link>
+
+                        <div>
+                          {sub.beatTitle && sub.beatTitle !== battle.title && !sub.beatTitle.startsWith("Beat Battle #") && (
+                            <span className="text-xs sm:text-sm text-[#888888] leading-tight block">
+                              {sub.beatTitle}
+                            </span>
+                          )}
+                          <Link
+                            href={`/producers/${sub.userId || "guest"}`}
+                            className="text-base sm:text-lg font-bold text-white hover:text-[#7B61FF] transition-colors leading-snug"
+                          >
+                            {sub.beatmakerTag || "Producer"}
+                          </Link>
+                        </div>
                       </div>
+
+                      {/* Scores (only if valid numbers exist) */}
+                      {hasScores && (
+                        <div className="flex items-center gap-5 shrink-0 text-sm sm:text-base font-bold">
+                          {hasFlame && (
+                            <div className="flex items-center gap-1.5 text-[#FF5E3A]">
+                              <Flame className="w-4 h-4 fill-current" />
+                              <span>{Number(sub.flameRating).toFixed(2)}</span>
+                            </div>
+                          )}
+
+                          {hasJury && (
+                            <div className="flex items-center gap-1.5 text-[#7B61FF]">
+                              <Star className="w-4 h-4 fill-current" />
+                              <span>{Number(sub.juryScore).toFixed(2)}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
                     </div>
 
-                    {/* Scores (only if valid numbers exist) */}
-                    {hasScores && (
-                      <div className="flex items-center gap-5 shrink-0 text-sm sm:text-base font-bold">
-                        {hasFlame && (
-                          <div className="flex items-center gap-1.5 text-[#FF5E3A]">
-                            <Flame className="w-4 h-4 fill-current" />
-                            <span>{Number(sub.flameRating).toFixed(2)}</span>
-                          </div>
-                        )}
+                    {/* Waveform Scrubber with real audio */}
+                    <AudioWaveformPlayer
+                      id={`res-${sub.id}`}
+                      title={sub.beatTitle}
+                      audioUrl={sub.audioUrl}
+                      duration={sub.duration}
+                      bpm={sub.bpm}
+                      compact={true}
+                    />
 
-                        {hasJury && (
-                          <div className="flex items-center gap-1.5 text-[#7B61FF]">
-                            <Star className="w-4 h-4 fill-current" />
-                            <span>{Number(sub.juryScore).toFixed(2)}</span>
-                          </div>
-                        )}
+                    {/* Clean Judge Feedback Box with Judge Name */}
+                    {sub.juryFeedback && (
+                      <div className="bg-[#121212] px-4 py-2.5 rounded-xl text-xs sm:text-sm text-[#D1D1D1] italic">
+                        "{sub.juryFeedback}" - <span className="text-[#888888] not-italic font-semibold">{judgeName}</span>
                       </div>
                     )}
-
                   </div>
-
-                  {/* Waveform Scrubber with real audio */}
-                  <AudioWaveformPlayer
-                    id={`res-${sub.id}`}
-                    title={sub.beatTitle}
-                    audioUrl={sub.audioUrl}
-                    duration={sub.duration}
-                    bpm={sub.bpm}
-                    compact={true}
-                  />
-
-                  {/* Clean Judge Feedback Box with Judge Name */}
-                  {sub.juryFeedback && (
-                    <div className="bg-[#121212] px-4 py-2.5 rounded-xl text-xs sm:text-sm text-[#D1D1D1] italic">
-                      "{sub.juryFeedback}" - <span className="text-[#888888] not-italic font-semibold">{judgeName}</span>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
 
           {/* YouTube Live Jury Evaluation Session Embed below Leaderboard */}
           {battle.youtubeVodUrl && battle.youtubeVodUrl.trim() && (

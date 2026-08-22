@@ -821,11 +821,6 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h2 className="text-xl sm:text-2xl font-bold text-white">Beats</h2>
-            {isProfileOwner && (
-              <span className="text-xs px-2.5 py-1 rounded-full bg-[#121212] text-zinc-400 font-medium">
-                {customUploadedBeats.length}/{MAX_FREE_BEATS} Uploaded
-              </span>
-            )}
           </div>
           
           {isProfileOwner && (
@@ -852,7 +847,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
               title={isAtBeatLimit ? `Limit of ${MAX_FREE_BEATS} beats reached` : "Add Beat"}
             >
               <Plus className="w-4 h-4" />
-              <span>Add Beat {isAtBeatLimit ? `(${MAX_FREE_BEATS}/${MAX_FREE_BEATS})` : ""}</span>
+              <span>Add Beat</span>
             </button>
           )}
         </div>
@@ -1002,7 +997,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
         ) : (
           <div className="bg-[#181818] rounded-2xl p-8 text-center space-y-2">
             <p className="text-zinc-400 text-sm">
-              No beats found for this producer yet.
+              This producer hasn&apos;t submitted any beats yet.
             </p>
           </div>
         )}

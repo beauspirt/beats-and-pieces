@@ -22,6 +22,29 @@ import { BattlePhase, Competition, BattleSubmission } from "@/lib/types";
 import { useAudioPlayer } from "@/lib/audio-context";
 import { useAuth } from "@/lib/auth-context";
 
+// Deterministic pseudo-random seeded shuffle (Mulberry32 PRNG)
+function seededShuffle<T>(array: T[], seedStr: string): T[] {
+  const arr = [...array];
+  let seed = 0;
+  for (let i = 0; i < seedStr.length; i++) {
+    seed = (seed << 5) - seed + seedStr.charCodeAt(i);
+    seed |= 0;
+  }
+  let s = seed >>> 0;
+  const random = () => {
+    s = (s + 0x6d2b79f5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 export function BattleDetailClient({ battleId }: { battleId: string }) {
   const router = useRouter();
   const { pauseTrack } = useAudioPlayer();
@@ -214,8 +237,14 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   const currentVotesCount = Object.keys(ratings).filter((tId) => submissions.some((s) => s.id === tId)).length;
   const isBallotQualified = totalEntries > 0 && currentVotesCount >= requiredVotes;
 
-  // Anonymized track queue derived directly from real submissions
-  const blindTracks = submissions.map((sub, idx) => ({
+  // Deterministic user-seeded randomized queue for Phase 2 public rating
+  const userSeed = `${currentUser?.id || currentUser?.email || "guest"}_${battle.id}`;
+  const shuffledSubmissions = React.useMemo(() => {
+    return seededShuffle(submissions, userSeed);
+  }, [submissions, userSeed]);
+
+  // Anonymized track queue derived from user-seeded randomized submissions
+  const blindTracks = shuffledSubmissions.map((sub, idx) => ({
     id: sub.id,
     placeholder: `Beat ${idx < 9 ? "0" + (idx + 1) : idx + 1}`,
     bpm: sub.bpm,
@@ -224,6 +253,27 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     waveformPeaks: sub.waveform,
     flameRating: sub.flameRating,
   }));
+
+  // Top 10 finalists triaged by Phase 2 public flame rating
+  const cutoff = battle.topFinalistsCutoff || 10;
+  const finalistSubmissions = React.useMemo(() => {
+    const sortedByFlame = [...submissions].sort((a, b) => (b.flameRating || 0) - (a.flameRating || 0));
+    return sortedByFlame.slice(0, cutoff);
+  }, [submissions, cutoff]);
+
+  // Set of judges who have submitted scores
+  const submittedJudgeNames = React.useMemo(() => {
+    const set = new Set<string>();
+    submissions.forEach((s) => {
+      s.juryFeedbacks?.forEach((f) => {
+        if (typeof f.score === "number" && f.judgeName) {
+          set.add(f.judgeName.toLowerCase().trim());
+          if (f.judgeId) set.add(f.judgeId.toLowerCase().trim());
+        }
+      });
+    });
+    return set;
+  }, [submissions]);
 
   const [isDraggingOver, setIsDraggingOver] = useState(false);
 
@@ -234,6 +284,12 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       const uploaderId = currentUser?.id || "guest";
       const uploaderTag = currentUser?.nickname || "Producer";
       const title = file.name.replace(/\.[^/.]+$/, "");
+
+      // If user had a previous submission, delete it first to ensure maximum 1 entry per producer
+      const existing = submissions.find((s) => s.userId === uploaderId);
+      if (existing) {
+        await battleService.deleteSubmission(existing.id, battle.id);
+      }
 
       // 1. Instantly decode arrayBuffer in memory for exact waveform & duration
       let extractedWaveform: WaveformData | null = null;
@@ -289,10 +345,24 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
         submittedAt: newSub.submittedAt,
       });
 
-      setSubmissions(battleService.getSubmissionsByBattleId(battle.id));
+      refreshBattleData();
       confetti({ particleCount: 60, spread: 60, origin: { y: 0.6 } });
     } catch (err) {
       console.error("Submission failed:", err);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemoveMyEntry = async () => {
+    if (!myEntry) return;
+    setIsUploading(true);
+    try {
+      await battleService.deleteSubmission(myEntry.id, battle.id);
+      setMyEntry(null);
+      refreshBattleData();
+    } catch (err) {
+      console.error("Failed to remove entry:", err);
     } finally {
       setIsUploading(false);
     }
@@ -718,10 +788,11 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                           </label>
 
                           <button
-                            onClick={() => setMyEntry(null)}
-                            className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-[#1A1A1A] hover:bg-red-500/20 text-[#888888] hover:text-red-400 transition-all cursor-pointer"
+                            onClick={handleRemoveMyEntry}
+                            disabled={isUploading}
+                            className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-[#1A1A1A] hover:bg-red-500/20 text-[#888888] hover:text-red-400 transition-all cursor-pointer disabled:opacity-50"
                           >
-                            Remove
+                            {isUploading ? "Removing..." : "Remove"}
                           </button>
                         </div>
                       </div>
@@ -995,57 +1066,65 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             </div>
 
             {/* Right Column: Assigned Judges stacked in a Column */}
-            <div className="lg:col-span-5 bg-[#181818] p-4 sm:p-5 rounded-2xl space-y-3 shadow-lg">
-              <div className="flex items-center justify-between">
-                <span className="text-xs sm:text-sm font-bold text-white">Assigned Judges</span>
-                <span className="text-[10px] text-zinc-500 font-mono">
-                  {(battle.judgeDetails?.length || battle.judges?.length || 0)} Judges
-                </span>
-              </div>
+            {(() => {
+              const assignedJudgesList = (
+                battle.judgeDetails && battle.judgeDetails.length > 0
+                  ? battle.judgeDetails
+                  : (battle.judges || []).map((j) => ({ name: typeof j === "string" ? j : "", email: "" }))
+              ).filter((j) => (j.name && j.name.trim()) || (j.email && j.email.trim()));
 
-              <div className="space-y-2">
-                {battle.judgeDetails && battle.judgeDetails.length > 0 ? (
-                  battle.judgeDetails.map((j) => {
-                    const isMe = currentUser?.email.toLowerCase() === j.email.toLowerCase() || currentUser?.nickname.toLowerCase() === j.name.toLowerCase();
-                    return (
-                      <div key={j.email} className="bg-[#121212] p-3 rounded-xl flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
-                          <span className={`w-2 h-2 rounded-full ${isJurySubmitted && isMe ? "bg-emerald-500" : "bg-[#FF5E3A] animate-pulse"}`} />
-                          <span className="text-xs sm:text-sm font-bold text-white">
-                            {j.name}{isMe ? " (You)" : ""}
+              const completedJudgesCount = assignedJudgesList.filter(
+                (j) =>
+                  (j.name && submittedJudgeNames.has(j.name.toLowerCase().trim())) ||
+                  (j.email && submittedJudgeNames.has(j.email.toLowerCase().trim()))
+              ).length;
+
+              return (
+                <div className="lg:col-span-5 bg-[#181818] p-4 sm:p-5 rounded-2xl space-y-3 shadow-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs sm:text-sm font-bold text-white">Assigned Judges</span>
+                    <span className="text-[10px] text-zinc-400 font-mono">
+                      {completedJudgesCount} / {assignedJudgesList.length} Judges Submitted
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    {assignedJudgesList.map((j) => {
+                      const isMe = Boolean(
+                        currentUser && (
+                          (j.email && j.email.toLowerCase() === currentUser.email.toLowerCase()) ||
+                          (j.name && j.name.toLowerCase() === currentUser.nickname.toLowerCase())
+                        )
+                      );
+                      const isDone = Boolean(
+                        (j.name && submittedJudgeNames.has(j.name.toLowerCase().trim())) ||
+                        (j.email && submittedJudgeNames.has(j.email.toLowerCase().trim())) ||
+                        (isJurySubmitted && isMe)
+                      );
+
+                      return (
+                        <div key={j.email || j.name} className="bg-[#121212] p-3 rounded-xl flex items-center justify-between">
+                          <div className="flex items-center gap-2.5">
+                            <span className={`w-2 h-2 rounded-full ${isDone ? "bg-emerald-500" : "bg-[#FF5E3A] animate-pulse"}`} />
+                            <span className="text-xs sm:text-sm font-bold text-white">
+                              {j.name || j.email}{isMe ? " (You)" : ""}
+                            </span>
+                          </div>
+                          <span className={`text-xs font-bold px-2 py-0.5 rounded ${isDone ? "bg-emerald-500/20 text-emerald-400" : "bg-[#FF5E3A]/20 text-[#FF5E3A]"}`}>
+                            {isDone ? "Submitted ✓" : "In Progress"}
                           </span>
                         </div>
-                        <span className={`text-xs font-bold px-2 py-0.5 rounded ${isJurySubmitted && isMe ? "bg-emerald-500/20 text-emerald-400" : "bg-[#FF5E3A]/20 text-[#FF5E3A]"}`}>
-                          {isJurySubmitted && isMe ? "Submitted ✓" : "In Progress"}
-                        </span>
-                      </div>
-                    );
-                  })
-                ) : (
-                  battle.judges.map((j) => {
-                    const isMe = currentUser?.nickname.toLowerCase() === j.toLowerCase() || currentUser?.email.toLowerCase() === j.toLowerCase();
-                    return (
-                      <div key={j} className="bg-[#121212] p-3 rounded-xl flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
-                          <span className={`w-2 h-2 rounded-full ${isJurySubmitted && isMe ? "bg-emerald-500" : "bg-[#FF5E3A] animate-pulse"}`} />
-                          <span className="text-xs sm:text-sm font-bold text-white">
-                            {j}{isMe ? " (You)" : ""}
-                          </span>
-                        </div>
-                        <span className={`text-xs font-bold px-2 py-0.5 rounded ${isJurySubmitted && isMe ? "bg-emerald-500/20 text-emerald-400" : "bg-[#FF5E3A]/20 text-[#FF5E3A]"}`}>
-                          {isJurySubmitted && isMe ? "Submitted ✓" : "In Progress"}
-                        </span>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
 
           </div>
 
-          {/* Anonymized Finalists list (Actual battle submissions) */}
-          {submissions.length === 0 ? (
+          {/* Anonymized Top Finalists list (triaged from Phase 2 public rating) */}
+          {finalistSubmissions.length === 0 ? (
             <div className="bg-[#181818] rounded-2xl p-8 text-center space-y-2">
               <p className="text-white font-bold text-base">No Finalists Yet</p>
               <p className="text-xs sm:text-sm text-[#888888]">
@@ -1054,7 +1133,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             </div>
           ) : (
             <div className="space-y-3.5">
-              {submissions.map((sub, idx) => {
+              {finalistSubmissions.map((sub, idx) => {
                 const scoreVal = juryScores[sub.id] !== undefined ? juryScores[sub.id] : "";
                 const feedbackVal = juryFeedback[sub.id] !== undefined ? juryFeedback[sub.id] : "";
                 const blindTitle = `Finalist ${idx < 9 ? "0" + (idx + 1) : idx + 1}`;
@@ -1068,17 +1147,6 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                       <div>
                         <h4 className="font-bold text-white text-base sm:text-lg">{blindTitle}</h4>
                       </div>
-
-                      {/* Clearly labeled Public Rating Average */}
-                      {typeof sub.flameRating === "number" && sub.flameRating > 0 && (
-                        <div className="flex flex-col items-end">
-                          <div className="flex items-center gap-1.5 text-sm sm:text-base text-[#FF5E3A] font-bold">
-                            <Flame className="w-4 h-4 fill-current" />
-                            <span>{sub.flameRating.toFixed(2)}</span>
-                          </div>
-                          <span className="text-xs text-[#777777] font-medium">Public Rating Avg</span>
-                        </div>
-                      )}
                     </div>
 
                     <AudioWaveformPlayer

@@ -517,17 +517,26 @@ export const battleService = {
 
   submitEntry(newSubmission: BattleSubmission): BattleSubmission {
     const custom = loadCustomSubmissions();
-    const filtered = custom.filter((s) => s.id !== newSubmission.id);
+    // Filter out any previous submission with the same ID OR from the same user in the same battle
+    const filtered = custom.filter(
+      (s) => s.id !== newSubmission.id && !(s.battleId === newSubmission.battleId && s.userId === newSubmission.userId)
+    );
     const updated = [newSubmission, ...filtered];
     saveCustomSubmissions(updated);
     customSubsList = updated;
-    submissionsList = [newSubmission, ...submissionsList.filter((s) => s.id !== newSubmission.id)];
+    submissionsList = [
+      newSubmission,
+      ...submissionsList.filter(
+        (s) => s.id !== newSubmission.id && !(s.battleId === newSubmission.battleId && s.userId === newSubmission.userId)
+      ),
+    ];
 
-    // Increment battle submission count
+    // Recalculate battle submission count accurately
     const battle = this.getBattleById(newSubmission.battleId);
     if (battle) {
+      const count = this.getSubmissionsByBattleId(battle.id).length;
       this.updateBattle(battle.id, {
-        totalSubmissions: (battle.totalSubmissions || 0) + 1,
+        totalSubmissions: count,
       });
     }
 
@@ -557,7 +566,41 @@ export const battleService = {
       () => {}
     );
 
+    notifyBattlesUpdated();
     return newSubmission;
+  },
+
+  async deleteSubmission(submissionId: string, battleId?: string): Promise<boolean> {
+    try {
+      const custom = loadCustomSubmissions();
+      const target = custom.find((s) => s.id === submissionId) || submissionsList.find((s) => s.id === submissionId);
+      const bId = battleId || target?.battleId;
+
+      const filteredCustom = custom.filter((s) => s.id !== submissionId);
+      saveCustomSubmissions(filteredCustom);
+      customSubsList = filteredCustom;
+      submissionsList = submissionsList.filter((s) => s.id !== submissionId);
+
+      if (bId) {
+        const battle = this.getBattleById(bId);
+        if (battle) {
+          const count = this.getSubmissionsByBattleId(bId).length;
+          this.updateBattle(bId, { totalSubmissions: count });
+        }
+      }
+
+      // Delete from Supabase submissions & ratings tables
+      await Promise.all([
+        supabase.from("submissions").delete().eq("id", submissionId),
+        supabase.from("ratings").delete().eq("submission_id", submissionId),
+      ]);
+
+      notifyBattlesUpdated();
+      return true;
+    } catch (err) {
+      console.warn("deleteSubmission error:", err);
+      return false;
+    }
   },
 
   async voteSubmission(
@@ -730,25 +773,30 @@ export const battleService = {
       submissionsList = updatedAllSubs;
 
       // Determine if all assigned judges have submitted their ballots
-      const assignedJudgesList = (
-        battle?.judgeDetails?.map((j) => j.name.toLowerCase().trim()) ||
-        battle?.judges?.map((j) => (typeof j === "string" ? j.toLowerCase().trim() : "")) ||
-        []
-      ).filter(Boolean);
+      const assignedJudges = (
+        battle?.judgeDetails && battle.judgeDetails.length > 0
+          ? battle.judgeDetails
+          : (battle?.judges || []).map((j) => ({ name: typeof j === "string" ? j : "", email: "" }))
+      ).filter((j) => (j.name && j.name.trim()) || (j.email && j.email.trim()));
 
       const submittedJudgesSet = new Set<string>();
       battleSubs.forEach((s) => {
         s.juryFeedbacks?.forEach((f) => {
           if (typeof f.score === "number" && f.judgeName) {
             submittedJudgesSet.add(f.judgeName.toLowerCase().trim());
+            if (f.judgeId) submittedJudgesSet.add(f.judgeId.toLowerCase().trim());
           }
         });
       });
 
+      // Results phase is reached ONLY when ALL assigned judges have submitted their scores
       const allJudgesFinished =
-        assignedJudgesList.length > 0
-          ? assignedJudgesList.every((name) => submittedJudgesSet.has(name))
-          : submittedJudgesSet.size > 0;
+        assignedJudges.length > 0 &&
+        assignedJudges.every(
+          (j) =>
+            (j.name && submittedJudgesSet.has(j.name.toLowerCase().trim())) ||
+            (j.email && submittedJudgesSet.has(j.email.toLowerCase().trim()))
+        );
 
       if (allJudgesFinished) {
         // Automatically transition battle to completed Results phase

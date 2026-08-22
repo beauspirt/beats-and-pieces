@@ -92,6 +92,7 @@ export interface Competition {
   minVotesRequired?: number;
   topFinalistsCutoff?: number;
   youtubeVodUrl?: string;
+  rules?: string[];
   winner?: string;
   endedAt?: string;
 }

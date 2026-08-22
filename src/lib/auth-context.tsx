@@ -11,6 +11,7 @@ interface AuthContextType {
   isLoading: boolean;
   signInWithGoogle: () => Promise<void>;
   signInWithDiscord: () => Promise<void>;
+  signUpNewProducer: (nickname: string, email: string) => { success: boolean; isNew: boolean; user: UserProfile };
   loginWithEmail: (email: string) => { success: boolean; isMatchedProducer: boolean; user: UserProfile };
   loginWithUser: (producerId: string) => void;
   logout: () => Promise<void>;
@@ -163,6 +164,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { success: true, isMatchedProducer: false, user: newProfile };
   };
 
+  const signUpNewProducer = (nickname: string, email: string) => {
+    const cleanNick = nickname.trim();
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanId = `usr-${cleanNick.toLowerCase().replace(/[^a-z0-9]/g, "") || Date.now()}`;
+
+    // Check if account already exists with this email or id
+    const existing = producerService.getProducerByEmail(cleanEmail) || producerService.getProducerById(cleanId);
+    if (existing) {
+      setUser(existing);
+      try {
+        localStorage.setItem(STORAGE_KEY, existing.id);
+      } catch {}
+      return { success: true, isNew: false, user: existing };
+    }
+
+    const newProfile: UserProfile = {
+      id: cleanId,
+      nickname: cleanNick,
+      email: cleanEmail,
+      avatarUrl: "/avatars/default-avatar.png",
+      role: cleanEmail === "adrian.hrihor@gmail.com" ? "admin" : "producer",
+      isClaimed: true,
+      createdAt: new Date().toISOString(),
+    };
+
+    producerService.updateProducer(newProfile.id, newProfile);
+    setUser(newProfile);
+    try {
+      localStorage.setItem(STORAGE_KEY, newProfile.id);
+    } catch {}
+
+    return { success: true, isNew: true, user: newProfile };
+  };
+
   const loginWithUser = (producerId: string) => {
     const prod = producerService.getProducerById(producerId);
     if (prod) {
@@ -174,15 +209,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
-    setUser(null);
+    setIsLoading(true);
     try {
       localStorage.removeItem(STORAGE_KEY);
       localStorage.setItem(STORAGE_KEY, "logged_out");
-      await supabase.auth.signOut();
     } catch {}
+
     if (typeof window !== "undefined") {
       window.location.href = "/signin";
     }
+
+    try {
+      await supabase.auth.signOut();
+    } catch {}
+    setUser(null);
   };
 
   return (
@@ -193,6 +233,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoading,
         signInWithGoogle,
         signInWithDiscord,
+        signUpNewProducer,
         loginWithEmail,
         loginWithUser,
         logout,

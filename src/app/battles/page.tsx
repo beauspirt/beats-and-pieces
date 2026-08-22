@@ -4,15 +4,29 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { battleService } from "@/services";
+import { useAuth } from "@/lib/auth-context";
 import { ArrowRight, Trophy } from "lucide-react";
 import { Competition } from "@/lib/types";
 
 export default function BattlesPage() {
-  const [competitions, setCompetitions] = useState<Competition[]>(() => battleService.getAllBattles());
+  const { isLoggedIn } = useAuth();
+  const [competitions, setCompetitions] = useState<Competition[]>([]);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setCompetitions(battleService.getAllBattles());
+    setMounted(true);
   }, []);
+
+  if (!mounted) {
+    return (
+      <div className="space-y-10 w-full animate-in fade-in duration-300">
+        <div className="min-h-[50vh] flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full border-2 border-brand border-t-transparent animate-spin" />
+        </div>
+      </div>
+    );
+  }
 
   const activeBattle = competitions.find((c) => c.phase !== "completed");
   const pastBattles = competitions.filter((c) => c.phase === "completed");
@@ -31,7 +45,7 @@ export default function BattlesPage() {
           </div>
 
           <Link
-            href={`/battles/${activeBattle.id}`}
+            href={isLoggedIn ? `/battles/${activeBattle.id}` : "/signin"}
             className="bg-[#181818] rounded-3xl p-5 sm:p-7 flex flex-col md:flex-row gap-7 items-start hover:bg-[#1A1A1A] transition-all shadow-xl block cursor-pointer group relative overflow-hidden"
           >
             {/* Cover Art Thumbnail (Grand 320px Square) */}

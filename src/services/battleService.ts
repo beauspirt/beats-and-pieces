@@ -3,6 +3,25 @@ import rawCompetitions from "@/data/competitions.json";
 import rawSubmissions from "@/data/submissions.json";
 
 const STORAGE_KEY_BATTLES = "bnp_custom_battles";
+const STORAGE_KEY_DELETED_BATTLES = "bnp_deleted_battles";
+
+function loadDeletedBattles(): string[] {
+  if (typeof window !== "undefined") {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_DELETED_BATTLES);
+      if (stored) return JSON.parse(stored);
+    } catch {}
+  }
+  return [];
+}
+
+function saveDeletedBattles(ids: string[]) {
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem(STORAGE_KEY_DELETED_BATTLES, JSON.stringify(ids));
+    } catch {}
+  }
+}
 
 export function calculateBattlePhase(battle: {
   submissionStartsAt?: string;
@@ -56,6 +75,8 @@ let submissionsList: BattleSubmission[] = [...(rawSubmissions as BattleSubmissio
 export const battleService = {
   getAllCompetitions(): Competition[] {
     let list: Competition[] = [];
+    const deletedIds = new Set(loadDeletedBattles());
+
     if (typeof window !== "undefined") {
       const freshCustom = loadCustomBattles();
       const customIds = new Set(freshCustom.map((b) => b.id));
@@ -66,6 +87,7 @@ export const battleService = {
     }
 
     return list
+      .filter((b) => !deletedIds.has(b.id))
       .map((b) => ({
         ...b,
         phase: calculateBattlePhase(b),
@@ -146,6 +168,7 @@ export const battleService = {
       totalSubmissions: 0,
       minVotesRequired: battleData.minVotesRequired || 5,
       topFinalistsCutoff: battleData.topFinalistsCutoff || 15,
+      rules: battleData.rules || [],
     };
 
     const currentCustom = loadCustomBattles();
@@ -178,6 +201,30 @@ export const battleService = {
     competitionsList = [...customBattlesList, ...(rawCompetitions as Competition[])];
 
     return updatedBattle;
+  },
+
+  deleteBattle(id: string): boolean {
+    // 1. Remove from custom battles if present
+    const currentCustom = loadCustomBattles();
+    const filtered = currentCustom.filter((b) => b.id !== id);
+    saveCustomBattles(filtered);
+    customBattlesList = filtered;
+
+    // 2. Add to deleted battles registry
+    const deleted = loadDeletedBattles();
+    if (!deleted.includes(id)) {
+      const updatedDeleted = [...deleted, id];
+      saveDeletedBattles(updatedDeleted);
+    }
+
+    // 3. Update memory list
+    const deletedSet = new Set(loadDeletedBattles());
+    competitionsList = [
+      ...customBattlesList,
+      ...(rawCompetitions as Competition[]).filter((b) => !deletedSet.has(b.id)),
+    ];
+
+    return true;
   },
 
   getSubmissionsByBattleId(battleId: string): BattleSubmission[] {

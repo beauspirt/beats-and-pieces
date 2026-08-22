@@ -32,6 +32,14 @@ export default function AdminBattlesManagerPage() {
   // Samples state (Upload only)
   const [samples, setSamples] = useState<BattleSample[]>([]);
 
+  // Extra Rules state
+  const [extraRules, setExtraRules] = useState<string[]>([]);
+  const [newRuleInput, setNewRuleInput] = useState("");
+  const [showAddRule, setShowAddRule] = useState(false);
+
+  // Delete confirmation state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
@@ -78,6 +86,10 @@ export default function AdminBattlesManagerPage() {
     setShowAddJudge(false);
 
     setSamples(battle.samples ? [...battle.samples] : []);
+    setExtraRules(battle.rules ? [...battle.rules] : []);
+    setNewRuleInput("");
+    setShowAddRule(false);
+    setShowDeleteConfirm(false);
     setIsSaved(false);
   };
 
@@ -168,6 +180,22 @@ export default function AdminBattlesManagerPage() {
     setShowAddJudge(false);
   };
 
+  const handleAddRule = () => {
+    if (newRuleInput.trim()) {
+      setExtraRules([...extraRules, newRuleInput.trim()]);
+      setNewRuleInput("");
+      setShowAddRule(false);
+    }
+  };
+
+  const handleDeleteBattle = () => {
+    if (!editingBattle) return;
+    battleService.deleteBattle(editingBattle.id);
+    setBattles(battleService.getAllBattles());
+    setShowDeleteConfirm(false);
+    setEditingBattle(null);
+  };
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingBattle) return;
@@ -223,6 +251,7 @@ export default function AdminBattlesManagerPage() {
       judges: judgeEntries.map((j) => j.name),
       judgeDetails: judgeEntries,
       samples: samples,
+      rules: extraRules,
     };
 
     battleService.updateBattle(updated.id, updated);
@@ -604,8 +633,12 @@ export default function AdminBattlesManagerPage() {
                 </div>
 
                 {/* Rules */}
-                <div className="space-y-2">
-                  <label className="font-semibold text-zinc-300 block">Rules</label>
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <label className="font-semibold text-zinc-300 block">Rules</label>
+                    <span className="text-[10px] text-zinc-500">Default + Custom battle rules</span>
+                  </div>
+
                   <div className="bg-[#121212] p-3.5 rounded-xl space-y-1.5 text-xs text-zinc-400">
                     <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block mb-1">
                       Standard Default Rules:
@@ -615,6 +648,75 @@ export default function AdminBattlesManagerPage() {
                     <p>3. File type must be WAV or MP3.</p>
                     <p>4. Use at least 1 of the samples (if) provided.</p>
                   </div>
+
+                  {/* Extra Rules List */}
+                  {extraRules.length > 0 && (
+                    <div className="space-y-2">
+                      <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block">
+                        Extra Custom Rules:
+                      </span>
+                      {extraRules.map((rule, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-[#121212] text-xs text-white"
+                        >
+                          <span>{idx + 5}. {rule.replace(/^\d+\.\s*/, "")}</span>
+                          <button
+                            type="button"
+                            onClick={() => setExtraRules(extraRules.filter((_, i) => i !== idx))}
+                            className="w-5 h-5 rounded-full bg-[#262626] text-zinc-400 hover:text-red-400 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {showAddRule ? (
+                    <div className="bg-[#121212] p-3 rounded-xl space-y-2">
+                      <input
+                        type="text"
+                        placeholder="e.g. Must feature an 808 sub-bassline"
+                        value={newRuleInput}
+                        onChange={(e) => setNewRuleInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleAddRule();
+                          }
+                        }}
+                        className="w-full bg-[#181818] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                        autoFocus
+                      />
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setShowAddRule(false)}
+                          className="px-3 py-1.5 text-xs text-[#888888] hover:text-white cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleAddRule}
+                          disabled={!newRuleInput.trim()}
+                          className="px-3.5 py-1.5 rounded-lg bg-brand hover:bg-brand/90 text-xs text-white font-bold cursor-pointer disabled:opacity-50"
+                        >
+                          Add Rule
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setShowAddRule(true)}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#121212] hover:bg-[#202020] text-xs text-[#D1D1D1] font-semibold transition-all cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5 text-brand" />
+                      <span>Add Extra Rule</span>
+                    </button>
+                  )}
                 </div>
 
                 {/* Sample(s) Management (Upload file only, clean row without audio player) */}
@@ -749,22 +851,73 @@ export default function AdminBattlesManagerPage() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center justify-end gap-3 pt-4">
+                <div className="flex items-center justify-between gap-3 pt-4">
                   <button
                     type="button"
-                    onClick={() => setEditingBattle(null)}
-                    className="px-5 py-2.5 rounded-xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-semibold text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                   >
-                    Cancel
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete Battle</span>
                   </button>
-                  <button
-                    type="submit"
-                    className="px-7 py-2.5 rounded-xl bg-brand hover:bg-brand/90 text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
-                  >
-                    {isSaved ? "Saved ✓" : "Save Changes"}
-                  </button>
+
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setEditingBattle(null)}
+                      className="px-5 py-2.5 rounded-xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-semibold text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-7 py-2.5 rounded-xl bg-brand hover:bg-brand/90 text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
+                    >
+                      {isSaved ? "Saved ✓" : "Save Changes"}
+                    </button>
+                  </div>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* DELETE CONFIRMATION MODAL */}
+        {showDeleteConfirm && editingBattle && (
+          <div
+            onClick={() => setShowDeleteConfirm(false)}
+            className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150 cursor-pointer"
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#181818] rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl relative text-left cursor-default"
+            >
+              <div className="flex items-center gap-3 text-red-400">
+                <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
+                  <Trash2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-base font-bold text-white">Delete {editingBattle.title}?</h4>
+                  <p className="text-xs text-zinc-400">This action will remove the battle from the platform.</p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="px-4 py-2 rounded-xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-semibold text-zinc-300 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteBattle}
+                  className="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-xs font-bold text-white transition-all shadow-md cursor-pointer"
+                >
+                  Confirm Delete
+                </button>
+              </div>
             </div>
           </div>
         )}

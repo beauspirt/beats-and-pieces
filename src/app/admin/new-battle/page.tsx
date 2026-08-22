@@ -198,6 +198,7 @@ export default function NewBattlePage() {
         judges: judges.map((j) => j.name),
         judgeDetails: judges,
         description: description.trim(),
+        rules: extraRules,
         samples: samples,
         submissionStartsAt: startDate ? new Date(startDate).toISOString() : new Date().toISOString(),
         submissionEndsAt: submissionDeadline ? new Date(submissionDeadline).toISOString() : new Date(Date.now() + 14 * 86400000).toISOString(),
@@ -530,6 +531,12 @@ export default function NewBattlePage() {
                       placeholder="e.g. Must flip the sample melody..."
                       value={newRuleInput}
                       onChange={(e) => setNewRuleInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddRule();
+                        }
+                      }}
                       className="flex-1 bg-[#121212] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
                       autoFocus
                     />

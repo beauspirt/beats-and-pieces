@@ -1,12 +1,14 @@
 import React from "react";
-import { sampleProducers } from "@/lib/mock-data";
+import { producerService } from "@/services/producerService";
 import { ProducerProfileClient } from "@/components/ProducerProfileClient";
 
 export function generateStaticParams() {
-  return Object.keys(sampleProducers).map((id) => ({
-    id,
+  return producerService.getAllProducers().map((p) => ({
+    id: p.id,
   }));
 }
+
+export const dynamicParams = true;
 
 export default async function ProducerProfilePage({
   params,

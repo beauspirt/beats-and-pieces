@@ -1,12 +1,14 @@
 import React from "react";
-import { sampleCompetitions } from "@/lib/mock-data";
+import { battleService } from "@/services/battleService";
 import { BattleDetailClient } from "@/components/BattleDetailClient";
 
 export function generateStaticParams() {
-  return sampleCompetitions.map((b) => ({
+  return battleService.getAllCompetitions().map((b) => ({
     id: b.id,
   }));
 }
+
+export const dynamicParams = true;
 
 export default async function BattleDetailPage({
   params,

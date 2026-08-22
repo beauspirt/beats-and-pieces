@@ -195,7 +195,7 @@ export const Navbar: React.FC = () => {
             </div>
           ) : (
             <Link
-              href="/signin"
+              href={pathname && pathname !== "/signin" && pathname !== "/auth/callback" ? `/signin?redirect=${encodeURIComponent(pathname)}` : "/signin"}
               className="px-4 py-2 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-semibold transition-all shadow-md active:scale-95 flex items-center gap-1.5"
             >
               <span>Log in</span>

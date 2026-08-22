@@ -38,23 +38,37 @@ export default function AuthCallbackPage() {
 
         // Check if verified email matches any known producer/admin in our registry
         const matchedProducer = producerService.getProducerByEmail(verifiedEmail);
+        const redirectUrl = (typeof window !== "undefined" ? localStorage.getItem("bnp_redirect_url") : null) || "/battles";
 
         if (matchedProducer) {
           // Matched authentic producer/admin!
           localStorage.setItem(STORAGE_KEY, matchedProducer.id);
           setStatus("success");
-          setTimeout(() => {
-            router.push("/profile");
-          }, 400);
+
+          // Only prompt for profile details if they log in for the first time (!isClaimed)
+          if (!matchedProducer.isClaimed) {
+            setTimeout(() => {
+              router.push("/profile?onboarding=true");
+            }, 400);
+          } else {
+            // Returning user: redirect directly to their previous page!
+            try {
+              localStorage.removeItem("bnp_redirect_url");
+            } catch {}
+            setTimeout(() => {
+              router.push(redirectUrl);
+            }, 400);
+          }
         } else {
-          // New verified community user
-          const newUserId = `usr-${verifiedEmail.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "")}`;
+          // New verified community user (first time login)
+          const newUserId = `usr-${verifiedEmail.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "") || Date.now()}`;
           const newProfile: UserProfile = {
             id: newUserId,
             nickname: googleName,
             email: verifiedEmail,
             avatarUrl: googleAvatar,
             role: verifiedEmail === "adrian.hrihor@gmail.com" ? "admin" : "producer",
+            isClaimed: false,
             createdAt: new Date().toISOString(),
           };
 
@@ -62,8 +76,8 @@ export default function AuthCallbackPage() {
           localStorage.setItem(STORAGE_KEY, newProfile.id);
           setStatus("success");
           setTimeout(() => {
-            router.push("/profile");
-          }, 800);
+            router.push("/profile?onboarding=true");
+          }, 400);
         }
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : "Authentication failed.";

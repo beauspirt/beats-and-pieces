@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { UserProfile } from "@/lib/types";
 import { X, ShieldCheck, ExternalLink, Sparkles, CheckCircle2, Camera } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { producerService } from "@/services";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { normalizeUrl } from "@/lib/utils";
 
@@ -22,8 +22,10 @@ const SOCIAL_PLATFORMS = [
   { key: "website", label: "Website" },
 ];
 
-export default function UserProfilePage() {
+function ProfileContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isOnboarding = searchParams.get("onboarding") === "true";
   const { user: activeUser, isLoading } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
@@ -64,7 +66,7 @@ export default function UserProfilePage() {
   if (isLoading || !profile) {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center text-center space-y-4">
-        <div className="w-8 h-8 rounded-full border-2 border-[#7B61FF] border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-2 border-brand border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -111,16 +113,28 @@ export default function UserProfilePage() {
       location: profile.location || "",
       links: sanitizedSaveLinks,
       isClaimed: true,
+      claimedAt: profile.claimedAt || new Date().toISOString(),
     });
 
     if (updated) {
       setProfile(updated);
     }
     setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 2500);
+
+    const pendingRedirect = typeof window !== "undefined" ? localStorage.getItem("bnp_redirect_url") : null;
+    if (pendingRedirect && pendingRedirect !== "/profile" && pendingRedirect !== "/signin") {
+      try {
+        localStorage.removeItem("bnp_redirect_url");
+      } catch {}
+      setTimeout(() => {
+        router.push(pendingRedirect);
+      }, 1000);
+    } else {
+      setTimeout(() => setSaveSuccess(false), 2500);
+    }
   };
 
-  const isProfileEmpty = !profile.isClaimed || (!profile.bio && Object.values(links).every((v) => !v));
+  const showOnboardingBanner = isOnboarding || !profile.isClaimed;
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-300 py-4">
@@ -139,7 +153,7 @@ export default function UserProfilePage() {
       </div>
 
       {/* First-Time Login Onboarding Prompt */}
-      {isProfileEmpty && (
+      {showOnboardingBanner && (
         <div className="bg-brand/10 rounded-2xl p-6 space-y-3 animate-in fade-in duration-300 shadow-md">
           <div className="flex items-center gap-2.5">
             <Sparkles className="w-5 h-5 text-brand" />
@@ -328,5 +342,19 @@ export default function UserProfilePage() {
       </form>
 
     </div>
+  );
+}
+
+export default function UserProfilePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-[50vh] flex flex-col items-center justify-center text-center space-y-4">
+          <div className="w-8 h-8 rounded-full border-2 border-brand border-t-transparent animate-spin" />
+        </div>
+      }
+    >
+      <ProfileContent />
+    </Suspense>
   );
 }

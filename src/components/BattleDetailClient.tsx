@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   sampleCompetitions,
   sampleSubmissions,
@@ -23,20 +24,34 @@ import { useAudioPlayer } from "@/lib/audio-context";
 import { useAuth } from "@/lib/auth-context";
 
 export function BattleDetailClient({ battleId }: { battleId: string }) {
+  const router = useRouter();
   const { pauseTrack } = useAudioPlayer();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, isLoggedIn, isLoading: isAuthLoading } = useAuth();
   const [battle, setBattle] = useState<Competition>(() => {
     return battleService.getCompetitionById(battleId) || sampleCompetitions.find((c) => c.id === battleId) || sampleCompetitions[0];
   });
-  const [activeTab, setActiveTab] = useState<BattlePhase>(battle.phase);
 
   useEffect(() => {
     const updated = battleService.getCompetitionById(battleId);
     if (updated) {
       setBattle(updated);
-      setActiveTab(updated.phase);
     }
   }, [battleId]);
+
+  // Route Guard: Require login for ongoing active battles
+  useEffect(() => {
+    if (!isAuthLoading && !isLoggedIn && battle.phase !== "completed") {
+      router.replace("/signin");
+    }
+  }, [isAuthLoading, isLoggedIn, battle.phase, router]);
+
+  if (!isAuthLoading && !isLoggedIn && battle.phase !== "completed") {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-2 border-brand border-t-transparent animate-spin" />
+      </div>
+    );
+  }
 
   const battleSubmissions = sampleSubmissions.filter((sub) => sub.battleId === battle.id);
   const currentSubmissions = battleSubmissions.length > 0 ? battleSubmissions : sampleSubmissions;
@@ -217,7 +232,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       sampleAudioRefs.current[playingSampleId]?.pause();
       setPlayingSampleId(null);
     }
-  }, [activeTab]);
+  }, [battle.phase]);
 
   // Clear any old test lockouts from localStorage on mount
   useEffect(() => {
@@ -275,9 +290,9 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   return (
     <div className="w-full space-y-8 animate-in fade-in duration-300">
       
-      {/* SECTION 1: HERO & STAGE SWITCHER */}
+      {/* SECTION 1: HERO & STAGE HEADER */}
       <section className="space-y-4">
-        {/* Top Breadcrumb & Competition Phase Timeline */}
+        {/* Top Breadcrumb & Stages Timeline Indicator */}
         <div className="flex items-center justify-between h-9">
           <Link
             href="/battles"
@@ -287,30 +302,27 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             <span>Back to Battles</span>
           </Link>
 
-          {/* Competition Process Timeline & Interactive Stage Switcher (only for active/mock competitions) */}
-          {battle.phase !== "completed" && (
-            <div className="flex items-center gap-1 bg-[#181818] p-1 rounded-xl">
-              {phasesList.map((p) => {
-                const isActive = activeTab === p.key;
-                return (
-                  <button
-                    key={p.key}
-                    onClick={() => setActiveTab(p.key)}
-                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                      isActive
-                        ? "bg-[#7B61FF] text-white shadow-md"
-                        : "text-[#777777] hover:text-[#D1D1D1] hover:bg-[#202020]"
-                    }`}
-                  >
-                    <span className={`text-xs ${isActive ? "text-white/80" : "text-[#555555]"}`}>
-                      {p.number}
-                    </span>
-                    <span>{p.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
+          {/* Battle Stages Timeline Indicator (Read-only status, no click/mock jumping) */}
+          <div className="flex items-center gap-1 bg-[#181818] p-1 rounded-xl select-none">
+            {phasesList.map((p) => {
+              const isCurrent = battle.phase === p.key;
+              return (
+                <div
+                  key={p.key}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                    isCurrent
+                      ? "bg-[#7B61FF] text-white shadow-md"
+                      : "text-[#555555] opacity-50 cursor-default"
+                  }`}
+                >
+                  <span className={`text-xs ${isCurrent ? "text-white/80" : "text-[#444444]"}`}>
+                    {p.number}
+                  </span>
+                  <span>{p.label}</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Hero Header */}
@@ -370,7 +382,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       {/* ========================================================================= */}
       {/* STAGE 1: SUBMISSIONS OPEN (RULES & COMPACT SAMPLES ON LEFT, SUBMIT ON RIGHT) */}
       {/* ========================================================================= */}
-      {activeTab === "submission" && (
+      {battle.phase === "submission" && (
         <div className="space-y-6">
           
           <div className={`grid grid-cols-1 lg:grid-cols-12 gap-6 ${myEntry ? "items-start" : "items-stretch"}`}>
@@ -385,21 +397,17 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                 </h3>
 
                 <div className="space-y-2.5 pt-1">
-                  <div className="bg-[#181818] p-3.5 rounded-xl">
-                    <p className="text-xs sm:text-sm text-[#D1D1D1]">1. Maximum 1 entry per producer.</p>
-                  </div>
-
-                  <div className="bg-[#181818] p-3.5 rounded-xl">
-                    <p className="text-xs sm:text-sm text-[#D1D1D1]">2. Track length must not exceed 3 minutes.</p>
-                  </div>
-
-                  <div className="bg-[#181818] p-3.5 rounded-xl">
-                    <p className="text-xs sm:text-sm text-[#D1D1D1]">3. File type must be WAV or MP3.</p>
-                  </div>
-
-                  <div className="bg-[#181818] p-3.5 rounded-xl">
-                    <p className="text-xs sm:text-sm text-[#D1D1D1]">4. Use at least 1 of the samples (if) provided.</p>
-                  </div>
+                  {[
+                    "Maximum 1 entry per producer.",
+                    "Track length must not exceed 3 minutes.",
+                    "File type must be WAV or MP3.",
+                    "Use at least 1 of the samples (if) provided.",
+                    ...(battle.rules || []).map((r) => r.replace(/^\d+\.\s*/, "")),
+                  ].map((rule, idx) => (
+                    <div key={idx} className="bg-[#181818] p-3.5 rounded-xl">
+                      <p className="text-xs sm:text-sm text-[#D1D1D1]">{idx + 1}. {rule}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
 
@@ -579,7 +587,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       {/* ========================================================================= */}
       {/* STAGE 2: PUBLIC RATING PHASE (ALL 15 BEATS WITH FLAME-ONLY RATING) */}
       {/* ========================================================================= */}
-      {activeTab === "rating" && (
+      {battle.phase === "rating" && (
         <div className="space-y-6">
           
           {/* Anti-Bias Info (Directly on website background) */}
@@ -769,7 +777,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       {/* ========================================================================= */}
       {/* STAGE 3: BLIND JURY EVALUATION */}
       {/* ========================================================================= */}
-      {activeTab === "judging" && (
+      {battle.phase === "judging" && (
         <div className="space-y-6">
           
           {/* Jury Portal Top Header & Controls (Directly on website background) */}
@@ -982,7 +990,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       {/* ========================================================================= */}
       {/* STAGE 4: RESULTS & LEADERBOARD */}
       {/* ========================================================================= */}
-      {activeTab === "completed" && (
+      {battle.phase === "completed" && (
         <div className="space-y-6">
           
           {/* Leaderboard Cards */}

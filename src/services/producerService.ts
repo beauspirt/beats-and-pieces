@@ -55,9 +55,29 @@ export const producerService = {
     );
   },
 
-  updateProducer(id: string, updates: Partial<UserProfile>): UserProfile | null {
+  createProducer(profile: UserProfile): UserProfile {
+    const custom = loadCustomProducers();
+    custom[profile.id] = profile;
+    saveCustomProducers(custom);
+    producersMap[profile.id] = profile;
+    return profile;
+  },
+
+  updateProducer(id: string, updates: Partial<UserProfile>): UserProfile {
     const current = this.getProducerById(id) || producersMap[id];
-    if (!current) return null;
+    if (!current) {
+      const newProfile: UserProfile = {
+        id,
+        nickname: updates.nickname || id,
+        email: updates.email || `${id}@beatsandpieces.ro`,
+        avatarUrl: updates.avatarUrl || "/avatars/default-avatar.png",
+        role: updates.role || "producer",
+        isClaimed: true,
+        createdAt: new Date().toISOString(),
+        ...updates,
+      };
+      return this.createProducer(newProfile);
+    }
 
     const updated = { ...current, ...updates, isClaimed: true };
     const custom = loadCustomProducers();

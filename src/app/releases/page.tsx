@@ -33,7 +33,7 @@ function formatReleaseDate(dateStr?: string): string {
 }
 
 export default function ReleasesPage() {
-  const [releases, setReleases] = useState<Release[]>([]);
+  const [releases, setReleases] = useState<Release[]>(() => releaseService.getAllReleases());
 
   useEffect(() => {
     setReleases(releaseService.getAllReleases());

@@ -24,18 +24,27 @@ function saveCustomReleases(releases: Release[]) {
 
 export const releaseService = {
   getAllReleases(): Release[] {
+    const rawList = (rawReleases as Release[]) || [];
+    const map = new Map<string, Release>();
+
+    for (const r of rawList) {
+      map.set(r.id, r);
+    }
+
     if (typeof window !== "undefined") {
       const custom = loadCustomReleases();
-      const map = new Map<string, Release>();
-      for (const r of rawReleases as Release[]) {
-        map.set(r.id, r);
-      }
       for (const r of custom) {
-        map.set(r.id, r);
+        if (!map.has(r.id)) {
+          map.set(r.id, r);
+        }
       }
-      return Array.from(map.values());
     }
-    return [...(rawReleases as Release[])];
+
+    return Array.from(map.values()).sort((a, b) => {
+      const timeA = a.releaseDate ? new Date(a.releaseDate).getTime() : 0;
+      const timeB = b.releaseDate ? new Date(b.releaseDate).getTime() : 0;
+      return timeA - timeB;
+    });
   },
 
   getReleaseById(idOrSlug: string): Release | undefined {

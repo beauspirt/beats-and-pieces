@@ -503,6 +503,16 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     });
   }, [producer, beatsVersion]);
 
+  const MAX_FREE_BEATS = 3;
+  const customUploadedBeats = prioritizedBeats.filter(
+    (b) =>
+      !b.battleSource &&
+      !b.competitionTitle &&
+      !b.rank &&
+      !(b.id && (b.id.startsWith("sub-") || b.id.startsWith("disc-bb")))
+  );
+  const isAtBeatLimit = customUploadedBeats.length >= MAX_FREE_BEATS;
+
   const handleCopyEmail = () => {
     navigator.clipboard.writeText(producer.email);
     setCopiedEmail(true);
@@ -634,6 +644,10 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
   const handleCreateBeat = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isAtBeatLimit) {
+      alert(`You have reached the maximum limit of ${MAX_FREE_BEATS} uploaded showcase beats.`);
+      return;
+    }
     if (!newBeatTitle.trim()) {
       alert("Please enter a beat title.");
       return;
@@ -798,24 +812,40 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       {/* SECTION 2: PRODUCER BEATS */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl sm:text-2xl font-bold text-white">Beats</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl sm:text-2xl font-bold text-white">Beats</h2>
+            {isProfileOwner && (
+              <span className="text-xs px-2.5 py-1 rounded-full bg-[#121212] text-zinc-400 font-medium">
+                {customUploadedBeats.length}/{MAX_FREE_BEATS} Uploaded
+              </span>
+            )}
+          </div>
           
           {isProfileOwner && (
             <button
               onClick={() => {
+                if (isAtBeatLimit) {
+                  alert(`You have reached the maximum limit of ${MAX_FREE_BEATS} uploaded showcase beats.`);
+                  return;
+                }
                 setNewBeatTitle("");
                 setNewBeatAudioUrl("");
                 setNewBeatAudioName("");
                 setNewBeatBpm("");
                 setNewBeatIsForSale(false);
                 setNewBeatTags([]);
-                setNewBeatTagInput("");
                 setIsAddModalOpen(true);
               }}
-              className="px-4 py-2 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 flex items-center gap-1.5 cursor-pointer"
+              disabled={isAtBeatLimit}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5 ${
+                isAtBeatLimit
+                  ? "bg-[#222222] text-zinc-500 cursor-not-allowed"
+                  : "bg-[#7B61FF] hover:bg-[#684DE6] text-white active:scale-95 cursor-pointer"
+              }`}
+              title={isAtBeatLimit ? `Limit of ${MAX_FREE_BEATS} beats reached` : "Add Beat"}
             >
               <Plus className="w-4 h-4" />
-              <span>Add Beat</span>
+              <span>Add Beat {isAtBeatLimit ? `(${MAX_FREE_BEATS}/${MAX_FREE_BEATS})` : ""}</span>
             </button>
           )}
         </div>
@@ -932,7 +962,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                         key={tag}
                         className="px-3 py-1 rounded-full bg-[#121212] text-[#888888] font-medium text-xs"
                       >
-                        #{tag}
+                        {tag}
                       </span>
                     ))}
                   </div>

@@ -3,10 +3,10 @@
 import React, { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { sampleDiscoveryBeats, sampleProducers } from "@/lib/mock-data";
+import { sampleDiscoveryBeats } from "@/lib/mock-data";
 import { AudioWaveformPlayer } from "@/components/AudioWaveformPlayer";
 import { DiscoveryBeat } from "@/lib/types";
-import { Search, Filter, ArrowUpDown, Star, Flame, Mail, ExternalLink, Copy, CheckCircle2, ChevronDown } from "lucide-react";
+import { Search, Filter, ArrowUpDown, Star, Flame, ChevronDown } from "lucide-react";
 
 export default function BeatsDiscoveryPage() {
   const [beats, setBeats] = useState<DiscoveryBeat[]>(sampleDiscoveryBeats);
@@ -20,27 +20,10 @@ export default function BeatsDiscoveryPage() {
   // Pagination: 15 beats at a time
   const [visibleCount, setVisibleCount] = useState(15);
 
-  // Contact Modal State
-  const [contactProducerTag, setContactProducerTag] = useState<string | null>(null);
-  const [copiedEmail, setCopiedEmail] = useState(false);
-
   // Reset pagination when search or filters change
   useEffect(() => {
     setVisibleCount(15);
   }, [searchQuery, selectedGenre, selectedSaleFilter, showOnlyFavorites, sortBy]);
-
-  // Close modal on Escape key
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setContactProducerTag(null);
-      }
-    };
-    if (contactProducerTag) {
-      window.addEventListener("keydown", handleKeyDown);
-      return () => window.removeEventListener("keydown", handleKeyDown);
-    }
-  }, [contactProducerTag]);
 
   // Load saved favorites from localStorage
   useEffect(() => {
@@ -115,16 +98,6 @@ export default function BeatsDiscoveryPage() {
     (selectedGenre !== "all" ? 1 : 0) +
     (selectedSaleFilter !== "all" ? 1 : 0);
 
-  const selectedProducer = Object.values(sampleProducers).find(
-    (p) => p.nickname.toLowerCase() === (contactProducerTag || "").toLowerCase()
-  ) || sampleProducers["usr-ortega"];
-
-  const handleCopyEmail = () => {
-    navigator.clipboard.writeText(selectedProducer.email);
-    setCopiedEmail(true);
-    setTimeout(() => setCopiedEmail(false), 2000);
-  };
-
   const allGenres = Array.from(new Set(beats.flatMap((b) => b.genres || b.tags || [])));
   const visibleBeats = filteredBeats.slice(0, visibleCount);
 
@@ -134,10 +107,7 @@ export default function BeatsDiscoveryPage() {
       {/* Intro Description Box */}
       <div className="text-sm sm:text-base text-[#A0A0A0] leading-relaxed space-y-1.5 font-normal max-w-4xl">
         <p>
-          This library showcases beats entered in Beats & Pieces competitions throughout the years.
-        </p>
-        <p>
-          To purchase licenses or collaborate, click any producer's nickname to view their showcase profile and direct contact channels.
+          This library showcases beats entered in Beats & Pieces battles throughout the years.
         </p>
       </div>
 
@@ -252,52 +222,68 @@ export default function BeatsDiscoveryPage() {
               </div>
             </div>
 
-            {/* Availability / Sale Status */}
-            <div className="space-y-2 pt-2">
-              <span className="text-xs text-[#A0A0A0] block">License Status</span>
+            {/* Price Tag / Availability Filters */}
+            <div className="space-y-2 pt-2 border-t border-[#222222]">
+              <span className="text-xs text-[#A0A0A0] block">Licensing / Price Status</span>
               <div className="flex flex-wrap gap-2">
-                {[
-                  { key: "all", label: "All Beats" },
-                  { key: "for_sale", label: "Available for License / Sale" },
-                  { key: "not_for_sale", label: "Showcase Only (Not For Sale)" },
-                ].map((item) => (
-                  <button
-                    key={item.key}
-                    onClick={() => setSelectedSaleFilter(item.key as any)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                      selectedSaleFilter === item.key
-                        ? "bg-[#7B61FF] text-white"
-                        : "bg-[#121212] text-[#888888] hover:text-white"
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                ))}
+                <button
+                  onClick={() => setSelectedSaleFilter("all")}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    selectedSaleFilter === "all"
+                      ? "bg-[#7B61FF] text-white"
+                      : "bg-[#121212] text-[#888888] hover:text-white"
+                  }`}
+                >
+                  All Beats
+                </button>
+                <button
+                  onClick={() => setSelectedSaleFilter("for_sale")}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    selectedSaleFilter === "for_sale"
+                      ? "bg-[#7B61FF] text-white"
+                      : "bg-[#121212] text-[#888888] hover:text-white"
+                  }`}
+                >
+                  Available For Sale / License
+                </button>
+                <button
+                  onClick={() => setSelectedSaleFilter("not_for_sale")}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    selectedSaleFilter === "not_for_sale"
+                      ? "bg-[#7B61FF] text-white"
+                      : "bg-[#121212] text-[#888888] hover:text-white"
+                  }`}
+                >
+                  Showcase Only
+                </button>
               </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* Active Search Query Tag (if searching) */}
-      {searchQuery && (
-        <div className="text-xs text-[#7B61FF] px-1">
-          Filtered by: &ldquo;{searchQuery}&rdquo;
-        </div>
-      )}
-
-      {/* Beats List Container */}
-      <div className="space-y-3">
-        {filteredBeats.length === 0 ? (
-          <div className="bg-[#181818] rounded-2xl p-12 text-center text-sm text-[#888888] space-y-2">
-            <p className="text-white font-bold text-base">No beats found matching your criteria</p>
-            <p className="text-xs text-[#666666]">Try clearing your search query or reset filters</p>
+      {/* Beats Feed List */}
+      <div className="space-y-4">
+        {visibleBeats.length === 0 ? (
+          <div className="bg-[#181818] rounded-2xl p-12 text-center space-y-3">
+            <p className="text-white font-semibold">No beats match your search criteria.</p>
+            <button
+              onClick={() => {
+                setSearchQuery("");
+                setSelectedGenre("all");
+                setSelectedSaleFilter("all");
+                setShowOnlyFavorites(false);
+              }}
+              className="text-xs text-[#7B61FF] hover:underline font-semibold"
+            >
+              Clear filters and search
+            </button>
           </div>
         ) : (
           visibleBeats.map((beat) => (
             <div
               key={beat.id}
-              className="bg-[#181818] rounded-2xl p-4 sm:p-5 space-y-3.5"
+              className="bg-[#181818] rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-md"
             >
               {/* Row 1: Header (Title, Producer, Avatar, BPM, License Pill, Favorite) */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -333,33 +319,37 @@ export default function BeatsDiscoveryPage() {
                 <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
                   
                   {/* BPM */}
-                  <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-[#121212] text-[#888888]">
-                    {beat.bpm} BPM
-                  </span>
+                  {beat.bpm ? (
+                    <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-[#121212] text-[#888888]">
+                      {beat.bpm} BPM
+                    </span>
+                  ) : null}
 
                   {/* Price Tag Pill */}
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-bold ${
-                      beat.priceTag === "Not For Sale"
-                        ? "bg-[#121212] text-[#666666]"
-                        : "bg-[#FF5E3A]/20 text-[#FF5E3A]"
-                    }`}
-                  >
-                    {beat.priceTag}
-                  </span>
+                  {beat.priceTag ? (
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        beat.priceTag === "Not For Sale"
+                          ? "bg-[#121212] text-[#666666]"
+                          : "bg-[#FF5E3A]/20 text-[#FF5E3A]"
+                      }`}
+                    >
+                      {beat.priceTag}
+                    </span>
+                  ) : null}
 
-                  {/* Community Flames (only if rating history exists) */}
-                  {beat.flames !== undefined && beat.flames > 0 && (
+                  {/* Community Flames */}
+                  {typeof beat.flames === "number" && beat.flames > 0 ? (
                     <div className="flex items-center gap-1 text-xs sm:text-sm text-[#FF5E3A] font-bold px-2">
                       <Flame className="w-4 h-4 fill-current" />
                       <span>{beat.flames.toFixed(2)}</span>
                     </div>
-                  )}
+                  ) : null}
 
                   {/* Favorite Button */}
                   <button
                     onClick={() => toggleFavorite(beat.id)}
-                    className="p-2 rounded-xl bg-[#121212] hover:bg-[#222222] transition-colors text-[#888888] hover:text-amber-400"
+                    className="p-2 rounded-xl bg-[#121212] hover:bg-[#222222] transition-colors text-[#888888] hover:text-amber-400 cursor-pointer"
                     title={beat.isFavorite ? "Remove from favorites" : "Add to favorites"}
                   >
                     <Star
@@ -382,55 +372,38 @@ export default function BeatsDiscoveryPage() {
                 compact={true}
               />
 
-              {/* Row 3: Clickable Genre & Tags + Contact Producer Action */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1 text-xs">
-                
-                {/* Interactive Clickable Tags (only if tags exist) */}
-                {((beat.genres && beat.genres.length > 0) || (beat.tags && beat.tags.length > 0)) ? (
-                  <div className="flex flex-wrap items-center gap-2">
-                    {beat.genres?.map((g) => (
-                      <button
-                        key={g}
-                        onClick={() => handleTagClick(g)}
-                        className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors cursor-pointer ${
-                          selectedGenre === g
-                            ? "bg-[#7B61FF] text-white"
-                            : "bg-[#121212] text-[#888888] hover:text-white hover:bg-[#202020]"
-                        }`}
-                      >
-                        {g}
-                      </button>
-                    ))}
+              {/* Row 3: Clickable Genre & Tags */}
+              {((beat.genres && beat.genres.length > 0) || (beat.tags && beat.tags.length > 0)) ? (
+                <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
+                  {beat.genres?.map((g) => (
+                    <button
+                      key={g}
+                      onClick={() => handleTagClick(g)}
+                      className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors cursor-pointer ${
+                        selectedGenre === g
+                          ? "bg-[#7B61FF] text-white"
+                          : "bg-[#121212] text-[#888888] hover:text-white hover:bg-[#202020]"
+                      }`}
+                    >
+                      {g}
+                    </button>
+                  ))}
 
-                    {beat.tags.map((t) => (
-                      <button
-                        key={t}
-                        onClick={() => handleTagClick(t)}
-                        className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer ${
-                          selectedGenre === t
-                            ? "bg-[#7B61FF] text-white"
-                            : "bg-[#121212] text-[#777777] hover:text-white hover:bg-[#202020]"
-                        }`}
-                      >
-                        {t}
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <div />
-                )}
-
-                {/* Contact Producer Button */}
-                <div className="flex items-center gap-2 self-end sm:self-center">
-                  <button
-                    onClick={() => setContactProducerTag(beat.beatmaker.tag)}
-                    className="px-3.5 py-1.5 rounded-full bg-[#121212] hover:bg-[#7B61FF] text-[#888888] hover:text-white text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Mail className="w-3.5 h-3.5" />
-                    <span>Contact</span>
-                  </button>
+                  {beat.tags.map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => handleTagClick(t)}
+                      className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer ${
+                        selectedGenre === t
+                          ? "bg-[#7B61FF] text-white"
+                          : "bg-[#121212] text-[#777777] hover:text-white hover:bg-[#202020]"
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  ))}
                 </div>
-              </div>
+              ) : null}
 
             </div>
           ))
@@ -447,100 +420,6 @@ export default function BeatsDiscoveryPage() {
             <span>Load More Beats (+15)</span>
             <ChevronDown className="w-4 h-4" />
           </button>
-        </div>
-      )}
-
-      {/* CONTACT MODAL DIALOG */}
-      {contactProducerTag && (
-        <div 
-          onClick={() => setContactProducerTag(null)}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150 cursor-pointer"
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            className="bg-[#181818] rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default"
-          >
-            
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-bold text-white">Contact {selectedProducer.nickname}</h3>
-              <button
-                onClick={() => setContactProducerTag(null)}
-                className="w-8 h-8 rounded-full bg-[#121212] text-[#888888] hover:text-white flex items-center justify-center text-sm cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            <p className="text-xs sm:text-sm text-[#A0A0A0] leading-relaxed">
-              Inquire about beat licenses, custom production, or collabs directly with {selectedProducer.nickname}:
-            </p>
-
-            {/* Email Box */}
-            <div className="bg-[#121212] rounded-xl p-3.5 flex items-center justify-between gap-3">
-              <div className="truncate">
-                <span className="text-[10px] text-[#777777] uppercase block">Direct Email</span>
-                <span className="text-xs sm:text-sm text-white select-all">{selectedProducer.email}</span>
-              </div>
-
-              <button
-                onClick={handleCopyEmail}
-                className="px-3.5 py-1.5 rounded-lg bg-[#252525] hover:bg-[#7B61FF] text-white text-xs font-medium transition-colors shrink-0 flex items-center gap-1.5 cursor-pointer"
-              >
-                {copiedEmail ? (
-                  <>
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Copied!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-3.5 h-3.5" />
-                    <span>Copy</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            {/* Social Channels */}
-            <div className="space-y-2.5 pt-1">
-              <span className="text-xs text-[#888888] uppercase block">Producer Channels</span>
-              <div className="grid grid-cols-2 gap-2.5">
-                {selectedProducer.links?.instagram && (
-                  <a
-                    href={selectedProducer.links.instagram}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-3 rounded-xl bg-[#121212] hover:bg-[#1E1E1E] text-xs font-semibold text-white flex items-center justify-between transition-colors"
-                  >
-                    <span>Instagram</span>
-                    <ExternalLink className="w-3.5 h-3.5 text-[#666666]" />
-                  </a>
-                )}
-
-                {selectedProducer.links?.beatstars && (
-                  <a
-                    href={selectedProducer.links.beatstars}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-3 rounded-xl bg-[#121212] hover:bg-[#1E1E1E] text-xs font-semibold text-white flex items-center justify-between transition-colors"
-                  >
-                    <span>BeatStars</span>
-                    <ExternalLink className="w-3.5 h-3.5 text-[#666666]" />
-                  </a>
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 pt-2">
-              <Link
-                href={`/producers/${selectedProducer.id}`}
-                onClick={() => setContactProducerTag(null)}
-                className="flex-1 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs sm:text-sm font-bold text-center transition-colors"
-              >
-                View Full Showcase Profile
-              </Link>
-            </div>
-
-          </div>
         </div>
       )}
 

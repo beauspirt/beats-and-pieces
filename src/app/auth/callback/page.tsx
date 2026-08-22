@@ -44,12 +44,8 @@ export default function AuthCallbackPage() {
           localStorage.setItem(STORAGE_KEY, matchedProducer.id);
           setStatus("success");
           setTimeout(() => {
-            if (matchedProducer.role === "admin") {
-              router.push("/admin");
-            } else {
-              router.push("/profile");
-            }
-          }, 800);
+            router.push("/profile");
+          }, 400);
         } else {
           // New verified community user
           const newUserId = `usr-${verifiedEmail.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "")}`;
@@ -86,7 +82,7 @@ export default function AuthCallbackPage() {
         <div className="space-y-4 animate-in fade-in duration-200">
           <Loader2 className="w-10 h-10 text-brand animate-spin mx-auto" />
           <h2 className="text-lg font-bold text-white">Verifying Google Account...</h2>
-          <p className="text-xs text-zinc-400">Authenticating and synchronizing your artist profile.</p>
+          <p className="text-xs text-zinc-400">Authenticating and synchronizing your user profile.</p>
         </div>
       )}
 
@@ -101,7 +97,7 @@ export default function AuthCallbackPage() {
       )}
 
       {status === "error" && (
-        <div className="space-y-4 max-w-md bg-[#181818] border border-red-500/20 rounded-2xl p-6 shadow-xl animate-in fade-in duration-200">
+        <div className="space-y-4 max-w-md bg-[#181818] rounded-2xl p-6 shadow-xl animate-in fade-in duration-200">
           <div className="w-12 h-12 rounded-full bg-red-500/20 text-red-400 mx-auto flex items-center justify-center">
             <ShieldAlert className="w-6 h-6" />
           </div>

@@ -2,173 +2,242 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { X } from "lucide-react";
+import { X, ArrowLeft, Disc } from "lucide-react";
 import { AdminGuard } from "@/components/AdminGuard";
+import { releaseService } from "@/services";
+import { normalizeUrl } from "@/lib/utils";
 
 export default function NewReleasePage() {
   const router = useRouter();
-  const [title, setTitle] = useState("Romanian Hip-Hop Flip Challenge");
-  const [description, setDescription] = useState(
-    "This is a short description about the release I am currently creating. There's not that much to say at this time but when I'm actually creating one, there might be lots of things to mention.\nThere might even be multiple paragraphs containing all sorts of random information I can't really think about right now.\nAnyway, hope this is enough to give you an idea."
-  );
-  const [releaseDate, setReleaseDate] = useState("2026-09-01");
-  const [links, setLinks] = useState<Record<string, string>>({
-    spotify: "https://open.spotify.com/album/5jEacwhNTYagOyRTq...",
-    appleMusic: "",
-    youtube: "",
-    bandcamp: "",
-    soundcloud: "",
-  });
+  const [title, setTitle] = useState("");
+  const [coverImage, setCoverImage] = useState("/covers/beat-battle-8.png");
+  const [description, setDescription] = useState("");
+  const [releaseDate, setReleaseDate] = useState("");
+  const [spotifyUrl, setSpotifyUrl] = useState("");
+  const [appleMusicUrl, setAppleMusicUrl] = useState("");
+  const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [bandcampUrl, setBandcampUrl] = useState("");
+  const [soundcloudUrl, setSoundcloudUrl] = useState("");
   const [isSaved, setIsSaved] = useState(false);
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (uploadEvent) => {
+        if (uploadEvent.target?.result) {
+          setCoverImage(uploadEvent.target.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!title.trim()) return;
+
     setIsSaved(true);
+
+    releaseService.createRelease({
+      title: title.trim(),
+      coverImage: coverImage,
+      description: description.trim(),
+      releaseDate: releaseDate ? new Date(releaseDate).toISOString() : new Date().toISOString(),
+      spotifyUrl: normalizeUrl(spotifyUrl) || undefined,
+      appleMusicUrl: normalizeUrl(appleMusicUrl) || undefined,
+      youtubeUrl: normalizeUrl(youtubeUrl) || undefined,
+      bandcampUrl: normalizeUrl(bandcampUrl) || undefined,
+      soundcloudUrl: normalizeUrl(soundcloudUrl) || undefined,
+    });
+
     setTimeout(() => {
       router.push("/releases");
-    }, 1500);
-  };
-
-  const clearLink = (key: string) => {
-    setLinks((prev) => ({ ...prev, [key]: "" }));
+    }, 1000);
   };
 
   return (
     <AdminGuard>
       <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-300 py-4">
       
-      {/* Title */}
-      <div className="pb-2">
-        <h1 className="text-3xl font-black text-white">Create a new release</h1>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        
-        {/* CONTAINER 1: DETAILS */}
-        <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 space-y-6">
-          <h2 className="text-lg font-bold text-white">Details</h2>
-
-          {/* Title */}
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-            <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">
-              Title
-            </label>
-            <div className="sm:col-span-9">
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Description */}
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-start">
-            <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1] pt-2">
-              Description
-            </label>
-            <div className="sm:col-span-9">
-              <textarea
-                rows={5}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF] resize-none leading-relaxed"
-              />
-            </div>
-          </div>
-
-          {/* Cover */}
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-            <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">
-              Cover
-            </label>
-            <div className="sm:col-span-9">
-              <div className="rounded-xl p-3 bg-[#121212] flex items-center justify-between">
-                <span className="text-xs text-[#777777]">Choose file</span>
-                <label className="px-4 py-1.5 rounded-lg bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-white cursor-pointer transition-colors">
-                  Browse
-                  <input type="file" accept="image/*" className="hidden" />
-                </label>
-              </div>
-            </div>
-          </div>
-
-          {/* Release Date */}
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-            <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">
-              Release date
-            </label>
-            <div className="sm:col-span-9">
-              <input
-                type="text"
-                value={releaseDate}
-                onChange={(e) => setReleaseDate(e.target.value)}
-                placeholder="YYYY-MM-DD"
-                className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm font-mono text-white placeholder-[#555555] focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
-              />
-            </div>
-          </div>
-
+        {/* Top Header & Breadcrumb */}
+        <div className="space-y-3">
+          <Link
+            href="/admin"
+            className="inline-flex items-center gap-1.5 text-xs text-[#888888] hover:text-white transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Back to Admin Panel</span>
+          </Link>
+          <h1 className="text-3xl font-black text-white flex items-center gap-3">
+            <Disc className="w-7 h-7 text-brand" />
+            <span>Create a New Release</span>
+          </h1>
         </div>
 
-        {/* CONTAINER 2: LINKS */}
-        <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 space-y-5">
-          <h2 className="text-lg font-bold text-white">Links</h2>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          
+          {/* CONTAINER 1: DETAILS */}
+          <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 space-y-6">
+            <h2 className="text-lg font-bold text-white">Details</h2>
 
-          {[
-            { id: "spotify", label: "Spotify" },
-            { id: "appleMusic", label: "Apple Music" },
-            { id: "youtube", label: "YouTube" },
-            { id: "bandcamp", label: "Bandcamp" },
-            { id: "soundcloud", label: "Soundcloud" },
-          ].map((field) => {
-            const val = links[field.id] || "";
-            return (
-              <div key={field.id} className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-                <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">
-                  {field.label}
-                </label>
-                <div className="sm:col-span-9 relative">
-                  <input
-                    type="url"
-                    value={val}
-                    onChange={(e) =>
-                      setLinks({ ...links, [field.id]: e.target.value })
-                    }
-                    className="w-full bg-[#121212] rounded-xl pl-4 pr-10 py-3 text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
-                  />
-                  {val && (
-                    <button
-                      type="button"
-                      onClick={() => clearLink(field.id)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-[#7B61FF] text-white flex items-center justify-center hover:bg-[#684DE6] transition-colors"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  )}
+            {/* Title */}
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+              <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">
+                Title
+              </label>
+              <div className="sm:col-span-9">
+                <input
+                  type="text"
+                  placeholder="e.g. Beats & Pieces - Flip Tape #3"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Cover Art Upload */}
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+              <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">
+                Cover Art
+              </label>
+              <div className="sm:col-span-9">
+                <div className="flex items-center gap-4 bg-[#121212] p-3 rounded-xl">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden relative bg-[#181818] shrink-0 shadow-md">
+                    <Image
+                      src={coverImage}
+                      alt="Cover Preview"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between flex-1">
+                    <span className="text-xs text-[#777777]">Upload square cover artwork</span>
+                    <label className="px-4 py-2 rounded-xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-white cursor-pointer transition-colors shrink-0">
+                      Browse File
+                      <input type="file" accept="image/*" onChange={handleImageFileChange} className="hidden" />
+                    </label>
+                  </div>
                 </div>
               </div>
-            );
-          })}
+            </div>
 
-        </div>
+            {/* Description */}
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-start">
+              <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1] pt-2">
+                Description
+              </label>
+              <div className="sm:col-span-9">
+                <textarea
+                  rows={4}
+                  placeholder="Compilation tracklist, producer credits, and release details..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF] resize-none leading-relaxed"
+                />
+              </div>
+            </div>
 
-        {/* Bottom Save Button */}
-        <div className="text-right pt-2">
-          <button
-            type="submit"
-            className="px-10 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-sm font-bold transition-all shadow-lg active:scale-95 ml-auto cursor-pointer"
-          >
-            {isSaved ? "Saved ✓" : "Save"}
-          </button>
-        </div>
+            {/* Release Date */}
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+              <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">
+                Release Date
+              </label>
+              <div className="sm:col-span-9">
+                <input
+                  type="date"
+                  value={releaseDate}
+                  onChange={(e) => setReleaseDate(e.target.value)}
+                  className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+                />
+              </div>
+            </div>
 
-      </form>
+          </div>
 
-    </div>
+          {/* CONTAINER 2: STREAMING LINKS */}
+          <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 space-y-5">
+            <h2 className="text-lg font-bold text-white">Streaming Links</h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+              <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">Spotify</label>
+              <div className="sm:col-span-9">
+                <input
+                  type="url"
+                  value={spotifyUrl}
+                  onChange={(e) => setSpotifyUrl(e.target.value)}
+                  className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+              <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">Apple Music</label>
+              <div className="sm:col-span-9">
+                <input
+                  type="url"
+                  value={appleMusicUrl}
+                  onChange={(e) => setAppleMusicUrl(e.target.value)}
+                  className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+              <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">YouTube</label>
+              <div className="sm:col-span-9">
+                <input
+                  type="url"
+                  value={youtubeUrl}
+                  onChange={(e) => setYoutubeUrl(e.target.value)}
+                  className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+              <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">Bandcamp</label>
+              <div className="sm:col-span-9">
+                <input
+                  type="url"
+                  value={bandcampUrl}
+                  onChange={(e) => setBandcampUrl(e.target.value)}
+                  className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+              <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">SoundCloud</label>
+              <div className="sm:col-span-9">
+                <input
+                  type="url"
+                  value={soundcloudUrl}
+                  onChange={(e) => setSoundcloudUrl(e.target.value)}
+                  className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                />
+              </div>
+            </div>
+
+          </div>
+
+          {/* Bottom Save Button */}
+          <div className="text-right pt-2">
+            <button
+              type="submit"
+              className="px-10 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-sm font-bold transition-all shadow-lg active:scale-95 ml-auto cursor-pointer"
+            >
+              {isSaved ? "Saved ✓" : "Create Release"}
+            </button>
+          </div>
+
+        </form>
+
+      </div>
     </AdminGuard>
   );
 }

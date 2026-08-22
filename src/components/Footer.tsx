@@ -4,7 +4,7 @@ import React from "react";
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="bg-[#121212] py-10 mt-16 border-t border-[#1C1C1C]">
+    <footer className="bg-[#121212] py-10 mt-16">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
         
         {/* Left: Copyright */}

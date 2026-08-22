@@ -6,16 +6,23 @@ import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { User as UserIcon, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { battleService } from "@/services";
 
 export const Navbar: React.FC = () => {
   const pathname = usePathname();
   const { user: currentUser, isLoggedIn, logout } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const [showAdminMenu, setShowAdminMenu] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
-  const adminMenuRef = useRef<HTMLDivElement>(null);
+  const isHost = Boolean(
+    currentUser && (
+      currentUser.role === "host" ||
+      (currentUser.email && battleService.getBattlesByHost(currentUser.email).length > 0) ||
+      (currentUser.nickname && battleService.getBattlesByHost(currentUser.nickname).length > 0)
+    )
+  );
+
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -57,9 +64,6 @@ export const Navbar: React.FC = () => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (adminMenuRef.current && !adminMenuRef.current.contains(event.target as Node)) {
-        setShowAdminMenu(false);
-      }
       if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
         setShowProfileMenu(false);
       }
@@ -69,7 +73,7 @@ export const Navbar: React.FC = () => {
   }, []);
 
   const navLinks = [
-    { href: "/battles", label: "Competitions" },
+    { href: "/battles", label: "Battles" },
     { href: "/beats", label: "Beats" },
     { href: "/releases", label: "Releases" },
   ];
@@ -117,66 +121,32 @@ export const Navbar: React.FC = () => {
           </nav>
         </div>
 
-        {/* Right Actions: Admin Panel dropdown, Theme Switch, Avatar / Log in */}
+        {/* Right Actions: Admin Panel link, Host Panel link, Avatar / Log in */}
         <div className="flex items-center gap-6">
           {mounted && currentUser?.role === "admin" && (
-            <div className="relative" ref={adminMenuRef}>
-              <button
-                onClick={() => setShowAdminMenu(!showAdminMenu)}
-                className={`text-[14px] font-semibold transition-colors flex items-center gap-1.5 ${
-                  pathname.startsWith("/admin") || showAdminMenu
-                    ? "text-[#FF8A65]"
-                    : "text-[#D1D1D1] hover:text-white"
-                }`}
-              >
-                <span>Admin Panel</span>
-              </button>
+            <Link
+              href="/admin"
+              className={`text-[14px] font-semibold transition-colors flex items-center gap-1.5 ${
+                pathname.startsWith("/admin")
+                  ? "text-[#FF8A65]"
+                  : "text-[#D1D1D1] hover:text-white"
+              }`}
+            >
+              Admin Panel
+            </Link>
+          )}
 
-              {/* Admin Panel Dropdown Menu */}
-              {showAdminMenu && (
-                <div className="absolute right-0 mt-3 w-56 bg-[#181818] rounded-xl shadow-2xl overflow-hidden py-1 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
-                  <Link
-                    href="/admin/new-battle"
-                    onClick={() => setShowAdminMenu(false)}
-                    className="block px-4 py-2.5 text-xs font-medium text-[#D1D1D1] hover:text-white hover:bg-[#7B61FF] transition-colors"
-                  >
-                    New Competition
-                  </Link>
-
-                  <Link
-                    href="/battles"
-                    onClick={() => setShowAdminMenu(false)}
-                    className="block px-4 py-2.5 text-xs font-medium text-[#D1D1D1] hover:text-white hover:bg-[#7B61FF] transition-colors"
-                  >
-                    Edit Competition(s)
-                  </Link>
-
-                  <Link
-                    href="/admin/new-release"
-                    onClick={() => setShowAdminMenu(false)}
-                    className="block px-4 py-2.5 text-xs font-medium text-[#D1D1D1] hover:text-white hover:bg-[#7B61FF] transition-colors"
-                  >
-                    New Release
-                  </Link>
-
-                  <Link
-                    href="/releases"
-                    onClick={() => setShowAdminMenu(false)}
-                    className="block px-4 py-2.5 text-xs font-medium text-[#D1D1D1] hover:text-white hover:bg-[#7B61FF] transition-colors"
-                  >
-                    Edit Release(s)
-                  </Link>
-
-                  <Link
-                    href="/admin/moderation"
-                    onClick={() => setShowAdminMenu(false)}
-                    className="block px-4 py-2.5 text-xs font-medium text-[#FF8A65] hover:text-white hover:bg-[#FF5E3A] transition-colors"
-                  >
-                    Voting Moderation
-                  </Link>
-                </div>
-              )}
-            </div>
+          {mounted && currentUser?.role !== "admin" && isHost && (
+            <Link
+              href="/host"
+              className={`text-[14px] font-semibold transition-colors flex items-center gap-1.5 ${
+                pathname.startsWith("/host")
+                  ? "text-[#FF8A65]"
+                  : "text-[#D1D1D1] hover:text-white"
+              }`}
+            >
+              Host Panel
+            </Link>
           )}
 
           {/* User Avatar (if logged in) or 'Log in' button */}

@@ -8,6 +8,7 @@ import {
   sampleSubmissions,
   sampleProducers,
 } from "@/lib/mock-data";
+import { battleService } from "@/services";
 import { AudioWaveformPlayer } from "./AudioWaveformPlayer";
 import { FlameRating } from "./FlameRating";
 import {
@@ -17,19 +18,48 @@ import {
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { submitRating } from "@/lib/api";
-import { BattlePhase } from "@/lib/types";
+import { BattlePhase, Competition } from "@/lib/types";
 import { useAudioPlayer } from "@/lib/audio-context";
+import { useAuth } from "@/lib/auth-context";
 
 export function BattleDetailClient({ battleId }: { battleId: string }) {
   const { pauseTrack } = useAudioPlayer();
-  const battle = sampleCompetitions.find((c) => c.id === battleId) || sampleCompetitions[0];
+  const { user: currentUser } = useAuth();
+  const [battle, setBattle] = useState<Competition>(() => {
+    return battleService.getCompetitionById(battleId) || sampleCompetitions.find((c) => c.id === battleId) || sampleCompetitions[0];
+  });
   const [activeTab, setActiveTab] = useState<BattlePhase>(battle.phase);
+
+  useEffect(() => {
+    const updated = battleService.getCompetitionById(battleId);
+    if (updated) {
+      setBattle(updated);
+      setActiveTab(updated.phase);
+    }
+  }, [battleId]);
 
   const battleSubmissions = sampleSubmissions.filter((sub) => sub.battleId === battle.id);
   const currentSubmissions = battleSubmissions.length > 0 ? battleSubmissions : sampleSubmissions;
 
-  // Current logged in user simulation (Judge / Producer)
-  const currentUser = sampleProducers["usr-nerub"];
+  // Determine if the currently logged in user is authorized to judge this battle
+  const isUserJudge = Boolean(
+    currentUser && (
+      currentUser.role === "admin" ||
+      currentUser.role === "judge" ||
+      battle.judgeDetails?.some((j) => j.email.toLowerCase() === currentUser.email.toLowerCase()) ||
+      battle.judges?.some((j) => typeof j === "string" && (j.toLowerCase() === currentUser.nickname.toLowerCase() || j.toLowerCase() === currentUser.email.toLowerCase()))
+    )
+  );
+
+  const [juryViewerRole, setJuryViewerRole] = useState<"judge" | "regular">("regular");
+
+  useEffect(() => {
+    if (isUserJudge) {
+      setJuryViewerRole("judge");
+    } else {
+      setJuryViewerRole("regular");
+    }
+  }, [isUserJudge]);
 
   // Stage 1: Upload state
   const [isUploading, setIsUploading] = useState(false);
@@ -223,7 +253,6 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   };
 
   const [isJurySubmitted, setIsJurySubmitted] = useState(false);
-  const [juryViewerRole, setJuryViewerRole] = useState<"judge" | "regular">("judge");
 
   const handlePublishJuryBallot = () => {
     setIsJurySubmitted(true);
@@ -255,7 +284,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             className="inline-flex items-center gap-2 text-sm font-semibold text-[#888888] hover:text-white transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Back to Competitions</span>
+            <span>Back to Battles</span>
           </Link>
 
           {/* Competition Process Timeline & Interactive Stage Switcher (only for active/mock competitions) */}
@@ -315,7 +344,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
           </div>
 
           <div className="space-y-1 text-sm sm:text-base text-[#A0A0A0]">
-            <p>Hosted by: <span className="text-white font-medium">{battle.hosts.join(", ")}</span></p>
+            <p>Hosted by: <span className="text-white font-medium">{battle.hosts?.[0] || "Nerub"}</span></p>
             <p>Judged by: <span className="text-white font-medium">{battle.judges.join(", ")}</span></p>
           </div>
 
@@ -326,7 +355,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
           {battle.phase === "completed" ? (
             battle.endedAt && (
               <div className="text-xs sm:text-sm text-[#888888] pt-2">
-                Ended on {new Date(battle.endedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                Ended on {new Date(battle.endedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" })}
               </div>
             )
           ) : (
@@ -361,7 +390,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                   </div>
 
                   <div className="bg-[#181818] p-3.5 rounded-xl">
-                    <p className="text-xs sm:text-sm text-[#D1D1D1]">2. Track length must not exceed 2 minutes.</p>
+                    <p className="text-xs sm:text-sm text-[#D1D1D1]">2. Track length must not exceed 3 minutes.</p>
                   </div>
 
                   <div className="bg-[#181818] p-3.5 rounded-xl">
@@ -623,7 +652,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
           {/* Bottom Submit Action (No scrolling required after finishing) */}
           <div className="flex flex-col items-center justify-center gap-3 pt-6 pb-6">
             {isRatingsSubmitted ? (
-              <div className="flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-emerald-500/15 text-emerald-300 font-bold text-sm sm:text-base border border-emerald-500/20 shadow-lg">
+              <div className="flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-emerald-500/15 text-emerald-300 font-bold text-sm sm:text-base shadow-lg">
                 <CheckCircle2 className="w-5 h-5 text-emerald-400" />
                 <span>Ratings Submitted & Locked ✓</span>
               </div>
@@ -645,7 +674,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             >
               <div 
                 onClick={(e) => e.stopPropagation()}
-                className="bg-[#181818] rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl relative border border-[#2A2A2A] cursor-default"
+                className="bg-[#181818] rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl relative cursor-default"
               >
                 <div className="space-y-2">
                   <h3 className="text-xl font-bold text-[#FF5E3A] flex items-center gap-2">
@@ -687,7 +716,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             >
               <div 
                 onClick={(e) => e.stopPropagation()}
-                className="bg-[#181818] rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl relative border border-[#2A2A2A] cursor-default"
+                className="bg-[#181818] rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default"
               >
                 <div className="space-y-2">
                   <h3 className="text-xl font-bold text-white flex items-center gap-2">
@@ -781,8 +810,8 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
                 <p className="text-xs sm:text-sm text-[#888888] mt-1">
                   {juryViewerRole === "judge"
-                    ? "Logged in as judge (Ortega)."
-                    : "The judges are currently evaluating the finalists' beats."}
+                    ? `Logged in as authorized judge (${currentUser?.nickname || "Judge"}). Score the finalists below.`
+                    : "The assigned judges are currently reviewing and scoring the finalist submissions."}
                 </p>
               </div>
 
@@ -790,12 +819,12 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                 <div className="pt-2">
                   {isJurySubmitted ? (
                     <div className="flex items-center gap-3 flex-wrap">
-                      <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500/15 text-emerald-300 font-bold text-xs sm:text-sm border border-emerald-500/20 shadow-sm">
+                      <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500/15 text-emerald-300 font-bold text-xs sm:text-sm shadow-sm">
                         Scores Submitted ✓
                       </div>
                       <button
                         onClick={() => setIsJurySubmitted(false)}
-                        className="px-4 py-2.5 rounded-xl bg-[#202020] hover:bg-[#282828] text-[#D1D1D1] hover:text-white font-semibold text-xs sm:text-sm border border-[#333333] transition-all cursor-pointer active:scale-95 shadow-sm"
+                        className="px-4 py-2.5 rounded-xl bg-[#202020] hover:bg-[#282828] text-[#D1D1D1] hover:text-white font-semibold text-xs sm:text-sm transition-all cursor-pointer active:scale-95 shadow-sm"
                       >
                         Unlock & Edit Scores
                       </button>
@@ -812,42 +841,51 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
               )}
             </div>
 
-            {/* Right Column: Assigned Judges stacked in a Column (Only actual judges, no hosts) */}
-            <div className="lg:col-span-5 bg-[#181818] p-4 sm:p-5 rounded-2xl space-y-3">
+            {/* Right Column: Assigned Judges stacked in a Column */}
+            <div className="lg:col-span-5 bg-[#181818] p-4 sm:p-5 rounded-2xl space-y-3 shadow-lg">
               <div className="flex items-center justify-between">
                 <span className="text-xs sm:text-sm font-bold text-white">Assigned Judges</span>
+                <span className="text-[10px] text-zinc-500 font-mono">
+                  {(battle.judgeDetails?.length || battle.judges?.length || 0)} Judges
+                </span>
               </div>
 
               <div className="space-y-2">
-                <div className="bg-[#121212] p-3 rounded-xl flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <span className={`w-2 h-2 rounded-full ${isJurySubmitted ? "bg-emerald-500" : "bg-[#FF5E3A] animate-pulse"}`} />
-                    <span className="text-xs sm:text-sm font-bold text-white">Ortega{juryViewerRole === "judge" ? " (You)" : ""}</span>
-                  </div>
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded ${isJurySubmitted ? "bg-emerald-500/20 text-emerald-400" : "bg-[#FF5E3A]/20 text-[#FF5E3A]"}`}>
-                    {isJurySubmitted ? "Submitted ✓" : "In Progress"}
-                  </span>
-                </div>
-
-                <div className="bg-[#121212] p-3 rounded-xl flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                    <span className="text-xs sm:text-sm font-bold text-white">Silent Strike</span>
-                  </div>
-                  <span className="text-xs font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">
-                    Submitted ✓
-                  </span>
-                </div>
-
-                <div className="bg-[#121212] p-3 rounded-xl flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <span className="w-2 h-2 rounded-full bg-[#FF5E3A] animate-pulse" />
-                    <span className="text-xs sm:text-sm font-bold text-white">K-Lu</span>
-                  </div>
-                  <span className="text-xs font-bold px-2 py-0.5 rounded bg-[#FF5E3A]/20 text-[#FF5E3A]">
-                    In Progress
-                  </span>
-                </div>
+                {battle.judgeDetails && battle.judgeDetails.length > 0 ? (
+                  battle.judgeDetails.map((j) => {
+                    const isMe = currentUser?.email.toLowerCase() === j.email.toLowerCase() || currentUser?.nickname.toLowerCase() === j.name.toLowerCase();
+                    return (
+                      <div key={j.email} className="bg-[#121212] p-3 rounded-xl flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <span className={`w-2 h-2 rounded-full ${isJurySubmitted && isMe ? "bg-emerald-500" : "bg-[#FF5E3A] animate-pulse"}`} />
+                          <span className="text-xs sm:text-sm font-bold text-white">
+                            {j.name}{isMe ? " (You)" : ""}
+                          </span>
+                        </div>
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded ${isJurySubmitted && isMe ? "bg-emerald-500/20 text-emerald-400" : "bg-[#FF5E3A]/20 text-[#FF5E3A]"}`}>
+                          {isJurySubmitted && isMe ? "Submitted ✓" : "In Progress"}
+                        </span>
+                      </div>
+                    );
+                  })
+                ) : (
+                  battle.judges.map((j) => {
+                    const isMe = currentUser?.nickname.toLowerCase() === j.toLowerCase() || currentUser?.email.toLowerCase() === j.toLowerCase();
+                    return (
+                      <div key={j} className="bg-[#121212] p-3 rounded-xl flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <span className={`w-2 h-2 rounded-full ${isJurySubmitted && isMe ? "bg-emerald-500" : "bg-[#FF5E3A] animate-pulse"}`} />
+                          <span className="text-xs sm:text-sm font-bold text-white">
+                            {j}{isMe ? " (You)" : ""}
+                          </span>
+                        </div>
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded ${isJurySubmitted && isMe ? "bg-emerald-500/20 text-emerald-400" : "bg-[#FF5E3A]/20 text-[#FF5E3A]"}`}>
+                          {isJurySubmitted && isMe ? "Submitted ✓" : "In Progress"}
+                        </span>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
 

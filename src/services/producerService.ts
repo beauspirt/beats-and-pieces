@@ -1,31 +1,70 @@
 import { UserProfile } from "@/lib/types";
 import rawProducers from "@/data/producers.json";
 
-const producersMap: Record<string, UserProfile> = { ...(rawProducers as Record<string, UserProfile>) };
+const STORAGE_KEY_PRODUCERS = "bnp_custom_producers";
+
+function loadCustomProducers(): Record<string, UserProfile> {
+  if (typeof window !== "undefined") {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_PRODUCERS);
+      if (stored) return JSON.parse(stored);
+    } catch {}
+  }
+  return {};
+}
+
+function saveCustomProducers(data: Record<string, UserProfile>) {
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem(STORAGE_KEY_PRODUCERS, JSON.stringify(data));
+    } catch {}
+  }
+}
+
+let customProducers = loadCustomProducers();
+let producersMap: Record<string, UserProfile> = {
+  ...(rawProducers as Record<string, UserProfile>),
+  ...customProducers,
+};
 
 export const producerService = {
   getAllProducers(): UserProfile[] {
+    if (typeof window !== "undefined") {
+      const fresh = loadCustomProducers();
+      return Object.values({ ...(rawProducers as Record<string, UserProfile>), ...fresh });
+    }
     return Object.values(producersMap);
   },
 
   getProducersMap(): Record<string, UserProfile> {
+    if (typeof window !== "undefined") {
+      const fresh = loadCustomProducers();
+      return { ...(rawProducers as Record<string, UserProfile>), ...fresh };
+    }
     return { ...producersMap };
   },
 
   getProducerById(id: string): UserProfile | undefined {
-    return producersMap[id];
+    return this.getProducersMap()[id];
   },
 
   getProducerByEmail(email: string): UserProfile | undefined {
     const cleanEmail = email.trim().toLowerCase();
-    return Object.values(producersMap).find(
+    return Object.values(this.getProducersMap()).find(
       (p) => p.email.toLowerCase() === cleanEmail
     );
   },
 
   updateProducer(id: string, updates: Partial<UserProfile>): UserProfile | null {
-    if (!producersMap[id]) return null;
-    producersMap[id] = { ...producersMap[id], ...updates };
-    return producersMap[id];
+    const current = this.getProducerById(id) || producersMap[id];
+    if (!current) return null;
+
+    const updated = { ...current, ...updates, isClaimed: true };
+    const custom = loadCustomProducers();
+    custom[id] = updated;
+    saveCustomProducers(custom);
+
+    producersMap[id] = updated;
+    return updated;
   },
 };

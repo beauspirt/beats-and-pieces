@@ -4,15 +4,28 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { sampleProducers } from "@/lib/mock-data";
-import { ArrowRight, UserCheck, Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 
 export default function SignInPage() {
   const router = useRouter();
-  const { signInWithGoogle, signInWithDiscord, loginWithUser } = useAuth();
+  const { isLoggedIn, isLoading, signInWithGoogle, signInWithDiscord } = useAuth();
 
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (!isLoading && isLoggedIn) {
+      router.replace("/profile");
+    }
+  }, [isLoggedIn, isLoading, router]);
+
+  if (isLoading || isLoggedIn) {
+    return (
+      <div className="min-h-[75vh] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-brand animate-spin" />
+      </div>
+    );
+  }
 
   const handleGoogleClick = async () => {
     setIsAuthenticating(true);
@@ -46,11 +59,6 @@ export default function SignInPage() {
     }
   };
 
-  const handleQuickLogin = (producerId: string) => {
-    loginWithUser(producerId);
-    router.push("/profile");
-  };
-
   return (
     <div className="min-h-[75vh] flex flex-col items-center justify-center text-center px-4 animate-in fade-in duration-300">
       
@@ -68,12 +76,12 @@ export default function SignInPage() {
       </div>
 
       <p className="text-sm text-[#8E8E93] max-w-md mb-8 leading-relaxed">
-        Sign in with your verified account to enter beat battles, rate submissions, and manage your artist profile.
+        Sign in with your verified account to enter beat battles, rate submissions, and manage your user profile.
       </p>
 
       {/* Auth Error Banner */}
       {authError && (
-        <div className="w-full max-w-md mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs text-left flex items-start gap-3 animate-in shake">
+        <div className="w-full max-w-md mb-6 p-4 rounded-xl bg-red-500/10 text-red-400 text-xs text-left flex items-start gap-3 animate-in shake">
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <p className="leading-relaxed">{authError}</p>
         </div>
@@ -127,45 +135,6 @@ export default function SignInPage() {
           )}
           <span>Sign in with Discord</span>
         </button>
-      </div>
-
-      {/* QUICK LOGIN AS LEGACY BEATMAKER (TESTING & DEMO HELPER) */}
-      <div className="w-full max-w-2xl bg-[#181818] border border-white/5 rounded-2xl p-5 sm:p-6 text-left space-y-4 shadow-xl">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <UserCheck className="w-4 h-4 text-[#7B61FF]" />
-            <h3 className="text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
-              Quick Switcher (Testing & Demo Showcase)
-            </h3>
-          </div>
-          <span className="text-[10px] text-[#666666] font-mono">
-            {Object.keys(sampleProducers).length} Accounts
-          </span>
-        </div>
-
-        <p className="text-xs text-[#999999] leading-relaxed">
-          Click any registered beatmaker profile below to preview their individual showcase and battle permissions:
-        </p>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 pt-1 max-h-48 overflow-y-auto pr-1">
-          {Object.entries(sampleProducers).map(([id, prod]) => (
-            <button
-              key={id}
-              onClick={() => handleQuickLogin(id)}
-              className="p-2.5 rounded-xl bg-[#121212] hover:bg-[#202020] border border-white/5 hover:border-[#7B61FF]/40 text-left transition-all group cursor-pointer"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-white group-hover:text-[#7B61FF] transition-colors truncate">
-                  {prod.nickname}
-                </span>
-                <ArrowRight className="w-3 h-3 text-[#555555] group-hover:text-white group-hover:translate-x-0.5 transition-all shrink-0" />
-              </div>
-              <span className="text-[10px] font-mono text-[#666666] truncate block mt-0.5">
-                {prod.email}
-              </span>
-            </button>
-          ))}
-        </div>
       </div>
 
     </div>

@@ -6,17 +6,22 @@ import { useAuth } from "@/lib/auth-context";
 import { ShieldAlert, ArrowLeft } from "lucide-react";
 
 export const AdminGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, isLoggedIn } = useAuth();
+  const { user, isLoggedIn, isLoading } = useAuth();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!mounted) {
+  // Determine if a session is still hydrating from localStorage/Supabase
+  const isHydrating = typeof window !== "undefined" && !user && Boolean(
+    localStorage.getItem("bnp_active_user_id") && localStorage.getItem("bnp_active_user_id") !== "logged_out"
+  );
+
+  if (!mounted || isLoading || isHydrating) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full border-2 border-brand border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-brand border-t-transparent animate-spin border-2" />
       </div>
     );
   }

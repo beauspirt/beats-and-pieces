@@ -1,54 +1,5 @@
 [
   {
-    "id": "battle-9",
-    "number": 9,
-    "title": "Beat Battle #9 (Demo Mockup)",
-    "slug": "beat-battle-9",
-    "coverImage": "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=600&auto=format&fit=crop&q=80",
-    "hosts": [
-      "[Demo Host]"
-    ],
-    "judges": [
-      "[Placeholder Judge 1]",
-      "[Placeholder Judge 2]",
-      "[Placeholder Judge 3]"
-    ],
-    "description": "Active staging mockup for platform testing. Use this demo battle to test beat submissions, public flame voting, jury evaluation scorecards, and results generation.",
-    "prizes": {
-      "first": "[1st Place Prize Placeholder]",
-      "second": "[2nd Place Prize Placeholder]",
-      "third": "[3rd Place Prize Placeholder]"
-    },
-    "samples": [
-      {
-        "id": "s1",
-        "title": "Sample 1 - Bonita Applebong",
-        "audioUrl": "/audio/01 Ortega - Bonita Applebong.mp3",
-        "duration": 67
-      },
-      {
-        "id": "s2",
-        "title": "Sample 2 - ThunderClouds",
-        "audioUrl": "/audio/02 C.S.T - ThunderClouds.mp3",
-        "duration": 119
-      },
-      {
-        "id": "s3",
-        "title": "Sample 3 - Butterflies in my lungs",
-        "audioUrl": "/audio/05 Nerub - Butterflies in my lungs.mp3",
-        "duration": 124
-      }
-    ],
-    "phase": "rating",
-    "submissionStartsAt": "2026-08-01T00:00:00Z",
-    "submissionEndsAt": "2026-08-15T23:59:59Z",
-    "ratingEndsAt": "2026-08-22T23:59:59Z",
-    "judgingEndsAt": "2026-08-25T20:00:00Z",
-    "totalSubmissions": 15,
-    "minVotesRequired": 8,
-    "topFinalistsCutoff": 15
-  },
-  {
     "id": "battle-8",
     "number": 8,
     "title": "Beat Battle #8",
@@ -146,6 +97,7 @@
       "Nerub"
     ],
     "judges": [
+      "Nerub",
       "Tomi Marfă",
       "Vapor"
     ],
@@ -176,6 +128,7 @@
       "Nerub"
     ],
     "judges": [
+      "Nerub",
       "Gogan",
       "nUKred"
     ],
@@ -206,6 +159,7 @@
       "Nerub"
     ],
     "judges": [
+      "Nerub",
       "Vlad Dobrescu"
     ],
     "winner": "El Huron",
@@ -235,6 +189,7 @@
       "Nerub"
     ],
     "judges": [
+      "Nerub",
       "C.S.T."
     ],
     "winner": "Vulpeanu",

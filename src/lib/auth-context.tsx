@@ -2,13 +2,13 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { UserProfile } from "@/lib/types";
-import { sampleProducers } from "@/lib/mock-data";
 import { supabase } from "@/lib/supabase";
 import { producerService } from "@/services/producerService";
 
 interface AuthContextType {
   user: UserProfile | null;
   isLoggedIn: boolean;
+  isLoading: boolean;
   signInWithGoogle: () => Promise<void>;
   signInWithDiscord: () => Promise<void>;
   loginWithEmail: (email: string) => { success: boolean; isMatchedProducer: boolean; user: UserProfile };
@@ -21,7 +21,28 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const STORAGE_KEY = "bnp_active_user_id";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const savedId = localStorage.getItem(STORAGE_KEY);
+        if (savedId && savedId !== "logged_out") {
+          return producerService.getProducerById(savedId) || null;
+        }
+      } catch {}
+    }
+    return null;
+  });
+  const [isLoading, setIsLoading] = useState(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const savedId = localStorage.getItem(STORAGE_KEY);
+        if (savedId && savedId !== "logged_out") {
+          return false;
+        }
+      } catch {}
+    }
+    return false;
+  });
 
   // Sync session on mount and listen to Supabase auth changes
   useEffect(() => {
@@ -30,9 +51,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const savedId = localStorage.getItem(STORAGE_KEY);
       if (savedId && savedId !== "logged_out") {
         const prod = producerService.getProducerById(savedId);
-        if (prod) setUser(prod);
+        if (prod) {
+          setUser(prod);
+        } else {
+          setUser(null);
+        }
+      } else {
+        setUser(null);
       }
-    } catch {}
+    } catch {
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
 
     // 2. Check active Supabase session
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -41,7 +72,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const matched = producerService.getProducerByEmail(email);
         if (matched) {
           setUser(matched);
-          localStorage.setItem(STORAGE_KEY, matched.id);
+          try {
+            localStorage.setItem(STORAGE_KEY, matched.id);
+          } catch {}
         }
       }
     });
@@ -53,11 +86,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const matched = producerService.getProducerByEmail(email);
         if (matched) {
           setUser(matched);
-          localStorage.setItem(STORAGE_KEY, matched.id);
+          try {
+            localStorage.setItem(STORAGE_KEY, matched.id);
+          } catch {}
         }
       } else if (_event === "SIGNED_OUT") {
         setUser(null);
-        localStorage.setItem(STORAGE_KEY, "logged_out");
+        try {
+          localStorage.removeItem(STORAGE_KEY);
+        } catch {}
       }
     });
 
@@ -139,9 +176,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     setUser(null);
     try {
+      localStorage.removeItem(STORAGE_KEY);
       localStorage.setItem(STORAGE_KEY, "logged_out");
       await supabase.auth.signOut();
     } catch {}
+    if (typeof window !== "undefined") {
+      window.location.href = "/signin";
+    }
   };
 
   return (
@@ -149,6 +190,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         user,
         isLoggedIn: !!user,
+        isLoading,
         signInWithGoogle,
         signInWithDiscord,
         loginWithEmail,

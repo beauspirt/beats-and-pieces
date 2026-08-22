@@ -1,6 +1,6 @@
 export type BattlePhase = "submission" | "rating" | "judging" | "completed";
 
-export type UserRole = "user" | "producer" | "judge" | "admin";
+export type UserRole = "user" | "producer" | "judge" | "host" | "admin";
 
 export interface UserProfile {
   id: string;
@@ -73,7 +73,9 @@ export interface Competition {
   slug: string;
   coverImage: string;
   hosts: string[];
+  hostDetails?: { name: string; email: string }[];
   judges: string[];
+  judgeDetails?: { name: string; email: string }[];
   description: string;
   prizes: {
     first: string;
@@ -129,6 +131,9 @@ export interface Release {
   description: string;
   spotifyUrl?: string;
   youtubeUrl?: string;
+  appleMusicUrl?: string;
+  bandcampUrl?: string;
+  soundcloudUrl?: string;
   streamingLinks?: {
     spotify?: string;
     appleMusic?: string;

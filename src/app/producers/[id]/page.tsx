@@ -2,6 +2,8 @@ import React from "react";
 import { producerService } from "@/services/producerService";
 import { ProducerProfileClient } from "@/components/ProducerProfileClient";
 
+export const dynamicParams = false;
+
 export function generateStaticParams() {
   return producerService.getAllProducers().map((p) => ({
     id: p.id,

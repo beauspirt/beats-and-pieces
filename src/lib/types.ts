@@ -217,16 +217,12 @@ export type StandardBeatTag = (typeof STANDARD_BEAT_TAGS)[number];
 export interface VaultItem {
   id: string;
   title: string;
-  category: "breakdowns" | "live-sets" | "challenges" | "weekly-flips";
-  categoryLabel: string;
+  category: "breakdowns" | "live-sets";
   producerId?: string;
   producerTag?: string;
   venue?: string;
   youtubeUrl: string;
-  youtubeId?: string;
-  playlistId?: string;
-  type: "video" | "playlist";
-  description: string;
-  thumbnailUrl?: string;
+  youtubeId: string;
+  description?: string;
 }
 

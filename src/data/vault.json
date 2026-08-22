@@ -3,183 +3,55 @@
     "id": "breakdown-dinca",
     "title": "Dinca's Beat Breakdown",
     "category": "breakdowns",
-    "categoryLabel": "Beat Breakdown",
     "producerId": "dinca",
     "producerTag": "Dinca",
     "youtubeUrl": "https://youtu.be/VtYHM-SsTRE",
-    "youtubeId": "VtYHM-SsTRE",
-    "type": "video",
-    "description": "In-depth studio session dissecting Dinca's sampling technique, drum programming, and mix workflow."
+    "youtubeId": "VtYHM-SsTRE"
   },
   {
     "id": "breakdown-vulpeanu",
     "title": "Vulpeanu's Beat Breakdown",
     "category": "breakdowns",
-    "categoryLabel": "Beat Breakdown",
     "producerId": "vulpeanu",
     "producerTag": "Vulpeanu",
     "youtubeUrl": "https://youtu.be/UjMMBfGvRRw",
-    "youtubeId": "UjMMBfGvRRw",
-    "type": "video",
-    "description": "Battle champion Vulpeanu walks through the track construction, sample chops, and creative process."
+    "youtubeId": "UjMMBfGvRRw"
   },
   {
     "id": "breakdown-elhuron",
     "title": "El Huron's Beat Breakdown",
     "category": "breakdowns",
-    "categoryLabel": "Beat Breakdown",
     "producerId": "elhuron",
     "producerTag": "El Huron",
     "youtubeUrl": "https://youtu.be/Ynm5MWhdjp4",
-    "youtubeId": "Ynm5MWhdjp4",
-    "type": "video",
-    "description": "El Huron breaks down his signature sound design, arrangement choices, and groove secrets."
+    "youtubeId": "Ynm5MWhdjp4"
   },
   {
     "id": "live-cst",
     "title": "C.S.T @ Control Club",
     "category": "live-sets",
-    "categoryLabel": "Live Set",
     "producerTag": "C.S.T",
     "venue": "Control Club",
     "youtubeUrl": "https://youtu.be/vrmB33TbYV4",
-    "youtubeId": "vrmB33TbYV4",
-    "type": "video",
-    "description": "Live performance set recorded live at Control Club Bucharest."
+    "youtubeId": "vrmB33TbYV4"
   },
   {
     "id": "live-gogan",
     "title": "Gogan @ Control Club",
     "category": "live-sets",
-    "categoryLabel": "Live Set",
     "producerTag": "Gogan",
     "venue": "Control Club",
     "youtubeUrl": "https://youtu.be/SKsMBcNgbmI",
-    "youtubeId": "SKsMBcNgbmI",
-    "type": "video",
-    "description": "Live performance set recorded live at Control Club Bucharest."
+    "youtubeId": "SKsMBcNgbmI"
   },
   {
     "id": "live-nerub",
     "title": "Nerub @ Control Club",
     "category": "live-sets",
-    "categoryLabel": "Live Set",
     "producerId": "nerub",
     "producerTag": "Nerub",
     "venue": "Control Club",
     "youtubeUrl": "https://youtu.be/1uFOED4k-XU",
-    "youtubeId": "1uFOED4k-XU",
-    "type": "video",
-    "description": "Live performance set recorded live at Control Club Bucharest."
-  },
-  {
-    "id": "challenge-dilimanjaro",
-    "title": "Beatmaking Challenge w/ Dilimanjaro",
-    "category": "challenges",
-    "categoryLabel": "Artist Challenge",
-    "youtubeUrl": "https://youtube.com/playlist?list=PLRQS9NY8D6IF6BwI9fJYJDnBLyH6K1X7i",
-    "playlistId": "PLRQS9NY8D6IF6BwI9fJYJDnBLyH6K1X7i",
-    "type": "playlist",
-    "description": "Community beat submissions created for the Dilimanjaro collaboration challenge."
-  },
-  {
-    "id": "challenge-kazi-ploae",
-    "title": "Beatmaking Challenge w/ Kazi Ploae",
-    "category": "challenges",
-    "categoryLabel": "Artist Challenge",
-    "youtubeUrl": "https://www.youtube.com/playlist?list=PLRQS9NY8D6IGUjCVzk0E4hQJDSOdXtsTv",
-    "playlistId": "PLRQS9NY8D6IGUjCVzk0E4hQJDSOdXtsTv",
-    "type": "playlist",
-    "description": "Community beat submissions created for the Kazi Ploae beatmaking challenge."
-  },
-  {
-    "id": "remix-motanu",
-    "title": "Remix Challenge: Motanu - Bag Gura Lor",
-    "category": "challenges",
-    "categoryLabel": "Remix Contest",
-    "youtubeUrl": "https://www.youtube.com/playlist?list=PLRQS9NY8D6IERplDOJOEeesUL5JucchnQ",
-    "playlistId": "PLRQS9NY8D6IERplDOJOEeesUL5JucchnQ",
-    "type": "playlist",
-    "description": "Official remix challenge compilation for Motanu's track 'Bag Gura Lor'."
-  },
-  {
-    "id": "remix-deliric",
-    "title": "Remix Challenge: Deliric - ASAP (feat. Vlad Flueraru)",
-    "category": "challenges",
-    "categoryLabel": "Remix Contest",
-    "youtubeUrl": "https://www.youtube.com/playlist?list=PLRQS9NY8D6IGPVHmKYdPpezO1bCmdAA3z",
-    "playlistId": "PLRQS9NY8D6IGPVHmKYdPpezO1bCmdAA3z",
-    "type": "playlist",
-    "description": "Official community remix competition entries for Deliric feat. Vlad Flueraru - ASAP."
-  },
-  {
-    "id": "remix-nctk",
-    "title": "Remix Challenge: NCTK - SLBZ",
-    "category": "challenges",
-    "categoryLabel": "Remix Contest",
-    "youtubeUrl": "https://www.youtube.com/playlist?list=PLRQS9NY8D6IHA-2rBKPgao_egzt_1TycD",
-    "playlistId": "PLRQS9NY8D6IHA-2rBKPgao_egzt_1TycD",
-    "type": "playlist",
-    "description": "Community remix challenge submissions for NCTK - SLBZ."
-  },
-  {
-    "id": "weekly-bnp001",
-    "title": "BNP001 Weekly Flips",
-    "category": "weekly-flips",
-    "categoryLabel": "Weekly Flips",
-    "youtubeUrl": "https://www.youtube.com/playlist?list=PLRQS9NY8D6IEK_HbKDQcc2t2UYE6dM_zQ",
-    "playlistId": "PLRQS9NY8D6IEK_HbKDQcc2t2UYE6dM_zQ",
-    "type": "playlist",
-    "description": "Weekly flip edition #001 submissions compilation playlist."
-  },
-  {
-    "id": "weekly-bnp002",
-    "title": "BNP002 Weekly Flips",
-    "category": "weekly-flips",
-    "categoryLabel": "Weekly Flips",
-    "youtubeUrl": "https://www.youtube.com/playlist?list=PLRQS9NY8D6IEvRLszq1RvLkUU4D0qeu1M",
-    "playlistId": "PLRQS9NY8D6IEvRLszq1RvLkUU4D0qeu1M",
-    "type": "playlist",
-    "description": "Weekly flip edition #002 submissions compilation playlist."
-  },
-  {
-    "id": "weekly-bnp003",
-    "title": "BNP003 Weekly Flips",
-    "category": "weekly-flips",
-    "categoryLabel": "Weekly Flips",
-    "youtubeUrl": "https://www.youtube.com/playlist?list=PLRQS9NY8D6IHNhHp-QBXRYNJmQpDEx7ST",
-    "playlistId": "PLRQS9NY8D6IHNhHp-QBXRYNJmQpDEx7ST",
-    "type": "playlist",
-    "description": "Weekly flip edition #003 submissions compilation playlist."
-  },
-  {
-    "id": "weekly-bnp004",
-    "title": "BNP004 Weekly Flips",
-    "category": "weekly-flips",
-    "categoryLabel": "Weekly Flips",
-    "youtubeUrl": "https://youtube.com/playlist?list=PLRQS9NY8D6IHiLmiCwUAmsALN6uGSV_go",
-    "playlistId": "PLRQS9NY8D6IHiLmiCwUAmsALN6uGSV_go",
-    "type": "playlist",
-    "description": "Weekly flip edition #004 submissions compilation playlist."
-  },
-  {
-    "id": "weekly-bnp005",
-    "title": "BNP005 Weekly Flips",
-    "category": "weekly-flips",
-    "categoryLabel": "Weekly Flips",
-    "youtubeUrl": "https://youtube.com/playlist?list=PLRQS9NY8D6IHGMYcaODO9ZseOniyrhvwE",
-    "playlistId": "PLRQS9NY8D6IHGMYcaODO9ZseOniyrhvwE",
-    "type": "playlist",
-    "description": "Weekly flip edition #005 submissions compilation playlist."
-  },
-  {
-    "id": "weekly-bnp006",
-    "title": "BNP006 Weekly Flips",
-    "category": "weekly-flips",
-    "categoryLabel": "Weekly Flips",
-    "youtubeUrl": "https://youtube.com/playlist?list=PLRQS9NY8D6IEMmgqeRvpNVX5TXIsMaoXw",
-    "playlistId": "PLRQS9NY8D6IEMmgqeRvpNVX5TXIsMaoXw",
-    "type": "playlist",
-    "description": "Weekly flip edition #006 submissions compilation playlist."
+    "youtubeId": "1uFOED4k-XU"
   }
 ]

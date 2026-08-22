@@ -410,7 +410,7 @@ export default function BeatsDiscoveryPage() {
                   ) : null}
 
                   {/* Community Flames (Public Rating Avg) */}
-                  {typeof beat.flames === "number" && beat.flames > 0 ? (
+                  {typeof beat.flames === "number" && beat.flames >= 1 ? (
                     <div className="flex items-center gap-1 text-xs sm:text-sm text-[#FF5E3A] font-bold px-2" title="Public Rating Average">
                       <Flame className="w-4 h-4 fill-current" />
                       <span>{beat.flames.toFixed(2)}</span>

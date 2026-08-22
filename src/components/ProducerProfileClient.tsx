@@ -980,7 +980,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                     ) : null}
 
                     {/* Public Rating Avg */}
-                    {typeof beat.flames === "number" && beat.flames > 0 ? (
+                    {typeof beat.flames === "number" && beat.flames >= 1 ? (
                       <div className="flex items-center gap-1 text-xs sm:text-sm text-[#FF5E3A] font-bold px-2" title="Public Rating Average">
                         <Flame className="w-4 h-4 fill-current" />
                         <span>{beat.flames.toFixed(2)}</span>
@@ -1082,14 +1082,11 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                 </div>
                 <div className="min-w-0 flex-1">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#7B61FF] block">
-                    {item.categoryLabel}
+                    {item.category === "breakdowns" ? "Beat Breakdown" : "Live Set"}
                   </span>
                   <h4 className="text-sm font-bold text-white group-hover:text-[#A78BFA] transition-colors truncate">
                     {item.title}
                   </h4>
-                  <p className="text-xs text-zinc-400 line-clamp-1 mt-0.5">
-                    {item.description}
-                  </p>
                 </div>
                 <ExternalLink className="w-4 h-4 text-zinc-500 group-hover:text-white shrink-0 transition-colors mr-1" />
               </a>

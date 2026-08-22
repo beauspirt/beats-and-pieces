@@ -485,7 +485,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
   );
   const isAtBeatLimit = customUploadedBeats.length >= MAX_FREE_BEATS;
 
-  // Compute prioritized badges: Admin -> Battle Champion -> OG Producer / Community
+  // Compute prioritized badges: Admin -> Battle Champion -> Podium Finalist / Community
   const sortedBadges = useMemo(() => {
     const rawRoles = new Set<string>(
       (producer.discordRoles || []).filter(
@@ -494,7 +494,8 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
           !r.toLowerCase().startsWith("winner #") &&
           r.toLowerCase() !== "judge" &&
           r.toLowerCase() !== "jury" &&
-          r.toLowerCase() !== "host"
+          r.toLowerCase() !== "host" &&
+          !r.toLowerCase().includes("og")
       )
     );
 
@@ -515,8 +516,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       const lower = roleName.toLowerCase();
       if (lower === "admin") return 1;
       if (lower.includes("champion") || lower.includes("winner") || lower.includes("1st")) return 2;
-      if (lower.includes("og producer") || lower.includes("og")) return 3;
-      return 4;
+      return 3;
     };
 
     return Array.from(rawRoles).sort((a, b) => roleRank(a) - roleRank(b));
@@ -1339,10 +1339,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
             </div>
 
             <div className="space-y-4 text-xs sm:text-sm text-zinc-300">
-              <div className="bg-[#121212] p-4 rounded-xl space-y-2">
-                <span className="text-[11px] text-zinc-500 uppercase tracking-wider font-semibold block">
-                  Verified Contact E-mail:
-                </span>
+              <div className="bg-[#121212] p-4 rounded-xl">
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-mono text-xs text-white truncate">{producer.email}</span>
                   <button

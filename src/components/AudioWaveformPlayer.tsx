@@ -182,10 +182,9 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
       if (dict[rawFilename]) return dict[rawFilename];
     }
 
-    // Return deterministic procedural waveform so tracks always render a lively responsive waveform
-    const fallbackPeaks = generateProceduralPeaks(id + (audioUrl || "") + (title || ""), 200);
-    return { peaks: fallbackPeaks, duration: duration || 60 };
-  }, [waveformData, audioUrl, title, id, duration]);
+    // Do not return placeholder procedural peaks to avoid jumping/flashing
+    return { peaks: [], duration: duration || 60 };
+  }, [waveformData, audioUrl, duration]);
 
   // Render Clean Continuous Single-Shade Waveform (Transparent Container Background)
   const renderWaveform = useCallback(() => {
@@ -211,8 +210,17 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
     ctx.scale(dpr, dpr);
     ctx.clearRect(0, 0, rect.width, rect.height);
 
+    const isLight = typeof document !== "undefined" && document.documentElement.classList.contains("light");
+    const width = Math.floor(rect.width);
+    const height = Math.floor(rect.height);
+    const centerY = Math.floor(height / 2);
+    const maxAmplitude = Math.floor(height * 0.46);
+
     const { peaks } = getWaveformData();
     if (!peaks || peaks.length === 0) {
+      // Draw subtle flat baseline while waiting for real waveform to decode
+      ctx.fillStyle = isLight ? "#d1d5db" : "#242424";
+      ctx.fillRect(0, centerY - 1, width, 2);
       ctx.restore();
       return;
     }
@@ -222,13 +230,6 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
     
     // Only show hover needle and brighter preview on ACTIVE tracks
     const hoverFraction = isThisTrackActive ? hoverFractionRef.current : null;
-
-    const width = Math.floor(rect.width);
-    const height = Math.floor(rect.height);
-    const centerY = Math.floor(height / 2);
-    const maxAmplitude = Math.floor(height * 0.46);
-
-    const isLight = typeof document !== "undefined" && document.documentElement.classList.contains("light");
 
     // Single-Pass Solid Uniform Width Waveform (Pure crisp solid colors)
     for (let x = 0; x < width; x++) {

@@ -246,6 +246,14 @@ export const battleService = {
           const calcFlame = stats && stats.count > 0 ? Number((stats.totalScore / stats.count).toFixed(2)) : (s.flame_rating || 0);
           const calcVotes = stats && stats.count > 0 ? stats.count : (s.total_votes || 0);
 
+          const feedbacks = s.jury_feedbacks || [];
+          const scoredFeedbacks = feedbacks.filter((f: any) => typeof f.score === "number" && !isNaN(f.score));
+          let calculatedJuryScore = typeof s.jury_score === "number" ? s.jury_score : undefined;
+          if (scoredFeedbacks.length > 0) {
+            const sum = scoredFeedbacks.reduce((acc: number, cur: any) => acc + (Number(cur.score) || 0), 0);
+            calculatedJuryScore = Number((sum / scoredFeedbacks.length).toFixed(2));
+          }
+
           return {
             id: s.id,
             battleId: s.battle_id,
@@ -258,7 +266,7 @@ export const battleService = {
             bpm: s.bpm,
             flameRating: calcFlame,
             totalVotes: calcVotes,
-            juryScore: s.jury_score,
+            juryScore: calculatedJuryScore,
             juryFeedback: s.jury_feedback,
             judgeName: s.judge_name,
             juryFeedbacks: s.jury_feedbacks || [],
@@ -731,9 +739,13 @@ export const battleService = {
         const feedbackVal = feedbacks[sub.id];
         const parsedScore = (scoreVal !== undefined && scoreVal !== "") ? parseFloat(String(scoreVal)) : null;
 
+        const cleanJudgeName = judgeName.toLowerCase().trim();
+        const cleanJudgeId = judgeId.toLowerCase().trim();
         const existingFeedbacks = sub.juryFeedbacks ? [...sub.juryFeedbacks] : [];
         const filteredFeedbacks = existingFeedbacks.filter(
-          (f) => f.judgeName.toLowerCase() !== judgeName.toLowerCase()
+          (f) =>
+            (f.judgeName ? f.judgeName.toLowerCase().trim() : "") !== cleanJudgeName &&
+            (f.judgeId ? f.judgeId.toLowerCase().trim() : "") !== cleanJudgeId
         );
 
         if (parsedScore !== null || (feedbackVal && feedbackVal.trim())) {
@@ -751,10 +763,12 @@ export const battleService = {
           (f) => typeof f.score === "number" && !isNaN(f.score)
         );
         if (scoredItems.length > 0) {
-          const sum = scoredItems.reduce((acc, cur) => acc + (cur.score || 0), 0);
+          const sum = scoredItems.reduce((acc, cur) => acc + (Number(cur.score) || 0), 0);
           sub.juryScore = Number((sum / scoredItems.length).toFixed(2));
         } else if (parsedScore !== null) {
           sub.juryScore = parsedScore;
+        } else {
+          sub.juryScore = 0;
         }
 
         if (feedbackVal && feedbackVal.trim()) {

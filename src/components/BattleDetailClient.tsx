@@ -243,39 +243,21 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   }, [currentUser, submissions]);
 
   // Phase 2: Rating state (Track ratings) with localStorage & database persistence
-  const [ratings, setRatings] = useState<Record<string, number>>(() => {
-    if (typeof window !== "undefined" && currentUser?.id) {
-      try {
-        const stored = localStorage.getItem(`bnp_ratings_${battle.id}_${currentUser.id}`);
-        if (stored) return JSON.parse(stored);
-      } catch {}
-    }
-    return {};
-  });
-
-  const [isRatingsSubmitted, setIsRatingsSubmitted] = useState<boolean>(() => {
-    if (typeof window !== "undefined" && currentUser?.id) {
-      try {
-        const subFlag = localStorage.getItem(`bnp_submitted_ratings_${battle.id}_${currentUser.id}`);
-        const stored = localStorage.getItem(`bnp_ratings_${battle.id}_${currentUser.id}`);
-        if (subFlag === "true" && stored && Object.keys(JSON.parse(stored)).length > 0) return true;
-      } catch {}
-    }
-    return false;
-  });
+  const [ratings, setRatings] = useState<Record<string, number>>({});
+  const [isRatingsSubmitted, setIsRatingsSubmitted] = useState<boolean>(false);
 
   // Sync user's existing ratings from database on mount / auth change
   useEffect(() => {
-    if (!currentUser?.id) return;
+    if (!currentUser?.id) {
+      setRatings({});
+      setIsRatingsSubmitted(false);
+      return;
+    }
     battleService.getUserRatingsForBattle(battle.id, currentUser.id).then(({ ratings: userRatings, isSubmitted }) => {
       const hasRatings = Object.keys(userRatings).length > 0;
-      if (hasRatings) {
-        setRatings((prev) => ({ ...userRatings, ...prev }));
-      }
-      if (isSubmitted && hasRatings) {
-        setIsRatingsSubmitted(true);
-      } else {
-        setIsRatingsSubmitted(false);
+      setRatings(userRatings);
+      setIsRatingsSubmitted(Boolean(isSubmitted && hasRatings));
+      if (!isSubmitted || !hasRatings) {
         try {
           localStorage.removeItem(`bnp_submitted_ratings_${battle.id}_${currentUser.id}`);
         } catch {}
@@ -286,7 +268,50 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   // Phase 3: Clean Single-Score Jury evaluation state (slider 0.00 to 5.00)
   const [juryScores, setJuryScores] = useState<Record<string, string>>({});
   const [juryFeedback, setJuryFeedback] = useState<Record<string, string>>({});
-  const [hasPublishedBallot, setHasPublishedBallot] = useState(false);
+  const [isJurySubmitted, setIsJurySubmitted] = useState(false);
+
+  // Restore judge's submitted scores and feedbacks when visiting the page
+  useEffect(() => {
+    if (!currentUser) return;
+    const cleanName = currentUser.nickname.toLowerCase().trim();
+    const cleanEmail = currentUser.email.toLowerCase().trim();
+    const cleanId = currentUser.id.toLowerCase().trim();
+
+    const loadedScores: Record<string, string> = {};
+    const loadedFeedbacks: Record<string, string> = {};
+    let hasFoundScores = false;
+
+    submissions.forEach((sub) => {
+      const match = sub.juryFeedbacks?.find(
+        (f) =>
+          (f.judgeName && f.judgeName.toLowerCase().trim() === cleanName) ||
+          (f.judgeId && f.judgeId.toLowerCase().trim() === cleanId) ||
+          (f.judgeId && f.judgeId.toLowerCase().trim() === cleanEmail)
+      );
+      if (match) {
+        if (typeof match.score === "number" && !isNaN(match.score)) {
+          loadedScores[sub.id] = match.score.toFixed(2);
+          hasFoundScores = true;
+        }
+        if (match.feedback) {
+          loadedFeedbacks[sub.id] = match.feedback;
+        }
+      }
+    });
+
+    if (hasFoundScores) {
+      setJuryScores((prev) => ({ ...loadedScores, ...prev }));
+      setJuryFeedback((prev) => ({ ...loadedFeedbacks, ...prev }));
+      setIsJurySubmitted(true);
+    } else {
+      try {
+        const localJuryFlag = localStorage.getItem(`bnp_jury_submitted_${battle.id}_${currentUser.id}`);
+        if (localJuryFlag === "true") {
+          setIsJurySubmitted(true);
+        }
+      } catch {}
+    }
+  }, [submissions, currentUser, battle.id]);
 
   // Dynamic Percentage-based Ballot Validation (min 50% of total entries)
   const minPercentage = 50;
@@ -554,13 +579,25 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
   };
 
-  const [isJurySubmitted, setIsJurySubmitted] = useState(false);
-
   const handlePublishJuryBallot = async () => {
     const judgeId = currentUser?.id || "judge";
     const judgeName = currentUser?.nickname || "Judge";
-    await battleService.submitJuryBallot(battle.id, judgeId, judgeName, juryScores, juryFeedback);
+
+    // Ensure all finalist tracks have a numerical score assigned (default to 0.00 if unadjusted)
+    const finalizedScores: Record<string, string> = { ...juryScores };
+    finalistSubmissions.forEach((sub) => {
+      if (finalizedScores[sub.id] === undefined || finalizedScores[sub.id] === "") {
+        finalizedScores[sub.id] = "0.00";
+      }
+    });
+
+    await battleService.submitJuryBallot(battle.id, judgeId, judgeName, finalizedScores, juryFeedback);
     setIsJurySubmitted(true);
+    if (currentUser?.id) {
+      try {
+        localStorage.setItem(`bnp_jury_submitted_${battle.id}_${currentUser.id}`, "true");
+      } catch {}
+    }
     refreshBattleData();
     confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
   };

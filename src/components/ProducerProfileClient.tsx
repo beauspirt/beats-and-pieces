@@ -907,6 +907,23 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                           {beat.title}
                         </h3>
 
+                        {/* Rank Badge */}
+                        {beat.rank === 1 && (
+                          <span className="h-6 px-3 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center leading-none">
+                            1st Place
+                          </span>
+                        )}
+                        {beat.rank === 2 && (
+                          <span className="h-6 px-3 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-bold inline-flex items-center justify-center leading-none">
+                            2nd Place
+                          </span>
+                        )}
+                        {beat.rank === 3 && (
+                          <span className="h-6 px-3 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center leading-none">
+                            3rd Place
+                          </span>
+                        )}
+
                         {/* BB#X Quick Link Badge */}
                         {(() => {
                           const match =
@@ -926,23 +943,6 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                             </Link>
                           );
                         })()}
-
-                        {/* Rank Badge */}
-                        {beat.rank === 1 && (
-                          <span className="h-6 px-3 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center leading-none">
-                            1st Place Winner
-                          </span>
-                        )}
-                        {beat.rank === 2 && (
-                          <span className="h-6 px-3 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-bold inline-flex items-center justify-center leading-none">
-                            2nd Place
-                          </span>
-                        )}
-                        {beat.rank === 3 && (
-                          <span className="h-6 px-3 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center leading-none">
-                            3rd Place
-                          </span>
-                        )}
                       </div>
                     </div>
                   </div>

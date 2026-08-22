@@ -325,10 +325,29 @@ export default function BeatsDiscoveryPage() {
                       </Link>
 
                       <div className="truncate">
-                        <div className="flex items-center gap-2 truncate">
+                        <div className="flex flex-wrap items-center gap-2 truncate">
                           <h3 className="font-bold text-white text-base sm:text-lg leading-snug truncate">
                             {beat.title}
                           </h3>
+
+                          {/* Rank Badge */}
+                          {beat.rank === 1 && (
+                            <span className="h-6 px-3 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center leading-none">
+                              1st Place
+                            </span>
+                          )}
+                          {beat.rank === 2 && (
+                            <span className="h-6 px-3 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-bold inline-flex items-center justify-center leading-none">
+                              2nd Place
+                            </span>
+                          )}
+                          {beat.rank === 3 && (
+                            <span className="h-6 px-3 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center leading-none">
+                              3rd Place
+                            </span>
+                          )}
+
+                          {/* BB#X Quick Link Badge */}
                           {(() => {
                             const match =
                               (beat.battleSource && beat.battleSource.match(/Beat Battle #?(\d+)/i)) ||

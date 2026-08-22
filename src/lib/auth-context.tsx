@@ -228,17 +228,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     setIsLoading(true);
     try {
-      localStorage.removeItem(STORAGE_KEY);
       localStorage.setItem(STORAGE_KEY, "logged_out");
     } catch {}
-    setUser(null);
 
     try {
       await supabase.auth.signOut();
     } catch {}
 
     if (typeof window !== "undefined") {
-      window.location.href = "/signin";
+      window.location.replace("/signin");
+    } else {
+      setUser(null);
     }
   };
 

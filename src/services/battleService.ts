@@ -645,47 +645,125 @@ export const battleService = {
     voterId: string,
     score: number
   ): Promise<{ success: boolean; error?: string }> {
+    // Draft rating: save locally in user's browser without prematurely mutating public averages
+    return { success: true };
+  },
+
+  async submitUserRatings(
+    battleId: string,
+    voterId: string,
+    userRatings: Record<string, number>
+  ): Promise<{ success: boolean; error?: string }> {
     try {
-      const { error } = await supabase.from("ratings").upsert(
-        {
-          battle_id: battleId,
-          submission_id: submissionId,
-          voter_id: voterId,
-          score: score,
-        },
-        { onConflict: "submission_id,voter_id" }
-      );
+      // 1. Upsert all user votes to Supabase ratings table
+      const upsertRows = Object.entries(userRatings).map(([submissionId, score]) => ({
+        battle_id: battleId,
+        submission_id: submissionId,
+        voter_id: voterId,
+        score: score,
+      }));
 
-      if (error) {
-        console.warn("Supabase voteSubmission failed:", error.message);
+      if (upsertRows.length > 0) {
+        await supabase.from("ratings").upsert(upsertRows, { onConflict: "submission_id,voter_id" });
       }
 
-      // Update local submission flameRating immediately
+      // 2. Fetch all ratings for this battle to accurately recompute flame averages
+      const { data: dbRatings } = await supabase
+        .from("ratings")
+        .select("submission_id, score")
+        .eq("battle_id", battleId);
+
+      const ratingStats: Record<string, { totalScore: number; count: number }> = {};
+      if (dbRatings && dbRatings.length > 0) {
+        dbRatings.forEach((r: any) => {
+          if (!ratingStats[r.submission_id]) {
+            ratingStats[r.submission_id] = { totalScore: 0, count: 0 };
+          }
+          ratingStats[r.submission_id].totalScore += (Number(r.score) || 0);
+          ratingStats[r.submission_id].count += 1;
+        });
+      }
+
+      // 3. Update all submissions in memory & Supabase
       const allSubs = this.getAllSubmissions();
-      const target = allSubs.find((s) => s.id === submissionId);
-      if (target) {
-        const currentVotes = target.totalVotes || 0;
-        const currentRating = target.flameRating || 0;
-        const newTotal = currentVotes + 1;
-        const newAvg = Number(((currentRating * currentVotes + score) / newTotal).toFixed(2));
-        target.flameRating = newAvg;
-        target.totalVotes = newTotal;
+      for (const sub of allSubs) {
+        if (sub.battleId === battleId) {
+          const stats = ratingStats[sub.id];
+          sub.flameRating = stats && stats.count > 0 ? Number((stats.totalScore / stats.count).toFixed(2)) : 0;
+          sub.totalVotes = stats && stats.count > 0 ? stats.count : 0;
 
-        saveCustomSubmissions(allSubs);
-        customSubsList = allSubs;
-        submissionsList = allSubs;
-
-        // Also sync flame_rating back to Supabase submissions row
-        supabase.from("submissions").update({
-          flame_rating: newAvg,
-          total_votes: newTotal,
-        }).eq("id", submissionId).then(() => {}, () => {});
+          await supabase.from("submissions").update({
+            flame_rating: sub.flameRating,
+            total_votes: sub.totalVotes,
+          }).eq("id", sub.id);
+        }
       }
+
+      saveCustomSubmissions(allSubs);
+      customSubsList = allSubs;
+      submissionsList = allSubs;
 
       notifyBattlesUpdated();
       return { success: true };
     } catch (err: any) {
-      return { success: false, error: err.message || "Failed to vote" };
+      console.error("submitUserRatings error:", err);
+      return { success: false, error: err.message };
+    }
+  },
+
+  async unlockUserRatings(
+    battleId: string,
+    voterId: string
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      // 1. Delete all rows from Supabase ratings table for this user & battle
+      await supabase
+        .from("ratings")
+        .delete()
+        .eq("battle_id", battleId)
+        .eq("voter_id", voterId);
+
+      // 2. Re-fetch all remaining ratings for this battle to recompute flame averages without this user's votes
+      const { data: dbRatings } = await supabase
+        .from("ratings")
+        .select("submission_id, score")
+        .eq("battle_id", battleId);
+
+      const ratingStats: Record<string, { totalScore: number; count: number }> = {};
+      if (dbRatings && dbRatings.length > 0) {
+        dbRatings.forEach((r: any) => {
+          if (!ratingStats[r.submission_id]) {
+            ratingStats[r.submission_id] = { totalScore: 0, count: 0 };
+          }
+          ratingStats[r.submission_id].totalScore += (Number(r.score) || 0);
+          ratingStats[r.submission_id].count += 1;
+        });
+      }
+
+      // 3. Update all submissions in memory & Supabase
+      const allSubs = this.getAllSubmissions();
+      for (const sub of allSubs) {
+        if (sub.battleId === battleId) {
+          const stats = ratingStats[sub.id];
+          sub.flameRating = stats && stats.count > 0 ? Number((stats.totalScore / stats.count).toFixed(2)) : 0;
+          sub.totalVotes = stats && stats.count > 0 ? stats.count : 0;
+
+          await supabase.from("submissions").update({
+            flame_rating: sub.flameRating,
+            total_votes: sub.totalVotes,
+          }).eq("id", sub.id);
+        }
+      }
+
+      saveCustomSubmissions(allSubs);
+      customSubsList = allSubs;
+      submissionsList = allSubs;
+
+      notifyBattlesUpdated();
+      return { success: true };
+    } catch (err: any) {
+      console.error("unlockUserRatings error:", err);
+      return { success: false, error: err.message };
     }
   },
 
@@ -704,36 +782,30 @@ export const battleService = {
         const stored = localStorage.getItem(`bnp_ratings_${battleId}_${userId}`);
         if (stored) localRatings = JSON.parse(stored);
         const subFlag = localStorage.getItem(`bnp_submitted_ratings_${battleId}_${userId}`);
-        if (subFlag === "true") isSubmitted = true;
+        if (subFlag === "true" && Object.keys(localRatings).length > 0) {
+          isSubmitted = true;
+        }
       } catch {}
     }
 
-    // 2. Fetch from Supabase ratings table
-    try {
-      const { data: dbRatings } = await supabase
-        .from("ratings")
-        .select("submission_id, score")
-        .eq("battle_id", battleId)
-        .eq("voter_id", userId);
+    // 2. Fetch from Supabase ratings table if local draft is empty
+    if (Object.keys(localRatings).length === 0) {
+      try {
+        const { data: dbRatings } = await supabase
+          .from("ratings")
+          .select("submission_id, score")
+          .eq("battle_id", battleId)
+          .eq("voter_id", userId);
 
-      if (dbRatings && dbRatings.length > 0) {
-        dbRatings.forEach((r: any) => {
-          if (r.submission_id && typeof r.score === "number") {
-            localRatings[r.submission_id] = r.score;
-          }
-        });
-      }
-    } catch (err) {
-      console.warn("getUserRatingsForBattle error:", err);
-    }
-
-    // If local storage had isSubmitted=true but no ratings exist or are empty, clean it up
-    if (isSubmitted && Object.keys(localRatings).length === 0) {
-      isSubmitted = false;
-      if (typeof window !== "undefined") {
-        try {
-          localStorage.removeItem(`bnp_submitted_ratings_${battleId}_${userId}`);
-        } catch {}
+        if (dbRatings && dbRatings.length > 0) {
+          dbRatings.forEach((r: any) => {
+            if (r.submission_id && typeof r.score === "number") {
+              localRatings[r.submission_id] = r.score;
+            }
+          });
+        }
+      } catch (err) {
+        console.warn("getUserRatingsForBattle error:", err);
       }
     }
 

@@ -254,14 +254,8 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       return;
     }
     battleService.getUserRatingsForBattle(battle.id, currentUser.id).then(({ ratings: userRatings, isSubmitted }) => {
-      const hasRatings = Object.keys(userRatings).length > 0;
       setRatings(userRatings);
-      setIsRatingsSubmitted(Boolean(isSubmitted && hasRatings));
-      if (!isSubmitted || !hasRatings) {
-        try {
-          localStorage.removeItem(`bnp_submitted_ratings_${battle.id}_${currentUser.id}`);
-        } catch {}
-      }
+      setIsRatingsSubmitted(isSubmitted);
     });
   }, [battle.id, currentUser?.id]);
 
@@ -270,7 +264,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   const [juryFeedback, setJuryFeedback] = useState<Record<string, string>>({});
   const [isJurySubmitted, setIsJurySubmitted] = useState(false);
 
-  // Restore judge's submitted scores and feedbacks when visiting the page
+  // Restore judge's drafted scores and check submission status for this active session
   useEffect(() => {
     if (!currentUser) return;
     const cleanName = currentUser.nickname.toLowerCase().trim();
@@ -279,7 +273,6 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
     const loadedScores: Record<string, string> = {};
     const loadedFeedbacks: Record<string, string> = {};
-    let hasFoundScores = false;
 
     submissions.forEach((sub) => {
       const match = sub.juryFeedbacks?.find(
@@ -291,7 +284,6 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       if (match) {
         if (typeof match.score === "number" && !isNaN(match.score)) {
           loadedScores[sub.id] = match.score.toFixed(2);
-          hasFoundScores = true;
         }
         if (match.feedback) {
           loadedFeedbacks[sub.id] = match.feedback;
@@ -299,17 +291,19 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       }
     });
 
-    if (hasFoundScores) {
+    if (Object.keys(loadedScores).length > 0) {
       setJuryScores((prev) => ({ ...loadedScores, ...prev }));
+    }
+    if (Object.keys(loadedFeedbacks).length > 0) {
       setJuryFeedback((prev) => ({ ...loadedFeedbacks, ...prev }));
-      setIsJurySubmitted(true);
-    } else {
-      try {
-        const localJuryFlag = localStorage.getItem(`bnp_jury_submitted_${battle.id}_${currentUser.id}`);
-        if (localJuryFlag === "true") {
-          setIsJurySubmitted(true);
-        }
-      } catch {}
+    }
+
+    // Only lock as submitted if explicitly submitted via session flag
+    try {
+      const localJuryFlag = localStorage.getItem(`bnp_jury_submitted_${battle.id}_${currentUser.id}`);
+      setIsJurySubmitted(localJuryFlag === "true");
+    } catch {
+      setIsJurySubmitted(false);
     }
   }, [submissions, currentUser, battle.id]);
 
@@ -575,25 +569,27 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     setShowSubmitWarningModal(true);
   };
 
-  const handleConfirmSubmitRatings = () => {
+  const handleConfirmSubmitRatings = async () => {
+    if (!currentUser?.id) return;
     setIsRatingsSubmitted(true);
     setShowSubmitWarningModal(false);
-    if (currentUser?.id) {
-      try {
-        localStorage.setItem(`bnp_submitted_ratings_${battle.id}_${currentUser.id}`, "true");
-        localStorage.setItem(`bnp_ratings_${battle.id}_${currentUser.id}`, JSON.stringify(ratings));
-      } catch {}
-    }
+    try {
+      localStorage.setItem(`bnp_submitted_ratings_${battle.id}_${currentUser.id}`, "true");
+      localStorage.setItem(`bnp_ratings_${battle.id}_${currentUser.id}`, JSON.stringify(ratings));
+    } catch {}
+    await battleService.submitUserRatings(battle.id, currentUser.id, ratings);
+    refreshBattleData();
     confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
   };
 
-  const handleUnlockRatings = () => {
+  const handleUnlockRatings = async () => {
+    if (!currentUser?.id) return;
     setIsRatingsSubmitted(false);
-    if (currentUser?.id) {
-      try {
-        localStorage.removeItem(`bnp_submitted_ratings_${battle.id}_${currentUser.id}`);
-      } catch {}
-    }
+    try {
+      localStorage.removeItem(`bnp_submitted_ratings_${battle.id}_${currentUser.id}`);
+    } catch {}
+    await battleService.unlockUserRatings(battle.id, currentUser.id);
+    refreshBattleData();
   };
 
   const handlePublishJuryBallot = async () => {

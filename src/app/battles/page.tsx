@@ -192,10 +192,10 @@ export default function BattlesPage() {
         </section>
       )}
 
-      {/* SECTION 2: PAST BATTLES ARCHIVE */}
+      {/* SECTION 2: BATTLES ARCHIVE */}
       <section className="space-y-4 pt-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl sm:text-2xl font-bold text-white">Past Battles</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-white">Battles Archive</h2>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">

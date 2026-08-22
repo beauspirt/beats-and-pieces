@@ -11,13 +11,13 @@ import {
   WaveformData,
 } from "@/components/AudioWaveformPlayer";
 import { DiscoveryBeat, JudgeFeedbackItem, UserProfile, STANDARD_BEAT_TAGS } from "@/lib/types";
-import { producerService, battleService, beatService, storageService } from "@/services";
+import { producerService, battleService, beatService, storageService, vaultService } from "@/services";
 import { normalizeUrl } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 import { 
   Flame, Trophy, Mail, ExternalLink, 
   CheckCircle2, Copy, MapPin, Calendar, Star, Award, Globe,
-  Pencil, Plus, Lock, Trash2, AlertTriangle, Music, Sliders, X
+  Pencil, Plus, Lock, Trash2, AlertTriangle, Music, Sliders, X, Play
 } from "lucide-react";
 
 /**
@@ -536,6 +536,10 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     return Array.from(rawRoles).sort((a, b) => roleRank(a) - roleRank(b));
   }, [producer, prioritizedBeats]);
 
+  const producerVaultItems = useMemo(() => {
+    return vaultService.getItemsByProducer(producer.id || producer.nickname);
+  }, [producer]);
+
   const handleCopyEmail = () => {
     navigator.clipboard.writeText(producer.email);
     setCopiedEmail(true);
@@ -1038,6 +1042,61 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
           </div>
         )}
       </div>
+
+      {/* SECTION 3: FEATURED VAULT MEDIA */}
+      {producerVaultItems.length > 0 && (
+        <div className="space-y-4 pt-2">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl sm:text-2xl font-bold text-white">
+              Featured In Vault
+            </h2>
+            <Link
+              href="/vault"
+              className="text-xs text-zinc-400 hover:text-[#7B61FF] font-semibold transition-colors"
+            >
+              Explore Vault →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {producerVaultItems.map((item) => (
+              <a
+                key={item.id}
+                href={item.youtubeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-[#181818] hover:bg-[#222222] p-4 rounded-2xl flex items-center gap-4 transition-all group shadow-md"
+              >
+                <div className="w-24 h-16 rounded-xl overflow-hidden relative shrink-0 bg-[#121212]">
+                  {item.youtubeId ? (
+                    <Image
+                      src={`https://img.youtube.com/vi/${item.youtubeId}/hqdefault.jpg`}
+                      alt={item.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform"
+                    />
+                  ) : null}
+                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                    <Play className="w-4 h-4 text-white fill-current" />
+                  </div>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#7B61FF] block">
+                    {item.categoryLabel}
+                  </span>
+                  <h4 className="text-sm font-bold text-white group-hover:text-[#A78BFA] transition-colors truncate">
+                    {item.title}
+                  </h4>
+                  <p className="text-xs text-zinc-400 line-clamp-1 mt-0.5">
+                    {item.description}
+                  </p>
+                </div>
+                <ExternalLink className="w-4 h-4 text-zinc-500 group-hover:text-white shrink-0 transition-colors mr-1" />
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* EDIT BEAT MODAL */}
       {editingBeat && (

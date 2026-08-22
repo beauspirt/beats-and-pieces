@@ -234,7 +234,7 @@ const SocialIcons: Record<string, React.FC<{ className?: string }>> = {
   ),
   soundcloud: ({ className }) => (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M1.175 12.225c-.051 0-.094.045-.102.1l-.269 2.89c-.004.053.037.1.09.102l.279.012c.053 0 .096-.045.102-.098l.273-2.906c.004-.051-.037-.098-.09-.1zm1.229-.877c-.057 0-.106.047-.114.106l-.371 3.82c-.004.057.037.108.096.11l.383.014c.057 0 .106-.047.114-.106l.371-3.834c.004-.055-.039-.104-.096-.108zm1.229-.449c-.061 0-.114.049-.12.112l-.465 4.316c-.006.061.039.114.102.118l.478.014c.061 0 .114-.049.12-.112l.465-4.336c.006-.059-.039-.11-.102-.112zm1.234-.309c-.065 0-.12.051-.128.118l-.553 4.674c-.006.065.041.122.108.124l.567.014c.065 0 .12-.051.128-.118l.553-4.688c.006-.065-.043-.12-.108-.124zm1.23-.391c-.069 0-.128.055-.134.124l-.629 5.129c-.008.069.043.128.114.132l.635.016c.069 0 .128-.055.134-.124l.631-5.143c.008-.071-.045-.13-.114-.134zm1.232-.424c-.071 0-.134.059-.14.13l-.689 5.617c-.008.073.047.136.12.14l.707.016c.073 0 .134-.059.14-.132l.691-5.631c.008-.073-.047-.136-.12-.14zm1.232-.303c-.075 0-.14.063-.146.14l-.736 6.002c-.008.077.049.142.128.146l.764.016c.075 0 .14-.063.146-.14l.738-6.018c.008-.077-.049-.142-.128-.146zm1.232.063c-.077 0-.142.065-.15.146l-.754 5.922c-.008.079.051.146.132.15l.775.016c.077 0 .142-.065.15-.146l.756-5.938c.008-.079-.051-.146-.132-.15zm1.232-.619c-.079 0-.146.067-.154.15l-.764 6.584c-.008.081.053.15.136.154l.797.016c.081 0 .146-.067.154-.15l.764-6.6c.008-.083-.053-.15-.136-.154zm1.472-1.748c-.085 0-.156.071-.164.158l-.66 8.355c-.008.087.057.16.146.164l.871.016c.085 0 .156-.071.164-.158l.66-8.371c.008-.087-.057-.16-.146-.164zm4.845 2.115c-.443 0-.865.092-1.248.256-.134-.992-.988-1.754-2.025-1.754-.263 0-.512.051-.744.138-.081.031-.136.108-.134.196l.465 7.643c.006.096.085.172.181.172h6.816c1.884 0 3.411-1.527 3.411-3.411s-1.527-3.24-3.411-3.24c-.461 0-.898.092-1.309.256-.569-1.372-1.928-2.34-3.513-2.34-.168 0-.334.012-.497.035-.098.014-.176.089-.181.189l-.229 2.069c.645-.224 1.341-.349 2.069-.349 2.037 0 3.844 1.132 4.793 2.809.11.193.345.281.551.205.343-.126.711-.197 1.096-.197 1.709 0 3.096 1.387 3.096 3.096s-1.387 3.096-3.096 3.096h-6.191l-.381-6.248c1.378-.457 2.378-1.758 2.378-3.297 0-.256-.029-.506-.083-.746z"/>
+      <path d="M1.65 13.1c-.1 0-.2.1-.2.2l-.3 3.5c0 .1.1.2.2.2h.3c.1 0 .2-.1.2-.2l.3-3.5c0-.1-.1-.2-.2-.2zm1.6-1.1c-.1 0-.2.1-.2.2l-.4 4.7c0 .1.1.2.2.2h.4c.1 0 .2-.1.2-.2l.4-4.7c0-.1-.1-.2-.2-.2zm1.6-.6c-.1 0-.2.1-.2.2l-.5 5.3c0 .1.1.2.2.2h.5c.1 0 .2-.1.2-.2l.5-5.3c0-.1-.1-.2-.2-.2zm1.6-.4c-.1 0-.2.1-.2.2l-.5 5.7c0 .1.1.2.2.2h.5c.1 0 .2-.1.2-.2l.5-5.7c0-.1-.1-.2-.2-.2zm1.6-.5c-.1 0-.2.1-.2.2l-.6 6.2c0 .1.1.2.2.2h.6c.1 0 .2-.1.2-.2l.6-6.2c0-.1-.1-.2-.2-.2zm1.6-.5c-.1 0-.2.1-.2.2l-.6 6.8c0 .1.1.2.2.2h.6c.1 0 .2-.1.2-.2l.6-6.8c0-.1-.1-.2-.2-.2zm1.6-.4c-.1 0-.2.1-.2.2l-.7 7.3c0 .1.1.2.2.2h.7c.1 0 .2-.1.2-.2l.7-7.3c0-.1-.1-.2-.2-.2zm1.6.1c-.1 0-.2.1-.2.2l-.7 7.2c0 .1.1.2.2.2h.7c.1 0 .2-.1.2-.2l.7-7.2c0-.1-.1-.2-.2-.2zm1.6-.8c-.1 0-.2.1-.2.2l-.7 8c0 .1.1.2.2.2h.7c.1 0 .2-.1.2-.2l.7-8c0-.1-.1-.2-.2-.2zm1.9-2.1c-.1 0-.2.1-.2.2l-.6 10.1c0 .1.1.2.2.2h.8c.1 0 .2-.1.2-.2l.6-10.1c0-.1-.1-.2-.2-.2zm6.2 2.6c-.5 0-1.1.1-1.5.3-.2-1.2-1.2-2.1-2.5-2.1-.3 0-.6.1-.9.2-.1 0-.2.1-.2.2l.4 9.3c0 .1.1.2.2.2h8.3c2.3 0 4.1-1.9 4.1-4.1 0-2.3-1.9-4.1-4.2-4.1-.6 0-1.1.1-1.6.3-.7-1.7-2.4-2.8-4.3-2.8-.2 0-.4 0-.6.1z" />
     </svg>
   ),
   beatstars: ({ className }) => (
@@ -1339,10 +1339,6 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
             </div>
 
             <div className="space-y-4 text-xs sm:text-sm text-zinc-300">
-              <p>
-                Interested in working together, booking studio sessions, or licensing original beats from <strong className="text-white">{producer.nickname}</strong>?
-              </p>
-
               <div className="bg-[#121212] p-4 rounded-xl space-y-2">
                 <span className="text-[11px] text-zinc-500 uppercase tracking-wider font-semibold block">
                   Verified Contact E-mail:
@@ -1368,13 +1364,13 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                 </div>
               </div>
 
-              {/* Social Channels / Links */}
+              {/* Socials */}
               {activeLinks.length > 0 && (
                 <div className="space-y-2.5 pt-1">
                   <span className="text-[11px] text-zinc-500 uppercase tracking-wider font-semibold block">
-                    Social Channels:
+                    Socials
                   </span>
-                  <div className="flex flex-wrap items-center gap-2.5">
+                  <div className="flex flex-wrap items-center gap-3.5">
                     {activeLinks.map(([platform, url]) => {
                       const IconComponent = SocialIcons[platform.toLowerCase()] || SocialIcons.website;
                       const hoverColorClasses: Record<string, string> = {
@@ -1396,11 +1392,10 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                           href={formattedUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className={`text-zinc-400 ${hoverColor} transition-colors duration-200 active:scale-95 inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[#121212] hover:bg-[#1a1a1a] text-xs font-medium`}
+                          className={`text-zinc-400 ${hoverColor} transition-colors duration-200 active:scale-95 inline-flex items-center justify-center`}
                           title={`${platform.charAt(0).toUpperCase() + platform.slice(1)}: ${url}`}
                         >
-                          <IconComponent className="w-4 h-4" />
-                          <span className="capitalize">{platform}</span>
+                          <IconComponent className="w-5 h-5" />
                         </a>
                       );
                     })}

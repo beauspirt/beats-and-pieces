@@ -6,26 +6,15 @@ import { useAudioPlayer } from "@/lib/audio-context";
 import { formatTime } from "@/lib/utils";
 import precomputedPeaksV2 from "@/lib/waveform-peaks-v2.json";
 
-interface AudioWaveformPlayerProps {
-  id: string;
-  title?: string;
-  audioUrl?: string;
-  bpm?: number;
-  duration?: number;
-  downloadable?: boolean;
-  showDownload?: boolean;
-  compact?: boolean;
-}
-
-interface WaveformData {
+export interface WaveformData {
   peaks: number[];
   body?: number[];
   duration?: number;
 }
 
-const globalWaveformCache = new Map<string, WaveformData>();
+export const globalWaveformCache = new Map<string, WaveformData>();
 
-function extractRealAudioBufferWaveform(buffer: AudioBuffer, numSlices = 800): WaveformData {
+export function extractRealAudioBufferWaveform(buffer: AudioBuffer, numSlices = 800): WaveformData {
   const channelData = buffer.getChannelData(0);
   const totalSamples = channelData.length;
   const samplesPerSlice = Math.floor(totalSamples / numSlices);
@@ -51,7 +40,7 @@ function extractRealAudioBufferWaveform(buffer: AudioBuffer, numSlices = 800): W
   return { peaks, duration: Math.round(buffer.duration) };
 }
 
-function generateProceduralPeaks(seedStr: string, count = 200): number[] {
+export function generateProceduralPeaks(seedStr: string, count = 200): number[] {
   let hash = 0;
   for (let i = 0; i < seedStr.length; i++) {
     hash = (hash << 5) - hash + seedStr.charCodeAt(i);
@@ -68,12 +57,25 @@ function generateProceduralPeaks(seedStr: string, count = 200): number[] {
   return peaks;
 }
 
+export interface AudioWaveformPlayerProps {
+  id: string;
+  title?: string;
+  audioUrl?: string;
+  bpm?: number;
+  duration?: number;
+  waveformPeaks?: number[];
+  downloadable?: boolean;
+  showDownload?: boolean;
+  compact?: boolean;
+}
+
 export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
   id,
   title = "Beat Track",
   audioUrl,
   bpm = 90,
   duration = 45,
+  waveformPeaks,
   showDownload = false,
   compact = false,
 }) => {
@@ -98,11 +100,20 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
   const isThisTrackPlaying = isThisTrackActive && isPlaying;
 
   const [waveformData, setWaveformData] = useState<WaveformData | null>(() => {
+    if (waveformPeaks && waveformPeaks.length > 0) {
+      return { peaks: waveformPeaks, duration };
+    }
     if (audioUrl && globalWaveformCache.has(audioUrl)) {
       return globalWaveformCache.get(audioUrl)!;
     }
     return null;
   });
+
+  useEffect(() => {
+    if (waveformPeaks && waveformPeaks.length > 0) {
+      setWaveformData({ peaks: waveformPeaks, duration });
+    }
+  }, [waveformPeaks, duration]);
 
   // Decode real AudioBuffer only for custom newly uploaded tracks not in precomputed dictionary
   useEffect(() => {

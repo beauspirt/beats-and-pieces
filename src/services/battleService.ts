@@ -219,28 +219,83 @@ export const battleService = {
         notifyBattlesUpdated();
       }
 
-      // 2. Sync Submissions
-      const { data: dbSubs, error: sErr } = await supabase.from("submissions").select("*");
+      // 2. Sync Submissions & Ratings
+      const [{ data: dbSubs, error: sErr }, { data: dbRatings }] = await Promise.all([
+        supabase.from("submissions").select("*"),
+        supabase.from("ratings").select("*"),
+      ]);
+
+      // Calculate rating stats from ratings table
+      const ratingStats: Record<string, { totalScore: number; count: number }> = {};
+      if (dbRatings && dbRatings.length > 0) {
+        dbRatings.forEach((r: any) => {
+          if (!ratingStats[r.submission_id]) {
+            ratingStats[r.submission_id] = { totalScore: 0, count: 0 };
+          }
+          ratingStats[r.submission_id].totalScore += (Number(r.score) || 0);
+          ratingStats[r.submission_id].count += 1;
+        });
+      }
+
       if (!sErr && dbSubs && dbSubs.length > 0) {
-        const mappedSubs: BattleSubmission[] = dbSubs.map((s) => ({
-          id: s.id,
-          battleId: s.battle_id,
-          userId: s.user_id,
-          beatmakerTag: s.beatmaker_tag,
-          beatTitle: s.beat_title,
-          audioUrl: s.audio_url,
-          waveform: s.waveform,
-          duration: s.duration || 120,
-          bpm: s.bpm,
-          flameRating: s.flame_rating || 0,
-          totalVotes: s.total_votes || 0,
-          juryScore: s.jury_score,
-          juryFeedback: s.jury_feedback,
-          judgeName: s.judge_name,
-          juryFeedbacks: s.jury_feedbacks || [],
-          rank: s.rank,
-          submittedAt: s.submitted_at,
-        }));
+        const mappedSubs: BattleSubmission[] = dbSubs.map((s) => {
+          const stats = ratingStats[s.id];
+          const calcFlame = stats && stats.count > 0 ? Number((stats.totalScore / stats.count).toFixed(2)) : (s.flame_rating || 0);
+          const calcVotes = stats && stats.count > 0 ? stats.count : (s.total_votes || 0);
+
+          return {
+            id: s.id,
+            battleId: s.battle_id,
+            userId: s.user_id,
+            beatmakerTag: s.beatmaker_tag,
+            beatTitle: s.beat_title,
+            audioUrl: s.audio_url,
+            waveform: s.waveform,
+            duration: s.duration || 120,
+            bpm: s.bpm,
+            flameRating: calcFlame,
+            totalVotes: calcVotes,
+            juryScore: s.jury_score,
+            juryFeedback: s.jury_feedback,
+            judgeName: s.judge_name,
+            juryFeedbacks: s.jury_feedbacks || [],
+            rank: s.rank,
+            submittedAt: s.submitted_at,
+          };
+        });
+
+        // Compute rankings & auto-assign winner for completed battles
+        const allBattles = this.getAllCompetitions();
+        let battlesModified = false;
+
+        for (const b of allBattles) {
+          const bSubs = mappedSubs.filter((s) => s.battleId === b.id);
+          if (bSubs.length > 0) {
+            // Sort by juryScore (highest first), then flameRating (highest first)
+            const sorted = [...bSubs].sort((a, b) => {
+              const aJury = typeof a.juryScore === "number" ? a.juryScore : -1;
+              const bJury = typeof b.juryScore === "number" ? b.juryScore : -1;
+              if (bJury !== aJury) return bJury - aJury;
+              return (b.flameRating || 0) - (a.flameRating || 0);
+            });
+
+            sorted.forEach((sub, idx) => {
+              if (!sub.rank) sub.rank = idx + 1;
+            });
+
+            if (b.phase === "completed" && (!b.winner || b.winner === "TBD") && sorted[0]) {
+              b.winner = sorted[0].beatmakerTag;
+              battlesModified = true;
+            }
+          }
+        }
+
+        if (battlesModified) {
+          saveCustomBattles(allBattles);
+          customBattlesList = allBattles;
+          competitionsList = allBattles;
+          notifyBattlesUpdated();
+        }
 
         saveCustomSubmissions(mappedSubs);
         customSubsList = mappedSubs;
@@ -522,12 +577,116 @@ export const battleService = {
 
       if (error) {
         console.warn("Supabase voteSubmission failed:", error.message);
-        return { success: false, error: error.message };
       }
 
+      // Update local submission flameRating immediately
+      const allSubs = this.getAllSubmissions();
+      const target = allSubs.find((s) => s.id === submissionId);
+      if (target) {
+        const currentVotes = target.totalVotes || 0;
+        const currentRating = target.flameRating || 0;
+        const newTotal = currentVotes + 1;
+        const newAvg = Number(((currentRating * currentVotes + score) / newTotal).toFixed(2));
+        target.flameRating = newAvg;
+        target.totalVotes = newTotal;
+
+        saveCustomSubmissions(allSubs);
+        customSubsList = allSubs;
+        submissionsList = allSubs;
+
+        // Also sync flame_rating back to Supabase submissions row
+        supabase.from("submissions").update({
+          flame_rating: newAvg,
+          total_votes: newTotal,
+        }).eq("id", submissionId).then(() => {}, () => {});
+      }
+
+      notifyBattlesUpdated();
       return { success: true };
     } catch (err: any) {
       return { success: false, error: err.message || "Failed to vote" };
+    }
+  },
+
+  async submitJuryBallot(
+    battleId: string,
+    judgeId: string,
+    judgeName: string,
+    scores: Record<string, number | string>,
+    feedbacks: Record<string, string>
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      const battleSubs = this.getSubmissionsByBattleId(battleId);
+      if (battleSubs.length === 0) return { success: true };
+
+      for (const sub of battleSubs) {
+        const scoreVal = scores[sub.id];
+        const feedbackVal = feedbacks[sub.id];
+        const parsedScore = (scoreVal !== undefined && scoreVal !== "") ? parseFloat(String(scoreVal)) : null;
+
+        if (parsedScore !== null) {
+          sub.juryScore = parsedScore;
+          sub.juryFeedback = feedbackVal || sub.juryFeedback;
+          sub.judgeName = judgeName;
+        }
+      }
+
+      // Rank by highest juryScore, then flameRating
+      const ranked = [...battleSubs].sort((a, b) => {
+        const aJury = typeof a.juryScore === "number" ? a.juryScore : -1;
+        const bJury = typeof b.juryScore === "number" ? b.juryScore : -1;
+        if (bJury !== aJury) return bJury - aJury;
+        return (b.flameRating || 0) - (a.flameRating || 0);
+      });
+
+      ranked.forEach((s, idx) => {
+        s.rank = idx + 1;
+      });
+
+      // Update in-memory and local storage
+      const allSubs = this.getAllSubmissions();
+      const updatedAllSubs = allSubs.map((s) => {
+        const match = ranked.find((r) => r.id === s.id);
+        return match || s;
+      });
+      saveCustomSubmissions(updatedAllSubs);
+      customSubsList = updatedAllSubs;
+      submissionsList = updatedAllSubs;
+
+      // Assign winner to the battle if ranked[0] exists
+      if (ranked[0]) {
+        await this.updateBattle(battleId, {
+          winner: ranked[0].beatmakerTag,
+        });
+      }
+
+      // Upsert updated submissions to Supabase
+      for (const sub of ranked) {
+        await supabase.from("submissions").upsert({
+          id: sub.id,
+          battle_id: sub.battleId,
+          user_id: sub.userId,
+          beatmaker_tag: sub.beatmakerTag,
+          beat_title: sub.beatTitle,
+          audio_url: sub.audioUrl,
+          waveform: sub.waveform || [],
+          duration: sub.duration || 120,
+          bpm: sub.bpm,
+          flame_rating: sub.flameRating || 0,
+          total_votes: sub.totalVotes || 0,
+          jury_score: sub.juryScore,
+          jury_feedback: sub.juryFeedback,
+          judge_name: sub.judgeName,
+          rank: sub.rank,
+          submitted_at: sub.submittedAt,
+        });
+      }
+
+      notifyBattlesUpdated();
+      return { success: true };
+    } catch (err: any) {
+      console.error("submitJuryBallot error:", err);
+      return { success: false, error: err.message || "Failed to submit jury ballot" };
     }
   },
 };

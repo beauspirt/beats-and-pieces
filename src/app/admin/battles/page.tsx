@@ -135,7 +135,8 @@ export default function AdminBattlesManagerPage() {
       const file = files[idx];
       const sampleId = `s-${Date.now()}-${idx}`;
       const sampleTitle = file.name.replace(/\.[^/.]+$/, "");
-      const { url } = await storageService.uploadAudio(file, "samples", `sample-${Date.now()}-${idx}`);
+      const cleanSlug = sampleTitle.toLowerCase().replace(/[^a-z0-9_-]/g, "_");
+      const { url } = await storageService.uploadAudio(file, "samples", `${cleanSlug}-${Date.now()}-${idx}`);
       const sampleUrl = url || URL.createObjectURL(file);
 
       newSamples.push({

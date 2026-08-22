@@ -5,7 +5,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { battleService, storageService } from "@/services";
-import { AudioWaveformPlayer } from "./AudioWaveformPlayer";
+import {
+  AudioWaveformPlayer,
+  extractRealAudioBufferWaveform,
+  globalWaveformCache,
+  WaveformData,
+} from "./AudioWaveformPlayer";
 import { FlameRating } from "./FlameRating";
 import {
   ArrowLeft, Download, Upload, CheckCircle2,
@@ -82,15 +87,35 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     )
   );
 
-  const [juryViewerRole, setJuryViewerRole] = useState<"judge" | "regular">("regular");
-
-  useEffect(() => {
-    if (isUserJudge) {
-      setJuryViewerRole("judge");
-    } else {
-      setJuryViewerRole("regular");
+  // Helper for cross-origin audio downloads preserving clean filenames
+  const downloadAudioFile = async (url: string, desiredFilename: string) => {
+    if (!url) return;
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      const ext = url.split("?")[0].split(".").pop() || "wav";
+      const cleanExt = ["wav", "mp3", "zip", "aif", "aiff", "flac"].includes(ext.toLowerCase()) ? ext : "wav";
+      const finalName = desiredFilename.toLowerCase().endsWith(`.${cleanExt.toLowerCase()}`)
+        ? desiredFilename
+        : `${desiredFilename}.${cleanExt}`;
+      a.download = finalName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      const a = document.createElement("a");
+      a.href = url;
+      a.target = "_blank";
+      a.download = desiredFilename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     }
-  }, [isUserJudge]);
+  };
 
   // Phase 1: Upload state
   const [isUploading, setIsUploading] = useState(false);
@@ -99,6 +124,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     title: string;
     audioUrl: string;
     duration: number;
+    waveformPeaks?: number[];
     bpm?: number;
     submittedAt: string;
   } | null>(() => {
@@ -110,6 +136,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
           title: existing.beatTitle,
           audioUrl: existing.audioUrl,
           duration: existing.duration || 120,
+          waveformPeaks: existing.waveform,
           bpm: existing.bpm,
           submittedAt: existing.submittedAt,
         };
@@ -127,6 +154,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
           title: existing.beatTitle,
           audioUrl: existing.audioUrl,
           duration: existing.duration || 120,
+          waveformPeaks: existing.waveform,
           bpm: existing.bpm,
           submittedAt: existing.submittedAt,
         });
@@ -156,6 +184,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     bpm: sub.bpm,
     audioUrl: sub.audioUrl,
     duration: sub.duration || 120,
+    waveformPeaks: sub.waveform,
     flameRating: sub.flameRating,
   }));
 
@@ -167,18 +196,40 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     try {
       const uploaderId = currentUser?.id || "guest";
       const uploaderTag = currentUser?.nickname || "Producer";
+      const title = file.name.replace(/\.[^/.]+$/, "");
 
-      // 1. Upload to Supabase Storage
+      // 1. Instantly decode arrayBuffer in memory for exact waveform & duration
+      let extractedWaveform: WaveformData | null = null;
+      let realDuration = 120;
+      try {
+        const arrayBuf = await file.arrayBuffer();
+        const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        if (AudioCtx) {
+          const ctx = new AudioCtx();
+          const decoded = await ctx.decodeAudioData(arrayBuf.slice(0));
+          extractedWaveform = extractRealAudioBufferWaveform(decoded, 800);
+          realDuration = Math.round(decoded.duration);
+          ctx.close();
+        }
+      } catch (decodeErr) {
+        console.warn("In-memory audio decode warning:", decodeErr);
+      }
+
+      // 2. Upload to Supabase Storage
       const { url } = await storageService.uploadAudio(
         file,
         "submissions",
         `${battle.id}-${uploaderId}-${Date.now()}`
       );
 
-      const title = file.name.replace(/\.[^/.]+$/, "");
       const finalAudioUrl = url || URL.createObjectURL(file);
 
-      // 2. Register submission in database service
+      // Cache extracted waveform for this URL
+      if (extractedWaveform) {
+        globalWaveformCache.set(finalAudioUrl, extractedWaveform);
+      }
+
+      // 3. Register submission in database service with exact waveform & duration
       const newSub = battleService.submitEntry({
         id: `sub-${battle.id}-${uploaderId}-${Date.now()}`,
         battleId: battle.id,
@@ -186,7 +237,8 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
         beatmakerTag: uploaderTag,
         beatTitle: title,
         audioUrl: finalAudioUrl,
-        duration: 120,
+        waveform: extractedWaveform ? extractedWaveform.peaks : [],
+        duration: realDuration,
         submittedAt: new Date().toISOString(),
       });
 
@@ -195,6 +247,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
         title: newSub.beatTitle,
         audioUrl: newSub.audioUrl,
         duration: newSub.duration,
+        waveformPeaks: newSub.waveform,
         bpm: newSub.bpm,
         submittedAt: newSub.submittedAt,
       });
@@ -336,8 +389,12 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
   const [isJurySubmitted, setIsJurySubmitted] = useState(false);
 
-  const handlePublishJuryBallot = () => {
+  const handlePublishJuryBallot = async () => {
+    const judgeId = currentUser?.id || "judge";
+    const judgeName = currentUser?.nickname || "Judge";
+    await battleService.submitJuryBallot(battle.id, judgeId, judgeName, juryScores, juryFeedback);
     setIsJurySubmitted(true);
+    refreshBattleData();
     confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
   };
 
@@ -488,14 +545,14 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                       Sample(s)
                     </h3>
 
-                    <a
-                      href={battle.samples[0]?.audioUrl || "/sample-packs/battle-5-samples.zip"}
-                      download
+                    <button
+                      type="button"
+                      onClick={() => downloadAudioFile(battle.samples[0]?.audioUrl || "/sample-packs/battle-5-samples.zip", battle.samples[0]?.title || "sample")}
                       className="px-4 py-2 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-md active:scale-95 transition-all w-fit shrink-0 cursor-pointer"
                     >
                       <Download className="w-4 h-4" />
                       <span>Download</span>
-                    </a>
+                    </button>
                   </div>
 
                   <div className="space-y-2.5 pt-1">
@@ -517,7 +574,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                           )}
 
                           {/* Left: Play / Pause button + Title */}
-                          <div className="flex items-center gap-3 relative z-10 min-w-0">
+                          <div className="flex items-center gap-3 relative z-10 min-w-0 flex-1">
                             <button
                               type="button"
                               onClick={() => togglePlaySample(sample.id, sample.audioUrl)}
@@ -542,6 +599,16 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                               {sample.title}
                             </span>
                           </div>
+
+                          {/* Right: Dedicated Individual Download Button */}
+                          <button
+                            type="button"
+                            onClick={() => downloadAudioFile(sample.audioUrl, sample.title)}
+                            aria-label={`Download ${sample.title}`}
+                            className="relative z-10 p-2 rounded-xl bg-[#141414] hover:bg-[#7B61FF] text-[#888888] hover:text-white transition-all shrink-0 cursor-pointer shadow-sm"
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                          </button>
                         </div>
                       );
                     })}
@@ -640,6 +707,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                         title={myEntry.title}
                         audioUrl={myEntry.audioUrl}
                         duration={myEntry.duration}
+                        waveformPeaks={myEntry.waveformPeaks}
                         bpm={myEntry.bpm}
                       />
                     </div>
@@ -855,50 +923,24 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       {battle.phase === "judging" && (
         <div className="space-y-6">
           
-          {/* Jury Portal Top Header & Controls (Directly on website background) */}
+          {/* Jury Portal Top Header & Controls */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
             
-            {/* Left Column: Title, Subtitle, Action Button, Perspective Switcher */}
+            {/* Left Column: Title, Subtitle, Action Button */}
             <div className="lg:col-span-7 space-y-4 flex flex-col justify-between h-full">
               <div className="space-y-2">
-                <div className="flex items-center justify-between gap-3 flex-wrap">
-                  <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                    {juryViewerRole === "judge" ? "Jury Evaluation Portal" : "Jury Evaluation"}
-                  </h3>
-
-                  {/* Simulation Role Switcher (Preview Judge vs Regular User View) */}
-                  <div className="flex items-center gap-1 bg-[#181818] p-1 rounded-xl text-xs">
-                    <button
-                      onClick={() => setJuryViewerRole("judge")}
-                      className={`px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer ${
-                        juryViewerRole === "judge"
-                          ? "bg-[#7B61FF] text-white"
-                          : "text-[#888888] hover:text-white"
-                      }`}
-                    >
-                      Judge View
-                    </button>
-                    <button
-                      onClick={() => setJuryViewerRole("regular")}
-                      className={`px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer ${
-                        juryViewerRole === "regular"
-                          ? "bg-[#7B61FF] text-white"
-                          : "text-[#888888] hover:text-white"
-                      }`}
-                    >
-                      Regular User View
-                    </button>
-                  </div>
-                </div>
+                <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                  {isUserJudge ? "Jury Evaluation Portal" : "Jury Evaluation"}
+                </h3>
 
                 <p className="text-xs sm:text-sm text-[#888888] mt-1">
-                  {juryViewerRole === "judge"
+                  {isUserJudge
                     ? `Logged in as authorized judge (${currentUser?.nickname || "Judge"}). Score the finalists below.`
                     : "The assigned judges are currently reviewing and scoring the finalist submissions."}
                 </p>
               </div>
 
-              {juryViewerRole === "judge" && (
+              {isUserJudge && (
                 <div className="pt-2">
                   {isJurySubmitted ? (
                     <div className="flex items-center gap-3 flex-wrap">
@@ -1016,12 +1058,13 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                       title={blindTitle}
                       audioUrl={sub.audioUrl}
                       duration={sub.duration}
+                      waveformPeaks={sub.waveform}
                       bpm={sub.bpm}
                       compact={true}
                     />
 
                     {/* Judge Evaluation Controls (Only visible for Judges, disabled once submitted) */}
-                    {juryViewerRole === "judge" && (
+                    {isUserJudge && (
                       <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 pt-1 items-center">
                         {/* Score Slider */}
                         <div className="md:col-span-5 flex items-center gap-3 bg-[#121212] px-4 py-2.5 rounded-xl">
@@ -1140,20 +1183,22 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                         </div>
                       </div>
 
-                      {/* Scores (only if valid numbers exist) */}
+                      {/* Scores (Flame Rating and Jury Score) */}
                       {hasScores && (
-                        <div className="flex items-center gap-5 shrink-0 text-sm sm:text-base font-bold">
+                        <div className="flex items-center gap-4 shrink-0 text-xs sm:text-sm font-bold flex-wrap">
                           {hasFlame && (
-                            <div className="flex items-center gap-1.5 text-[#FF5E3A]">
+                            <div className="flex items-center gap-1.5 text-[#FF5E3A]" title="Public Rating Average">
                               <Flame className="w-4 h-4 fill-current" />
                               <span>{Number(sub.flameRating).toFixed(2)}</span>
+                              <span className="text-[10px] text-[#777777] font-normal">Public</span>
                             </div>
                           )}
 
                           {hasJury && (
-                            <div className="flex items-center gap-1.5 text-[#7B61FF]">
+                            <div className="flex items-center gap-1.5 text-[#7B61FF]" title="Jury Score">
                               <Star className="w-4 h-4 fill-current" />
                               <span>{Number(sub.juryScore).toFixed(2)}</span>
+                              <span className="text-[10px] text-[#777777] font-normal">Jury</span>
                             </div>
                           )}
                         </div>
@@ -1167,6 +1212,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                       title={sub.beatTitle}
                       audioUrl={sub.audioUrl}
                       duration={sub.duration}
+                      waveformPeaks={sub.waveform}
                       bpm={sub.bpm}
                       compact={true}
                     />

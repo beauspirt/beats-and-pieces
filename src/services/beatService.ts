@@ -8,21 +8,32 @@ const STORAGE_KEY_CUSTOM_BEATS = "bnp_custom_beats";
 const STORAGE_KEY_BEAT_OVERRIDES = "bnp_beats_overrides";
 const STORAGE_KEY_DELETED_BEATS = "bnp_deleted_beats";
 
+let customBeatsMemory: DiscoveryBeat[] = [];
+
 function loadCustomBeats(): DiscoveryBeat[] {
   if (typeof window !== "undefined") {
     try {
       const stored = localStorage.getItem(STORAGE_KEY_CUSTOM_BEATS);
-      if (stored) return JSON.parse(stored);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          customBeatsMemory = parsed;
+          return parsed;
+        }
+      }
     } catch {}
   }
-  return [];
+  return customBeatsMemory;
 }
 
 function saveCustomBeats(beats: DiscoveryBeat[]) {
+  customBeatsMemory = beats;
   if (typeof window !== "undefined") {
     try {
       localStorage.setItem(STORAGE_KEY_CUSTOM_BEATS, JSON.stringify(beats));
-    } catch {}
+    } catch (err) {
+      console.warn("saveCustomBeats localStorage quota warning:", err);
+    }
   }
 }
 
@@ -142,7 +153,10 @@ export const beatService = {
           createdAt: b.created_at,
         }));
 
-        saveCustomBeats(mapped);
+        const currentCustom = loadCustomBeats();
+        const existingIds = new Set(mapped.map((b) => b.id));
+        const merged = [...mapped, ...currentCustom.filter((b) => !existingIds.has(b.id))];
+        saveCustomBeats(merged);
       }
     } catch (err) {
       console.warn("beatService.syncFromSupabase error:", err);
@@ -218,11 +232,9 @@ export const beatService = {
       id: beat.id || `beat-custom-${Date.now()}`,
     };
 
-    if (typeof window !== "undefined") {
-      const custom = loadCustomBeats();
-      custom.unshift(newBeat);
-      saveCustomBeats(custom);
-    }
+    const custom = loadCustomBeats();
+    const updated = [newBeat, ...custom.filter((b) => b.id !== newBeat.id)];
+    saveCustomBeats(updated);
 
     // Async insert to Supabase
     supabase.from("beats").upsert({

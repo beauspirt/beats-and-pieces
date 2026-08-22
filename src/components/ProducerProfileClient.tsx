@@ -4,9 +4,14 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { sampleProducers, sampleDiscoveryBeats, sampleSubmissions } from "@/lib/mock-data";
-import { AudioWaveformPlayer } from "@/components/AudioWaveformPlayer";
+import { 
+  AudioWaveformPlayer,
+  extractRealAudioBufferWaveform,
+  globalWaveformCache,
+  WaveformData,
+} from "@/components/AudioWaveformPlayer";
 import { DiscoveryBeat, JudgeFeedbackItem, UserProfile } from "@/lib/types";
-import { producerService, battleService, beatService } from "@/services";
+import { producerService, battleService, beatService, storageService } from "@/services";
 import { normalizeUrl } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 import { 
@@ -156,6 +161,8 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
   const [newBeatTags, setNewBeatTags] = useState<string[]>([]);
   const [newBeatTagInput, setNewBeatTagInput] = useState("");
   const [newBeatDuration, setNewBeatDuration] = useState(120);
+  const [newBeatWaveformPeaks, setNewBeatWaveformPeaks] = useState<number[]>([]);
+  const [isUploadingBeatAudio, setIsUploadingBeatAudio] = useState(false);
 
   const [saveToastMessage, setSaveToastMessage] = useState<string | null>(null);
 
@@ -396,27 +403,58 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     setEditingTagInput("");
   };
 
-  const handleAudioUpload = (e: React.ChangeEvent<HTMLInputElement>, isNew: boolean) => {
+  const handleAudioUpload = async (e: React.ChangeEvent<HTMLInputElement>, isNew: boolean) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (uploadEvent) => {
-      if (uploadEvent.target?.result) {
-        const dataUrl = uploadEvent.target.result as string;
-        if (isNew) {
-          setNewBeatAudioUrl(dataUrl);
-          setNewBeatAudioName(file.name);
-          setNewBeatDuration(120);
-        } else if (editingBeat && !editingBeat.isBattleSubmission) {
-          setEditingBeat({
-            ...editingBeat,
-            audioUrl: dataUrl,
-          });
+    setIsUploadingBeatAudio(true);
+    try {
+      // 1. Instantly decode arrayBuffer in memory for exact waveform & duration
+      let extractedWaveform: WaveformData | null = null;
+      let realDuration = 120;
+      try {
+        const arrayBuf = await file.arrayBuffer();
+        const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        if (AudioCtx) {
+          const ctx = new AudioCtx();
+          const decoded = await ctx.decodeAudioData(arrayBuf.slice(0));
+          extractedWaveform = extractRealAudioBufferWaveform(decoded, 800);
+          realDuration = Math.round(decoded.duration);
+          ctx.close();
         }
+      } catch (decodeErr) {
+        console.warn("In-memory audio decode warning:", decodeErr);
       }
-    };
-    reader.readAsDataURL(file);
+
+      // 2. Upload to Supabase Storage 'beats' folder
+      const { url } = await storageService.uploadAudio(
+        file,
+        "beats",
+        `${producer.id}-${Date.now()}`
+      );
+
+      const finalAudioUrl = url || URL.createObjectURL(file);
+      if (extractedWaveform) {
+        globalWaveformCache.set(finalAudioUrl, extractedWaveform);
+      }
+
+      if (isNew) {
+        setNewBeatAudioUrl(finalAudioUrl);
+        setNewBeatAudioName(file.name);
+        setNewBeatDuration(realDuration);
+        setNewBeatWaveformPeaks(extractedWaveform ? extractedWaveform.peaks : []);
+      } else if (editingBeat && !editingBeat.isBattleSubmission) {
+        setEditingBeat({
+          ...editingBeat,
+          audioUrl: finalAudioUrl,
+        });
+      }
+    } catch (err) {
+      console.error("Audio upload error:", err);
+      alert("Failed to upload audio file. Please try again.");
+    } finally {
+      setIsUploadingBeatAudio(false);
+    }
   };
 
   const handleSaveEditBeat = (e: React.FormEvent) => {
@@ -486,9 +524,11 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       },
       audioUrl: newBeatAudioUrl,
       duration: newBeatDuration,
+      waveform: newBeatWaveformPeaks,
       bpm: bpmValue,
       priceTag: newBeatIsForSale ? "For Sale" : "Not For Sale",
       tags: newBeatTags,
+      genres: [],
       createdAt: new Date().toISOString(),
     });
 
@@ -500,6 +540,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     setNewBeatIsForSale(false);
     setNewBeatTags([]);
     setNewBeatTagInput("");
+    setNewBeatWaveformPeaks([]);
     setBeatsVersion((v) => v + 1);
     showToast("Beat added to your showcase!");
   };
@@ -635,7 +676,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                 setNewBeatTitle("");
                 setNewBeatAudioUrl("");
                 setNewBeatAudioName("");
-                setNewBeatBpm(90);
+                setNewBeatBpm("");
                 setNewBeatIsForSale(false);
                 setNewBeatTags([]);
                 setNewBeatTagInput("");
@@ -1060,7 +1101,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                 <label className="text-xs font-semibold text-[#D1D1D1]">BPM</label>
                 <input
                   type="number"
-                  placeholder="e.g. 90 (optional)"
+                  placeholder="Optional"
                   value={newBeatBpm}
                   onChange={(e) => setNewBeatBpm(e.target.value === "" ? "" : Number(e.target.value))}
                   className="w-full bg-[#121212] rounded-xl px-4 py-3 text-xs text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-[#7B61FF] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -1157,9 +1198,17 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
+                  disabled={isUploadingBeatAudio || !newBeatAudioUrl || !newBeatTitle.trim()}
+                  className="px-6 py-2.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-2"
                 >
-                  Add Beat
+                  {isUploadingBeatAudio ? (
+                    <>
+                      <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Uploading audio...</span>
+                    </>
+                  ) : (
+                    <span>Add Beat</span>
+                  )}
                 </button>
               </div>
 

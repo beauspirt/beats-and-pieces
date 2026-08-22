@@ -119,6 +119,7 @@ export interface DiscoveryBeat {
   battleSource?: string;
   tier?: number;
   rank?: number;
+  juryScore?: number;
   juryFeedback?: string;
   judgeName?: string;
   juryFeedbacks?: JudgeFeedbackItem[];

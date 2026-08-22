@@ -159,6 +159,19 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
   const [saveToastMessage, setSaveToastMessage] = useState<string | null>(null);
 
+  const backdropMouseDownRef = useRef<EventTarget | null>(null);
+
+  const handleBackdropMouseDown = (e: React.MouseEvent) => {
+    backdropMouseDownRef.current = e.target;
+  };
+
+  const handleBackdropMouseUp = (e: React.MouseEvent, closeCallback: () => void) => {
+    if (e.target === e.currentTarget && backdropMouseDownRef.current === e.currentTarget) {
+      closeCallback();
+    }
+    backdropMouseDownRef.current = null;
+  };
+
   const showToast = (msg: string) => {
     setSaveToastMessage(msg);
     setTimeout(() => setSaveToastMessage(null), 3000);
@@ -326,7 +339,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
           audioUrl: sub.audioUrl,
           waveform: sub.waveform,
           duration: sub.duration || 120,
-          bpm: sub.bpm || 90,
+          bpm: typeof sub.bpm === "number" ? sub.bpm : undefined,
           priceTag: "Not For Sale",
           tags: [],
           flames: flameVal,
@@ -368,13 +381,13 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     );
 
     const isForSale = Boolean(beat.priceTag && beat.priceTag !== "Not For Sale");
-    const rawTags: string[] = Array.from(new Set([...(beat.tags || []), ...(beat.genres || [])]));
+    const rawTags: string[] = Array.from(new Set([...(beat.tags || [])]));
 
     setEditingBeat({
       id: beat.id,
       title: beat.title,
       audioUrl: beat.audioUrl,
-      bpm: beat.bpm ? beat.bpm : "",
+      bpm: typeof beat.bpm === "number" && !isNaN(beat.bpm) ? beat.bpm : "",
       isForSale: isForSale,
       isBattleSubmission: isBattle,
       battleSource: beat.battleSource || beat.competitionTitle,
@@ -419,6 +432,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
         bpm: bpmValue,
         priceTag: priceTag,
         tags: editingTags,
+        genres: [],
       });
     } else {
       // Standalone beats: update title, audioUrl, bpm, priceTag, and tags
@@ -428,6 +442,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
         bpm: bpmValue,
         priceTag: priceTag,
         tags: editingTags,
+        genres: [],
       });
     }
 
@@ -698,8 +713,17 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                       </span>
                     ) : null}
 
+                    {/* Jury Score Avg */}
+                    {typeof beat.juryScore === "number" && beat.juryScore > 0 ? (
+                      <div className="flex items-center gap-1 text-xs sm:text-sm text-[#7B61FF] font-bold px-2" title="Jury Score Average">
+                        <Star className="w-4 h-4 fill-current text-[#7B61FF]" />
+                        <span>{beat.juryScore.toFixed(2)}</span>
+                      </div>
+                    ) : null}
+
+                    {/* Public Rating Avg */}
                     {typeof beat.flames === "number" && beat.flames > 0 ? (
-                      <div className="flex items-center gap-1 text-xs sm:text-sm text-[#FF5E3A] font-bold px-2">
+                      <div className="flex items-center gap-1 text-xs sm:text-sm text-[#FF5E3A] font-bold px-2" title="Public Rating Average">
                         <Flame className="w-4 h-4 fill-current" />
                         <span>{beat.flames.toFixed(2)}</span>
                       </div>
@@ -750,10 +774,12 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       {/* EDIT BEAT MODAL */}
       {editingBeat && (
         <div
-          onClick={() => setEditingBeat(null)}
+          onMouseDown={handleBackdropMouseDown}
+          onMouseUp={(e) => handleBackdropMouseUp(e, () => setEditingBeat(null))}
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
         >
           <div
+            onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
             className="bg-[#181818] rounded-2xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default"
           >
@@ -977,10 +1003,12 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       {/* ADD BEAT MODAL */}
       {isAddModalOpen && (
         <div
-          onClick={() => setIsAddModalOpen(false)}
+          onMouseDown={handleBackdropMouseDown}
+          onMouseUp={(e) => handleBackdropMouseUp(e, () => setIsAddModalOpen(false))}
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
         >
           <div
+            onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
             className="bg-[#181818] rounded-2xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default"
           >
@@ -1143,10 +1171,12 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       {/* CONTACT / LICENSE MODAL */}
       {showContactModal && (
         <div
-          onClick={() => setShowContactModal(false)}
+          onMouseDown={handleBackdropMouseDown}
+          onMouseUp={(e) => handleBackdropMouseUp(e, () => setShowContactModal(false))}
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
         >
           <div
+            onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
             className="bg-[#181818] rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default"
           >

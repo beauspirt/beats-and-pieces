@@ -890,8 +890,8 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
             </div>
 
-            {/* Right Column: Submit Your Entry Container (Reduces in size when submitted) */}
-            <div className={`lg:col-span-6 bg-[#181818] rounded-3xl p-5 sm:p-7 space-y-4 flex flex-col ${myEntry ? "h-auto" : "h-full justify-between"}`}>
+            {/* Right Column: Submit Your Entry Container (Reduces in size when submitted or staged) */}
+            <div className={`lg:col-span-6 bg-[#181818] rounded-3xl p-5 sm:p-7 space-y-4 flex flex-col ${(myEntry || stagedBeat) ? "h-auto" : "h-full justify-between"}`}>
               <div className="space-y-4 flex-1 flex flex-col">
                 <h3 className="text-xl font-bold text-white flex items-center gap-2">
                   <Upload className="w-5 h-5 text-[#FF5E3A]" />
@@ -951,6 +951,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                         audioUrl={stagedBeat.audioUrl}
                         duration={stagedBeat.duration}
                         waveformPeaks={stagedBeat.waveformPeaks}
+                        compact={true}
                       />
                     </div>
 

@@ -353,9 +353,17 @@ export default function BeatsDiscoveryPage() {
                     </span>
                   ) : null}
 
-                  {/* Community Flames */}
+                  {/* Jury Score Avg */}
+                  {typeof beat.juryScore === "number" && beat.juryScore > 0 ? (
+                    <div className="flex items-center gap-1 text-xs sm:text-sm text-[#7B61FF] font-bold px-2" title="Jury Score Average">
+                      <Star className="w-4 h-4 fill-current text-[#7B61FF]" />
+                      <span>{beat.juryScore.toFixed(2)}</span>
+                    </div>
+                  ) : null}
+
+                  {/* Community Flames (Public Rating Avg) */}
                   {typeof beat.flames === "number" && beat.flames > 0 ? (
-                    <div className="flex items-center gap-1 text-xs sm:text-sm text-[#FF5E3A] font-bold px-2">
+                    <div className="flex items-center gap-1 text-xs sm:text-sm text-[#FF5E3A] font-bold px-2" title="Public Rating Average">
                       <Flame className="w-4 h-4 fill-current" />
                       <span>{beat.flames.toFixed(2)}</span>
                     </div>

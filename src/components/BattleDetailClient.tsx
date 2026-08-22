@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -362,6 +362,10 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
   const processUploadedFile = async (file: File) => {
     if (!file) return;
+    if (isUserJudge) {
+      alert("You are assigned as a judge for this battle and cannot submit an entry.");
+      return;
+    }
     setIsUploading(true);
     try {
       const uploaderId = currentUser?.id || "guest";
@@ -371,7 +375,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       // If user had a previous submission, delete it first to ensure maximum 1 entry per producer
       const existing = submissions.find((s) => s.userId === uploaderId);
       if (existing) {
-        await battleService.deleteSubmission(existing.id, battle.id);
+        await battleService.deleteSubmission(existing.id, battle.id, currentUser?.id);
       }
 
       // 1. Instantly decode arrayBuffer in memory for exact waveform & duration
@@ -430,8 +434,9 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
       refreshBattleData();
       confetti({ particleCount: 60, spread: 60, origin: { y: 0.6 } });
-    } catch (err) {
+    } catch (err: any) {
       console.error("Submission failed:", err);
+      alert(err.message || "Submission failed");
     } finally {
       setIsUploading(false);
     }
@@ -482,11 +487,14 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   // Compact Samples Audio Player State
   const [playingSampleId, setPlayingSampleId] = useState<string | null>(null);
   const [sampleProgress, setSampleProgress] = useState<Record<string, number>>({});
-  const sampleAudioRefs = React.useRef<Record<string, HTMLAudioElement | null>>({});
+  const sampleAudioRefs = useRef<Record<string, HTMLAudioElement | null>>({});
 
-  const togglePlaySample = (sampleId: string, audioUrl: string) => {
+  const handleToggleSample = (sampleId: string, audioUrl: string) => {
     if (playingSampleId === sampleId) {
-      sampleAudioRefs.current[sampleId]?.pause();
+      const audio = sampleAudioRefs.current[sampleId];
+      if (audio) {
+        audio.pause();
+      }
       setPlayingSampleId(null);
     } else {
       if (playingSampleId && sampleAudioRefs.current[playingSampleId]) {
@@ -579,6 +587,15 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
   };
 
+  const handleUnlockRatings = () => {
+    setIsRatingsSubmitted(false);
+    if (currentUser?.id) {
+      try {
+        localStorage.removeItem(`bnp_submitted_ratings_${battle.id}_${currentUser.id}`);
+      } catch {}
+    }
+  };
+
   const handlePublishJuryBallot = async () => {
     const judgeId = currentUser?.id || "judge";
     const judgeName = currentUser?.nickname || "Judge";
@@ -600,6 +617,19 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     }
     refreshBattleData();
     confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+  };
+
+  const handleUnlockJuryBallot = async () => {
+    const judgeId = currentUser?.id || "judge";
+    const judgeName = currentUser?.nickname || "Judge";
+    setIsJurySubmitted(false);
+    if (currentUser?.id) {
+      try {
+        localStorage.removeItem(`bnp_jury_submitted_${battle.id}_${currentUser.id}`);
+      } catch {}
+    }
+    await battleService.unsubmitJuryBallot(battle.id, judgeId, judgeName);
+    refreshBattleData();
   };
 
   const isTrackUnlocked = (index: number) => {
@@ -786,7 +816,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                           <div className="flex items-center gap-3 relative z-10 min-w-0 flex-1">
                             <button
                               type="button"
-                              onClick={() => togglePlaySample(sample.id, sample.audioUrl)}
+                              onClick={() => handleToggleSample(sample.id, sample.audioUrl)}
                               className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all cursor-pointer shadow-md ${
                                 isPlaying
                                   ? "bg-[#7B61FF] text-white hover:scale-105 active:scale-95"
@@ -825,7 +855,19 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                   <span>Submit your entry</span>
                 </h3>
 
-                {!myEntry ? (
+                {isUserJudge ? (
+                  <div className="flex-1 min-h-[260px] rounded-2xl p-6 bg-[#121212]/70 border border-[#7B61FF]/30 flex flex-col items-center justify-center text-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-[#7B61FF]/15 flex items-center justify-center text-[#7B61FF]">
+                      <Star className="w-6 h-6 fill-current" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm sm:text-base font-bold text-white">Assigned as Judge</p>
+                      <p className="text-xs text-[#888888] max-w-sm">
+                        You are assigned as an official judge for this battle and cannot submit an entry. You will evaluate the finalists in Phase 03.
+                      </p>
+                    </div>
+                  </div>
+                ) : !myEntry ? (
                   <label
                     onDragOver={handleDragOver}
                     onDragEnter={handleDragOver}
@@ -855,7 +897,6 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                       <p className="text-sm sm:text-base font-bold text-white">
                         {isUploading ? "Uploading entry..." : "Click to select or drag your entry here"}
                       </p>
-                      <p className="text-xs text-[#888888]">WAV or MP3 (Max 2 minutes)</p>
                     </div>
                   </label>
                 ) : (
@@ -1002,9 +1043,17 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
           {blindTracks.length > 0 && (
             <div className="flex flex-col items-center justify-center gap-3 pt-6 pb-6">
               {isRatingsSubmitted ? (
-                <div className="flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-emerald-500/15 text-emerald-300 font-bold text-sm sm:text-base shadow-lg">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                  <span>Ratings Submitted & Locked ✓</span>
+                <div className="flex items-center gap-3 flex-wrap justify-center">
+                  <div className="flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-emerald-500/15 text-emerald-300 font-bold text-sm sm:text-base shadow-lg">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                    <span>Ratings Submitted & Locked ✓</span>
+                  </div>
+                  <button
+                    onClick={handleUnlockRatings}
+                    className="px-5 py-3.5 rounded-2xl bg-[#202020] hover:bg-[#282828] text-[#D1D1D1] hover:text-white font-semibold text-xs sm:text-sm transition-all cursor-pointer active:scale-95 shadow-sm"
+                  >
+                    Unlock & Edit Ratings
+                  </button>
                 </div>
               ) : (
                 <button
@@ -1148,7 +1197,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                         Scores Submitted ✓
                       </div>
                       <button
-                        onClick={() => setIsJurySubmitted(false)}
+                        onClick={handleUnlockJuryBallot}
                         className="px-4 py-2.5 rounded-xl bg-[#202020] hover:bg-[#282828] text-[#D1D1D1] hover:text-white font-semibold text-xs sm:text-sm transition-all cursor-pointer active:scale-95 shadow-sm"
                       >
                         Unlock & Edit Scores

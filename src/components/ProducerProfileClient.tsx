@@ -794,7 +794,21 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                   compact={true}
                 />
 
-                {/* Row 3: Judge Feedback Loop / Ticker */}
+                {/* Row 3: Beat Tags */}
+                {beat.tags && beat.tags.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                    {beat.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-3 py-1 rounded-full bg-[#121212] text-[#888888] font-medium text-xs"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Row 4: Judge Feedback Loop / Ticker */}
                 {beat.juryFeedbacksList && beat.juryFeedbacksList.length > 0 && (
                   <div className="bg-[#121212] rounded-xl px-4 py-2.5">
                     <JudgeFeedbackTicker feedbacks={beat.juryFeedbacksList} />

@@ -320,8 +320,10 @@ function ProfileContent() {
                   {url && (
                     <button
                       type="button"
+                      tabIndex={-1}
                       onClick={() => setLinks((prev) => ({ ...prev, [key]: "" }))}
                       className="absolute right-3 text-[#777777] hover:text-white transition-colors cursor-pointer"
+                      title="Clear field"
                     >
                       <X className="w-4 h-4" />
                     </button>

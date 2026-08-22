@@ -485,7 +485,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
   );
   const isAtBeatLimit = customUploadedBeats.length >= MAX_FREE_BEATS;
 
-  // Compute prioritized badges: Admin -> Host -> Battle Champion -> OG Producer / Community
+  // Compute prioritized badges: Admin -> Battle Champion -> OG Producer / Community
   const sortedBadges = useMemo(() => {
     const rawRoles = new Set<string>(
       (producer.discordRoles || []).filter(
@@ -493,7 +493,8 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
           !r.toLowerCase().startsWith("winner bb") &&
           !r.toLowerCase().startsWith("winner #") &&
           r.toLowerCase() !== "judge" &&
-          r.toLowerCase() !== "jury"
+          r.toLowerCase() !== "jury" &&
+          r.toLowerCase() !== "host"
       )
     );
 
@@ -505,21 +506,17 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       rawRoles.add("Battle Champion");
     }
 
-    // 2. Inject system roles if applicable (Admin & Host)
+    // 2. Inject system roles if applicable (Admin)
     if (producer.role === "admin" || producer.email === "adrian.hrihor@gmail.com" || producer.nickname.toLowerCase() === "nerub") {
       rawRoles.add("Admin");
-    }
-    if (producer.role === "host" || (producer.email && battleService.getBattlesByHost(producer.email).length > 0)) {
-      rawRoles.add("Host");
     }
 
     const roleRank = (roleName: string): number => {
       const lower = roleName.toLowerCase();
       if (lower === "admin") return 1;
-      if (lower === "host") return 2;
-      if (lower.includes("champion") || lower.includes("winner") || lower.includes("1st")) return 3;
-      if (lower.includes("og producer") || lower.includes("og")) return 4;
-      return 5;
+      if (lower.includes("champion") || lower.includes("winner") || lower.includes("1st")) return 2;
+      if (lower.includes("og producer") || lower.includes("og")) return 3;
+      return 4;
     };
 
     return Array.from(rawRoles).sort((a, b) => roleRank(a) - roleRank(b));

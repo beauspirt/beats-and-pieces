@@ -1,94 +1,13 @@
 [
   {
-    "id": "rel-1",
-    "title": "Flip tape #1",
-    "slug": "flip-tape-1",
-    "coverImage": "/covers/releases/flip-tape-1.png",
-    "releaseDate": "2020-04-28",
-    "description": "This is our first beat tape, a compilation of the best beats chosen from the first flip battle.\nThe sample used in all the beats, chosen by Nerub, is 'Steven Halpern - Apollo's Lyre'.",
-    "spotifyUrl": "https://open.spotify.com/album/6iGLiO9pYmUgjNxdcQ5mRl",
-    "appleMusicUrl": "https://music.apple.com/ro/album/flip-tape-1/1689702343",
-    "youtubeUrl": "https://youtu.be/Qxc6J74b5Ro",
-    "bandcampUrl": "https://beatsandpiecesro.bandcamp.com/album/flip-tape-1"
-  },
-  {
-    "id": "rel-2",
-    "title": "Ăla - Smoking In My Spaceship",
-    "slug": "ala-smoking-in-my-spaceship",
-    "coverImage": "/covers/releases/ala-smoking-in-my-spaceship.jpg",
-    "releaseDate": "2020-05-01",
-    "description": "This is the first solo beat tape released by Beats & Pieces, masterfully created by Ăla, one of our OG community members.",
-    "youtubeUrl": "https://youtu.be/5Rg8SihdmkI"
-  },
-  {
-    "id": "rel-3",
-    "title": "Flip tape #2",
-    "slug": "flip-tape-2",
-    "coverImage": "/covers/releases/flip-tape-2.png",
-    "releaseDate": "2020-05-12",
-    "description": "This is our second beat tape, a compilation of the best beats chosen from the second flip battle.\nThe samples used in all the beats, chosen by Ortega, are:\nEduard Artemyev - На Сельской Станции\nEugen Doga - Waltz",
-    "spotifyUrl": "https://open.spotify.com/album/65tJYtPhM0p8OgTbW5KfkK",
-    "appleMusicUrl": "https://music.apple.com/ro/album/flip-tape-2/1776242267",
-    "youtubeUrl": "https://youtu.be/7ZsFPYmOTTk",
-    "bandcampUrl": "https://beatsandpiecesro.bandcamp.com/album/flip-tape-2"
-  },
-  {
-    "id": "rel-4",
-    "title": "The Miles Davis Tape",
-    "slug": "the-miles-davis-tape",
-    "coverImage": "/covers/releases/the-miles-davis-tape.png",
-    "releaseDate": "2020-08-31",
-    "description": "This is our first thematic beat tape, a compilation of beats made with samples taken from the music of the legendary Miles Davis.",
-    "youtubeUrl": "https://youtu.be/XtQArB6MSXo",
-    "bandcampUrl": "https://beatsandpiecesro.bandcamp.com/album/the-miles-davis-tape"
-  },
-  {
-    "id": "rel-5",
-    "title": "The Christmas Tape",
-    "slug": "the-christmas-tape",
-    "coverImage": "/covers/releases/the-christmas-tape.png",
-    "releaseDate": "2020-12-24",
-    "description": "This is a Christmas themed beat tape, a compilation of beats made with samples taken from Elena Mîndru Quintet's amazing album called 'Romanian Christmas Stories' in which they created jazz reinterpretations of traditional Romanian carols.",
-    "youtubeUrl": "https://youtu.be/ecpgw3wwSg0",
-    "bandcampUrl": "https://beatsandpiecesro.bandcamp.com/album/the-christmas-tape"
-  },
-  {
-    "id": "rel-6",
-    "title": "Plastel - FeedMeBeatz",
-    "slug": "plastel-feedmebeatz",
-    "coverImage": "/covers/releases/plastel-feedmebeatz.jpg",
-    "releaseDate": "2021-01-03",
-    "description": "This is a beat tape carefully crafted by Plastel, an OG member of the Beats & Pieces community.",
-    "youtubeUrl": "https://youtu.be/RXAff3Q5Niw",
-    "bandcampUrl": "https://beatsandpiecesro.bandcamp.com/album/feedmebeatz"
-  },
-  {
-    "id": "rel-7",
-    "title": "Fu & MLDN - Happy Accidents",
-    "slug": "fu-mldn-happy-accidents",
-    "coverImage": "/covers/releases/fu-mldn-happy-accidents.jpg",
-    "releaseDate": "2021-07-01",
-    "description": "This is a collaborative beat tape created by two of the most prolific OG community members.",
-    "youtubeUrl": "https://youtu.be/1U2UIcf9akY",
-    "bandcampUrl": "https://beatsandpiecesro.bandcamp.com/track/happy-accidents"
-  },
-  {
-    "id": "rel-8",
-    "title": "DFB - Microrama",
-    "slug": "dfb-microrama",
-    "coverImage": "/covers/releases/dfb-microrama.jpeg",
-    "releaseDate": "2023-01-09",
-    "description": "This is a beat tape carefully crafted by DFB, which is one of the first members in the Beats & Pieces community."
-  },
-  {
-    "id": "rel-9",
-    "title": "Electrofantul - 11 Thoughts",
-    "slug": "electrofantul-11-thoughts",
-    "coverImage": "/covers/releases/electrofantul-11-thoughts.jpg",
-    "releaseDate": "2023-06-11",
-    "description": "This is a trip-hop themed beat tape created by Electrofantul, another one of the OG members of the Beats & Pieces community.",
-    "spotifyUrl": "https://open.spotify.com/album/4kaLf4dseu9dumbZj4xkky",
-    "youtubeUrl": "https://youtube.com/playlist?list=PLRQS9NY8D6IFG8EQDQUwnW31cKyEYnjLi"
+    "id": "rel-11",
+    "title": "The Halloween Tape",
+    "slug": "the-halloween-tape",
+    "coverImage": "/covers/releases/the-halloween-tape.jpg",
+    "releaseDate": "2024-10-31",
+    "description": "This is a Halloween themed beat tape, made using a huge library of Halloween and horror movie samples.",
+    "youtubeUrl": "https://youtu.be/QTK0It6Zq-o",
+    "bandcampUrl": "https://beatsandpiecesro.bandcamp.com/album/the-halloween-tape"
   },
   {
     "id": "rel-10",
@@ -103,13 +22,94 @@
     "bandcampUrl": "https://blackrhino-music.bandcamp.com/album/walk-with-us"
   },
   {
-    "id": "rel-11",
-    "title": "The Halloween Tape",
-    "slug": "the-halloween-tape",
-    "coverImage": "/covers/releases/the-halloween-tape.jpg",
-    "releaseDate": "2024-10-31",
-    "description": "This is a Halloween themed beat tape, made using a huge library of Halloween and horror movie samples.",
-    "youtubeUrl": "https://youtu.be/QTK0It6Zq-o",
-    "bandcampUrl": "https://beatsandpiecesro.bandcamp.com/album/the-halloween-tape"
+    "id": "rel-9",
+    "title": "Electrofantul - 11 Thoughts",
+    "slug": "electrofantul-11-thoughts",
+    "coverImage": "/covers/releases/electrofantul-11-thoughts.jpg",
+    "releaseDate": "2023-06-11",
+    "description": "This is a trip-hop themed beat tape created by Electrofantul, another one of the OG members of the Beats & Pieces community.",
+    "spotifyUrl": "https://open.spotify.com/album/4kaLf4dseu9dumbZj4xkky",
+    "youtubeUrl": "https://youtube.com/playlist?list=PLRQS9NY8D6IFG8EQDQUwnW31cKyEYnjLi"
+  },
+  {
+    "id": "rel-8",
+    "title": "DFB - Microrama",
+    "slug": "dfb-microrama",
+    "coverImage": "/covers/releases/dfb-microrama.jpeg",
+    "releaseDate": "2023-01-09",
+    "description": "This is a beat tape carefully crafted by DFB, which is one of the first members in the Beats & Pieces community."
+  },
+  {
+    "id": "rel-7",
+    "title": "Fu & MLDN - Happy Accidents",
+    "slug": "fu-mldn-happy-accidents",
+    "coverImage": "/covers/releases/fu-mldn-happy-accidents.jpg",
+    "releaseDate": "2021-07-01",
+    "description": "This is a collaborative beat tape created by two of the most prolific OG community members.",
+    "youtubeUrl": "https://youtu.be/1U2UIcf9akY",
+    "bandcampUrl": "https://beatsandpiecesro.bandcamp.com/track/happy-accidents"
+  },
+  {
+    "id": "rel-6",
+    "title": "Plastel - FeedMeBeatz",
+    "slug": "plastel-feedmebeatz",
+    "coverImage": "/covers/releases/plastel-feedmebeatz.jpg",
+    "releaseDate": "2021-01-03",
+    "description": "This is a beat tape carefully crafted by Plastel, an OG member of the Beats & Pieces community.",
+    "youtubeUrl": "https://youtu.be/RXAff3Q5Niw",
+    "bandcampUrl": "https://beatsandpiecesro.bandcamp.com/album/feedmebeatz"
+  },
+  {
+    "id": "rel-5",
+    "title": "The Christmas Tape",
+    "slug": "the-christmas-tape",
+    "coverImage": "/covers/releases/the-christmas-tape.png",
+    "releaseDate": "2020-12-24",
+    "description": "This is a Christmas themed beat tape, a compilation of beats made with samples taken from Elena Mîndru Quintet's amazing album called 'Romanian Christmas Stories' in which they created jazz reinterpretations of traditional Romanian carols.",
+    "youtubeUrl": "https://youtu.be/ecpgw3wwSg0",
+    "bandcampUrl": "https://beatsandpiecesro.bandcamp.com/album/the-christmas-tape"
+  },
+  {
+    "id": "rel-4",
+    "title": "The Miles Davis Tape",
+    "slug": "the-miles-davis-tape",
+    "coverImage": "/covers/releases/the-miles-davis-tape.png",
+    "releaseDate": "2020-08-31",
+    "description": "This is our first thematic beat tape, a compilation of beats made with samples taken from the music of the legendary Miles Davis.",
+    "youtubeUrl": "https://youtu.be/XtQArB6MSXo",
+    "bandcampUrl": "https://beatsandpiecesro.bandcamp.com/album/the-miles-davis-tape"
+  },
+  {
+    "id": "rel-3",
+    "title": "Flip tape #2",
+    "slug": "flip-tape-2",
+    "coverImage": "/covers/releases/flip-tape-2.png",
+    "releaseDate": "2020-05-12",
+    "description": "This is our second beat tape, a compilation of the best beats chosen from the second flip battle.\nThe samples used in all the beats, chosen by Ortega, are:\nEduard Artemyev - На Сельской Станции\nEugen Doga - Waltz",
+    "spotifyUrl": "https://open.spotify.com/album/65tJYtPhM0p8OgTbW5KfkK",
+    "appleMusicUrl": "https://music.apple.com/ro/album/flip-tape-2/1776242267",
+    "youtubeUrl": "https://youtu.be/7ZsFPYmOTTk",
+    "bandcampUrl": "https://beatsandpiecesro.bandcamp.com/album/flip-tape-2"
+  },
+  {
+    "id": "rel-2",
+    "title": "Ăla - Smoking In My Spaceship",
+    "slug": "ala-smoking-in-my-spaceship",
+    "coverImage": "/covers/releases/ala-smoking-in-my-spaceship.jpg",
+    "releaseDate": "2020-05-01",
+    "description": "This is the first solo beat tape released by Beats & Pieces, masterfully created by Ăla, one of our OG community members.",
+    "youtubeUrl": "https://youtu.be/5Rg8SihdmkI"
+  },
+  {
+    "id": "rel-1",
+    "title": "Flip tape #1",
+    "slug": "flip-tape-1",
+    "coverImage": "/covers/releases/flip-tape-1.png",
+    "releaseDate": "2020-04-28",
+    "description": "This is our first beat tape, a compilation of the best beats chosen from the first flip battle.\nThe sample used in all the beats, chosen by Nerub, is 'Steven Halpern - Apollo's Lyre'.",
+    "spotifyUrl": "https://open.spotify.com/album/6iGLiO9pYmUgjNxdcQ5mRl",
+    "appleMusicUrl": "https://music.apple.com/ro/album/flip-tape-1/1689702343",
+    "youtubeUrl": "https://youtu.be/Qxc6J74b5Ro",
+    "bandcampUrl": "https://beatsandpiecesro.bandcamp.com/album/flip-tape-1"
   }
 ]

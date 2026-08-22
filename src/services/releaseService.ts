@@ -43,7 +43,7 @@ export const releaseService = {
     return Array.from(map.values()).sort((a, b) => {
       const timeA = a.releaseDate ? new Date(a.releaseDate).getTime() : 0;
       const timeB = b.releaseDate ? new Date(b.releaseDate).getTime() : 0;
-      return timeA - timeB;
+      return timeB - timeA;
     });
   },
 

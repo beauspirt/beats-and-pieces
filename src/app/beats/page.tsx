@@ -348,32 +348,12 @@ export default function BeatsDiscoveryPage() {
                             );
                           })()}
                         </div>
-                        <div className="flex items-center gap-2 mt-0.5 truncate">
-                          <Link
-                            href={`/producers/${beat.beatmaker.id}`}
-                            className="text-xs sm:text-sm text-[#7B61FF] hover:underline font-semibold block truncate"
-                          >
-                            {displayTag}
-                          </Link>
-                          {beat.battleSource && (() => {
-                            const match =
-                              beat.battleSource.match(/Beat Battle #?(\d+)/i) ||
-                              (beat.id && beat.id.match(/disc-bb(\d+)/));
-                            const battleUrl = match ? `/battles/battle-${match[1]}` : null;
-                            if (!battleUrl) return null;
-                            return (
-                              <span className="text-[11px] text-[#888888] truncate">
-                                •{" "}
-                                <Link
-                                  href={battleUrl}
-                                  className="hover:underline hover:text-zinc-300 transition-colors"
-                                >
-                                  {beat.battleSource}
-                                </Link>
-                              </span>
-                            );
-                          })()}
-                        </div>
+                        <Link
+                          href={`/producers/${beat.beatmaker.id}`}
+                          className="text-xs sm:text-sm text-[#7B61FF] hover:underline font-semibold block truncate mt-0.5"
+                        >
+                          {displayTag}
+                        </Link>
                       </div>
                     </div>
                   );

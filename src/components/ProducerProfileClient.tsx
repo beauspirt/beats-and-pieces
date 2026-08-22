@@ -899,13 +899,33 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                 {/* Row 1: Header (Title, Rank Badge, Meta, Edit Action) */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   
-                  {/* Left: Beat Title + Battle Source */}
+                  {/* Left: Beat Title + Quick Link Badge + Rank Badge */}
                   <div className="flex items-center gap-3.5 min-w-0">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2.5">
                         <h3 className="font-bold text-white text-base sm:text-lg leading-snug truncate">
                           {beat.title}
                         </h3>
+
+                        {/* BB#X Quick Link Badge */}
+                        {(() => {
+                          const match =
+                            (beat.battleSource && beat.battleSource.match(/Beat Battle #?(\d+)/i)) ||
+                            (beat.id && beat.id.match(/disc-bb(\d+)/));
+                          if (!match) return null;
+                          const battleUrl = `/battles/battle-${match[1]}`;
+                          const battleLabel = `BB#${match[1]}`;
+                          return (
+                            <Link
+                              href={battleUrl}
+                              className="px-2 py-0.5 rounded-md bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-[11px] font-bold shrink-0 transition-all inline-flex items-center gap-1"
+                              title={`View ${beat.battleSource || `Beat Battle #${match[1]}`}`}
+                            >
+                              <span>{battleLabel}</span>
+                              <span className="text-[9px]">↗</span>
+                            </Link>
+                          );
+                        })()}
 
                         {/* Rank Badge */}
                         {beat.rank === 1 && (
@@ -924,27 +944,6 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                           </span>
                         )}
                       </div>
-
-                      {beat.battleSource && (() => {
-                        const match =
-                          beat.battleSource.match(/Beat Battle #?(\d+)/i) ||
-                          (beat.id && beat.id.match(/disc-bb(\d+)/));
-                        const battleUrl = match ? `/battles/battle-${match[1]}` : null;
-                        return battleUrl ? (
-                          <Link
-                            href={battleUrl}
-                            className="text-xs text-[#888888] hover:text-[#7B61FF] hover:underline font-medium inline-flex items-center gap-1 mt-0.5 transition-colors"
-                            title={`Go to ${beat.battleSource}`}
-                          >
-                            <span>{beat.battleSource}</span>
-                            <span className="text-[10px]">↗</span>
-                          </Link>
-                        ) : (
-                          <span className="text-xs text-[#888888] font-medium block mt-0.5">
-                            {beat.battleSource}
-                          </span>
-                        );
-                      })()}
                     </div>
                   </div>
 

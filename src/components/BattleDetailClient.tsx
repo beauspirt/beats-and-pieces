@@ -353,6 +353,13 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   }, [submissions]);
 
   const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const [stagedBeat, setStagedBeat] = useState<{
+    file: File;
+    title: string;
+    audioUrl: string;
+    duration: number;
+    waveformPeaks: number[];
+  } | null>(null);
 
   const processUploadedFile = async (file: File) => {
     if (!file) return;
@@ -362,17 +369,9 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     }
     setIsUploading(true);
     try {
-      const uploaderId = currentUser?.id || "guest";
-      const uploaderTag = currentUser?.nickname || "Producer";
-      const title = file.name.replace(/\.[^/.]+$/, "");
+      const defaultTitle = file.name.replace(/\.[^/.]+$/, "");
 
-      // If user had a previous submission, delete it first to ensure maximum 1 entry per producer
-      const existing = submissions.find((s) => s.userId === uploaderId);
-      if (existing) {
-        await battleService.deleteSubmission(existing.id, battle.id, currentUser?.id);
-      }
-
-      // 1. Instantly decode arrayBuffer in memory for exact waveform & duration
+      // Instantly decode arrayBuffer in memory for exact waveform & duration preview
       let extractedWaveform: WaveformData | null = null;
       let realDuration = 120;
       try {
@@ -389,30 +388,65 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
         console.warn("In-memory audio decode warning:", decodeErr);
       }
 
-      // 2. Upload to Supabase Storage
-      const { url } = await storageService.uploadAudio(
+      const tempAudioUrl = URL.createObjectURL(file);
+      if (extractedWaveform) {
+        globalWaveformCache.set(tempAudioUrl, extractedWaveform);
+      }
+
+      setStagedBeat({
         file,
+        title: defaultTitle,
+        audioUrl: tempAudioUrl,
+        duration: realDuration,
+        waveformPeaks: extractedWaveform ? extractedWaveform.peaks : [],
+      });
+    } catch (err: any) {
+      console.error("File staging error:", err);
+      alert(err.message || "Failed to load audio file");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleConfirmSubmitStagedEntry = async () => {
+    if (!stagedBeat || !stagedBeat.title.trim()) return;
+    setIsUploading(true);
+    try {
+      const uploaderId = currentUser?.id || "guest";
+      const uploaderTag = currentUser?.nickname || "Producer";
+      const finalTitle = stagedBeat.title.trim();
+
+      // If user had a previous submission, delete it first to ensure maximum 1 entry per producer
+      const existing = submissions.find((s) => s.userId === uploaderId);
+      if (existing) {
+        await battleService.deleteSubmission(existing.id, battle.id, currentUser?.id);
+      }
+
+      // Upload to Supabase Storage
+      const { url } = await storageService.uploadAudio(
+        stagedBeat.file,
         "submissions",
         `${battle.id}-${uploaderId}-${Date.now()}`
       );
 
-      const finalAudioUrl = url || URL.createObjectURL(file);
-
-      // Cache extracted waveform for this URL
-      if (extractedWaveform) {
-        globalWaveformCache.set(finalAudioUrl, extractedWaveform);
+      const finalAudioUrl = url || stagedBeat.audioUrl;
+      if (stagedBeat.waveformPeaks && stagedBeat.waveformPeaks.length > 0) {
+        globalWaveformCache.set(finalAudioUrl, {
+          peaks: stagedBeat.waveformPeaks,
+          duration: stagedBeat.duration,
+        });
       }
 
-      // 3. Register submission in database service with exact waveform & duration
+      // Register submission in database service
       const newSub = battleService.submitEntry({
         id: `sub-${battle.id}-${uploaderId}-${Date.now()}`,
         battleId: battle.id,
         userId: uploaderId,
         beatmakerTag: uploaderTag,
-        beatTitle: title,
+        beatTitle: finalTitle,
         audioUrl: finalAudioUrl,
-        waveform: extractedWaveform ? extractedWaveform.peaks : [],
-        duration: realDuration,
+        waveform: stagedBeat.waveformPeaks,
+        duration: stagedBeat.duration,
         submittedAt: new Date().toISOString(),
       });
 
@@ -426,6 +460,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
         submittedAt: newSub.submittedAt,
       });
 
+      setStagedBeat(null);
       refreshBattleData();
       confetti({ particleCount: 60, spread: 60, origin: { y: 0.6 } });
     } catch (err: any) {
@@ -443,6 +478,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     try {
       await battleService.deleteSubmission(myEntry.id, battle.id, currentUser?.id);
       setMyEntry(null);
+      setStagedBeat(null);
       refreshBattleData();
     } catch (err) {
       console.error("Failed to remove entry:", err);
@@ -846,6 +882,65 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                       </p>
                     </div>
                   </div>
+                ) : !myEntry && stagedBeat ? (
+                  <div className="bg-[#121212] p-5 sm:p-7 rounded-2xl space-y-5">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 text-[#7B61FF] font-bold text-sm sm:text-base">
+                        <Upload className="w-4 h-4" />
+                        <span>Confirm Beat Details</span>
+                      </div>
+
+                      <button
+                        onClick={() => setStagedBeat(null)}
+                        className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-[#1A1A1A] hover:bg-zinc-800 text-[#888888] hover:text-white transition-all cursor-pointer"
+                      >
+                        Change File
+                      </button>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1">
+                        <span>Beat Name</span>
+                        <span className="text-[#FF5E3A]">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={stagedBeat.title}
+                        onChange={(e) => setStagedBeat({ ...stagedBeat, title: e.target.value })}
+                        placeholder="Enter your beat title..."
+                        className="w-full px-4 py-3 rounded-xl bg-[#1A1A1A] border border-[#333333] focus:border-[#7B61FF] text-white text-sm outline-none transition-all"
+                        autoFocus
+                      />
+                    </div>
+
+                    <div className="pt-1">
+                      <AudioWaveformPlayer
+                        id="staged-preview"
+                        title={stagedBeat.title || "Preview"}
+                        audioUrl={stagedBeat.audioUrl}
+                        duration={stagedBeat.duration}
+                        waveformPeaks={stagedBeat.waveformPeaks}
+                      />
+                    </div>
+
+                    <button
+                      onClick={handleConfirmSubmitStagedEntry}
+                      disabled={isUploading || !stagedBeat.title.trim()}
+                      className="w-full py-3.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white font-bold text-sm shadow-xl active:scale-98 transition-all disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      {isUploading ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>Uploading & Submitting...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-4 h-4" />
+                          <span>Submit Entry</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 ) : !myEntry ? (
                   <label
                     onDragOver={handleDragOver}
@@ -874,7 +969,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                     </div>
                     <div className="text-center space-y-1">
                       <p className="text-sm sm:text-base font-bold text-white">
-                        {isUploading ? "Uploading entry..." : "Click to select or drag your entry here"}
+                        {isUploading ? "Loading audio..." : "Click to select or drag your entry here"}
                       </p>
                     </div>
                   </label>

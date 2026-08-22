@@ -56,6 +56,14 @@ export const producerService = {
     );
   },
 
+  getProducerByTag(tag?: string): UserProfile | undefined {
+    if (!tag) return undefined;
+    const cleanTag = tag.trim().toLowerCase();
+    return Object.values(this.getProducersMap()).find(
+      (p) => (p.nickname && p.nickname.toLowerCase() === cleanTag) || (p.id && p.id.toLowerCase() === cleanTag)
+    );
+  },
+
   /**
    * Sync latest producers from Supabase table into local cache
    */

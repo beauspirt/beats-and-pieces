@@ -833,7 +833,7 @@ export const battleService = {
             judgeId,
             judgeName,
             score: parsedScore !== null ? parsedScore : undefined,
-            feedback: feedbackVal ? feedbackVal.trim() : "",
+            feedback: feedbackVal && feedbackVal.trim() ? feedbackVal.trim() : undefined,
           });
         }
         sub.juryFeedbacks = filteredFeedbacks;
@@ -854,6 +854,9 @@ export const battleService = {
         if (feedbackVal && feedbackVal.trim()) {
           sub.juryFeedback = feedbackVal.trim();
           sub.judgeName = judgeName;
+        } else {
+          delete sub.juryFeedback;
+          delete sub.judgeName;
         }
       }
 

@@ -292,11 +292,13 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
         (b) => b.audioUrl === sub.audioUrl || (b.title === sub.beatTitle && sub.beatTitle !== "Beat Battle #1")
       );
 
-      const juryList: JudgeFeedbackItem[] = sub.juryFeedbacks || [];
-      if (sub.juryFeedback && sub.judgeName && juryList.length === 0) {
+      const juryList: JudgeFeedbackItem[] = (sub.juryFeedbacks || []).filter(
+        (f) => f.feedback && f.feedback.trim().length > 0
+      );
+      if (sub.juryFeedback && sub.judgeName && juryList.length === 0 && sub.juryFeedback.trim().length > 0) {
         juryList.push({
           judgeName: sub.judgeName,
-          feedback: sub.juryFeedback,
+          feedback: sub.juryFeedback.trim(),
         });
       }
 
@@ -305,6 +307,10 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
           existing.juryFeedbacksList = juryList;
         }
       } else {
+        const flameVal = typeof sub.flameRating === "number" && !isNaN(sub.flameRating)
+          ? Math.min(5.0, Math.max(0, sub.flameRating))
+          : (typeof sub.juryScore === "number" && !isNaN(sub.juryScore) ? Math.min(5.0, Math.max(0, sub.juryScore)) : 0);
+
         mergedList.push({
           id: `sub-${sub.id}`,
           title: sub.beatTitle,
@@ -319,7 +325,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
           bpm: sub.bpm || 90,
           priceTag: "Not For Sale",
           tags: ["Battle Beat"],
-          flames: (sub.juryScore || 8) * 1.2,
+          flames: flameVal,
           tier: sub.rank === 1 ? 1 : sub.rank === 2 ? 2 : sub.rank === 3 ? 3 : 4,
           rank: sub.rank,
           juryScore: sub.juryScore,

@@ -1,6 +1,8 @@
 import { DiscoveryBeat } from "@/lib/types";
 import rawDiscoveryBeats from "@/data/discovery-beats.json";
 import { supabase } from "@/lib/supabase";
+import { battleService } from "./battleService";
+import { producerService } from "./producerService";
 
 const STORAGE_KEY_CUSTOM_BEATS = "bnp_custom_beats";
 const STORAGE_KEY_BEAT_OVERRIDES = "bnp_beats_overrides";
@@ -51,11 +53,54 @@ export const beatService = {
     const overrides = loadBeatOverrides();
     const deleted = loadDeletedBeatIds();
 
-    const combined = [...raw, ...custom]
-      .filter((b) => !deleted.includes(b.id))
-      .map((b) => (overrides[b.id] ? { ...b, ...overrides[b.id] } : b));
+    // Dynamically pull all submissions from finished/completed battles
+    const battleBeats: DiscoveryBeat[] = [];
+    try {
+      const completedBattles = battleService.getAllBattles().filter((b) => b.phase === "completed");
+      completedBattles.forEach((b) => {
+        const subs = battleService.getSubmissionsByBattleId(b.id);
+        subs.forEach((sub) => {
+          const prod = producerService.getProducerById(sub.userId) || producerService.getProducerByTag(sub.beatmakerTag);
+          battleBeats.push({
+            id: `sub-${sub.id}`,
+            title: sub.beatTitle || "Untitled Beat",
+            beatmaker: {
+              id: sub.userId || "producer",
+              tag: sub.beatmakerTag || "Producer",
+              avatarUrl: prod?.avatarUrl || "/avatars/default-avatar.png",
+            },
+            audioUrl: sub.audioUrl,
+            duration: sub.duration || 120,
+            waveform: sub.waveform || [],
+            bpm: sub.bpm || 90,
+            priceTag: "Not For Sale",
+            genres: ["Hip Hop"],
+            tags: [b.title, `Rank #${sub.rank || 1}`],
+            flames: typeof sub.flameRating === "number" ? Math.min(5.0, Math.max(0, sub.flameRating)) : 0,
+            battleSource: b.title,
+            tier: sub.rank === 1 ? 1 : sub.rank === 2 ? 2 : sub.rank === 3 ? 3 : 4,
+            rank: sub.rank,
+            createdAt: sub.submittedAt || b.endedAt || new Date().toISOString(),
+          });
+        });
+      });
+    } catch {}
 
-    return combined;
+    const seenAudios = new Set<string>();
+    const seenIds = new Set<string>();
+    const allCombined = [...custom, ...battleBeats, ...raw];
+    const uniqueBeats: DiscoveryBeat[] = [];
+
+    for (const b of allCombined) {
+      if (deleted.includes(b.id)) continue;
+      if (b.audioUrl && seenAudios.has(b.audioUrl)) continue;
+      if (seenIds.has(b.id)) continue;
+      if (b.audioUrl) seenAudios.add(b.audioUrl);
+      seenIds.add(b.id);
+      uniqueBeats.push(overrides[b.id] ? { ...b, ...overrides[b.id] } : b);
+    }
+
+    return uniqueBeats;
   },
 
   getBeatsByProducer(producerTagOrId: string): DiscoveryBeat[] {

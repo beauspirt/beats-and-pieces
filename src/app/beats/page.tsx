@@ -123,7 +123,7 @@ export default function BeatsDiscoveryPage() {
       {/* Intro Description Box */}
       <div className="text-sm sm:text-base text-[#A0A0A0] leading-relaxed space-y-1.5 font-normal max-w-4xl">
         <p>
-          This library showcases beats entered in Beats & Pieces battles throughout the years.
+          This library showcases beats entered in Beats & Pieces battles throughout the years, as well as original tracks uploaded directly by community producers.
         </p>
       </div>
 

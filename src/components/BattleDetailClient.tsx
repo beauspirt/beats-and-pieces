@@ -264,49 +264,6 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   const [juryFeedback, setJuryFeedback] = useState<Record<string, string>>({});
   const [isJurySubmitted, setIsJurySubmitted] = useState(false);
 
-  // Restore judge's drafted scores and check submission status for this active session
-  useEffect(() => {
-    if (!currentUser) return;
-    const cleanName = currentUser.nickname.toLowerCase().trim();
-    const cleanEmail = currentUser.email.toLowerCase().trim();
-    const cleanId = currentUser.id.toLowerCase().trim();
-
-    const loadedScores: Record<string, string> = {};
-    const loadedFeedbacks: Record<string, string> = {};
-
-    submissions.forEach((sub) => {
-      const match = sub.juryFeedbacks?.find(
-        (f) =>
-          (f.judgeName && f.judgeName.toLowerCase().trim() === cleanName) ||
-          (f.judgeId && f.judgeId.toLowerCase().trim() === cleanId) ||
-          (f.judgeId && f.judgeId.toLowerCase().trim() === cleanEmail)
-      );
-      if (match) {
-        if (typeof match.score === "number" && !isNaN(match.score)) {
-          loadedScores[sub.id] = match.score.toFixed(2);
-        }
-        if (match.feedback) {
-          loadedFeedbacks[sub.id] = match.feedback;
-        }
-      }
-    });
-
-    if (Object.keys(loadedScores).length > 0) {
-      setJuryScores((prev) => ({ ...loadedScores, ...prev }));
-    }
-    if (Object.keys(loadedFeedbacks).length > 0) {
-      setJuryFeedback((prev) => ({ ...loadedFeedbacks, ...prev }));
-    }
-
-    // Only lock as submitted if explicitly submitted via session flag
-    try {
-      const localJuryFlag = localStorage.getItem(`bnp_jury_submitted_${battle.id}_${currentUser.id}`);
-      setIsJurySubmitted(localJuryFlag === "true");
-    } catch {
-      setIsJurySubmitted(false);
-    }
-  }, [submissions, currentUser, battle.id]);
-
   // Dynamic Percentage-based Ballot Validation (min 50% of total entries)
   const minPercentage = 50;
   const totalEntries = submissions.length;
@@ -331,12 +288,55 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     flameRating: sub.flameRating,
   }));
 
-  // Top 10 finalists triaged by Phase 2 public flame rating
+  // Top 10 finalists triaged by Phase 2 public flame rating, randomized presentation order for judges
   const cutoff = battle.topFinalistsCutoff || 10;
   const finalistSubmissions = React.useMemo(() => {
-    const sortedByFlame = [...submissions].sort((a, b) => (b.flameRating || 0) - (a.flameRating || 0));
-    return sortedByFlame.slice(0, cutoff);
-  }, [submissions, cutoff]);
+    const topFinalists = [...submissions]
+      .sort((a, b) => (b.flameRating || 0) - (a.flameRating || 0))
+      .slice(0, cutoff);
+    return seededShuffle(topFinalists, `${userSeed}_jury_finalists`);
+  }, [submissions, cutoff, userSeed]);
+
+  // Restore judge's drafted scores and check submission status purely from database
+  useEffect(() => {
+    if (!currentUser) return;
+    const cleanName = currentUser.nickname.toLowerCase().trim();
+    const cleanEmail = currentUser.email.toLowerCase().trim();
+    const cleanId = currentUser.id.toLowerCase().trim();
+
+    const loadedScores: Record<string, string> = {};
+    const loadedFeedbacks: Record<string, string> = {};
+    let scoredFinalistsCount = 0;
+
+    finalistSubmissions.forEach((sub) => {
+      const match = sub.juryFeedbacks?.find(
+        (f) =>
+          (f.judgeName && f.judgeName.toLowerCase().trim() === cleanName) ||
+          (f.judgeId && f.judgeId.toLowerCase().trim() === cleanId) ||
+          (f.judgeId && f.judgeId.toLowerCase().trim() === cleanEmail)
+      );
+      if (match) {
+        if (typeof match.score === "number" && !isNaN(match.score)) {
+          loadedScores[sub.id] = match.score.toFixed(2);
+          scoredFinalistsCount++;
+        }
+        if (match.feedback) {
+          loadedFeedbacks[sub.id] = match.feedback;
+        }
+      }
+    });
+
+    if (Object.keys(loadedScores).length > 0) {
+      setJuryScores((prev) => ({ ...loadedScores, ...prev }));
+    }
+    if (Object.keys(loadedFeedbacks).length > 0) {
+      setJuryFeedback((prev) => ({ ...loadedFeedbacks, ...prev }));
+    }
+
+    // Only submitted if every finalist has a submitted score in the database
+    const isSubmitted = finalistSubmissions.length > 0 && scoredFinalistsCount === finalistSubmissions.length;
+    setIsJurySubmitted(isSubmitted);
+  }, [finalistSubmissions, currentUser, battle.id]);
 
   // Set of judges who have submitted scores
   const submittedJudgeNames = React.useMemo(() => {
@@ -573,10 +573,6 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     if (!currentUser?.id) return;
     setIsRatingsSubmitted(true);
     setShowSubmitWarningModal(false);
-    try {
-      localStorage.setItem(`bnp_submitted_ratings_${battle.id}_${currentUser.id}`, "true");
-      localStorage.setItem(`bnp_ratings_${battle.id}_${currentUser.id}`, JSON.stringify(ratings));
-    } catch {}
     await battleService.submitUserRatings(battle.id, currentUser.id, ratings);
     refreshBattleData();
     confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
@@ -585,9 +581,6 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   const handleUnlockRatings = async () => {
     if (!currentUser?.id) return;
     setIsRatingsSubmitted(false);
-    try {
-      localStorage.removeItem(`bnp_submitted_ratings_${battle.id}_${currentUser.id}`);
-    } catch {}
     await battleService.unlockUserRatings(battle.id, currentUser.id);
     refreshBattleData();
   };
@@ -606,11 +599,6 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
     await battleService.submitJuryBallot(battle.id, judgeId, judgeName, finalizedScores, juryFeedback);
     setIsJurySubmitted(true);
-    if (currentUser?.id) {
-      try {
-        localStorage.setItem(`bnp_jury_submitted_${battle.id}_${currentUser.id}`, "true");
-      } catch {}
-    }
     refreshBattleData();
     confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
   };
@@ -619,11 +607,6 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     const judgeId = currentUser?.id || "judge";
     const judgeName = currentUser?.nickname || "Judge";
     setIsJurySubmitted(false);
-    if (currentUser?.id) {
-      try {
-        localStorage.removeItem(`bnp_jury_submitted_${battle.id}_${currentUser.id}`);
-      } catch {}
-    }
     await battleService.unsubmitJuryBallot(battle.id, judgeId, judgeName);
     refreshBattleData();
   };
@@ -1440,13 +1423,11 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                             </div>
                           )}
 
-                          {hasFlame && (
-                            <div className="flex items-center gap-1.5 text-[#FF5E3A] px-2" title="Public Rating Average">
-                              <Flame className="w-4 h-4 fill-current" />
-                              <span>{Number(sub.flameRating).toFixed(2)}</span>
-                              <span className="text-[10px] text-[#777777] font-normal">Public</span>
-                            </div>
-                          )}
+                          <div className="flex items-center gap-1.5 text-[#FF5E3A] px-2" title="Public Rating Average">
+                            <Flame className="w-4 h-4 fill-current" />
+                            <span>{typeof sub.flameRating === "number" && !isNaN(sub.flameRating) ? Number(sub.flameRating).toFixed(2) : "0.00"}</span>
+                            <span className="text-[10px] text-[#A0A0A0] font-normal">Public Rating Avg</span>
+                          </div>
                         </div>
 
                       </div>

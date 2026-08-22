@@ -773,43 +773,32 @@ export const battleService = {
   ): Promise<{ ratings: Record<string, number>; isSubmitted: boolean }> {
     if (!userId || !battleId) return { ratings: {}, isSubmitted: false };
 
-    let localRatings: Record<string, number> = {};
+    const ratings: Record<string, number> = {};
     let isSubmitted = false;
 
-    // 1. Read from localStorage
-    if (typeof window !== "undefined") {
-      try {
-        const stored = localStorage.getItem(`bnp_ratings_${battleId}_${userId}`);
-        if (stored) localRatings = JSON.parse(stored);
-        const subFlag = localStorage.getItem(`bnp_submitted_ratings_${battleId}_${userId}`);
-        if (subFlag === "true" && Object.keys(localRatings).length > 0) {
+    // Fetch directly from Supabase ratings table for this specific user & battle
+    try {
+      const { data: dbRatings } = await supabase
+        .from("ratings")
+        .select("submission_id, score")
+        .eq("battle_id", battleId)
+        .eq("voter_id", userId);
+
+      if (dbRatings && dbRatings.length > 0) {
+        dbRatings.forEach((r: any) => {
+          if (r.submission_id && typeof r.score === "number") {
+            ratings[r.submission_id] = r.score;
+          }
+        });
+        if (Object.keys(ratings).length > 0) {
           isSubmitted = true;
         }
-      } catch {}
-    }
-
-    // 2. Fetch from Supabase ratings table if local draft is empty
-    if (Object.keys(localRatings).length === 0) {
-      try {
-        const { data: dbRatings } = await supabase
-          .from("ratings")
-          .select("submission_id, score")
-          .eq("battle_id", battleId)
-          .eq("voter_id", userId);
-
-        if (dbRatings && dbRatings.length > 0) {
-          dbRatings.forEach((r: any) => {
-            if (r.submission_id && typeof r.score === "number") {
-              localRatings[r.submission_id] = r.score;
-            }
-          });
-        }
-      } catch (err) {
-        console.warn("getUserRatingsForBattle error:", err);
       }
+    } catch (err) {
+      console.warn("getUserRatingsForBattle error:", err);
     }
 
-    return { ratings: localRatings, isSubmitted };
+    return { ratings, isSubmitted };
   },
 
   async submitJuryBallot(

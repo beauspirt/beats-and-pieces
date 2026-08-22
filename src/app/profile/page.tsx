@@ -144,12 +144,12 @@ function ProfileContent() {
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-300 py-4">
       
       {/* Profile Header */}
-      <div className="flex items-center justify-between pb-2">
-        <h1 className="text-3xl font-black text-white">User Profile</h1>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2">
+        <h1 className="text-2xl sm:text-3xl font-black text-white">User Profile</h1>
 
         <Link
           href={`/producers/${profile.id}`}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#7B61FF] hover:bg-[#684DE6] text-xs font-bold text-white transition-all shadow-md active:scale-95 group"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-[#7B61FF] hover:bg-[#684DE6] text-xs font-bold text-white transition-all shadow-md active:scale-95 group"
         >
           <span>View Public Profile</span>
           <ExternalLink className="w-3.5 h-3.5 text-white/80 group-hover:text-white transition-colors" />
@@ -339,7 +339,7 @@ function ProfileContent() {
         <div className="text-right pt-2">
           <button
             type="submit"
-            className="px-10 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-sm font-bold transition-all shadow-lg active:scale-95 ml-auto cursor-pointer"
+            className="w-full sm:w-auto px-10 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-sm font-bold transition-all shadow-lg active:scale-95 sm:ml-auto cursor-pointer flex items-center justify-center"
           >
             {saveSuccess ? "Saved ✓" : "Save Profile"}
           </button>

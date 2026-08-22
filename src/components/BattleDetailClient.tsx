@@ -704,16 +704,16 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
           </Link>
 
           {/* Battle Phases Timeline Indicator (Read-only status, no click/mock jumping) */}
-          <div className="flex items-center gap-1 bg-[#181818] p-1 rounded-xl select-none">
+          <div className="flex items-center gap-1 bg-[#181818] p-1 rounded-xl select-none overflow-x-auto no-scrollbar max-w-[200px] sm:max-w-none">
             {phasesList.map((p) => {
               const isCurrent = battle.phase === p.key;
               return (
                 <div
                   key={p.key}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  className={`px-2.5 sm:px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 sm:gap-1.5 shrink-0 ${
                     isCurrent
                       ? "bg-[#7B61FF] text-white shadow-md"
-                      : "text-[#555555] opacity-50 cursor-default"
+                      : "text-[#555555] opacity-50 cursor-default hidden sm:flex"
                   }`}
                 >
                   <span className={`text-xs ${isCurrent ? "text-white/80" : "text-[#444444]"}`}>
@@ -729,18 +729,13 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
         {/* Hero Header */}
         <div className="bg-[#181818] rounded-3xl p-5 sm:p-7 flex flex-col md:flex-row gap-7 items-start relative overflow-hidden shadow-xl">
           
-          {/* Cover Art Thumbnail (Grand 320px Square) */}
-          <div
-            className="w-full md:w-80 h-80 max-w-[320px] max-h-[320px] rounded-2xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl"
-            style={{ width: "320px", height: "320px", position: "relative" }}
-          >
+          {/* Cover Art Thumbnail (Responsive Square) */}
+          <div className="w-full sm:max-w-[320px] aspect-square rounded-2xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl mx-auto md:mx-0">
             <Image
               src={battle.coverImage}
               alt={battle.title}
-              width={320}
-              height={320}
-              className="w-full h-full object-cover"
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              fill
+              className="object-cover"
               priority
             />
           </div>

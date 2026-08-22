@@ -70,18 +70,13 @@ export default function BattlesPage() {
             href={`/battles/${activeBattle.id}`}
             className="bg-[#181818] rounded-3xl p-5 sm:p-7 flex flex-col md:flex-row gap-7 items-start hover:bg-[#1A1A1A] transition-all shadow-xl block cursor-pointer group relative overflow-hidden"
           >
-            {/* Cover Art Thumbnail (Grand 320px Square) */}
-            <div
-              className="w-full md:w-80 h-80 max-w-[320px] max-h-[320px] rounded-2xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl"
-              style={{ width: "320px", height: "320px", position: "relative" }}
-            >
+            {/* Cover Art Thumbnail (Responsive Square) */}
+            <div className="w-full sm:max-w-[320px] aspect-square rounded-2xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl mx-auto md:mx-0">
               <Image
                 src={activeBattle.coverImage || "/covers/default-battle.png"}
                 alt={activeBattle.title}
-                width={320}
-                height={320}
-                className="w-full h-full object-cover"
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                fill
+                className="object-cover"
                 priority
               />
             </div>

@@ -432,7 +432,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
         onClick={handlePlayToggle}
         aria-label={isThisTrackPlaying ? "Pause" : "Play"}
         className={`shrink-0 rounded-full flex items-center justify-center transition-all cursor-pointer shadow-md ${
-          compact ? "w-9 h-9" : "w-11 h-11"
+          compact ? "w-9 h-9 sm:w-10 sm:h-10 min-w-[36px] min-h-[36px]" : "w-10 h-10 sm:w-11 sm:h-11 min-w-[40px] min-h-[40px]"
         } ${
           isThisTrackPlaying
             ? "bg-white text-black shadow-white/10"
@@ -447,7 +447,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
       </button>
 
       {/* Waveform Visualizer on Pure Transparent Background (No background box / No layout shift) */}
-      <div className={`flex-1 relative overflow-hidden bg-transparent ${compact ? "h-14" : "h-18"}`}>
+      <div className={`flex-1 relative overflow-hidden bg-transparent ${compact ? "h-12 sm:h-14" : "h-14 sm:h-18"}`}>
         <canvas
           ref={canvasRef}
           onPointerDown={handlePointerDown}

@@ -128,8 +128,8 @@ export default function BeatsDiscoveryPage() {
       </div>
 
       {/* Search & Filter Bar */}
-      <div className="space-y-3 pt-2">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+      <div className="space-y-3 pt-1">
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3">
           
           {/* Search Bar */}
           <div className="relative flex-1">
@@ -143,49 +143,52 @@ export default function BeatsDiscoveryPage() {
             <Search className="w-4 h-4 text-[#666666] absolute left-4 top-1/2 -translate-y-1/2" />
           </div>
 
-          {/* Favorites Filter Button */}
-          <button
-            onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
-            className={`flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
-              showOnlyFavorites
-                ? "bg-amber-500/20 text-amber-300 shadow-sm"
-                : "bg-[#181818] text-[#888888] hover:text-white"
-            }`}
-          >
-            <Star className={`w-4 h-4 ${showOnlyFavorites ? "fill-amber-400 text-amber-400" : ""}`} />
-            <span>Favorites</span>
-          </button>
-
-          {/* Filter Toggle Button */}
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
-              showFilters || activeFiltersCount > 0
-                ? "bg-[#7B61FF] text-white"
-                : "bg-[#181818] text-[#888888] hover:text-white"
-            }`}
-          >
-            <Filter className="w-4 h-4" />
-            <span>Filter</span>
-            {activeFiltersCount > 0 && (
-              <span className="w-5 h-5 rounded-full bg-white text-[#7B61FF] text-xs font-bold flex items-center justify-center ml-1">
-                {activeFiltersCount}
-              </span>
-            )}
-          </button>
-
-          {/* Sort Dropdown */}
-          <div className="flex items-center bg-[#181818] rounded-xl px-3 py-1.5 text-xs sm:text-sm text-[#888888]">
-            <ArrowUpDown className="w-3.5 h-3.5 mr-2 text-[#666666]" />
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-              className="bg-transparent text-white font-medium focus:outline-none cursor-pointer py-1.5 pr-2"
+          {/* Quick Action Controls Row (Favorites, Filter Drawer Toggle, Sort) */}
+          <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar pb-0.5 sm:pb-0">
+            {/* Favorites Filter Button */}
+            <button
+              onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
+              className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 cursor-pointer ${
+                showOnlyFavorites
+                  ? "bg-amber-500/20 text-amber-300 shadow-sm"
+                  : "bg-[#181818] text-[#888888] hover:text-white"
+              }`}
             >
-              <option value="rating" className="bg-[#181818] text-white">Highest Rated</option>
-              <option value="bpm" className="bg-[#181818] text-white">BPM (Low to High)</option>
-              <option value="title" className="bg-[#181818] text-white">Title (A-Z)</option>
-            </select>
+              <Star className={`w-4 h-4 ${showOnlyFavorites ? "fill-amber-400 text-amber-400" : ""}`} />
+              <span>Favorites</span>
+            </button>
+
+            {/* Filter Toggle Button */}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 cursor-pointer ${
+                showFilters || activeFiltersCount > 0
+                  ? "bg-[#7B61FF] text-white"
+                  : "bg-[#181818] text-[#888888] hover:text-white"
+              }`}
+            >
+              <Filter className="w-4 h-4" />
+              <span>Filter</span>
+              {activeFiltersCount > 0 && (
+                <span className="w-5 h-5 rounded-full bg-white text-[#7B61FF] text-xs font-bold flex items-center justify-center ml-0.5">
+                  {activeFiltersCount}
+                </span>
+              )}
+            </button>
+
+            {/* Sort Dropdown */}
+            <div className="flex items-center bg-[#181818] rounded-xl px-3 py-2 sm:py-1.5 text-xs sm:text-sm text-[#888888] shrink-0">
+              <ArrowUpDown className="w-3.5 h-3.5 mr-1.5 sm:mr-2 text-[#666666]" />
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="bg-transparent text-white font-medium focus:outline-none cursor-pointer py-0.5 pr-1"
+              >
+                <option value="rating" className="bg-[#181818] text-white">Highest Rated</option>
+                <option value="bpm" className="bg-[#181818] text-white">BPM (Low to High)</option>
+                <option value="title" className="bg-[#181818] text-white">Title (A-Z)</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -311,7 +314,7 @@ export default function BeatsDiscoveryPage() {
                   const displayAvatar = prod?.avatarUrl || beat.beatmaker.avatarUrl || "/avatars/default-avatar.png";
 
                   return (
-                    <div className="flex items-center gap-3.5 min-w-[240px]">
+                    <div className="flex items-center gap-3.5 min-w-0 flex-1">
                       <Link
                         href={`/producers/${beat.beatmaker.id}`}
                         className="w-10 h-10 rounded-full overflow-hidden relative shrink-0 hover:opacity-80 transition-opacity bg-[#121212]"

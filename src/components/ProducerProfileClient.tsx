@@ -1105,7 +1105,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
           <div
             onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
-            className="bg-[#181818] rounded-2xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default"
+            className="bg-[#181818] rounded-2xl max-w-lg w-full p-5 sm:p-8 space-y-6 shadow-2xl relative cursor-default max-h-[90vh] overflow-y-auto no-scrollbar"
           >
             <div className="flex items-center justify-between pb-2">
               <div className="space-y-1">
@@ -1284,7 +1284,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
           <div
             onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
-            className="bg-[#181818] rounded-2xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default"
+            className="bg-[#181818] rounded-2xl max-w-lg w-full p-5 sm:p-8 space-y-6 shadow-2xl relative cursor-default max-h-[90vh] overflow-y-auto no-scrollbar"
           >
             <div className="flex items-center justify-between pb-2">
               <h3 className="text-lg font-bold text-white flex items-center gap-2">
@@ -1410,7 +1410,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
           <div
             onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
-            className="bg-[#181818] rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default"
+            className="bg-[#181818] rounded-2xl max-w-md w-full p-5 sm:p-8 space-y-6 shadow-2xl relative cursor-default max-h-[90vh] overflow-y-auto no-scrollbar"
           >
             <div className="flex items-center justify-between pb-2">
               <h3 className="text-lg font-bold text-white flex items-center gap-2">

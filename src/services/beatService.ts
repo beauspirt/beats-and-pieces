@@ -72,9 +72,13 @@ export const beatService = {
         const subs = battleService.getSubmissionsByBattleId(b.id);
         subs.forEach((sub) => {
           const prod = producerService.getProducerById(sub.userId) || producerService.getProducerByTag(sub.beatmakerTag);
+          let beatTitle = sub.beatTitle || (b.title ? `${b.title} Entry` : "Untitled Beat");
+          if (/^Beat Battle #\d+$/i.test(beatTitle.trim())) {
+            beatTitle = `${beatTitle.trim()} Entry`;
+          }
           battleBeats.push({
             id: `sub-${sub.id}`,
-            title: sub.beatTitle || "Untitled Beat",
+            title: beatTitle,
             beatmaker: {
               id: sub.userId || "producer",
               tag: sub.beatmakerTag || "Producer",
@@ -110,9 +114,15 @@ export const beatService = {
       if (b.audioUrl) seenAudios.add(b.audioUrl);
       seenIds.add(b.id);
 
+      let finalTitle = b.title;
+      if (/^Beat Battle #\d+$/i.test(finalTitle.trim())) {
+        finalTitle = `${finalTitle.trim()} Entry`;
+      }
+
       const prod = producerService.getProducerById(b.beatmaker.id) || producerService.getProducerByTag(b.beatmaker.tag);
       const enrichedBeat: DiscoveryBeat = {
         ...b,
+        title: finalTitle,
         beatmaker: {
           id: b.beatmaker.id,
           tag: prod?.nickname || b.beatmaker.tag,

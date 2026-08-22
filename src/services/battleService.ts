@@ -472,6 +472,9 @@ export const battleService = {
   },
 
   async deleteBattle(id: string): Promise<boolean> {
+    const battleToDelete = this.getBattleById(id);
+    const battleTitle = battleToDelete?.title;
+
     // 1. Remove from custom battles if present
     const currentCustom = loadCustomBattles();
     const filtered = currentCustom.filter((b) => b.id !== id);
@@ -485,7 +488,17 @@ export const battleService = {
       saveDeletedBattles(updatedDeleted);
     }
 
-    // 3. Update memory list
+    // 3. Remove all submissions for this battle from local storage & memory
+    const currentSubs = loadCustomSubmissions();
+    const remainingSubs = currentSubs.filter((s) => s.battleId !== id);
+    saveCustomSubmissions(remainingSubs);
+    customSubsList = remainingSubs;
+    submissionsList = [
+      ...remainingSubs,
+      ...(rawSubmissions as BattleSubmission[]).filter((s) => s.battleId !== id),
+    ];
+
+    // 4. Update memory competitions list
     const deletedSet = new Set(loadDeletedBattles());
     competitionsList = [
       ...customBattlesList,
@@ -493,13 +506,56 @@ export const battleService = {
     ];
     notifyBattlesUpdated();
 
-    // 4. Delete from Supabase
+    // 5. Delete from Supabase tables concurrently
     try {
-      await supabase.from("battles").delete().eq("id", id);
+      const deletePromises = [
+        Promise.resolve(supabase.from("battles").delete().eq("id", id)),
+        Promise.resolve(supabase.from("submissions").delete().eq("battle_id", id)),
+        Promise.resolve(supabase.from("ratings").delete().eq("battle_id", id)),
+      ];
+
+      if (battleTitle) {
+        deletePromises.push(
+          Promise.resolve(supabase.from("beats").delete().eq("battle_source", battleTitle))
+        );
+      }
+
+      await Promise.all(deletePromises);
     } catch (err) {
       console.warn("Supabase delete battle exception:", err);
     }
 
+    return true;
+  },
+
+  async updateSubmissionTitle(
+    submissionId: string,
+    battleId: string,
+    newTitle: string
+  ): Promise<boolean> {
+    const cleanTitle = newTitle.trim();
+    if (!cleanTitle) return false;
+
+    const custom = loadCustomSubmissions();
+    const target = custom.find((s) => s.id === submissionId || (s.battleId === battleId && s.id === submissionId));
+    if (target) {
+      target.beatTitle = cleanTitle;
+      saveCustomSubmissions(custom);
+    }
+    customSubsList = custom;
+
+    const memTarget = submissionsList.find((s) => s.id === submissionId);
+    if (memTarget) {
+      memTarget.beatTitle = cleanTitle;
+    }
+
+    try {
+      await supabase.from("submissions").update({ beat_title: cleanTitle }).eq("id", submissionId);
+    } catch (err) {
+      console.warn("updateSubmissionTitle error:", err);
+    }
+
+    notifyBattlesUpdated();
     return true;
   },
 

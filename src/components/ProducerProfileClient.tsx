@@ -288,6 +288,10 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     });
 
     submissions.forEach((sub) => {
+      // Check if battle still exists (has not been deleted)
+      const battle = battleService.getBattleById(sub.battleId);
+      if (!battle) return;
+
       const existing = mergedList.find(
         (b) => b.audioUrl === sub.audioUrl || (b.title === sub.beatTitle && sub.beatTitle !== "Beat Battle #1")
       );
@@ -324,12 +328,12 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
           duration: sub.duration || 120,
           bpm: sub.bpm || 90,
           priceTag: "Not For Sale",
-          tags: ["Battle Beat"],
+          tags: [],
           flames: flameVal,
           tier: sub.rank === 1 ? 1 : sub.rank === 2 ? 2 : sub.rank === 3 ? 3 : 4,
           rank: sub.rank,
           juryScore: sub.juryScore,
-          competitionTitle: `Beat Battle #${sub.battleId ? sub.battleId.replace('battle-', '') : '8'}`,
+          competitionTitle: battle.title || `Beat Battle #${sub.battleId ? sub.battleId.replace('battle-', '') : '8'}`,
           juryFeedbacksList: juryList,
           createdAt: sub.submittedAt,
         });

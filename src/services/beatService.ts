@@ -75,7 +75,7 @@ export const beatService = {
             bpm: sub.bpm || 90,
             priceTag: "Not For Sale",
             genres: ["Hip Hop"],
-            tags: [b.title, `Rank #${sub.rank || 1}`],
+            tags: [],
             flames: typeof sub.flameRating === "number" ? Math.min(5.0, Math.max(0, sub.flameRating)) : 0,
             battleSource: b.title,
             tier: sub.rank === 1 ? 1 : sub.rank === 2 ? 2 : sub.rank === 3 ? 3 : 4,

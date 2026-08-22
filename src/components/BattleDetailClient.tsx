@@ -15,7 +15,7 @@ import { FlameRating } from "./FlameRating";
 import {
   ArrowLeft, Download, Upload, CheckCircle2,
   Lock, ShieldCheck, Flame, Star, Disc, Trophy, Award, Check, FileCheck, CassetteTape,
-  ExternalLink
+  ExternalLink, Pencil
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { BattlePhase, Competition, BattleSubmission } from "@/lib/types";
@@ -471,6 +471,34 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     }
   };
 
+  const [isEditingMyEntryTitle, setIsEditingMyEntryTitle] = useState(false);
+  const [editingMyEntryTitle, setEditingMyEntryTitle] = useState("");
+
+  const handleStartEditTitle = () => {
+    if (!myEntry) return;
+    setEditingMyEntryTitle(myEntry.title);
+    setIsEditingMyEntryTitle(true);
+  };
+
+  const handleSaveEditedTitle = async () => {
+    if (!myEntry || !editingMyEntryTitle.trim()) return;
+    const newTitle = editingMyEntryTitle.trim();
+    setIsUploading(true);
+    try {
+      await battleService.updateSubmissionTitle(myEntry.id, battle.id, newTitle);
+      setMyEntry({
+        ...myEntry,
+        title: newTitle,
+      });
+      setIsEditingMyEntryTitle(false);
+      refreshBattleData();
+    } catch (err) {
+      console.error("Failed to update title:", err);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleRemoveMyEntry = async () => {
     if (!myEntry) return;
     pauseTrack();
@@ -911,6 +939,9 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                         className="w-full px-4 py-3 rounded-xl bg-[#1A1A1A] border border-[#333333] focus:border-[#7B61FF] text-white text-sm outline-none transition-all"
                         autoFocus
                       />
+                      <p className="text-[11px] text-[#888888] font-normal">
+                        Note: You don&apos;t have to add your beatmaker / producer name in the beat title.
+                      </p>
                     </div>
 
                     <div className="pt-1">
@@ -991,17 +1022,16 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                         </div>
 
                         <div className="flex items-center gap-2.5">
-                          <label className="text-xs font-semibold px-3.5 py-1.5 rounded-xl bg-[#1A1A1A] hover:bg-[#7B61FF] text-white hover:text-white transition-all cursor-pointer flex items-center gap-1.5 shadow-sm">
-                            <Upload className="w-3.5 h-3.5" />
-                            <span>Replace File</span>
-                            <input
-                              type="file"
-                              accept="audio/wav,audio/mp3,audio/mpeg"
-                              onChange={handleFileUpload}
-                              className="hidden"
+                          {!isEditingMyEntryTitle && (
+                            <button
+                              onClick={handleStartEditTitle}
                               disabled={isUploading}
-                            />
-                          </label>
+                              className="text-xs font-semibold px-3.5 py-1.5 rounded-xl bg-[#1A1A1A] hover:bg-[#7B61FF] text-white transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                              <span>Edit Title</span>
+                            </button>
+                          )}
 
                           <button
                             onClick={handleRemoveMyEntry}
@@ -1013,7 +1043,34 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                         </div>
                       </div>
 
-                      <p className="text-white font-bold text-lg sm:text-xl truncate">{myEntry.title}</p>
+                      {isEditingMyEntryTitle ? (
+                        <div className="space-y-2 pt-1">
+                          <input
+                            type="text"
+                            value={editingMyEntryTitle}
+                            onChange={(e) => setEditingMyEntryTitle(e.target.value)}
+                            className="w-full px-3.5 py-2 rounded-xl bg-[#1A1A1A] border border-[#333333] focus:border-[#7B61FF] text-white text-sm outline-none"
+                            autoFocus
+                          />
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={handleSaveEditedTitle}
+                              disabled={!editingMyEntryTitle.trim() || isUploading}
+                              className="px-4 py-1.5 rounded-lg bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all disabled:opacity-50 cursor-pointer"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={() => setIsEditingMyEntryTitle(false)}
+                              className="px-3 py-1.5 rounded-lg bg-[#1A1A1A] hover:bg-zinc-800 text-zinc-400 hover:text-white text-xs font-semibold transition-all cursor-pointer"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-white font-bold text-lg sm:text-xl truncate">{myEntry.title}</p>
+                      )}
                     </div>
 
                     <div className="pt-1">

@@ -91,7 +91,7 @@ export const beatService = {
             priceTag: "Not For Sale",
             genres: [],
             tags: [],
-            flames: typeof sub.flameRating === "number" ? Math.min(5.0, Math.max(0, sub.flameRating)) : 0,
+            flames: typeof sub.flameRating === "number" && sub.flameRating >= 1 ? Math.min(5.0, Math.max(1.0, sub.flameRating)) : undefined,
             juryScore: typeof sub.juryScore === "number" && !isNaN(sub.juryScore) ? Number(sub.juryScore) : undefined,
             battleSource: b.title,
             tier: sub.rank === 1 ? 1 : sub.rank === 2 ? 2 : sub.rank === 3 ? 3 : 4,

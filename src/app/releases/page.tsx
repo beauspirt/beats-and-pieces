@@ -46,32 +46,32 @@ export default function ReleasesPage() {
           key={release.id}
           className="flex flex-col md:flex-row items-start gap-8 sm:gap-10 w-full"
         >
-          {/* Square Cover Artwork */}
-          <div className="w-44 h-44 sm:w-56 sm:h-56 md:w-60 md:h-60 rounded-2xl overflow-hidden relative shrink-0 bg-[#181818] shadow-2xl mx-auto sm:mx-0">
+          {/* Square Cover Artwork (1.5x - 2x Larger) */}
+          <div className="w-64 h-64 sm:w-80 sm:h-80 md:w-88 md:h-88 lg:w-[380px] lg:h-[380px] rounded-3xl overflow-hidden relative shrink-0 bg-[#181818] shadow-2xl mx-auto md:mx-0">
             <Image
               src={release.coverImage}
               alt={release.title}
               fill
               className="object-cover"
-              sizes="(max-width: 768px) 100vw, 240px"
+              sizes="(max-width: 768px) 100vw, 380px"
               priority
             />
           </div>
 
           {/* Release Metadata */}
           <div className="flex-1 w-full flex flex-col justify-between space-y-4 pt-1">
-            <div className="space-y-2 w-full">
-              <h2 className="text-2xl font-bold text-white tracking-tight">
+            <div className="space-y-2.5 w-full">
+              <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
                 {release.title}
               </h2>
 
               {release.releaseDate && (
-                <p className="text-xs text-[#888888] font-medium">
+                <p className="text-xs sm:text-sm text-[#888888] font-medium">
                   released {formatReleaseDate(release.releaseDate)}
                 </p>
               )}
 
-              <p className="text-sm text-[#D1D1D1] leading-relaxed w-full whitespace-pre-line pt-1">
+              <p className="text-sm sm:text-base text-[#D1D1D1] leading-relaxed w-full whitespace-pre-line pt-1">
                 {release.description}
               </p>
             </div>

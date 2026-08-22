@@ -447,9 +447,9 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
           existing.juryFeedbacksList = juryList;
         }
       } else {
-        const flameVal = typeof sub.flameRating === "number" && !isNaN(sub.flameRating)
-          ? Math.min(5.0, Math.max(0, sub.flameRating))
-          : (typeof sub.juryScore === "number" && !isNaN(sub.juryScore) ? Math.min(5.0, Math.max(0, sub.juryScore)) : 0);
+        const flameVal = typeof sub.flameRating === "number" && !isNaN(sub.flameRating) && sub.flameRating >= 1
+          ? Math.min(5.0, Math.max(1.0, sub.flameRating))
+          : undefined;
 
         mergedList.push({
           id: `sub-${sub.id}`,
@@ -904,50 +904,92 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   
                   {/* Left: Beat Title + Quick Link Badge + Rank Badge */}
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2.5">
-                        <h3 className="font-bold text-white text-base sm:text-lg leading-snug truncate">
+                  <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                    <div className="min-w-0 flex-1 truncate">
+                      {/* Title & Desktop Inline Badges */}
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="font-bold text-white text-base sm:text-lg leading-snug">
                           {beat.title}
                         </h3>
 
-                        {/* Rank Badge */}
-                        {beat.rank === 1 && (
-                          <span className="h-6 px-3 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center leading-none">
-                            1st Place
-                          </span>
-                        )}
-                        {beat.rank === 2 && (
-                          <span className="h-6 px-3 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-bold inline-flex items-center justify-center leading-none">
-                            2nd Place
-                          </span>
-                        )}
-                        {beat.rank === 3 && (
-                          <span className="h-6 px-3 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center leading-none">
-                            3rd Place
-                          </span>
-                        )}
+                        {/* Desktop Inline Badges */}
+                        <div className="hidden sm:inline-flex items-center gap-2">
+                          {beat.rank === 1 && (
+                            <span className="h-6 px-3 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center leading-none">
+                              1st Place
+                            </span>
+                          )}
+                          {beat.rank === 2 && (
+                            <span className="h-6 px-3 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-bold inline-flex items-center justify-center leading-none">
+                              2nd Place
+                            </span>
+                          )}
+                          {beat.rank === 3 && (
+                            <span className="h-6 px-3 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center leading-none">
+                              3rd Place
+                            </span>
+                          )}
 
-                        {/* BB#X Quick Link Badge */}
-                        {(() => {
-                          const match =
-                            (beat.battleSource && beat.battleSource.match(/Beat Battle #?(\d+)/i)) ||
-                            (beat.id && beat.id.match(/disc-bb(\d+)/));
-                          if (!match) return null;
-                          const battleUrl = `/battles/battle-${match[1]}`;
-                          const battleLabel = `BB#${match[1]}`;
-                          return (
-                            <Link
-                              href={battleUrl}
-                              className="px-2 py-0.5 rounded-md bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-[11px] font-bold shrink-0 transition-all inline-flex items-center gap-1"
-                              title={`View ${beat.battleSource || `Beat Battle #${match[1]}`}`}
-                            >
-                              <span>{battleLabel}</span>
-                              <span className="text-[9px]">↗</span>
-                            </Link>
-                          );
-                        })()}
+                          {(() => {
+                            const match =
+                              (beat.battleSource && beat.battleSource.match(/Beat Battle #?(\d+)/i)) ||
+                              (beat.id && beat.id.match(/disc-bb(\d+)/));
+                            if (!match) return null;
+                            const battleUrl = `/battles/battle-${match[1]}`;
+                            const battleLabel = `BB#${match[1]}`;
+                            return (
+                              <Link
+                                href={battleUrl}
+                                className="px-2 py-0.5 rounded-md bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-[11px] font-bold shrink-0 transition-all inline-flex items-center gap-1"
+                                title={`View ${beat.battleSource || `Beat Battle #${match[1]}`}`}
+                              >
+                                <span>{battleLabel}</span>
+                                <span className="text-[9px]">↗</span>
+                              </Link>
+                            );
+                          })()}
+                        </div>
                       </div>
+
+                      {/* Mobile Badges Row (Under Title) */}
+                      {(() => {
+                        const match =
+                          (beat.battleSource && beat.battleSource.match(/Beat Battle #?(\d+)/i)) ||
+                          (beat.id && beat.id.match(/disc-bb(\d+)/));
+                        const hasBadges = beat.rank || match;
+                        if (!hasBadges) return null;
+
+                        return (
+                          <div className="flex sm:hidden items-center gap-2 pt-1 flex-wrap">
+                            {beat.rank === 1 && (
+                              <span className="h-6 px-2.5 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center leading-none">
+                                1st Place
+                              </span>
+                            )}
+                            {beat.rank === 2 && (
+                              <span className="h-6 px-2.5 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-bold inline-flex items-center justify-center leading-none">
+                                2nd Place
+                              </span>
+                            )}
+                            {beat.rank === 3 && (
+                              <span className="h-6 px-2.5 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center leading-none">
+                                3rd Place
+                              </span>
+                            )}
+
+                            {match && (
+                              <Link
+                                href={`/battles/battle-${match[1]}`}
+                                className="px-2 py-0.5 rounded-md bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-[11px] font-bold shrink-0 transition-all inline-flex items-center gap-1"
+                                title={`View ${beat.battleSource || `Beat Battle #${match[1]}`}`}
+                              >
+                                <span>BB#{match[1]}</span>
+                                <span className="text-[9px]">↗</span>
+                              </Link>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
 

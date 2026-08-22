@@ -66,7 +66,15 @@ function loadCustomBattles(): Competition[] {
   if (typeof window !== "undefined") {
     try {
       const stored = localStorage.getItem(STORAGE_KEY_BATTLES);
-      if (stored) return JSON.parse(stored);
+      if (stored) {
+        const parsed: Competition[] = JSON.parse(stored);
+        const deletedIds = new Set(loadDeletedBattles());
+        return parsed.filter((b) => 
+          !deletedIds.has(b.id) && 
+          !b.id.toLowerCase().includes("test") && 
+          !b.title.toLowerCase().includes("test battle")
+        );
+      }
     } catch {}
   }
   return [];
@@ -127,7 +135,11 @@ export const battleService = {
     }
 
     return list
-      .filter((b) => !deletedIds.has(b.id))
+      .filter((b) => 
+        !deletedIds.has(b.id) &&
+        !b.id.toLowerCase().includes("test") &&
+        !b.title.toLowerCase().includes("test battle")
+      )
       .map((b) => ({
         ...b,
         phase: calculateBattlePhase(b),

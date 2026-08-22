@@ -16,7 +16,7 @@ export default function BeatsDiscoveryPage() {
   const [selectedGenre, setSelectedGenre] = useState<string>("all");
   const [selectedSaleFilter, setSelectedSaleFilter] = useState<"all" | "for_sale" | "not_for_sale">("all");
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
-  const [sortBy, setSortBy] = useState<"rating" | "bpm" | "title">("rating");
+  const [sortBy, setSortBy] = useState<"recent" | "rating" | "bpm" | "title">("recent");
   const [showFilters, setShowFilters] = useState(false);
 
   // Pagination: 15 beats at a time
@@ -66,17 +66,17 @@ export default function BeatsDiscoveryPage() {
   };
 
   const filteredBeats = useMemo(() => {
-    const q = searchQuery.toLowerCase().trim();
     return beats
       .filter((beat) => {
-        const beatTitle = (beat.title || "").toLowerCase();
-        const producerTag = (beat.beatmaker?.tag || "").toLowerCase();
+        const q = searchQuery.toLowerCase().trim();
+        const title = beat.title.toLowerCase();
+        const producerTag = beat.beatmaker.tag.toLowerCase();
         const tags = Array.isArray(beat.tags) ? beat.tags : [];
         const genres = Array.isArray(beat.genres) ? beat.genres : [];
 
         const matchesQuery =
           !q ||
-          beatTitle.includes(q) ||
+          title.includes(q) ||
           producerTag.includes(q) ||
           tags.some((t) => (t || "").toLowerCase().includes(q)) ||
           genres.some((g) => (g || "").toLowerCase().includes(q));
@@ -96,6 +96,11 @@ export default function BeatsDiscoveryPage() {
         return matchesQuery && matchesGenre && matchesSale && matchesFav;
       })
       .sort((a, b) => {
+        if (sortBy === "recent") {
+          const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return timeB - timeA;
+        }
         if (sortBy === "rating") return (b.flames || 0) - (a.flames || 0);
         if (sortBy === "bpm") return (a.bpm || 0) - (b.bpm || 0);
         if (sortBy === "title") return (a.title || "").localeCompare(b.title || "");
@@ -121,7 +126,7 @@ export default function BeatsDiscoveryPage() {
     <div className="space-y-6 w-full animate-in fade-in duration-300">
       
       {/* Intro Description Box */}
-      <div className="text-sm sm:text-base text-[#A0A0A0] leading-relaxed space-y-1.5 font-normal max-w-4xl">
+      <div className="text-sm sm:text-base text-[#A0A0A0] leading-relaxed space-y-1.5 font-normal w-full">
         <p>
           This library showcases beats entered in Beats & Pieces battles throughout the years, as well as original tracks uploaded directly by community producers.
         </p>
@@ -184,6 +189,7 @@ export default function BeatsDiscoveryPage() {
                 onChange={(e) => setSortBy(e.target.value as any)}
                 className="bg-transparent text-white font-medium focus:outline-none cursor-pointer py-0.5 pr-1"
               >
+                <option value="recent" className="bg-[#181818] text-white">Most Recent</option>
                 <option value="rating" className="bg-[#181818] text-white">Highest Rated</option>
                 <option value="bpm" className="bg-[#181818] text-white">BPM (Low to High)</option>
                 <option value="title" className="bg-[#181818] text-white">Title (A-Z)</option>
@@ -327,52 +333,96 @@ export default function BeatsDiscoveryPage() {
                         />
                       </Link>
 
-                      <div className="truncate">
-                        <div className="flex flex-wrap items-center gap-2 truncate">
-                          <h3 className="font-bold text-white text-base sm:text-lg leading-snug truncate">
+                      <div className="min-w-0 flex-1 truncate">
+                        {/* Title & Desktop Inline Badges */}
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="font-bold text-white text-base sm:text-lg leading-snug">
                             {beat.title}
                           </h3>
 
-                          {/* Rank Badge */}
-                          {beat.rank === 1 && (
-                            <span className="h-6 px-3 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center leading-none">
-                              1st Place
-                            </span>
-                          )}
-                          {beat.rank === 2 && (
-                            <span className="h-6 px-3 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-bold inline-flex items-center justify-center leading-none">
-                              2nd Place
-                            </span>
-                          )}
-                          {beat.rank === 3 && (
-                            <span className="h-6 px-3 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center leading-none">
-                              3rd Place
-                            </span>
-                          )}
+                          {/* Desktop Inline Badges */}
+                          <div className="hidden sm:inline-flex items-center gap-2">
+                            {beat.rank === 1 && (
+                              <span className="h-6 px-3 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center leading-none">
+                                1st Place
+                              </span>
+                            )}
+                            {beat.rank === 2 && (
+                              <span className="h-6 px-3 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-bold inline-flex items-center justify-center leading-none">
+                                2nd Place
+                              </span>
+                            )}
+                            {beat.rank === 3 && (
+                              <span className="h-6 px-3 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center leading-none">
+                                3rd Place
+                              </span>
+                            )}
 
-                          {/* BB#X Quick Link Badge */}
-                          {(() => {
-                            const match =
-                              (beat.battleSource && beat.battleSource.match(/Beat Battle #?(\d+)/i)) ||
-                              (beat.id && beat.id.match(/disc-bb(\d+)/));
-                            if (!match) return null;
-                            const battleUrl = `/battles/battle-${match[1]}`;
-                            const battleLabel = `BB#${match[1]}`;
-                            return (
-                              <Link
-                                href={battleUrl}
-                                className="px-2 py-0.5 rounded-md bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-[11px] font-bold shrink-0 transition-all inline-flex items-center gap-1"
-                                title={`View ${beat.battleSource || `Beat Battle #${match[1]}`}`}
-                              >
-                                <span>{battleLabel}</span>
-                                <span className="text-[9px]">↗</span>
-                              </Link>
-                            );
-                          })()}
+                            {(() => {
+                              const match =
+                                (beat.battleSource && beat.battleSource.match(/Beat Battle #?(\d+)/i)) ||
+                                (beat.id && beat.id.match(/disc-bb(\d+)/));
+                              if (!match) return null;
+                              const battleUrl = `/battles/battle-${match[1]}`;
+                              const battleLabel = `BB#${match[1]}`;
+                              return (
+                                <Link
+                                  href={battleUrl}
+                                  className="px-2 py-0.5 rounded-md bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-[11px] font-bold shrink-0 transition-all inline-flex items-center gap-1"
+                                  title={`View ${beat.battleSource || `Beat Battle #${match[1]}`}`}
+                                >
+                                  <span>{battleLabel}</span>
+                                  <span className="text-[9px]">↗</span>
+                                </Link>
+                              );
+                            })()}
+                          </div>
                         </div>
+
+                        {/* Mobile Badges Row (Under Title) */}
+                        {(() => {
+                          const match =
+                            (beat.battleSource && beat.battleSource.match(/Beat Battle #?(\d+)/i)) ||
+                            (beat.id && beat.id.match(/disc-bb(\d+)/));
+                          const hasBadges = beat.rank || match;
+                          if (!hasBadges) return null;
+
+                          return (
+                            <div className="flex sm:hidden items-center gap-2 pt-1 flex-wrap">
+                              {beat.rank === 1 && (
+                                <span className="h-6 px-2.5 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center leading-none">
+                                  1st Place
+                                </span>
+                              )}
+                              {beat.rank === 2 && (
+                                <span className="h-6 px-2.5 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-bold inline-flex items-center justify-center leading-none">
+                                  2nd Place
+                                </span>
+                              )}
+                              {beat.rank === 3 && (
+                                <span className="h-6 px-2.5 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center leading-none">
+                                  3rd Place
+                                </span>
+                              )}
+
+                              {match && (
+                                <Link
+                                  href={`/battles/battle-${match[1]}`}
+                                  className="px-2 py-0.5 rounded-md bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-[11px] font-bold shrink-0 transition-all inline-flex items-center gap-1"
+                                  title={`View ${beat.battleSource || `Beat Battle #${match[1]}`}`}
+                                >
+                                  <span>BB#{match[1]}</span>
+                                  <span className="text-[9px]">↗</span>
+                                </Link>
+                              )}
+                            </div>
+                          );
+                        })()}
+
+                        {/* Beatmaker name with clean padding below badges */}
                         <Link
                           href={`/producers/${beat.beatmaker.id}`}
-                          className="text-xs sm:text-sm text-[#7B61FF] hover:underline font-semibold block truncate mt-0.5"
+                          className="text-xs sm:text-sm text-[#7B61FF] hover:underline font-semibold block truncate pt-1.5 sm:pt-0.5"
                         >
                           {displayTag}
                         </Link>

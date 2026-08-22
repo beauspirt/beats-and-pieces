@@ -86,7 +86,7 @@ export const Navbar: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-50 bg-[#121212]/95 backdrop-blur-md border-b border-white/5">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 sm:h-20 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 sm:h-24 py-4 sm:py-5 flex items-center justify-between">
         
         {/* Left: Brand Logo & Desktop Nav */}
         <div className="flex items-center gap-8 lg:gap-12">
@@ -127,9 +127,18 @@ export const Navbar: React.FC = () => {
           </nav>
         </div>
 
-        {/* Right Actions: Desktop Admin / Host / Profile & Mobile Hamburger */}
+        {/* Right Actions: Mobile Hamburger (Left) + Admin/Host/Avatar (Right) */}
         <div className="flex items-center gap-3 sm:gap-6">
           
+          {/* Mobile Hamburger Toggle Button (Positioned to the left of profile picture) */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2.5 rounded-xl bg-[#181818] hover:bg-[#222222] text-zinc-300 hover:text-white transition-colors cursor-pointer focus:outline-none"
+            aria-label="Toggle navigation menu"
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+
           {/* Desktop Admin Link */}
           {mounted && currentUser?.role === "admin" && (
             <Link
@@ -158,7 +167,7 @@ export const Navbar: React.FC = () => {
             </Link>
           )}
 
-          {/* User Avatar Dropdown (Desktop & Mobile) */}
+          {/* User Avatar Dropdown (To the right of the burger menu) */}
           {mounted && isLoggedIn && currentUser ? (
             <div className="relative" ref={profileMenuRef}>
               <button
@@ -222,15 +231,6 @@ export const Navbar: React.FC = () => {
               <span>Log in</span>
             </Link>
           )}
-
-          {/* Mobile Hamburger Toggle Button */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-xl bg-[#181818] hover:bg-[#222222] text-zinc-300 hover:text-white transition-colors cursor-pointer focus:outline-none"
-            aria-label="Toggle navigation menu"
-          >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
 
         </div>
       </div>

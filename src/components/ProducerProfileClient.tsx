@@ -369,7 +369,11 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
   // Compute prioritized badges: Admin -> Host -> Judge -> Winner -> OG Producer / Community
   const sortedBadges = useMemo(() => {
-    const rawRoles = new Set<string>(producer.discordRoles || []);
+    const rawRoles = new Set<string>(
+      (producer.discordRoles || []).filter(
+        (r) => !r.toLowerCase().startsWith("winner bb")
+      )
+    );
 
     // Inject system roles if applicable
     if (producer.role === "admin" || producer.email === "adrian.hrihor@gmail.com" || producer.nickname.toLowerCase() === "nerub") {
@@ -387,7 +391,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       if (lower === "admin") return 1;
       if (lower === "host") return 2;
       if (lower === "judge" || lower === "jury") return 3;
-      if (lower.includes("winner") || lower.includes("1st")) return 4;
+      if (lower.includes("winner") || lower.includes("1st") || lower.includes("champion")) return 4;
       if (lower.includes("og producer") || lower.includes("og")) return 5;
       return 6;
     };
@@ -849,6 +853,21 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
             </button>
           )}
         </div>
+
+        {/* Max Upload Limit Notice */}
+        {isProfileOwner && isAtBeatLimit && (
+          <div className="bg-[#1C1A24] border border-[#7B61FF]/30 rounded-2xl p-4 flex items-center gap-3.5 text-xs text-zinc-300 animate-in fade-in duration-200">
+            <div className="w-8 h-8 rounded-xl bg-[#7B61FF]/15 flex items-center justify-center shrink-0 text-[#7B61FF]">
+              <Music className="w-4 h-4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-white">Maximum upload limit reached ({MAX_FREE_BEATS}/{MAX_FREE_BEATS})</p>
+              <p className="text-[#888888] mt-0.5">
+                You have reached the maximum number of custom beats you can upload. To upload a new beat, you can remove an existing one, or unlock additional slots with Patreon support in the future.
+              </p>
+            </div>
+          </div>
+        )}
 
         {prioritizedBeats.length > 0 ? (
           <div className="space-y-3.5">

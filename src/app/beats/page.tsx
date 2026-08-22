@@ -7,6 +7,7 @@ import { sampleDiscoveryBeats } from "@/lib/mock-data";
 import { AudioWaveformPlayer } from "@/components/AudioWaveformPlayer";
 import { DiscoveryBeat } from "@/lib/types";
 import { beatService } from "@/services/beatService";
+import { producerService } from "@/services/producerService";
 import { Search, Filter, ArrowUpDown, Star, Flame, ChevronDown } from "lucide-react";
 
 export default function BeatsDiscoveryPage() {
@@ -304,31 +305,39 @@ export default function BeatsDiscoveryPage() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 
                 {/* Left: Beat Title + Producer Avatar/Tag */}
-                <div className="flex items-center gap-3.5 min-w-[240px]">
-                  <Link
-                    href={`/producers/${beat.beatmaker.id}`}
-                    className="w-10 h-10 rounded-full overflow-hidden relative shrink-0 hover:opacity-80 transition-opacity bg-[#121212]"
-                  >
-                    <Image
-                      src={beat.beatmaker.avatarUrl}
-                      alt={beat.beatmaker.tag}
-                      fill
-                      className="object-cover"
-                    />
-                  </Link>
+                {(() => {
+                  const prod = producerService.getProducerById(beat.beatmaker.id) || producerService.getProducerByTag(beat.beatmaker.tag);
+                  const displayTag = prod?.nickname || beat.beatmaker.tag;
+                  const displayAvatar = prod?.avatarUrl || beat.beatmaker.avatarUrl || "/avatars/default-avatar.png";
 
-                  <div className="truncate">
-                    <h3 className="font-bold text-white text-base sm:text-lg leading-snug truncate">
-                      {beat.title}
-                    </h3>
-                    <Link
-                      href={`/producers/${beat.beatmaker.id}`}
-                      className="text-xs sm:text-sm text-[#7B61FF] hover:underline font-semibold block"
-                    >
-                      {beat.beatmaker.tag}
-                    </Link>
-                  </div>
-                </div>
+                  return (
+                    <div className="flex items-center gap-3.5 min-w-[240px]">
+                      <Link
+                        href={`/producers/${beat.beatmaker.id}`}
+                        className="w-10 h-10 rounded-full overflow-hidden relative shrink-0 hover:opacity-80 transition-opacity bg-[#121212]"
+                      >
+                        <Image
+                          src={displayAvatar}
+                          alt={displayTag}
+                          fill
+                          className="object-cover"
+                        />
+                      </Link>
+
+                      <div className="truncate">
+                        <h3 className="font-bold text-white text-base sm:text-lg leading-snug truncate">
+                          {beat.title}
+                        </h3>
+                        <Link
+                          href={`/producers/${beat.beatmaker.id}`}
+                          className="text-xs sm:text-sm text-[#7B61FF] hover:underline font-semibold block"
+                        >
+                          {displayTag}
+                        </Link>
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {/* Right: Meta Badges (BPM, Price, Flames, Fav) */}
                 <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">

@@ -109,7 +109,18 @@ export const beatService = {
       if (seenIds.has(b.id)) continue;
       if (b.audioUrl) seenAudios.add(b.audioUrl);
       seenIds.add(b.id);
-      uniqueBeats.push(overrides[b.id] ? { ...b, ...overrides[b.id] } : b);
+
+      const prod = producerService.getProducerById(b.beatmaker.id) || producerService.getProducerByTag(b.beatmaker.tag);
+      const enrichedBeat: DiscoveryBeat = {
+        ...b,
+        beatmaker: {
+          id: b.beatmaker.id,
+          tag: prod?.nickname || b.beatmaker.tag,
+          avatarUrl: prod?.avatarUrl || b.beatmaker.avatarUrl || "/avatars/default-avatar.png",
+        },
+      };
+
+      uniqueBeats.push(overrides[b.id] ? { ...enrichedBeat, ...overrides[b.id] } : enrichedBeat);
     }
 
     return uniqueBeats;
@@ -131,27 +142,30 @@ export const beatService = {
     try {
       const { data, error } = await supabase.from("beats").select("*");
       if (!error && data && data.length > 0) {
-        const mapped: DiscoveryBeat[] = data.map((b) => ({
-          id: b.id,
-          title: b.title,
-          beatmaker: {
-            id: b.producer_id,
-            tag: b.producer_id,
-            avatarUrl: "/avatars/default-avatar.png",
-          },
-          audioUrl: b.audio_url,
-          duration: b.duration || 120,
-          waveform: b.waveform || [],
-          bpm: b.bpm,
-          priceTag: b.price_tag || "Not For Sale",
-          genres: b.genres || [],
-          tags: b.tags || [],
-          flames: b.flames || 0,
-          battleSource: b.battle_source,
-          tier: b.tier || 4,
-          rank: b.rank,
-          createdAt: b.created_at,
-        }));
+        const mapped: DiscoveryBeat[] = data.map((b) => {
+          const prod = producerService.getProducerById(b.producer_id) || producerService.getProducerByTag(b.producer_id);
+          return {
+            id: b.id,
+            title: b.title,
+            beatmaker: {
+              id: b.producer_id,
+              tag: prod?.nickname || b.producer_id,
+              avatarUrl: prod?.avatarUrl || "/avatars/default-avatar.png",
+            },
+            audioUrl: b.audio_url,
+            duration: b.duration || 120,
+            waveform: b.waveform || [],
+            bpm: b.bpm,
+            priceTag: b.price_tag || "Not For Sale",
+            genres: b.genres || [],
+            tags: b.tags || [],
+            flames: b.flames || 0,
+            battleSource: b.battle_source,
+            tier: b.tier || 4,
+            rank: b.rank,
+            createdAt: b.created_at,
+          };
+        });
 
         const currentCustom = loadCustomBeats();
         const existingIds = new Set(mapped.map((b) => b.id));

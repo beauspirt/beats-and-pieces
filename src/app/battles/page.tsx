@@ -58,7 +58,7 @@ export default function BattlesPage() {
               style={{ width: "320px", height: "320px", position: "relative" }}
             >
               <Image
-                src={activeBattle.coverImage}
+                src={activeBattle.coverImage || "/covers/default-battle.png"}
                 alt={activeBattle.title}
                 width={320}
                 height={320}
@@ -127,7 +127,7 @@ export default function BattlesPage() {
               {/* Compact Square Card Cover Art */}
               <div className="w-full aspect-square relative rounded-xl overflow-hidden bg-[#121212] shrink-0">
                 <Image
-                  src={battle.coverImage}
+                  src={battle.coverImage || "/covers/default-battle.png"}
                   alt={battle.title}
                   fill
                   className="object-cover"

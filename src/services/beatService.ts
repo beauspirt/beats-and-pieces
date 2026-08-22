@@ -1,5 +1,6 @@
 import { DiscoveryBeat } from "@/lib/types";
 import rawDiscoveryBeats from "@/data/discovery-beats.json";
+import { supabase } from "@/lib/supabase";
 
 const STORAGE_KEY_CUSTOM_BEATS = "bnp_custom_beats";
 const STORAGE_KEY_BEAT_OVERRIDES = "bnp_beats_overrides";
@@ -13,6 +14,14 @@ function loadCustomBeats(): DiscoveryBeat[] {
     } catch {}
   }
   return [];
+}
+
+function saveCustomBeats(beats: DiscoveryBeat[]) {
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem(STORAGE_KEY_CUSTOM_BEATS, JSON.stringify(beats));
+    } catch {}
+  }
 }
 
 function loadBeatOverrides(): Record<string, Partial<DiscoveryBeat>> {
@@ -58,26 +67,72 @@ export const beatService = {
     );
   },
 
+  /**
+   * Sync showcase beats from Supabase table
+   */
+  async syncFromSupabase(): Promise<void> {
+    try {
+      const { data, error } = await supabase.from("beats").select("*");
+      if (!error && data && data.length > 0) {
+        const mapped: DiscoveryBeat[] = data.map((b) => ({
+          id: b.id,
+          title: b.title,
+          beatmaker: {
+            id: b.producer_id,
+            tag: b.producer_id,
+            avatarUrl: "/avatars/default-avatar.png",
+          },
+          audioUrl: b.audio_url,
+          duration: b.duration || 120,
+          waveform: b.waveform || [],
+          bpm: b.bpm,
+          priceTag: b.price_tag || "Not For Sale",
+          genres: b.genres || [],
+          tags: b.tags || [],
+          flames: b.flames || 0,
+          battleSource: b.battle_source,
+          tier: b.tier || 4,
+          rank: b.rank,
+          createdAt: b.created_at,
+        }));
+
+        saveCustomBeats(mapped);
+      }
+    } catch (err) {
+      console.warn("beatService.syncFromSupabase error:", err);
+    }
+  },
+
   updateBeat(id: string, updates: Partial<DiscoveryBeat>): DiscoveryBeat | null {
     if (typeof window !== "undefined") {
-      // 1. If it's in custom beats, update it directly
       const custom = loadCustomBeats();
       const customIndex = custom.findIndex((b) => b.id === id);
       if (customIndex !== -1) {
         custom[customIndex] = { ...custom[customIndex], ...updates };
+        saveCustomBeats(custom);
+      } else {
+        const overrides = loadBeatOverrides();
+        overrides[id] = { ...(overrides[id] || {}), ...updates };
         try {
-          localStorage.setItem(STORAGE_KEY_CUSTOM_BEATS, JSON.stringify(custom));
+          localStorage.setItem(STORAGE_KEY_BEAT_OVERRIDES, JSON.stringify(overrides));
         } catch {}
-        return custom[customIndex];
       }
-
-      // 2. Otherwise store in overrides
-      const overrides = loadBeatOverrides();
-      overrides[id] = { ...(overrides[id] || {}), ...updates };
-      try {
-        localStorage.setItem(STORAGE_KEY_BEAT_OVERRIDES, JSON.stringify(overrides));
-      } catch {}
     }
+
+    // Async write to Supabase
+    supabase.from("beats").update({
+      title: updates.title,
+      bpm: updates.bpm,
+      price_tag: updates.priceTag,
+      genres: updates.genres,
+      tags: updates.tags,
+      audio_url: updates.audioUrl,
+    }).eq("id", id).then(
+      ({ error }) => {
+        if (error) console.warn("Supabase beat update failed:", error.message);
+      },
+      () => {}
+    );
 
     const all = this.getAllDiscoveryBeats();
     return all.find((b) => b.id === id) || null;
@@ -85,17 +140,12 @@ export const beatService = {
 
   deleteBeat(id: string): boolean {
     if (typeof window !== "undefined") {
-      // 1. Remove from custom beats if present
       const custom = loadCustomBeats();
       const filtered = custom.filter((b) => b.id !== id);
       if (filtered.length !== custom.length) {
-        try {
-          localStorage.setItem(STORAGE_KEY_CUSTOM_BEATS, JSON.stringify(filtered));
-        } catch {}
-        return true;
+        saveCustomBeats(filtered);
       }
 
-      // 2. Add to deleted IDs list
       const deleted = loadDeletedBeatIds();
       if (!deleted.includes(id)) {
         deleted.push(id);
@@ -103,9 +153,17 @@ export const beatService = {
           localStorage.setItem(STORAGE_KEY_DELETED_BEATS, JSON.stringify(deleted));
         } catch {}
       }
-      return true;
     }
-    return false;
+
+    // Async delete from Supabase
+    supabase.from("beats").delete().eq("id", id).then(
+      ({ error }) => {
+        if (error) console.warn("Supabase beat delete failed:", error.message);
+      },
+      () => {}
+    );
+
+    return true;
   },
 
   createBeat(beat: Omit<DiscoveryBeat, "id"> & { id?: string }): DiscoveryBeat {
@@ -117,10 +175,31 @@ export const beatService = {
     if (typeof window !== "undefined") {
       const custom = loadCustomBeats();
       custom.unshift(newBeat);
-      try {
-        localStorage.setItem(STORAGE_KEY_CUSTOM_BEATS, JSON.stringify(custom));
-      } catch {}
+      saveCustomBeats(custom);
     }
+
+    // Async insert to Supabase
+    supabase.from("beats").upsert({
+      id: newBeat.id,
+      title: newBeat.title,
+      producer_id: newBeat.beatmaker.id,
+      audio_url: newBeat.audioUrl,
+      duration: newBeat.duration || 120,
+      bpm: newBeat.bpm,
+      price_tag: newBeat.priceTag || "Not For Sale",
+      genres: newBeat.genres || [],
+      tags: newBeat.tags || [],
+      flames: newBeat.flames || 0,
+      battle_source: newBeat.battleSource,
+      tier: newBeat.tier || 4,
+      rank: newBeat.rank,
+      created_at: newBeat.createdAt || new Date().toISOString(),
+    }).then(
+      ({ error }) => {
+        if (error) console.warn("Supabase beat insert failed:", error.message);
+      },
+      () => {}
+    );
 
     return newBeat;
   },
@@ -142,3 +221,8 @@ export const beatService = {
     return false;
   },
 };
+
+// Initial background sync if in browser
+if (typeof window !== "undefined") {
+  beatService.syncFromSupabase().catch(() => {});
+}

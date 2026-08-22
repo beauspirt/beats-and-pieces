@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Edit3, Plus, Check, X, Trophy, Calendar, Users, Music, Trash2, Upload, Image as ImageIcon } from "lucide-react";
 import { AdminGuard } from "@/components/AdminGuard";
-import { battleService, producerService } from "@/services";
+import { battleService, producerService, storageService } from "@/services";
 import { Competition, BattlePhase, BattleSample } from "@/lib/types";
 
 interface PersonEntry {
@@ -43,7 +43,7 @@ export default function AdminBattlesManagerPage() {
   const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
-    setBattles(battleService.getAllBattles());
+    setBattles(battleService.getAllCompetitions());
   }, []);
 
   const handleEditClick = (battle: Competition) => {
@@ -93,31 +93,41 @@ export default function AdminBattlesManagerPage() {
     setIsSaved(false);
   };
 
-  const handleCoverFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCoverFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && editingBattle) {
-      const reader = new FileReader();
-      reader.onload = (uploadEvent) => {
-        if (uploadEvent.target?.result) {
-          setEditingBattle({
-            ...editingBattle,
-            coverImage: uploadEvent.target.result as string,
-          });
-        }
-      };
-      reader.readAsDataURL(file);
+      const { url } = await storageService.uploadImage(file, "battles");
+      if (url) {
+        setEditingBattle({
+          ...editingBattle,
+          coverImage: url,
+        });
+      } else {
+        const reader = new FileReader();
+        reader.onload = (uploadEvent) => {
+          if (uploadEvent.target?.result) {
+            setEditingBattle({
+              ...editingBattle,
+              coverImage: uploadEvent.target.result as string,
+            });
+          }
+        };
+        reader.readAsDataURL(file);
+      }
     }
   };
 
-  const handleSampleFilesUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSampleFilesUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     const newSamples: BattleSample[] = [];
-    Array.from(files).forEach((file, idx) => {
+    for (let idx = 0; idx < files.length; idx++) {
+      const file = files[idx];
       const sampleId = `s-${Date.now()}-${idx}`;
       const sampleTitle = file.name.replace(/\.[^/.]+$/, "");
-      const sampleUrl = URL.createObjectURL(file);
+      const { url } = await storageService.uploadAudio(file, "samples", `sample-${Date.now()}-${idx}`);
+      const sampleUrl = url || URL.createObjectURL(file);
 
       newSamples.push({
         id: sampleId,
@@ -125,7 +135,7 @@ export default function AdminBattlesManagerPage() {
         audioUrl: sampleUrl,
         duration: 90,
       });
-    });
+    }
 
     setSamples((prev) => [...prev, ...newSamples]);
   };
@@ -209,7 +219,7 @@ export default function AdminBattlesManagerPage() {
           producerService.updateProducer(existing.id, { role: "host" });
         }
       } else {
-        const id = `usr-${h.name.toLowerCase().replace(/[^a-z0-9]/g, "") || Date.now()}`;
+        const id = h.name.toLowerCase().replace(/[^a-z0-9]/g, "") || String(Date.now());
         producerService.updateProducer(id, {
           id,
           nickname: h.name,
@@ -231,7 +241,7 @@ export default function AdminBattlesManagerPage() {
           producerService.updateProducer(existing.id, { role: "judge" });
         }
       } else {
-        const id = `usr-${j.name.toLowerCase().replace(/[^a-z0-9]/g, "") || Date.now()}`;
+        const id = j.name.toLowerCase().replace(/[^a-z0-9]/g, "") || String(Date.now());
         producerService.updateProducer(id, {
           id,
           nickname: j.name,

@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { X, ArrowLeft, Disc } from "lucide-react";
 import { AdminGuard } from "@/components/AdminGuard";
-import { releaseService } from "@/services";
+import { releaseService, storageService } from "@/services";
 import { normalizeUrl } from "@/lib/utils";
 
 export default function NewReleasePage() {
@@ -22,16 +22,21 @@ export default function NewReleasePage() {
   const [soundcloudUrl, setSoundcloudUrl] = useState("");
   const [isSaved, setIsSaved] = useState(false);
 
-  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (uploadEvent) => {
-        if (uploadEvent.target?.result) {
-          setCoverImage(uploadEvent.target.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
+      const { url } = await storageService.uploadImage(file, "releases");
+      if (url) {
+        setCoverImage(url);
+      } else {
+        const reader = new FileReader();
+        reader.onload = (uploadEvent) => {
+          if (uploadEvent.target?.result) {
+            setCoverImage(uploadEvent.target.result as string);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
     }
   };
 

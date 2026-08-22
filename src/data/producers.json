@@ -1,6 +1,6 @@
 {
-  "usr-nerub": {
-    "id": "usr-nerub",
+  "nerub": {
+    "id": "nerub",
     "nickname": "Nerub",
     "email": "adrian.hrihor@gmail.com",
     "avatarUrl": "/avatars/default-avatar.png",
@@ -23,8 +23,8 @@
     "isClaimed": false,
     "createdAt": "2021-01-15T00:00:00Z"
   },
-  "usr-vulpeanu": {
-    "id": "usr-vulpeanu",
+  "vulpeanu": {
+    "id": "vulpeanu",
     "nickname": "Vulpeanu",
     "email": "vulpeanumihaivalentin@gmail.com",
     "avatarUrl": "/avatars/default-avatar.png",
@@ -47,8 +47,8 @@
     "isClaimed": false,
     "createdAt": "2021-06-01T00:00:00Z"
   },
-  "usr-mldn": {
-    "id": "usr-mldn",
+  "mldn": {
+    "id": "mldn",
     "nickname": "MLDN",
     "email": "mldnbeats@gmail.com",
     "avatarUrl": "/avatars/default-avatar.png",
@@ -69,8 +69,8 @@
     "isClaimed": false,
     "createdAt": "2021-06-01T00:00:00Z"
   },
-  "usr-cgr": {
-    "id": "usr-cgr",
+  "cgr": {
+    "id": "cgr",
     "nickname": "CGR",
     "email": "prod.cgr@gmail.com",
     "avatarUrl": "/avatars/default-avatar.png",
@@ -91,8 +91,8 @@
     "isClaimed": false,
     "createdAt": "2021-06-01T00:00:00Z"
   },
-  "usr-joeycrack": {
-    "id": "usr-joeycrack",
+  "joeycrack": {
+    "id": "joeycrack",
     "nickname": "JoeyCrack",
     "email": "catalinavadani01@gmail.com",
     "avatarUrl": "/avatars/default-avatar.png",
@@ -113,8 +113,8 @@
     "isClaimed": false,
     "createdAt": "2021-06-01T00:00:00Z"
   },
-  "usr-tinybeats": {
-    "id": "usr-tinybeats",
+  "tinybeats": {
+    "id": "tinybeats",
     "nickname": "TinyBeats",
     "email": "b.3a2iu@gmail.com",
     "avatarUrl": "/avatars/default-avatar.png",
@@ -135,8 +135,8 @@
     "isClaimed": false,
     "createdAt": "2021-06-01T00:00:00Z"
   },
-  "usr-elhuron": {
-    "id": "usr-elhuron",
+  "elhuron": {
+    "id": "elhuron",
     "nickname": "El Huron",
     "email": "basescu.florinandrei@yahoo.com",
     "avatarUrl": "/avatars/default-avatar.png",
@@ -158,8 +158,8 @@
     "isClaimed": false,
     "createdAt": "2021-08-01T00:00:00Z"
   },
-  "usr-mateicojo": {
-    "id": "usr-mateicojo",
+  "mateicojo": {
+    "id": "mateicojo",
     "nickname": "mateicojo",
     "email": "mateicojo@yahoo.com",
     "avatarUrl": "/avatars/default-avatar.png",
@@ -180,8 +180,8 @@
     "isClaimed": false,
     "createdAt": "2021-08-01T00:00:00Z"
   },
-  "usr-ceinaru": {
-    "id": "usr-ceinaru",
+  "ceinaru": {
+    "id": "ceinaru",
     "nickname": "CEINARU",
     "email": "qishta.ceinaru@live.com",
     "avatarUrl": "/avatars/default-avatar.png",
@@ -202,8 +202,8 @@
     "isClaimed": false,
     "createdAt": "2021-08-01T00:00:00Z"
   },
-  "usr-dinca": {
-    "id": "usr-dinca",
+  "dinca": {
+    "id": "dinca",
     "nickname": "Dinca",
     "email": "andreidinca317@gmail.com",
     "avatarUrl": "/avatars/default-avatar.png",
@@ -224,8 +224,8 @@
     "isClaimed": false,
     "createdAt": "2021-10-01T00:00:00Z"
   },
-  "usr-stolly": {
-    "id": "usr-stolly",
+  "stolly": {
+    "id": "stolly",
     "nickname": "Stolly",
     "email": "alinionut094@gmail.com",
     "avatarUrl": "/avatars/default-avatar.png",
@@ -247,8 +247,8 @@
     "isClaimed": false,
     "createdAt": "2021-10-01T00:00:00Z"
   },
-  "usr-gherman": {
-    "id": "usr-gherman",
+  "gherman": {
+    "id": "gherman",
     "nickname": "GHERMAN",
     "email": "florin.gherman21@yahoo.com",
     "avatarUrl": "/avatars/default-avatar.png",
@@ -269,8 +269,8 @@
     "isClaimed": false,
     "createdAt": "2021-10-01T00:00:00Z"
   },
-  "usr-benjahmin": {
-    "id": "usr-benjahmin",
+  "benjahmin": {
+    "id": "benjahmin",
     "nickname": "BENJAHMIN",
     "email": "yamakasi_beni@yahoo.com",
     "avatarUrl": "/avatars/default-avatar.png",
@@ -291,8 +291,8 @@
     "isClaimed": false,
     "createdAt": "2021-12-01T00:00:00Z"
   },
-  "usr-mayfourteen": {
-    "id": "usr-mayfourteen",
+  "mayfourteen": {
+    "id": "mayfourteen",
     "nickname": "mayfourteen",
     "email": "erik.kecse@gmail.com",
     "avatarUrl": "/avatars/default-avatar.png",
@@ -314,8 +314,8 @@
     "isClaimed": false,
     "createdAt": "2022-02-01T00:00:00Z"
   },
-  "usr-oliniutza": {
-    "id": "usr-oliniutza",
+  "oliniutza": {
+    "id": "oliniutza",
     "nickname": "oliniutza",
     "email": "oliniutzaa@yahoo.com",
     "avatarUrl": "/avatars/default-avatar.png",
@@ -336,8 +336,8 @@
     "isClaimed": false,
     "createdAt": "2022-02-01T00:00:00Z"
   },
-  "usr-bladishv": {
-    "id": "usr-bladishv",
+  "bladishv": {
+    "id": "bladishv",
     "nickname": "bladishv",
     "email": "jurjaque@yahoo.com",
     "avatarUrl": "/avatars/default-avatar.png",
@@ -358,8 +358,8 @@
     "isClaimed": false,
     "createdAt": "2022-02-01T00:00:00Z"
   },
-  "usr-groveek": {
-    "id": "usr-groveek",
+  "groveek": {
+    "id": "groveek",
     "nickname": "GROVEEK",
     "email": "grooveektouch@gmail.com",
     "avatarUrl": "/avatars/default-avatar.png",
@@ -381,8 +381,8 @@
     "isClaimed": false,
     "createdAt": "2022-05-01T00:00:00Z"
   },
-  "usr-ionbriceag": {
-    "id": "usr-ionbriceag",
+  "ionbriceag": {
+    "id": "ionbriceag",
     "nickname": "ionbriceag",
     "email": "ionut.nicola08@gmail.com",
     "avatarUrl": "/avatars/default-avatar.png",
@@ -403,8 +403,8 @@
     "isClaimed": false,
     "createdAt": "2022-05-01T00:00:00Z"
   },
-  "usr-z3nn": {
-    "id": "usr-z3nn",
+  "z3nn": {
+    "id": "z3nn",
     "nickname": "Z3nn",
     "email": "tudorx9gg@gmail.com",
     "avatarUrl": "/avatars/default-avatar.png",
@@ -426,8 +426,8 @@
     "isClaimed": false,
     "createdAt": "2022-08-01T00:00:00Z"
   },
-  "usr-venr": {
-    "id": "usr-venr",
+  "venr": {
+    "id": "venr",
     "nickname": "venr",
     "email": "prod.venr@gmail.com",
     "avatarUrl": "/avatars/default-avatar.png",

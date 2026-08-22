@@ -108,7 +108,7 @@ export interface DiscoveryBeat {
   audioUrl: string;
   duration: number;
   waveform?: number[];
-  bpm: number;
+  bpm?: number;
   priceTag: string; // e.g. "Not For Sale", "$100 - $200", "$200+"
   genres?: string[];
   tags: string[];

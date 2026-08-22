@@ -63,7 +63,7 @@ export async function getProducers(): Promise<Record<string, UserProfile>> {
 
     const result: Record<string, UserProfile> = {};
     for (const p of data) {
-      result[`usr-${p.nickname.toLowerCase().replace(/[^a-z0-9]/g, "")}`] = {
+      result[p.nickname.toLowerCase().replace(/[^a-z0-9]/g, "")] = {
         id: p.id,
         nickname: p.nickname,
         email: p.email || "",

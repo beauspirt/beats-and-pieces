@@ -6,10 +6,11 @@ import Link from "next/link";
 import { sampleDiscoveryBeats } from "@/lib/mock-data";
 import { AudioWaveformPlayer } from "@/components/AudioWaveformPlayer";
 import { DiscoveryBeat } from "@/lib/types";
+import { beatService } from "@/services/beatService";
 import { Search, Filter, ArrowUpDown, Star, Flame, ChevronDown } from "lucide-react";
 
 export default function BeatsDiscoveryPage() {
-  const [beats, setBeats] = useState<DiscoveryBeat[]>(sampleDiscoveryBeats);
+  const [beats, setBeats] = useState<DiscoveryBeat[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGenre, setSelectedGenre] = useState<string>("all");
   const [selectedSaleFilter, setSelectedSaleFilter] = useState<"all" | "for_sale" | "not_for_sale">("all");
@@ -20,28 +21,27 @@ export default function BeatsDiscoveryPage() {
   // Pagination: 15 beats at a time
   const [visibleCount, setVisibleCount] = useState(15);
 
+  // Load fresh beats from beatService (including user custom beats) & favorites from localStorage
+  useEffect(() => {
+    try {
+      const allBeats = beatService.getAllDiscoveryBeats();
+      const savedFavs = localStorage.getItem("bnp_favorites");
+      const favIds: string[] = savedFavs ? JSON.parse(savedFavs) : [];
+      setBeats(
+        allBeats.map((b) => ({
+          ...b,
+          isFavorite: favIds.includes(b.id),
+        }))
+      );
+    } catch {
+      setBeats(beatService.getAllDiscoveryBeats());
+    }
+  }, []);
+
   // Reset pagination when search or filters change
   useEffect(() => {
     setVisibleCount(15);
   }, [searchQuery, selectedGenre, selectedSaleFilter, showOnlyFavorites, sortBy]);
-
-  // Load saved favorites from localStorage
-  useEffect(() => {
-    try {
-      const savedFavs = localStorage.getItem("bnp_favorites");
-      if (savedFavs) {
-        const favIds: string[] = JSON.parse(savedFavs);
-        setBeats((prev) =>
-          prev.map((b) => ({
-            ...b,
-            isFavorite: favIds.includes(b.id),
-          }))
-        );
-      }
-    } catch {
-      // ignore
-    }
-  }, []);
 
   const toggleFavorite = (beatId: string) => {
     setBeats((prev) => {
@@ -65,17 +65,25 @@ export default function BeatsDiscoveryPage() {
   };
 
   const filteredBeats = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
     return beats
       .filter((beat) => {
+        const beatTitle = (beat.title || "").toLowerCase();
+        const producerTag = (beat.beatmaker?.tag || "").toLowerCase();
+        const tags = Array.isArray(beat.tags) ? beat.tags : [];
+        const genres = Array.isArray(beat.genres) ? beat.genres : [];
+
         const matchesQuery =
-          beat.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          beat.beatmaker.tag.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          beat.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()));
+          !q ||
+          beatTitle.includes(q) ||
+          producerTag.includes(q) ||
+          tags.some((t) => (t || "").toLowerCase().includes(q)) ||
+          genres.some((g) => (g || "").toLowerCase().includes(q));
 
         const matchesGenre =
           selectedGenre === "all" ||
-          (beat.genres ? beat.genres.includes(selectedGenre) : false) ||
-          beat.tags.includes(selectedGenre);
+          genres.includes(selectedGenre) ||
+          tags.includes(selectedGenre);
 
         const matchesSale =
           selectedSaleFilter === "all" ||
@@ -88,8 +96,8 @@ export default function BeatsDiscoveryPage() {
       })
       .sort((a, b) => {
         if (sortBy === "rating") return (b.flames || 0) - (a.flames || 0);
-        if (sortBy === "bpm") return a.bpm - b.bpm;
-        if (sortBy === "title") return a.title.localeCompare(b.title);
+        if (sortBy === "bpm") return (a.bpm || 0) - (b.bpm || 0);
+        if (sortBy === "title") return (a.title || "").localeCompare(b.title || "");
         return 0;
       });
   }, [beats, searchQuery, selectedGenre, selectedSaleFilter, showOnlyFavorites, sortBy]);
@@ -98,7 +106,14 @@ export default function BeatsDiscoveryPage() {
     (selectedGenre !== "all" ? 1 : 0) +
     (selectedSaleFilter !== "all" ? 1 : 0);
 
-  const allGenres = Array.from(new Set(beats.flatMap((b) => b.genres || b.tags || [])));
+  const allGenres = Array.from(
+    new Set(
+      beats.flatMap((b) => [
+        ...(Array.isArray(b.genres) ? b.genres : []),
+        ...(Array.isArray(b.tags) ? b.tags : []),
+      ])
+    )
+  );
   const visibleBeats = filteredBeats.slice(0, visibleCount);
 
   return (

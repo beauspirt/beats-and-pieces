@@ -61,7 +61,7 @@ export default function AuthCallbackPage() {
           }
         } else {
           // New verified community user (first time login)
-          const newUserId = `usr-${verifiedEmail.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "") || Date.now()}`;
+          const newUserId = verifiedEmail.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "") || String(Date.now());
           const newProfile: UserProfile = {
             id: newUserId,
             nickname: googleName,

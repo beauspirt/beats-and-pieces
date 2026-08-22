@@ -69,6 +69,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // 2. Check active Supabase session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user?.email) {
+        // Don't re-login if user explicitly logged out
+        try {
+          if (localStorage.getItem(STORAGE_KEY) === "logged_out") return;
+        } catch {}
         const email = session.user.email.toLowerCase().trim();
         const matched = producerService.getProducerByEmail(email);
         if (matched) {
@@ -82,6 +86,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // 3. Listen to auth state transitions
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      // Don't re-login if user explicitly logged out
+      try {
+        if (localStorage.getItem(STORAGE_KEY) === "logged_out" && _event !== "SIGNED_OUT") return;
+      } catch {}
+
       if (session?.user?.email) {
         const email = session.user.email.toLowerCase().trim();
         const matched = producerService.getProducerByEmail(email);
@@ -147,7 +156,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // New profile fallback
     const fallbackNickname = cleanEmail.split("@")[0] || "User";
     const newProfile: UserProfile = {
-      id: `usr-${fallbackNickname.toLowerCase().replace(/[^a-z0-9]/g, "")}`,
+      id: fallbackNickname.toLowerCase().replace(/[^a-z0-9]/g, "") || String(Date.now()),
       nickname: fallbackNickname,
       email: cleanEmail,
       avatarUrl: "/avatars/default-avatar.png",
@@ -167,7 +176,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUpNewProducer = (nickname: string, email: string) => {
     const cleanNick = nickname.trim();
     const cleanEmail = email.trim().toLowerCase();
-    const cleanId = `usr-${cleanNick.toLowerCase().replace(/[^a-z0-9]/g, "") || Date.now()}`;
+    const cleanId = cleanNick.toLowerCase().replace(/[^a-z0-9]/g, "") || String(Date.now());
 
     // Check if account already exists with this email or id
     const existing = producerService.getProducerByEmail(cleanEmail) || producerService.getProducerById(cleanId);
@@ -214,15 +223,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.removeItem(STORAGE_KEY);
       localStorage.setItem(STORAGE_KEY, "logged_out");
     } catch {}
-
-    if (typeof window !== "undefined") {
-      window.location.href = "/signin";
-    }
+    setUser(null);
 
     try {
       await supabase.auth.signOut();
     } catch {}
-    setUser(null);
+
+    if (typeof window !== "undefined") {
+      window.location.href = "/signin";
+    }
   };
 
   return (

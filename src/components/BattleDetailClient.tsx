@@ -9,7 +9,7 @@ import {
   sampleSubmissions,
   sampleProducers,
 } from "@/lib/mock-data";
-import { battleService } from "@/services";
+import { battleService, storageService } from "@/services";
 import { AudioWaveformPlayer } from "./AudioWaveformPlayer";
 import { FlameRating } from "./FlameRating";
 import {
@@ -53,7 +53,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     );
   }
 
-  const battleSubmissions = sampleSubmissions.filter((sub) => sub.battleId === battle.id);
+  const battleSubmissions = battleService.getSubmissionsByBattleId(battle.id);
   const currentSubmissions = battleSubmissions.length > 0 ? battleSubmissions : sampleSubmissions;
 
   // Determine if the currently logged in user is authorized to judge this battle
@@ -83,9 +83,40 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     title: string;
     audioUrl: string;
     duration: number;
-    bpm: number;
+    bpm?: number;
     submittedAt: string;
-  } | null>(null);
+  } | null>(() => {
+    if (currentUser) {
+      const existing = battleSubmissions.find((s) => s.userId === currentUser.id);
+      if (existing) {
+        return {
+          id: existing.id,
+          title: existing.beatTitle,
+          audioUrl: existing.audioUrl,
+          duration: existing.duration,
+          bpm: existing.bpm,
+          submittedAt: existing.submittedAt,
+        };
+      }
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    if (currentUser && !myEntry) {
+      const existing = battleSubmissions.find((s) => s.userId === currentUser.id);
+      if (existing) {
+        setMyEntry({
+          id: existing.id,
+          title: existing.beatTitle,
+          audioUrl: existing.audioUrl,
+          duration: existing.duration,
+          bpm: existing.bpm,
+          submittedAt: existing.submittedAt,
+        });
+      }
+    }
+  }, [currentUser, battleSubmissions, myEntry]);
 
   // Stage 2: Rating state (Track ratings)
   const [ratings, setRatings] = useState<Record<string, number>>({
@@ -126,21 +157,50 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
   const [isDraggingOver, setIsDraggingOver] = useState(false);
 
-  const processUploadedFile = (file: File) => {
+  const processUploadedFile = async (file: File) => {
     if (!file) return;
     setIsUploading(true);
-    setTimeout(() => {
-      setMyEntry({
-        id: "sub-user-entry",
-        title: file.name.replace(/\.[^/.]+$/, ""),
-        audioUrl: "/audio/05 Nerub - Butterflies in my lungs.mp3",
-        duration: 124,
-        bpm: 90,
+    try {
+      const uploaderId = currentUser?.id || "guest";
+      const uploaderTag = currentUser?.nickname || "Producer";
+
+      // 1. Upload to Supabase Storage
+      const { url } = await storageService.uploadAudio(
+        file,
+        "submissions",
+        `${battle.id}-${uploaderId}-${Date.now()}`
+      );
+
+      const title = file.name.replace(/\.[^/.]+$/, "");
+      const finalAudioUrl = url || URL.createObjectURL(file);
+
+      // 2. Register submission in database service
+      const newSub = battleService.submitEntry({
+        id: `sub-${battle.id}-${uploaderId}-${Date.now()}`,
+        battleId: battle.id,
+        userId: uploaderId,
+        beatmakerTag: uploaderTag,
+        beatTitle: title,
+        audioUrl: finalAudioUrl,
+        duration: 120,
         submittedAt: new Date().toISOString(),
       });
+
+      setMyEntry({
+        id: newSub.id,
+        title: newSub.beatTitle,
+        audioUrl: newSub.audioUrl,
+        duration: newSub.duration,
+        bpm: newSub.bpm,
+        submittedAt: newSub.submittedAt,
+      });
+
+      confetti({ particleCount: 60, spread: 60, origin: { y: 0.6 } });
+    } catch (err) {
+      console.error("Submission failed:", err);
+    } finally {
       setIsUploading(false);
-      confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
-    }, 1000);
+    }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -247,7 +307,9 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     if (isRatingsSubmitted) return; // Locked once submitted
     setRatings((prev) => ({ ...prev, [trackId]: flames }));
     setLastSavedTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
-    await submitRating(trackId, battle.id, flames);
+    if (currentUser?.id) {
+      await battleService.voteSubmission(trackId, battle.id, currentUser.id, flames);
+    }
   };
 
   const handleClickSubmitRatings = () => {

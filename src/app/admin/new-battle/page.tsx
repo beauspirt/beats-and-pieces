@@ -6,8 +6,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Plus, X, ArrowLeft, Music, Trash2, Image as ImageIcon } from "lucide-react";
 import { AdminGuard } from "@/components/AdminGuard";
-import { battleService, producerService } from "@/services";
-import { BattleSample } from "@/lib/types";
+import { battleService, producerService, storageService } from "@/services";
+import { BattleSample, UserProfile } from "@/lib/types";
 
 interface PersonEntry {
   name: string;
@@ -16,8 +16,12 @@ interface PersonEntry {
 
 export default function NewBattlePage() {
   const router = useRouter();
+  const [battleNumber, setBattleNumber] = useState<number>(() => {
+    const existing = battleService.getAllCompetitions();
+    return existing.reduce((max, b) => Math.max(max, b.number || 0), 0) + 1;
+  });
   const [title, setTitle] = useState("");
-  const [coverImage, setCoverImage] = useState("");
+  const [coverImage, setCoverImage] = useState("/covers/beat-battle-8.png");
   
   // Hosts state with email accounts
   const [hosts, setHosts] = useState<PersonEntry[]>([
@@ -47,28 +51,35 @@ export default function NewBattlePage() {
   const [judgingDeadline, setJudgingDeadline] = useState("");
   const [isSaved, setIsSaved] = useState(false);
 
-  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (uploadEvent) => {
-        if (uploadEvent.target?.result) {
-          setCoverImage(uploadEvent.target.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
+      const { url } = await storageService.uploadImage(file, "battles");
+      if (url) {
+        setCoverImage(url);
+      } else {
+        const reader = new FileReader();
+        reader.onload = (uploadEvent) => {
+          if (uploadEvent.target?.result) {
+            setCoverImage(uploadEvent.target.result as string);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
     }
   };
 
-  const handleSampleFilesUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSampleFilesUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     const newSamples: BattleSample[] = [];
-    Array.from(files).forEach((file, idx) => {
+    for (let idx = 0; idx < files.length; idx++) {
+      const file = files[idx];
       const sampleId = `s-${Date.now()}-${idx}`;
       const sampleTitle = file.name.replace(/\.[^/.]+$/, "");
-      const sampleUrl = URL.createObjectURL(file);
+      const { url } = await storageService.uploadAudio(file, "samples", `sample-${Date.now()}-${idx}`);
+      const sampleUrl = url || URL.createObjectURL(file);
 
       newSamples.push({
         id: sampleId,
@@ -76,7 +87,7 @@ export default function NewBattlePage() {
         audioUrl: sampleUrl,
         duration: 90,
       });
-    });
+    }
 
     setSamples((prev) => [...prev, ...newSamples]);
   };
@@ -154,7 +165,7 @@ export default function NewBattlePage() {
           producerService.updateProducer(existing.id, { role: "host" });
         }
       } else {
-        const id = `usr-${h.name.toLowerCase().replace(/[^a-z0-9]/g, "") || Date.now()}`;
+        const id = h.name.toLowerCase().replace(/[^a-z0-9]/g, "") || String(Date.now());
         producerService.updateProducer(id, {
           id,
           nickname: h.name,
@@ -176,7 +187,7 @@ export default function NewBattlePage() {
           producerService.updateProducer(existing.id, { role: "judge" });
         }
       } else {
-        const id = `usr-${j.name.toLowerCase().replace(/[^a-z0-9]/g, "") || Date.now()}`;
+        const id = j.name.toLowerCase().replace(/[^a-z0-9]/g, "") || String(Date.now());
         producerService.updateProducer(id, {
           id,
           nickname: j.name,

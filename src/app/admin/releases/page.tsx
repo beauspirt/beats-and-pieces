@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Edit3, Plus, Disc, ExternalLink, Music, Radio } from "lucide-react";
 import { AdminGuard } from "@/components/AdminGuard";
-import { releaseService } from "@/services";
+import { releaseService, storageService } from "@/services";
 import { Release } from "@/lib/types";
 import { normalizeUrl } from "@/lib/utils";
 
@@ -23,19 +23,27 @@ export default function AdminReleasesManagerPage() {
     setIsSaved(false);
   };
 
-  const handleCoverFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCoverFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && editingRelease) {
-      const reader = new FileReader();
-      reader.onload = (uploadEvent) => {
-        if (uploadEvent.target?.result) {
-          setEditingRelease({
-            ...editingRelease,
-            coverImage: uploadEvent.target.result as string,
-          });
-        }
-      };
-      reader.readAsDataURL(file);
+      const { url } = await storageService.uploadImage(file, "releases");
+      if (url) {
+        setEditingRelease({
+          ...editingRelease,
+          coverImage: url,
+        });
+      } else {
+        const reader = new FileReader();
+        reader.onload = (uploadEvent) => {
+          if (uploadEvent.target?.result) {
+            setEditingRelease({
+              ...editingRelease,
+              coverImage: uploadEvent.target.result as string,
+            });
+          }
+        };
+        reader.readAsDataURL(file);
+      }
     }
   };
 

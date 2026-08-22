@@ -137,7 +137,7 @@ export default function HostPanelPage() {
           producerService.updateProducer(existing.id, { role: "judge" });
         }
       } else {
-        const id = `usr-${j.name.toLowerCase().replace(/[^a-z0-9]/g, "") || Date.now()}`;
+        const id = j.name.toLowerCase().replace(/[^a-z0-9]/g, "") || String(Date.now());
         producerService.updateProducer(id, {
           id,
           nickname: j.name,

@@ -8,7 +8,7 @@ import {
 } from "@/services";
 
 export const sampleProducers: Record<string, UserProfile> = producerService.getProducersMap();
-export const currentUser: UserProfile = sampleProducers["usr-nerub"] || Object.values(sampleProducers)[0];
+export const currentUser: UserProfile = sampleProducers["nerub"] || Object.values(sampleProducers)[0];
 export const sampleCompetitions: Competition[] = battleService.getAllCompetitions();
 export const sampleSubmissions: BattleSubmission[] = battleService.getAllSubmissions();
 export const sampleDiscoveryBeats: DiscoveryBeat[] = beatService.getAllDiscoveryBeats();

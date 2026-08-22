@@ -119,7 +119,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
   const { user: authUser } = useAuth();
 
   const [producer, setProducer] = useState<UserProfile>(() => {
-    return producerService.getProducerById(producerId) || sampleProducers[producerId] || sampleProducers["usr-nerub"] || Object.values(sampleProducers)[0];
+    return producerService.getProducerById(producerId) || sampleProducers[producerId] || sampleProducers["nerub"] || Object.values(sampleProducers)[0];
   });
 
   useEffect(() => {
@@ -138,7 +138,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     id: string;
     title: string;
     audioUrl: string;
-    bpm: number;
+    bpm: number | "";
     isForSale: boolean;
     isBattleSubmission: boolean;
     battleSource?: string;
@@ -151,7 +151,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
   const [newBeatTitle, setNewBeatTitle] = useState("");
   const [newBeatAudioUrl, setNewBeatAudioUrl] = useState("");
   const [newBeatAudioName, setNewBeatAudioName] = useState("");
-  const [newBeatBpm, setNewBeatBpm] = useState<number>(90);
+  const [newBeatBpm, setNewBeatBpm] = useState<number | "">("");
   const [newBeatIsForSale, setNewBeatIsForSale] = useState(false);
   const [newBeatTags, setNewBeatTags] = useState<string[]>([]);
   const [newBeatTagInput, setNewBeatTagInput] = useState("");
@@ -162,6 +162,38 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
   const showToast = (msg: string) => {
     setSaveToastMessage(msg);
     setTimeout(() => setSaveToastMessage(null), 3000);
+  };
+
+  const addEditingTags = (input: string) => {
+    const rawTokens = input.split(",").map((t) => t.trim()).filter(Boolean);
+    if (rawTokens.length === 0) {
+      setEditingTagInput("");
+      return;
+    }
+    setEditingTags((prev) => {
+      const next = [...prev];
+      rawTokens.forEach((token) => {
+        if (!next.includes(token)) next.push(token);
+      });
+      return next;
+    });
+    setEditingTagInput("");
+  };
+
+  const addNewBeatTags = (input: string) => {
+    const rawTokens = input.split(",").map((t) => t.trim()).filter(Boolean);
+    if (rawTokens.length === 0) {
+      setNewBeatTagInput("");
+      return;
+    }
+    setNewBeatTags((prev) => {
+      const next = [...prev];
+      rawTokens.forEach((token) => {
+        if (!next.includes(token)) next.push(token);
+      });
+      return next;
+    });
+    setNewBeatTagInput("");
   };
 
   // Close modals on Escape key
@@ -332,7 +364,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       id: beat.id,
       title: beat.title,
       audioUrl: beat.audioUrl,
-      bpm: beat.bpm || 90,
+      bpm: beat.bpm ? beat.bpm : "",
       isForSale: isForSale,
       isBattleSubmission: isBattle,
       battleSource: beat.battleSource || beat.competitionTitle,
@@ -369,11 +401,12 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     if (!editingBeat) return;
 
     const priceTag = editingBeat.isForSale ? "For Sale" : "Not For Sale";
+    const bpmValue = editingBeat.bpm !== "" && !isNaN(Number(editingBeat.bpm)) ? Number(editingBeat.bpm) : undefined;
 
     if (editingBeat.isBattleSubmission) {
       // Battle submissions: update BPM, priceTag, and tags only
       beatService.updateBeat(editingBeat.id, {
-        bpm: Number(editingBeat.bpm) || 90,
+        bpm: bpmValue,
         priceTag: priceTag,
         tags: editingTags,
       });
@@ -382,7 +415,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       beatService.updateBeat(editingBeat.id, {
         title: editingBeat.title.trim() || "Untitled Beat",
         audioUrl: editingBeat.audioUrl,
-        bpm: Number(editingBeat.bpm) || 90,
+        bpm: bpmValue,
         priceTag: priceTag,
         tags: editingTags,
       });
@@ -417,6 +450,8 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       return;
     }
 
+    const bpmValue = newBeatBpm !== "" && !isNaN(Number(newBeatBpm)) ? Number(newBeatBpm) : undefined;
+
     beatService.createBeat({
       title: newBeatTitle.trim(),
       beatmaker: {
@@ -426,7 +461,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       },
       audioUrl: newBeatAudioUrl,
       duration: newBeatDuration,
-      bpm: Number(newBeatBpm) || 90,
+      bpm: bpmValue,
       priceTag: newBeatIsForSale ? "For Sale" : "Not For Sale",
       tags: newBeatTags,
       createdAt: new Date().toISOString(),
@@ -436,7 +471,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     setNewBeatTitle("");
     setNewBeatAudioUrl("");
     setNewBeatAudioName("");
-    setNewBeatBpm(90);
+    setNewBeatBpm("");
     setNewBeatIsForSale(false);
     setNewBeatTags([]);
     setNewBeatTagInput("");
@@ -804,11 +839,12 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                 <label className="text-xs font-semibold text-[#D1D1D1]">BPM</label>
                 <input
                   type="number"
+                  placeholder="e.g. 90 (optional)"
                   value={editingBeat.bpm}
                   onChange={(e) =>
-                    setEditingBeat({ ...editingBeat, bpm: Number(e.target.value) || 0 })
+                    setEditingBeat({ ...editingBeat, bpm: e.target.value === "" ? "" : Number(e.target.value) })
                   }
-                  className="w-full bg-[#121212] rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="w-full bg-[#121212] rounded-xl px-4 py-3 text-xs text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-[#7B61FF] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
 
@@ -863,29 +899,26 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                   <input
                     type="text"
                     value={editingTagInput}
-                    onChange={(e) => setEditingTagInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        const clean = editingTagInput.trim();
-                        if (clean && !editingTags.includes(clean)) {
-                          setEditingTags([...editingTags, clean]);
-                          setEditingTagInput("");
-                        }
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val.includes(",")) {
+                        addEditingTags(val);
+                      } else {
+                        setEditingTagInput(val);
                       }
                     }}
-                    placeholder="Add a genre or tag"
-                    className="flex-1 bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === ",") {
+                        e.preventDefault();
+                        addEditingTags(editingTagInput);
+                      }
+                    }}
+                    placeholder="Add tags (press comma or enter)"
+                    className="flex-1 bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
                   />
                   <button
                     type="button"
-                    onClick={() => {
-                      const clean = editingTagInput.trim();
-                      if (clean && !editingTags.includes(clean)) {
-                        setEditingTags([...editingTags, clean]);
-                        setEditingTagInput("");
-                      }
-                    }}
+                    onClick={() => addEditingTags(editingTagInput)}
                     className="p-2.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white transition-all shadow-md active:scale-95 cursor-pointer flex items-center justify-center shrink-0"
                     title="Add tag"
                   >
@@ -965,7 +998,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                   value={newBeatTitle}
                   onChange={(e) => setNewBeatTitle(e.target.value)}
                   placeholder="e.g. Midnight Soul Flip"
-                  className="w-full bg-[#121212] rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+                  className="w-full bg-[#121212] rounded-xl px-4 py-3 text-xs text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
                 />
               </div>
 
@@ -989,9 +1022,10 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                 <label className="text-xs font-semibold text-[#D1D1D1]">BPM</label>
                 <input
                   type="number"
+                  placeholder="e.g. 90 (optional)"
                   value={newBeatBpm}
-                  onChange={(e) => setNewBeatBpm(Number(e.target.value) || 90)}
-                  className="w-full bg-[#121212] rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  onChange={(e) => setNewBeatBpm(e.target.value === "" ? "" : Number(e.target.value))}
+                  className="w-full bg-[#121212] rounded-xl px-4 py-3 text-xs text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-[#7B61FF] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
 
@@ -1046,29 +1080,26 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                   <input
                     type="text"
                     value={newBeatTagInput}
-                    onChange={(e) => setNewBeatTagInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        const clean = newBeatTagInput.trim();
-                        if (clean && !newBeatTags.includes(clean)) {
-                          setNewBeatTags([...newBeatTags, clean]);
-                          setNewBeatTagInput("");
-                        }
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val.includes(",")) {
+                        addNewBeatTags(val);
+                      } else {
+                        setNewBeatTagInput(val);
                       }
                     }}
-                    placeholder="Add a genre or tag"
-                    className="flex-1 bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === ",") {
+                        e.preventDefault();
+                        addNewBeatTags(newBeatTagInput);
+                      }
+                    }}
+                    placeholder="Add tags (press comma or enter)"
+                    className="flex-1 bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
                   />
                   <button
                     type="button"
-                    onClick={() => {
-                      const clean = newBeatTagInput.trim();
-                      if (clean && !newBeatTags.includes(clean)) {
-                        setNewBeatTags([...newBeatTags, clean]);
-                        setNewBeatTagInput("");
-                      }
-                    }}
+                    onClick={() => addNewBeatTags(newBeatTagInput)}
                     className="p-2.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white transition-all shadow-md active:scale-95 cursor-pointer flex items-center justify-center shrink-0"
                     title="Add tag"
                   >

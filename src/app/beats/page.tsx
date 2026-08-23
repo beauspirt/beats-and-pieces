@@ -142,45 +142,51 @@ export default function BeatsDiscoveryPage() {
           </div>
 
           {/* Quick Action Controls Row (Favorites, Filter Drawer Toggle, Sort) */}
-          <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar pb-0.5 sm:pb-0">
-            {/* Favorites Filter Button */}
-            <button
-              onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
-              className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 cursor-pointer ${
-                showOnlyFavorites
-                  ? "bg-amber-500/20 text-amber-300 shadow-sm"
-                  : "bg-[#181818] text-[#888888] hover:text-white"
-              }`}
-            >
-              <Star className={`w-4 h-4 ${showOnlyFavorites ? "fill-amber-400 text-amber-400" : ""}`} />
-              <span>Favorites</span>
-            </button>
+          <div className="grid grid-cols-2 sm:flex items-center gap-2 sm:gap-3 w-full lg:w-auto">
+            {/* Top row on mobile / inline on desktop: Favorites + Filter */}
+            <div className="flex items-center gap-2 sm:gap-3 col-span-2 sm:col-span-1">
+              {/* Favorites Filter Button */}
+              <button
+                onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
+                className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                  showOnlyFavorites
+                    ? "bg-amber-500/20 text-amber-300 shadow-sm"
+                    : "bg-[#181818] text-[#888888] hover:text-white"
+                }`}
+              >
+                <Star className={`w-4 h-4 ${showOnlyFavorites ? "fill-amber-400 text-amber-400" : ""}`} />
+                <span>Favorites</span>
+              </button>
 
-            {/* Filter Toggle Button */}
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 cursor-pointer ${
-                showFilters || activeFiltersCount > 0
-                  ? "bg-[#7B61FF] text-white"
-                  : "bg-[#181818] text-[#888888] hover:text-white"
-              }`}
-            >
-              <Filter className="w-4 h-4" />
-              <span>Filter</span>
-              {activeFiltersCount > 0 && (
-                <span className="w-5 h-5 rounded-full bg-white text-[#7B61FF] text-xs font-bold flex items-center justify-center ml-0.5">
-                  {activeFiltersCount}
-                </span>
-              )}
-            </button>
+              {/* Filter Toggle Button */}
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                  showFilters || activeFiltersCount > 0
+                    ? "bg-[#7B61FF] text-white"
+                    : "bg-[#181818] text-[#888888] hover:text-white"
+                }`}
+              >
+                <Filter className="w-4 h-4" />
+                <span>Filter</span>
+                {activeFiltersCount > 0 && (
+                  <span className="w-5 h-5 rounded-full bg-white text-[#7B61FF] text-xs font-bold flex items-center justify-center ml-0.5">
+                    {activeFiltersCount}
+                  </span>
+                )}
+              </button>
+            </div>
 
-            {/* Sort Dropdown */}
-            <div className="flex items-center bg-[#181818] rounded-xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-[#888888] shrink-0">
-              <ArrowUpDown className="w-4 h-4 mr-2 text-[#666666] shrink-0" />
+            {/* Sort Dropdown - Responsive pill with rounded corners on all sides */}
+            <div className="col-span-2 sm:col-span-1 flex items-center justify-between sm:justify-start bg-[#181818] rounded-xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-[#888888] w-full sm:w-auto">
+              <div className="flex items-center gap-2">
+                <ArrowUpDown className="w-4 h-4 text-[#666666] shrink-0" />
+                <span className="text-[#666666] sm:hidden text-xs font-medium">Sort:</span>
+              </div>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="bg-transparent text-white font-semibold text-xs sm:text-sm focus:outline-none cursor-pointer pr-1 leading-none"
+                className="bg-transparent text-white font-semibold text-xs sm:text-sm focus:outline-none cursor-pointer pr-1 leading-none text-right sm:text-left"
               >
                 <option value="recent" className="bg-[#181818] text-white">Most Recent</option>
                 <option value="rating" className="bg-[#181818] text-white">Highest Rated</option>
@@ -298,235 +304,183 @@ export default function BeatsDiscoveryPage() {
             </button>
           </div>
         ) : (
-          visibleBeats.map((beat) => (
-            <div
-              key={beat.id}
-              className="bg-[#181818] rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-md"
-            >
-              {/* Row 1: Header (Title, Producer, Avatar, BPM, License Pill, Favorite) */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                
-                {/* Left: Beat Title + Producer Avatar/Tag */}
-                {(() => {
-                  const prod = producerService.getProducerById(beat.beatmaker.id) || producerService.getProducerByTag(beat.beatmaker.tag);
-                  const displayTag = prod?.nickname || beat.beatmaker.tag;
-                  const displayAvatar = prod?.avatarUrl || beat.beatmaker.avatarUrl || "/avatars/default-avatar.png";
+          visibleBeats.map((beat) => {
+            const prod = producerService.getProducerById(beat.beatmaker.id) || producerService.getProducerByTag(beat.beatmaker.tag);
+            const displayTag = prod?.nickname || beat.beatmaker.tag;
+            const displayAvatar = prod?.avatarUrl || beat.beatmaker.avatarUrl || "/avatars/default-avatar.png";
+            const match =
+              (beat.battleSource && beat.battleSource.match(/Beat Battle #?(\d+)/i)) ||
+              (beat.id && beat.id.match(/disc-bb(\d+)/));
 
-                  return (
-                    <div className="flex items-center gap-3.5 min-w-0 flex-1">
+            return (
+              <div
+                key={beat.id}
+                className="bg-[#181818] rounded-2xl p-4 sm:p-5 space-y-3.5 sm:space-y-4 shadow-md"
+              >
+                {/* Row 1: Header (Title, Producer, Avatar, Badges, Meta) */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  
+                  {/* Left: Beat Title + Producer Avatar/Tag + Badges */}
+                  <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                    <Link
+                      href={`/producers/${beat.beatmaker.id}`}
+                      className="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden relative shrink-0 hover:opacity-80 transition-opacity bg-[#121212]"
+                    >
+                      <Image
+                        src={displayAvatar}
+                        alt={displayTag}
+                        fill
+                        className="object-cover"
+                      />
+                    </Link>
+
+                    <div className="min-w-0 flex-1">
+                      {/* Title & Badges */}
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="font-bold text-white text-base sm:text-lg leading-snug">
+                          {beat.title}
+                        </h3>
+
+                        {beat.rank === 1 && (
+                          <span className="h-5 sm:h-6 px-2.5 sm:px-3 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-[11px] sm:text-xs font-bold inline-flex items-center justify-center leading-none">
+                            1st Place
+                          </span>
+                        )}
+                        {beat.rank === 2 && (
+                          <span className="h-5 sm:h-6 px-2.5 sm:px-3 rounded-full bg-[#1E232A] text-[#94A3B8] text-[11px] sm:text-xs font-bold inline-flex items-center justify-center leading-none">
+                            2nd Place
+                          </span>
+                        )}
+                        {beat.rank === 3 && (
+                          <span className="h-5 sm:h-6 px-2.5 sm:px-3 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-[11px] sm:text-xs font-bold inline-flex items-center justify-center leading-none">
+                            3rd Place
+                          </span>
+                        )}
+
+                        {match && (
+                          <Link
+                            href={`/battles/battle-${match[1]}`}
+                            className="px-2 py-0.5 rounded-md bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-[11px] font-bold shrink-0 transition-all inline-flex items-center gap-1"
+                            title={`View ${beat.battleSource || `Beat Battle #${match[1]}`}`}
+                          >
+                            <span>BB#{match[1]}</span>
+                            <span className="text-[9px]">↗</span>
+                          </Link>
+                        )}
+                      </div>
+
+                      {/* Beatmaker name */}
                       <Link
                         href={`/producers/${beat.beatmaker.id}`}
-                        className="w-10 h-10 rounded-full overflow-hidden relative shrink-0 hover:opacity-80 transition-opacity bg-[#121212]"
+                        className="text-xs sm:text-sm text-[#7B61FF] hover:underline font-semibold block truncate mt-0.5"
                       >
-                        <Image
-                          src={displayAvatar}
-                          alt={displayTag}
-                          fill
-                          className="object-cover"
-                        />
+                        {displayTag}
                       </Link>
+                    </div>
+                  </div>
 
-                      <div className="min-w-0 flex-1 truncate">
-                        {/* Title & Desktop Inline Badges */}
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="font-bold text-white text-base sm:text-lg leading-snug">
-                            {beat.title}
-                          </h3>
+                  {/* Right: Meta Badges (BPM, Price, Flames, Fav) */}
+                  <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 flex-wrap sm:flex-nowrap">
+                    {/* BPM */}
+                    {beat.bpm ? (
+                      <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-[#121212] text-[#888888]">
+                        {beat.bpm} BPM
+                      </span>
+                    ) : null}
 
-                          {/* Desktop Inline Badges */}
-                          <div className="hidden sm:inline-flex items-center gap-2">
-                            {beat.rank === 1 && (
-                              <span className="h-6 px-3 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center leading-none">
-                                1st Place
-                              </span>
-                            )}
-                            {beat.rank === 2 && (
-                              <span className="h-6 px-3 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-bold inline-flex items-center justify-center leading-none">
-                                2nd Place
-                              </span>
-                            )}
-                            {beat.rank === 3 && (
-                              <span className="h-6 px-3 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center leading-none">
-                                3rd Place
-                              </span>
-                            )}
+                    {/* Price Tag Pill */}
+                    {beat.priceTag ? (
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-bold ${
+                          beat.priceTag === "Not For Sale"
+                            ? "bg-[#121212] text-[#666666]"
+                            : "bg-[#FF5E3A]/20 text-[#FF5E3A]"
+                        }`}
+                      >
+                        {beat.priceTag}
+                      </span>
+                    ) : null}
 
-                            {(() => {
-                              const match =
-                                (beat.battleSource && beat.battleSource.match(/Beat Battle #?(\d+)/i)) ||
-                                (beat.id && beat.id.match(/disc-bb(\d+)/));
-                              if (!match) return null;
-                              const battleUrl = `/battles/battle-${match[1]}`;
-                              const battleLabel = `BB#${match[1]}`;
-                              return (
-                                <Link
-                                  href={battleUrl}
-                                  className="px-2 py-0.5 rounded-md bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-[11px] font-bold shrink-0 transition-all inline-flex items-center gap-1"
-                                  title={`View ${beat.battleSource || `Beat Battle #${match[1]}`}`}
-                                >
-                                  <span>{battleLabel}</span>
-                                  <span className="text-[9px]">↗</span>
-                                </Link>
-                              );
-                            })()}
-                          </div>
-                        </div>
-
-                        {/* Mobile Badges Row (Under Title) */}
-                        {(() => {
-                          const match =
-                            (beat.battleSource && beat.battleSource.match(/Beat Battle #?(\d+)/i)) ||
-                            (beat.id && beat.id.match(/disc-bb(\d+)/));
-                          const hasBadges = beat.rank || match;
-                          if (!hasBadges) return null;
-
-                          return (
-                            <div className="flex sm:hidden items-center gap-2 pt-1 flex-wrap">
-                              {beat.rank === 1 && (
-                                <span className="h-6 px-2.5 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center leading-none">
-                                  1st Place
-                                </span>
-                              )}
-                              {beat.rank === 2 && (
-                                <span className="h-6 px-2.5 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-bold inline-flex items-center justify-center leading-none">
-                                  2nd Place
-                                </span>
-                              )}
-                              {beat.rank === 3 && (
-                                <span className="h-6 px-2.5 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center leading-none">
-                                  3rd Place
-                                </span>
-                              )}
-
-                              {match && (
-                                <Link
-                                  href={`/battles/battle-${match[1]}`}
-                                  className="px-2 py-0.5 rounded-md bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-[11px] font-bold shrink-0 transition-all inline-flex items-center gap-1"
-                                  title={`View ${beat.battleSource || `Beat Battle #${match[1]}`}`}
-                                >
-                                  <span>BB#{match[1]}</span>
-                                  <span className="text-[9px]">↗</span>
-                                </Link>
-                              )}
-                            </div>
-                          );
-                        })()}
-
-                        {/* Beatmaker name with clean padding below badges */}
-                        <Link
-                          href={`/producers/${beat.beatmaker.id}`}
-                          className="text-xs sm:text-sm text-[#7B61FF] hover:underline font-semibold block truncate pt-1.5 sm:pt-0.5"
-                        >
-                          {displayTag}
-                        </Link>
+                    {/* Jury Score Avg */}
+                    {typeof beat.juryScore === "number" && beat.juryScore > 0 ? (
+                      <div className="flex items-center gap-1 text-xs sm:text-sm text-[#7B61FF] font-bold px-1.5" title="Jury Score Average">
+                        <Star className="w-4 h-4 fill-current text-[#7B61FF]" />
+                        <span>{beat.juryScore.toFixed(2)}</span>
                       </div>
-                    </div>
-                  );
-                })()}
+                    ) : null}
 
-                {/* Right: Meta Badges (BPM, Price, Flames, Fav) */}
-                <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
-                  
-                  {/* BPM */}
-                  {beat.bpm ? (
-                    <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-[#121212] text-[#888888]">
-                      {beat.bpm} BPM
-                    </span>
-                  ) : null}
+                    {/* Community Flames (Public Rating Avg) */}
+                    {typeof beat.flames === "number" && beat.flames >= 1 ? (
+                      <div className="flex items-center gap-1 text-xs sm:text-sm text-[#FF5E3A] font-bold px-1.5" title="Public Rating Average">
+                        <Flame className="w-4 h-4 fill-current" />
+                        <span>{beat.flames.toFixed(2)}</span>
+                      </div>
+                    ) : null}
 
-                  {/* Price Tag Pill */}
-                  {beat.priceTag ? (
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-bold ${
-                        beat.priceTag === "Not For Sale"
-                          ? "bg-[#121212] text-[#666666]"
-                          : "bg-[#FF5E3A]/20 text-[#FF5E3A]"
-                      }`}
+                    {/* Favorite Button */}
+                    <button
+                      onClick={() => toggleFavorite(beat.id)}
+                      className="p-2 rounded-xl bg-[#121212] hover:bg-[#222222] transition-colors text-[#888888] hover:text-amber-400 cursor-pointer ml-auto sm:ml-0"
+                      title={beat.isFavorite ? "Remove from favorites" : "Add to favorites"}
                     >
-                      {beat.priceTag}
-                    </span>
-                  ) : null}
-
-                  {/* Jury Score Avg */}
-                  {typeof beat.juryScore === "number" && beat.juryScore > 0 ? (
-                    <div className="flex items-center gap-1 text-xs sm:text-sm text-[#7B61FF] font-bold px-2" title="Jury Score Average">
-                      <Star className="w-4 h-4 fill-current text-[#7B61FF]" />
-                      <span>{beat.juryScore.toFixed(2)}</span>
-                    </div>
-                  ) : null}
-
-                  {/* Community Flames (Public Rating Avg) */}
-                  {typeof beat.flames === "number" && beat.flames >= 1 ? (
-                    <div className="flex items-center gap-1 text-xs sm:text-sm text-[#FF5E3A] font-bold px-2" title="Public Rating Average">
-                      <Flame className="w-4 h-4 fill-current" />
-                      <span>{beat.flames.toFixed(2)}</span>
-                    </div>
-                  ) : null}
-
-                  {/* Favorite Button */}
-                  <button
-                    onClick={() => toggleFavorite(beat.id)}
-                    className="p-2 rounded-xl bg-[#121212] hover:bg-[#222222] transition-colors text-[#888888] hover:text-amber-400 cursor-pointer"
-                    title={beat.isFavorite ? "Remove from favorites" : "Add to favorites"}
-                  >
-                    <Star
-                      className={`w-4 h-4 ${
-                        beat.isFavorite ? "fill-amber-400 text-amber-400" : ""
-                      }`}
-                    />
-                  </button>
-
+                      <Star
+                        className={`w-4 h-4 ${
+                          beat.isFavorite ? "fill-amber-400 text-amber-400" : ""
+                        }`}
+                      />
+                    </button>
+                  </div>
                 </div>
+
+                {/* Row 2: Full Waveform Player */}
+                <AudioWaveformPlayer
+                  id={`disc-${beat.id}`}
+                  title={beat.title}
+                  artist={displayTag}
+                  artistId={beat.beatmaker.id}
+                  coverUrl={beat.beatmaker.avatarUrl}
+                  audioUrl={beat.audioUrl}
+                  duration={beat.duration}
+                  bpm={beat.bpm}
+                  compact={true}
+                />
+
+                {/* Row 3: Clickable Genre & Tags */}
+                {((beat.genres && beat.genres.length > 0) || (beat.tags && beat.tags.length > 0)) ? (
+                  <div className="flex flex-wrap items-center gap-2 pt-0.5 text-xs">
+                    {beat.genres?.map((g) => (
+                      <button
+                        key={g}
+                        onClick={() => handleTagClick(g)}
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors cursor-pointer ${
+                          selectedGenre === g
+                            ? "bg-[#7B61FF] text-white"
+                            : "bg-[#121212] text-[#888888] hover:text-white hover:bg-[#202020]"
+                        }`}
+                      >
+                        {g}
+                      </button>
+                    ))}
+
+                    {beat.tags.map((t) => (
+                      <button
+                        key={t}
+                        onClick={() => handleTagClick(t)}
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer ${
+                          selectedGenre === t
+                            ? "bg-[#7B61FF] text-white"
+                            : "bg-[#121212] text-[#777777] hover:text-white hover:bg-[#202020]"
+                        }`}
+                      >
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+
               </div>
-
-              {/* Row 2: Full Waveform Player */}
-              <AudioWaveformPlayer
-                id={`disc-${beat.id}`}
-                title={beat.title}
-                artist={producerService.getProducerById(beat.beatmaker.id)?.nickname || beat.beatmaker.tag}
-                artistId={beat.beatmaker.id}
-                coverUrl={beat.beatmaker.avatarUrl}
-                audioUrl={beat.audioUrl}
-                duration={beat.duration}
-                bpm={beat.bpm}
-                compact={true}
-              />
-
-              {/* Row 3: Clickable Genre & Tags */}
-              {((beat.genres && beat.genres.length > 0) || (beat.tags && beat.tags.length > 0)) ? (
-                <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
-                  {beat.genres?.map((g) => (
-                    <button
-                      key={g}
-                      onClick={() => handleTagClick(g)}
-                      className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors cursor-pointer ${
-                        selectedGenre === g
-                          ? "bg-[#7B61FF] text-white"
-                          : "bg-[#121212] text-[#888888] hover:text-white hover:bg-[#202020]"
-                      }`}
-                    >
-                      {g}
-                    </button>
-                  ))}
-
-                  {beat.tags.map((t) => (
-                    <button
-                      key={t}
-                      onClick={() => handleTagClick(t)}
-                      className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer ${
-                        selectedGenre === t
-                          ? "bg-[#7B61FF] text-white"
-                          : "bg-[#121212] text-[#777777] hover:text-white hover:bg-[#202020]"
-                      }`}
-                    >
-                      {t}
-                    </button>
-                  ))}
-                </div>
-              ) : null}
-
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 

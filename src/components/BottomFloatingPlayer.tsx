@@ -155,15 +155,15 @@ export const BottomFloatingPlayer: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#121212]/95 backdrop-blur-2xl shadow-[0_-10px_30px_rgba(0,0,0,0.8)] animate-in slide-in-from-bottom-5 duration-200 select-none pb-safe">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#121212]/95 backdrop-blur-2xl shadow-[0_-10px_30px_rgba(0,0,0,0.8)] animate-in slide-in-from-bottom-5 duration-200 select-none">
       
-      {/* Mobile Top Interactive Scrubber (Large touch hit zone with smooth silent scrub) */}
+      {/* Mobile Top Interactive Scrubber (Pinned absolutely to top edge with zero layout shift) */}
       <div
         ref={mobileScrubberRef}
         onPointerDown={(e) => handleScrubberPointerDown(e, true)}
         onPointerMove={(e) => handleScrubberPointerMove(e, true)}
         onPointerUp={(e) => handleScrubberPointerUp(e, true)}
-        className="sm:hidden w-full h-5 -mt-2.5 flex items-center relative cursor-pointer z-30 select-none touch-none group"
+        className="sm:hidden absolute top-0 left-0 right-0 -translate-y-1/2 h-5 flex items-center cursor-pointer z-30 select-none touch-none group"
       >
         <div className="w-full h-[3px] bg-[#2A2A2A] relative overflow-hidden">
           <div
@@ -178,8 +178,8 @@ export const BottomFloatingPlayer: React.FC = () => {
         />
       </div>
 
-      {/* Main Container with generous desktop top/bottom padding */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4.5 flex items-center justify-between gap-3 sm:gap-6 min-h-[64px] sm:min-h-[92px]">
+      {/* Main Container: Perfectly vertically centered on mobile and desktop */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-auto sm:min-h-[92px] py-2.5 sm:py-4.5 flex items-center justify-between gap-3 sm:gap-6">
         
         {/* LEFT COLUMN: Track Info (Cover, Title, Clickable Artist) */}
         <div className="flex items-center gap-3 min-w-0 flex-1 sm:flex-initial sm:w-1/3 sm:max-w-[280px]">

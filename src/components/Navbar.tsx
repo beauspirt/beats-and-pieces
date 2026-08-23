@@ -85,7 +85,7 @@ export const Navbar: React.FC = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-[#121212]/95 backdrop-blur-md border-b border-white/5">
+    <header className="sticky top-0 z-50 bg-[#0A0A0A]/95 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 sm:h-24 py-4 sm:py-5 flex items-center justify-between">
         
         {/* Left: Brand Logo & Desktop Nav */}

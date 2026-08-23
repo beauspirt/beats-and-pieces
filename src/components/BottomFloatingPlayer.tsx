@@ -173,7 +173,7 @@ export const BottomFloatingPlayer: React.FC = () => {
 
   return (
     <div
-      className={`fixed bottom-0 inset-x-0 z-50 bg-black select-none border-b-[100px] border-black -mb-[100px] ${
+      className={`fixed bottom-0 inset-x-0 z-50 bg-[#121212] sm:bg-[#0A0A0A] select-none ${
         isClosing
           ? "animate-out slide-out-to-bottom duration-200 fill-mode-forwards"
           : "animate-in slide-in-from-bottom duration-300"

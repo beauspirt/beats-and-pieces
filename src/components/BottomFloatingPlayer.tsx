@@ -29,6 +29,8 @@ export const BottomFloatingPlayer: React.FC = () => {
   } = useAudioPlayer();
 
   const [mounted, setMounted] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const [isScrubbing, setIsScrubbing] = useState(false);
   const [scrubFraction, setScrubFraction] = useState(0);
   const [showMobileVolume, setShowMobileVolume] = useState(false);
@@ -45,6 +47,28 @@ export const BottomFloatingPlayer: React.FC = () => {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Slide-up enter animation on track activation
+  useEffect(() => {
+    if (currentTrackId) {
+      setIsClosing(false);
+      const timer = setTimeout(() => setIsVisible(true), 20);
+      return () => clearTimeout(timer);
+    } else {
+      setIsVisible(false);
+    }
+  }, [currentTrackId]);
+
+  // Smooth dismiss handler with slide-down exit animation
+  const handleClose = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsClosing(true);
+    setTimeout(() => {
+      closePlayer();
+      setIsClosing(false);
+      setIsVisible(false);
+    }, 280);
+  };
 
   // Close mobile volume flyout when tapping outside
   useEffect(() => {
@@ -155,7 +179,11 @@ export const BottomFloatingPlayer: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#121212]/95 backdrop-blur-2xl shadow-[0_-10px_30px_rgba(0,0,0,0.8)] animate-in slide-in-from-bottom-5 duration-200 select-none">
+    <div
+      className={`fixed bottom-0 inset-x-0 z-50 bg-[#121212]/95 backdrop-blur-2xl shadow-[0_-10px_30px_rgba(0,0,0,0.8)] select-none transition-all duration-300 ease-out transform-gpu ${
+        isVisible && !isClosing ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"
+      }`}
+    >
       
       {/* Mobile Top Interactive Scrubber (Pinned absolutely to top edge with zero layout shift) */}
       <div
@@ -400,9 +428,9 @@ export const BottomFloatingPlayer: React.FC = () => {
             )}
           </button>
 
-          {/* Dismiss Player Bar */}
+          {/* Dismiss Player Bar with smooth slide-down animation */}
           <button
-            onClick={closePlayer}
+            onClick={handleClose}
             className="p-1.5 text-[#B3B3B3] hover:text-white transition-colors cursor-pointer shrink-0 ml-0.5 sm:ml-1"
             title="Close player"
             aria-label="Close player"

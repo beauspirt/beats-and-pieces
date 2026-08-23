@@ -175,7 +175,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const currentPos = startTrackOffsetRef.current + elapsed;
 
         if (currentPos >= buf.duration) {
-          setCurrentTime(buf.duration);
+          setCurrentTime(0);
           setIsPlaying(false);
           if (animFrameIdRef.current) cancelAnimationFrame(animFrameIdRef.current);
           return;
@@ -184,6 +184,12 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           animFrameIdRef.current = requestAnimationFrame(update);
         }
       } else if (fallbackAudioRef.current && !fallbackAudioRef.current.paused) {
+        if (fallbackAudioRef.current.ended) {
+          setCurrentTime(0);
+          setIsPlaying(false);
+          if (animFrameIdRef.current) cancelAnimationFrame(animFrameIdRef.current);
+          return;
+        }
         setCurrentTime(fallbackAudioRef.current.currentTime);
         if (fallbackAudioRef.current.duration && isFinite(fallbackAudioRef.current.duration)) {
           setDuration(fallbackAudioRef.current.duration);
@@ -278,6 +284,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     sourceNode.onended = () => {
       if (activeSourceNodeRef.current === sourceNode) {
         setIsPlaying(false);
+        setCurrentTime(0);
       }
     };
 
@@ -337,32 +344,6 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setActiveTrackCover(null);
     setCurrentTime(0);
   }, [pauseTrack]);
-
-  const togglePlay = useCallback(() => {
-    if (isPlaying) {
-      pauseTrack();
-    } else {
-      if (currentBufferRef.current) {
-        startBufferPlayback(currentBufferRef.current, currentTime);
-      } else if (fallbackAudioRef.current) {
-        fallbackAudioRef.current.play();
-        setIsPlaying(true);
-        startTimeLoop();
-      } else if (currentTrackId && currentUrlRef.current) {
-        playTrack(
-          currentTrackId,
-          activeTrackTitle || undefined,
-          90,
-          currentUrlRef.current,
-          duration > 0 ? currentTime / duration : 0,
-          duration,
-          activeTrackArtist || undefined,
-          activeTrackArtistId || undefined,
-          activeTrackCover || undefined
-        );
-      }
-    }
-  }, [isPlaying, pauseTrack, startBufferPlayback, currentTime, currentTrackId, activeTrackTitle, duration, activeTrackArtist, activeTrackArtistId, activeTrackCover, startTimeLoop]);
 
   const seekTrack = useCallback((progress: number) => {
     if (typeof progress !== "number" || isNaN(progress) || !isFinite(progress)) return;
@@ -493,6 +474,38 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }).catch(console.error);
 
   }, [currentTrackId, getAudioContext, isPlaying, currentTime, pauseTrack, startBufferPlayback, startTimeLoop, getCachedBuffer, setCachedBuffer]);
+
+  const togglePlay = useCallback(() => {
+    if (isPlaying) {
+      pauseTrack();
+    } else {
+      const isAtEnd =
+        (duration > 0 && currentTime >= duration - 0.5) ||
+        (currentBufferRef.current && currentTime >= currentBufferRef.current.duration - 0.5);
+      const resumeTime = isAtEnd ? 0 : currentTime;
+
+      if (currentBufferRef.current) {
+        startBufferPlayback(currentBufferRef.current, resumeTime);
+      } else if (fallbackAudioRef.current) {
+        if (isAtEnd) fallbackAudioRef.current.currentTime = 0;
+        fallbackAudioRef.current.play();
+        setIsPlaying(true);
+        startTimeLoop();
+      } else if (currentTrackId && currentUrlRef.current) {
+        playTrack(
+          currentTrackId,
+          activeTrackTitle || undefined,
+          90,
+          currentUrlRef.current,
+          isAtEnd ? 0 : (duration > 0 ? resumeTime / duration : 0),
+          duration,
+          activeTrackArtist || undefined,
+          activeTrackArtistId || undefined,
+          activeTrackCover || undefined
+        );
+      }
+    }
+  }, [isPlaying, pauseTrack, startBufferPlayback, currentTime, currentTrackId, activeTrackTitle, duration, activeTrackArtist, activeTrackArtistId, activeTrackCover, startTimeLoop, playTrack]);
 
   const playbackProgress = duration > 0 ? currentTime / duration : 0;
 

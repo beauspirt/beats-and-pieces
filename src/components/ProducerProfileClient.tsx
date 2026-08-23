@@ -10,7 +10,7 @@ import {
   globalWaveformCache,
   WaveformData,
 } from "@/components/AudioWaveformPlayer";
-import { DiscoveryBeat, JudgeFeedbackItem, UserProfile, STANDARD_BEAT_TAGS } from "@/lib/types";
+import { DiscoveryBeat, JudgeFeedbackItem, UserProfile, STANDARD_BEAT_TAGS, VaultItem } from "@/lib/types";
 import { producerService, battleService, beatService, storageService, vaultService } from "@/services";
 import { normalizeUrl } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
@@ -280,6 +280,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
+  const [activeVaultModalItem, setActiveVaultModalItem] = useState<VaultItem | null>(null);
   const [beatsVersion, setBeatsVersion] = useState(0);
 
   // Edit Beat Modal state
@@ -727,7 +728,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
   }, [producer.links]);
 
   return (
-    <div className="w-full space-y-4 animate-in fade-in duration-300">
+    <div className="w-full space-y-12 animate-in fade-in duration-300">
       
       {/* SECTION 1: PRODUCER HERO / IDENTITY */}
       <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-xl">
@@ -1105,12 +1106,10 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {producerVaultItems.map((item) => (
-              <a
+              <div
                 key={item.id}
-                href={item.youtubeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-[#181818] hover:bg-[#222222] p-4 rounded-2xl flex items-center gap-4 transition-all group shadow-md"
+                onClick={() => setActiveVaultModalItem(item)}
+                className="bg-[#181818] hover:bg-[#222222] p-4 rounded-2xl flex items-center gap-4 transition-colors group shadow-md cursor-pointer select-none"
               >
                 <div className="w-24 h-16 rounded-xl overflow-hidden relative shrink-0 bg-[#121212]">
                   {item.youtubeId ? (
@@ -1118,23 +1117,20 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                       src={`https://img.youtube.com/vi/${item.youtubeId}/hqdefault.jpg`}
                       alt={item.title}
                       fill
-                      className="object-cover group-hover:scale-105 transition-transform"
+                      className="object-cover"
                     />
                   ) : null}
-                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                    <Play className="w-4 h-4 text-white fill-current" />
-                  </div>
                 </div>
                 <div className="min-w-0 flex-1">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#7B61FF] block">
                     {item.category === "breakdowns" ? "Beat Breakdown" : "Live Set"}
                   </span>
-                  <h4 className="text-sm font-bold text-white group-hover:text-[#A78BFA] transition-colors truncate">
+                  <h4 className="text-sm font-bold text-white truncate">
                     {item.title}
                   </h4>
                 </div>
                 <ExternalLink className="w-4 h-4 text-zinc-500 group-hover:text-white shrink-0 transition-colors mr-1" />
-              </a>
+              </div>
             ))}
           </div>
         </div>
@@ -1545,6 +1541,56 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
           <div>
             <p className="text-xs font-bold text-white">Showcase Updated</p>
             <p className="text-[11px] text-zinc-400">{saveToastMessage}</p>
+          </div>
+        </div>
+      )}
+
+      {/* IN-APP VAULT VIDEO MODAL */}
+      {activeVaultModalItem && (
+        <div
+          onClick={() => setActiveVaultModalItem(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200 cursor-pointer"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#181818] rounded-2xl max-w-4xl w-full overflow-hidden shadow-2xl space-y-4 p-4 sm:p-6 relative cursor-default"
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between gap-4">
+              <h3 className="text-lg sm:text-xl font-bold text-white leading-snug truncate">
+                {activeVaultModalItem.title}
+              </h3>
+              <button
+                onClick={() => setActiveVaultModalItem(null)}
+                className="w-8 h-8 rounded-full bg-[#121212] text-zinc-400 hover:text-white flex items-center justify-center text-sm cursor-pointer shrink-0"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Embedded 16:9 YouTube Player */}
+            <div className="w-full aspect-video rounded-xl overflow-hidden bg-black relative shadow-inner">
+              <iframe
+                src={`https://www.youtube.com/embed/${activeVaultModalItem.youtubeId}?autoplay=1`}
+                title={activeVaultModalItem.title}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full border-0"
+              />
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-end pt-1 text-xs">
+              <a
+                href={activeVaultModalItem.youtubeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 rounded-xl bg-[#222222] hover:bg-[#2c2c2c] text-white font-semibold flex items-center gap-2 shrink-0 transition-colors"
+              >
+                <span>Watch on YouTube</span>
+                <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
+              </a>
+            </div>
           </div>
         </div>
       )}

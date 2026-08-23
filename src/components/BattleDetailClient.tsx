@@ -1149,6 +1149,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                           title={track.placeholder}
                           artist="Blind Battle Entry"
                           audioUrl={track.audioUrl}
+                          waveformPeaks={track.waveformPeaks}
                           duration={track.duration}
                           bpm={track.bpm}
                           compact={true}

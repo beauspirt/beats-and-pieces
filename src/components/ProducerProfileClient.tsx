@@ -1052,6 +1052,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                   artistId={producer.id}
                   coverUrl={beat.beatmaker?.avatarUrl || producer.avatarUrl}
                   audioUrl={beat.audioUrl}
+                  waveformPeaks={beat.waveform}
                   duration={beat.duration}
                   bpm={beat.bpm}
                   compact={true}

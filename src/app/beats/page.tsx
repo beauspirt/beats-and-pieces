@@ -434,6 +434,7 @@ export default function BeatsDiscoveryPage() {
                   artistId={beat.beatmaker.id}
                   coverUrl={beat.beatmaker.avatarUrl}
                   audioUrl={beat.audioUrl}
+                  waveformPeaks={beat.waveform}
                   duration={beat.duration}
                   bpm={beat.bpm}
                   compact={true}

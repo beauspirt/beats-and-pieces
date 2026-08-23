@@ -25,8 +25,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark overflow-x-hidden">
-      <body className={`${inter.variable} font-sans antialiased bg-[#121212] text-foreground min-h-screen flex flex-col overflow-x-hidden w-full`}>
+    <html lang="en" className="dark">
+      <body className={`${inter.variable} font-sans antialiased bg-[#121212] text-foreground min-h-screen flex flex-col w-full`}>
         <AuthProvider>
           <AudioProvider>
             <Navbar />

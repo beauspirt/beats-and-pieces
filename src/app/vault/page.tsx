@@ -128,7 +128,7 @@ export default function VaultPage() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-[#181818] rounded-2xl max-w-4xl w-full overflow-hidden shadow-2xl space-y-4 p-4 sm:p-6 relative cursor-default border border-white/5"
+            className="bg-[#181818] rounded-2xl max-w-4xl w-full overflow-hidden shadow-2xl space-y-4 p-4 sm:p-6 relative cursor-default"
           >
             {/* Modal Header */}
             <div className="flex items-center justify-between gap-4">

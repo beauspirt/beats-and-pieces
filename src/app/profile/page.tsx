@@ -141,7 +141,7 @@ function ProfileContent() {
   const showOnboardingBanner = isOnboarding || !profile.isClaimed;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-300 py-4">
+    <div className="max-w-4xl mx-auto space-y-4 animate-in fade-in duration-300 py-4">
       
       {/* Profile Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2">
@@ -185,7 +185,7 @@ function ProfileContent() {
         </div>
       )}
 
-      <form onSubmit={handleSave} className="space-y-6">
+      <form onSubmit={handleSave} className="space-y-4">
         
         {/* CONTAINER 1: DETAILS */}
         <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 space-y-5 shadow-lg">

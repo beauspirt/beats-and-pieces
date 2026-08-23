@@ -91,16 +91,15 @@ export const Navbar: React.FC = () => {
         {/* Left: Brand Logo & Desktop Nav */}
         <div className="flex items-center gap-8 lg:gap-12">
           {/* Authentic Beats & Pieces Logo */}
-          <Link href="/battles" className="flex items-center group select-none">
-            <div className="relative h-7 sm:h-8 w-24 sm:w-28 flex items-center">
-              <Image
-                src="/logo.png"
-                alt="Beats & Pieces"
-                fill
-                className="object-contain object-left group-hover:opacity-90 transition-opacity"
-                priority
-              />
-            </div>
+          <Link href="/battles" className="flex items-center group select-none shrink-0">
+            <Image
+              src="/logo.png"
+              alt="Beats & Pieces"
+              width={120}
+              height={36}
+              className="h-7 sm:h-8 w-auto object-contain group-hover:opacity-90 transition-opacity"
+              priority
+            />
           </Link>
 
           {/* Desktop Navigation Links */}

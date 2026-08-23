@@ -727,7 +727,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
   }, [producer.links]);
 
   return (
-    <div className="w-full space-y-8 animate-in fade-in duration-300">
+    <div className="w-full space-y-4 animate-in fade-in duration-300">
       
       {/* SECTION 1: PRODUCER HERO / IDENTITY */}
       <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-xl">
@@ -894,7 +894,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
         )}
 
         {prioritizedBeats.length > 0 ? (
-          <div className="space-y-3.5">
+          <div className="space-y-4">
             {prioritizedBeats.map((beat) => (
               <div
                 key={beat.id}
@@ -1087,7 +1087,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
       {/* SECTION 3: FEATURED VAULT MEDIA */}
       {producerVaultItems.length > 0 && (
-        <div className="space-y-4 pt-2">
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl sm:text-2xl font-bold text-white">
               Featured In Vault

@@ -123,7 +123,7 @@ export default function BeatsDiscoveryPage() {
   const visibleBeats = filteredBeats.slice(0, visibleCount);
 
   return (
-    <div className="space-y-6 w-full animate-in fade-in duration-300">
+    <div className="space-y-4 w-full animate-in fade-in duration-300">
       
       {/* Intro Description Box */}
       <div className="text-sm sm:text-base text-[#A0A0A0] leading-relaxed space-y-1.5 font-normal w-full">
@@ -133,7 +133,7 @@ export default function BeatsDiscoveryPage() {
       </div>
 
       {/* Search & Filter Bar */}
-      <div className="space-y-3 pt-1">
+      <div className="space-y-3">
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3">
           
           {/* Search Bar */}

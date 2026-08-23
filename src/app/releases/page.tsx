@@ -40,7 +40,7 @@ export default function ReleasesPage() {
   }, []);
 
   return (
-    <div className="w-full space-y-12 py-2 animate-in fade-in duration-300">
+    <div className="w-full space-y-6 animate-in fade-in duration-300">
       {releases.map((release) => (
         <div
           key={release.id}

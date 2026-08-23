@@ -689,7 +689,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   ];
 
   return (
-    <div className="w-full space-y-8 animate-in fade-in duration-300">
+    <div className="w-full space-y-4 animate-in fade-in duration-300">
       
       {/* SECTION 1: HERO & PHASE HEADER */}
       <section className="space-y-4">
@@ -781,12 +781,12 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       {/* PHASE 1: SUBMISSIONS OPEN (RULES & COMPACT SAMPLES ON LEFT, SUBMIT ON RIGHT) */}
       {/* ========================================================================= */}
       {battle.phase === "submission" && (
-        <div className="space-y-6">
+        <div className="space-y-4">
           
-          <div className={`grid grid-cols-1 lg:grid-cols-12 gap-6 ${myEntry ? "items-start" : "items-stretch"}`}>
+          <div className={`grid grid-cols-1 lg:grid-cols-12 gap-4 ${myEntry ? "items-start" : "items-stretch"}`}>
             
             {/* Left Column: Rules on Top, Compact Samples Below */}
-            <div className="lg:col-span-6 space-y-6 flex flex-col">
+            <div className="lg:col-span-6 space-y-4 flex flex-col">
               
               {/* 1. Rules (Directly on website background) */}
               <div className="space-y-3.5">
@@ -1091,7 +1091,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       {/* PHASE 2: PUBLIC RATING PHASE (ACTUAL BATTLE SUBMISSIONS WITH FLAME-ONLY RATING) */}
       {/* ========================================================================= */}
       {battle.phase === "rating" && (
-        <div className="space-y-6">
+        <div className="space-y-4">
           
           {/* Anti-Bias Info (Directly on website background) */}
           <div className="space-y-1">
@@ -1111,7 +1111,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
               </p>
             </div>
           ) : (
-            <div className="space-y-3.5">
+            <div className="space-y-4">
               {blindTracks.map((track, idx) => {
                 const unlocked = isTrackUnlocked(idx);
                 const currentFlames = ratings[track.id] || 0;
@@ -1409,7 +1409,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
               </p>
             </div>
           ) : (
-            <div className="space-y-3.5">
+            <div className="space-y-4">
               {finalistSubmissions.map((sub, idx) => {
                 const scoreVal = juryScores[sub.id] !== undefined ? juryScores[sub.id] : "";
                 const feedbackVal = juryFeedback[sub.id] !== undefined ? juryFeedback[sub.id] : "";
@@ -1493,7 +1493,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       {/* PHASE 4: RESULTS & LEADERBOARD */}
       {/* ========================================================================= */}
       {battle.phase === "completed" && (
-        <div className="space-y-6">
+        <div className="space-y-4">
           
           {/* Leaderboard Cards */}
           {submissions.length === 0 ? (
@@ -1504,7 +1504,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
               </p>
             </div>
           ) : (
-            <div className="space-y-3.5">
+            <div className="space-y-4">
               {[...submissions]
                 .sort((a, b) => {
                   const aScore = typeof a.juryScore === "number" ? a.juryScore : -1;

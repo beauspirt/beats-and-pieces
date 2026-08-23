@@ -105,14 +105,14 @@ export default function VaultPage() {
   };
 
   return (
-    <div className="w-full space-y-12 py-2 animate-in fade-in duration-300">
+    <div className="w-full space-y-4 animate-in fade-in duration-300">
       
       {/* Section 1: Beat Breakdowns */}
       <section className="space-y-4">
         <h2 className="text-xl sm:text-2xl font-bold text-white">
           Beat Breakdowns
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {breakdowns.map(renderCard)}
         </div>
       </section>
@@ -122,7 +122,7 @@ export default function VaultPage() {
         <h2 className="text-xl sm:text-2xl font-bold text-white">
           Live Sets
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {liveSets.map(renderCard)}
         </div>
       </section>

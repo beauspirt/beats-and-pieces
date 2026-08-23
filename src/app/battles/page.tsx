@@ -54,7 +54,7 @@ export default function BattlesPage() {
   const pastBattles = competitions.filter((c) => c.phase === "completed");
 
   return (
-    <div className="space-y-10 w-full animate-in fade-in duration-300">
+    <div className="space-y-4 w-full animate-in fade-in duration-300">
       
       {/* SECTION 1: ACTIVE BATTLE (IF ANY ONGOING BATTLE EXISTS) */}
       {activeBattle && (
@@ -126,7 +126,7 @@ export default function BattlesPage() {
 
       {/* SECTION 1.5: ADDITIONAL ACTIVE BATTLES (IF MORE THAN ONE) */}
       {additionalActive.length > 0 && (
-        <section className="space-y-4 pt-2">
+        <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2.5">
               <span className="w-2.5 h-2.5 rounded-full bg-brand animate-pulse" />
@@ -134,7 +134,7 @@ export default function BattlesPage() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {additionalActive.map((battle) => (
               <Link
                 key={battle.id}
@@ -188,12 +188,12 @@ export default function BattlesPage() {
       )}
 
       {/* SECTION 2: BATTLES ARCHIVE */}
-      <section className="space-y-4 pt-2">
+      <section className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl sm:text-2xl font-bold text-white">Battles Archive</h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {pastBattles.map((battle) => {
             const battleSubs = battleService.getSubmissionsByBattleId(battle.id);
             const topSub = battleSubs.find((s) => s.rank === 1) || battleSubs[0];

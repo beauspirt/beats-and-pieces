@@ -31,15 +31,36 @@ export const BottomFloatingPlayer: React.FC = () => {
   const [mounted, setMounted] = useState(false);
   const [isScrubbing, setIsScrubbing] = useState(false);
   const [scrubFraction, setScrubFraction] = useState(0);
+  const [showMobileVolume, setShowMobileVolume] = useState(false);
 
   const scrubberRef = useRef<HTMLDivElement | null>(null);
+  const mobileScrubberRef = useRef<HTMLDivElement | null>(null);
   const volumeBarRef = useRef<HTMLDivElement | null>(null);
+  const mobileVolumeBarRef = useRef<HTMLDivElement | null>(null);
+  const mobileVolumePopupRef = useRef<HTMLDivElement | null>(null);
+
   const isPointerDownScrubber = useRef(false);
   const isPointerDownVolume = useRef(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Close mobile volume flyout when tapping outside
+  useEffect(() => {
+    if (!showMobileVolume) return;
+    const handleOutsideClick = (e: MouseEvent | TouchEvent) => {
+      if (mobileVolumePopupRef.current && !mobileVolumePopupRef.current.contains(e.target as Node)) {
+        setShowMobileVolume(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("touchstart", handleOutsideClick);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("touchstart", handleOutsideClick);
+    };
+  }, [showMobileVolume]);
 
   if (!mounted || !currentTrackId) return null;
 
@@ -49,8 +70,8 @@ export const BottomFloatingPlayer: React.FC = () => {
   const currentVolumePercent = isMuted ? 0 : volume;
 
   // --- SCRUBBER HANDLERS (Spotify smooth & silent scrubbing) ---
-  const getScrubberFraction = (e: React.PointerEvent<HTMLDivElement>) => {
-    const bar = scrubberRef.current;
+  const getScrubberFraction = (e: React.PointerEvent<HTMLDivElement>, targetRef: React.RefObject<HTMLDivElement | null>) => {
+    const bar = targetRef.current;
     if (!bar) return 0;
     const rect = bar.getBoundingClientRect();
     if (rect.width <= 0) return 0;
@@ -58,7 +79,7 @@ export const BottomFloatingPlayer: React.FC = () => {
     return Math.max(0, Math.min(1, x / rect.width));
   };
 
-  const handleScrubberPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+  const handleScrubberPointerDown = (e: React.PointerEvent<HTMLDivElement>, isMobile = false) => {
     e.preventDefault();
     e.stopPropagation();
     isPointerDownScrubber.current = true;
@@ -66,32 +87,35 @@ export const BottomFloatingPlayer: React.FC = () => {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch {}
 
-    const frac = getScrubberFraction(e);
+    const targetRef = isMobile ? mobileScrubberRef : scrubberRef;
+    const frac = getScrubberFraction(e, targetRef);
     setIsScrubbing(true);
     setScrubFraction(frac);
   };
 
-  const handleScrubberPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+  const handleScrubberPointerMove = (e: React.PointerEvent<HTMLDivElement>, isMobile = false) => {
     if (!isPointerDownScrubber.current) return;
-    const frac = getScrubberFraction(e);
+    const targetRef = isMobile ? mobileScrubberRef : scrubberRef;
+    const frac = getScrubberFraction(e, targetRef);
     setScrubFraction(frac);
   };
 
-  const handleScrubberPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+  const handleScrubberPointerUp = (e: React.PointerEvent<HTMLDivElement>, isMobile = false) => {
     if (!isPointerDownScrubber.current) return;
     isPointerDownScrubber.current = false;
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);
     } catch {}
 
-    const frac = getScrubberFraction(e);
+    const targetRef = isMobile ? mobileScrubberRef : scrubberRef;
+    const frac = getScrubberFraction(e, targetRef);
     setIsScrubbing(false);
     seekTrack(frac);
   };
 
   // --- VOLUME BAR HANDLERS ---
-  const getVolumeFraction = (e: React.PointerEvent<HTMLDivElement>) => {
-    const bar = volumeBarRef.current;
+  const getVolumeFraction = (e: React.PointerEvent<HTMLDivElement>, targetRef: React.RefObject<HTMLDivElement | null>) => {
+    const bar = targetRef.current;
     if (!bar) return 0;
     const rect = bar.getBoundingClientRect();
     if (rect.width <= 0) return 0;
@@ -99,7 +123,7 @@ export const BottomFloatingPlayer: React.FC = () => {
     return Math.max(0, Math.min(1, x / rect.width));
   };
 
-  const handleVolumePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+  const handleVolumePointerDown = (e: React.PointerEvent<HTMLDivElement>, isMobile = false) => {
     e.preventDefault();
     e.stopPropagation();
     isPointerDownVolume.current = true;
@@ -107,43 +131,60 @@ export const BottomFloatingPlayer: React.FC = () => {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch {}
 
-    const frac = getVolumeFraction(e);
+    const targetRef = isMobile ? mobileVolumeBarRef : volumeBarRef;
+    const frac = getVolumeFraction(e, targetRef);
     setVolume(frac);
   };
 
-  const handleVolumePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+  const handleVolumePointerMove = (e: React.PointerEvent<HTMLDivElement>, isMobile = false) => {
     if (!isPointerDownVolume.current) return;
-    const frac = getVolumeFraction(e);
+    const targetRef = isMobile ? mobileVolumeBarRef : volumeBarRef;
+    const frac = getVolumeFraction(e, targetRef);
     setVolume(frac);
   };
 
-  const handleVolumePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+  const handleVolumePointerUp = (e: React.PointerEvent<HTMLDivElement>, isMobile = false) => {
     if (!isPointerDownVolume.current) return;
     isPointerDownVolume.current = false;
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);
     } catch {}
-    const frac = getVolumeFraction(e);
+    const targetRef = isMobile ? mobileVolumeBarRef : volumeBarRef;
+    const frac = getVolumeFraction(e, targetRef);
     setVolume(frac);
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#121212]/95 backdrop-blur-xl shadow-[0_-10px_30px_rgba(0,0,0,0.7)] animate-in slide-in-from-bottom-5 duration-200 select-none pb-safe">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#121212]/95 backdrop-blur-2xl shadow-[0_-10px_30px_rgba(0,0,0,0.8)] animate-in slide-in-from-bottom-5 duration-200 select-none pb-safe">
       
-      {/* Mobile Top Micro-Progress Line (Pinned to top on < sm screens) */}
-      <div className="sm:hidden w-full h-[2px] bg-[#2A2A2A] relative overflow-hidden">
+      {/* Mobile Top Interactive Scrubber (Large touch hit zone with smooth silent scrub) */}
+      <div
+        ref={mobileScrubberRef}
+        onPointerDown={(e) => handleScrubberPointerDown(e, true)}
+        onPointerMove={(e) => handleScrubberPointerMove(e, true)}
+        onPointerUp={(e) => handleScrubberPointerUp(e, true)}
+        className="sm:hidden w-full h-5 -mt-2.5 flex items-center relative cursor-pointer z-30 select-none touch-none group"
+      >
+        <div className="w-full h-[3px] bg-[#2A2A2A] relative overflow-hidden">
+          <div
+            className="h-full bg-[#7B61FF]"
+            style={{ width: `${Math.max(0, Math.min(100, currentDisplayProgress * 100))}%` }}
+          />
+        </div>
+        {/* Mobile Scrubber Drag Thumb */}
         <div
-          className="h-full bg-[#7B61FF]"
-          style={{ width: `${Math.max(0, Math.min(100, currentDisplayProgress * 100))}%` }}
+          className="w-2.5 h-2.5 bg-white rounded-full absolute top-1/2 -translate-y-1/2 -translate-x-1/2 shadow-[0_1px_4px_rgba(0,0,0,0.8)] pointer-events-none"
+          style={{ left: `${Math.max(0, Math.min(100, currentDisplayProgress * 100))}%` }}
         />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-22 flex items-center justify-between gap-3 sm:gap-4">
+      {/* Main Container with generous desktop top/bottom padding */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4.5 flex items-center justify-between gap-3 sm:gap-6 min-h-[64px] sm:min-h-[92px]">
         
         {/* LEFT COLUMN: Track Info (Cover, Title, Clickable Artist) */}
         <div className="flex items-center gap-3 min-w-0 flex-1 sm:flex-initial sm:w-1/3 sm:max-w-[280px]">
           {/* Artwork Thumbnail */}
-          <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-md overflow-hidden bg-[#242424] relative shrink-0 shadow-md flex items-center justify-center">
+          <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-md overflow-hidden bg-[#242424] relative shrink-0 shadow-md flex items-center justify-center">
             {activeTrackCover ? (
               <Image
                 src={activeTrackCover}
@@ -179,13 +220,13 @@ export const BottomFloatingPlayer: React.FC = () => {
         </div>
 
         {/* CENTER COLUMN (Desktop only): Play/Pause Button + Spotify-Style Scrubber */}
-        <div className="hidden sm:flex flex-col items-center justify-center gap-1.5 flex-1 max-w-xl min-w-0">
+        <div className="hidden sm:flex flex-col items-center justify-center gap-2 flex-1 max-w-xl min-w-0">
           
           {/* Transport Controls Row */}
           <div className="flex items-center gap-4">
             <button
               onClick={togglePlay}
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white hover:scale-105 active:scale-95 text-black flex items-center justify-center shadow-lg transition-all cursor-pointer"
+              className="w-9 h-9 rounded-full bg-white hover:scale-105 active:scale-95 text-black flex items-center justify-center shadow-lg transition-all cursor-pointer"
               aria-label={isPlaying ? "Pause" : "Play"}
             >
               {isPlaying ? (
@@ -205,9 +246,9 @@ export const BottomFloatingPlayer: React.FC = () => {
             {/* Interactive Scrubber Track (Thin 3px Bar with generous hit area) */}
             <div
               ref={scrubberRef}
-              onPointerDown={handleScrubberPointerDown}
-              onPointerMove={handleScrubberPointerMove}
-              onPointerUp={handleScrubberPointerUp}
+              onPointerDown={(e) => handleScrubberPointerDown(e, false)}
+              onPointerMove={(e) => handleScrubberPointerMove(e, false)}
+              onPointerUp={(e) => handleScrubberPointerUp(e, false)}
               className="flex-1 py-3 -my-3 flex items-center relative cursor-pointer group select-none"
             >
               {/* Slim Unified 3px Track */}
@@ -242,15 +283,68 @@ export const BottomFloatingPlayer: React.FC = () => {
 
         </div>
 
-        {/* RIGHT COLUMN: Mobile Play Button + Volume Slider (Desktop) + Mute + Dismiss */}
-        <div className="flex items-center justify-end gap-2 sm:gap-2.5 shrink-0 sm:w-1/3 sm:max-w-[280px]">
+        {/* RIGHT COLUMN: Mobile Play Button + Volume Popover (Mobile) / Slider (Desktop) + Dismiss */}
+        <div className="flex items-center justify-end gap-2 sm:gap-3 shrink-0 sm:w-1/3 sm:max-w-[280px] relative">
           
-          {/* Mute Toggle */}
+          {/* Mobile Volume Popover Flyout */}
+          {showMobileVolume && (
+            <div
+              ref={mobileVolumePopupRef}
+              className="sm:hidden absolute bottom-full right-6 mb-3 bg-[#1A1A1A]/95 backdrop-blur-2xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] border border-white/10 rounded-2xl p-3 flex items-center gap-3 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150"
+            >
+              <button
+                onClick={toggleMute}
+                className="p-1 text-[#B3B3B3] hover:text-white transition-colors cursor-pointer"
+                title={isMuted ? "Unmute" : "Mute"}
+              >
+                {isMuted || currentVolumePercent === 0 ? (
+                  <VolumeX className="w-4 h-4 text-red-400" />
+                ) : currentVolumePercent < 0.5 ? (
+                  <Volume1 className="w-4 h-4" />
+                ) : (
+                  <Volume2 className="w-4 h-4" />
+                )}
+              </button>
+
+              <div
+                ref={mobileVolumeBarRef}
+                onPointerDown={(e) => handleVolumePointerDown(e, true)}
+                onPointerMove={(e) => handleVolumePointerMove(e, true)}
+                onPointerUp={(e) => handleVolumePointerUp(e, true)}
+                className="w-24 py-2.5 -my-2.5 flex items-center relative cursor-pointer select-none touch-none"
+              >
+                <div className="w-full h-1 bg-[#3E3E3E] rounded-full overflow-hidden relative">
+                  <div
+                    className="h-full bg-[#7B61FF] rounded-full"
+                    style={{ width: `${Math.max(0, Math.min(100, currentVolumePercent * 100))}%` }}
+                  />
+                </div>
+                <div
+                  className="w-3 h-3 bg-white rounded-full absolute top-1/2 -translate-y-1/2 -translate-x-1/2 shadow-md pointer-events-none"
+                  style={{ left: `${Math.max(0, Math.min(100, currentVolumePercent * 100))}%` }}
+                />
+              </div>
+
+              <span className="text-[11px] font-mono text-zinc-400 min-w-[28px] text-right">
+                {Math.round(currentVolumePercent * 100)}%
+              </span>
+            </div>
+          )}
+
+          {/* Volume Icon Button (Opens Flyout on Mobile, Mutes on Desktop) */}
           <button
-            onClick={toggleMute}
-            className="p-1.5 text-[#B3B3B3] hover:text-white transition-colors cursor-pointer shrink-0"
-            title={isMuted ? "Unmute" : "Mute"}
-            aria-label={isMuted ? "Unmute" : "Mute"}
+            onClick={() => {
+              if (window.innerWidth < 640) {
+                setShowMobileVolume((prev) => !prev);
+              } else {
+                toggleMute();
+              }
+            }}
+            className={`p-1.5 transition-colors cursor-pointer shrink-0 rounded-lg ${
+              showMobileVolume ? "text-white bg-white/10" : "text-[#B3B3B3] hover:text-white"
+            }`}
+            title={isMuted ? "Unmute" : "Volume"}
+            aria-label="Volume controls"
           >
             {isMuted || currentVolumePercent === 0 ? (
               <VolumeX className="w-4 h-4 text-red-400" />
@@ -264,9 +358,9 @@ export const BottomFloatingPlayer: React.FC = () => {
           {/* Spotify-style Slim 3px Volume Bar (Desktop Only) */}
           <div
             ref={volumeBarRef}
-            onPointerDown={handleVolumePointerDown}
-            onPointerMove={handleVolumePointerMove}
-            onPointerUp={handleVolumePointerUp}
+            onPointerDown={(e) => handleVolumePointerDown(e, false)}
+            onPointerMove={(e) => handleVolumePointerMove(e, false)}
+            onPointerUp={(e) => handleVolumePointerUp(e, false)}
             className="w-16 sm:w-24 py-3 -my-3 items-center relative cursor-pointer group select-none hidden sm:flex"
           >
             <div className="w-full h-[3px] bg-[#3E3E3E] rounded-full overflow-hidden relative">
@@ -293,16 +387,16 @@ export const BottomFloatingPlayer: React.FC = () => {
             </div>
           </div>
 
-          {/* Mobile Play/Pause Button (Visible on mobile right next to mute) */}
+          {/* Mobile Play/Pause Button (Visible on mobile right next to volume) */}
           <button
             onClick={togglePlay}
-            className="w-8 h-8 rounded-full bg-white hover:scale-105 active:scale-95 text-black flex items-center justify-center shadow-md transition-all cursor-pointer sm:hidden"
+            className="w-9 h-9 rounded-full bg-white hover:scale-105 active:scale-95 text-black flex items-center justify-center shadow-md transition-all cursor-pointer sm:hidden"
             aria-label={isPlaying ? "Pause" : "Play"}
           >
             {isPlaying ? (
-              <Pause className="w-3.5 h-3.5 fill-current" />
+              <Pause className="w-4 h-4 fill-current" />
             ) : (
-              <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+              <Play className="w-4 h-4 fill-current ml-0.5" />
             )}
           </button>
 

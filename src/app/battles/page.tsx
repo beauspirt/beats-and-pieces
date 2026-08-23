@@ -54,7 +54,7 @@ export default function BattlesPage() {
   const pastBattles = competitions.filter((c) => c.phase === "completed");
 
   return (
-    <div className="space-y-4 w-full animate-in fade-in duration-300">
+    <div className="space-y-12 sm:space-y-16 w-full animate-in fade-in duration-300">
       
       {/* SECTION 1: ACTIVE BATTLE (IF ANY ONGOING BATTLE EXISTS) */}
       {activeBattle && (

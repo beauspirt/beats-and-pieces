@@ -102,6 +102,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
   const isPointerDownRef = useRef(false);
   const wasActiveOnDownRef = useRef(false);
   const hoverFractionRef = useRef<number | null>(null);
+  const touchStartPos = useRef<{ x: number; y: number; isScrolling: boolean } | null>(null);
 
   const isThisTrackActive = currentTrackId === id;
   const isThisTrackPlaying = isThisTrackActive && isPlaying;
@@ -361,11 +362,18 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
   };
 
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
     isPointerDownRef.current = true;
     wasActiveOnDownRef.current = isThisTrackActive;
 
+    if (e.pointerType === "touch") {
+      // Record starting coordinates to distinguish between vertical scroll and intentional tap/scrub
+      touchStartPos.current = { x: e.clientX, y: e.clientY, isScrolling: false };
+      return;
+    }
+
+    // For mouse, immediately seek/play and capture pointer
+    e.preventDefault();
+    e.stopPropagation();
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch {
@@ -375,16 +383,46 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
     hoverFractionRef.current = p;
 
     if (!isThisTrackActive) {
-      // Initial click on inactive track: ALWAYS start from 0:00
       playTrack(id, title, bpm, audioUrl, 0, effectiveDuration, artist, artistId, coverUrl);
     } else {
-      // Already active track: seek directly to clicked position
       seekTrack(p);
     }
     renderWaveform();
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (e.pointerType === "touch" && touchStartPos.current) {
+      const dx = Math.abs(e.clientX - touchStartPos.current.x);
+      const dy = Math.abs(e.clientY - touchStartPos.current.y);
+
+      // If user moved vertically more than 7px, they are scrolling the page!
+      if (dy > 7 && !touchStartPos.current.isScrolling) {
+        touchStartPos.current.isScrolling = true;
+        isPointerDownRef.current = false;
+        hoverFractionRef.current = null;
+        renderWaveform();
+        return;
+      }
+
+      // If scrolling, ignore horizontal moves
+      if (touchStartPos.current.isScrolling) {
+        return;
+      }
+
+      // If moved horizontally more than 10px while holding, start scrubbing
+      if (dx > 10) {
+        e.preventDefault();
+        const p = getProgressFromPointer(e);
+        hoverFractionRef.current = p;
+        if (wasActiveOnDownRef.current && isThisTrackActive) {
+          seekTrack(p);
+        }
+        renderWaveform();
+        return;
+      }
+      return;
+    }
+
     const p = getProgressFromPointer(e);
     hoverFractionRef.current = p;
 
@@ -399,6 +437,32 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (e.pointerType === "touch" && touchStartPos.current) {
+      const wasScrolling = touchStartPos.current.isScrolling;
+      const dy = Math.abs(e.clientY - touchStartPos.current.y);
+      touchStartPos.current = null;
+      isPointerDownRef.current = false;
+      wasActiveOnDownRef.current = false;
+
+      // If it was a scroll gesture, do nothing!
+      if (wasScrolling || dy > 7) {
+        hoverFractionRef.current = null;
+        renderWaveform();
+        return;
+      }
+
+      // Otherwise it was an intentional tap on the waveform: seek/play!
+      const p = getProgressFromPointer(e);
+      hoverFractionRef.current = p;
+      if (!isThisTrackActive) {
+        playTrack(id, title, bpm, audioUrl, p, effectiveDuration, artist, artistId, coverUrl);
+      } else {
+        seekTrack(p);
+      }
+      renderWaveform();
+      return;
+    }
+
     isPointerDownRef.current = false;
     wasActiveOnDownRef.current = false;
     try {
@@ -466,7 +530,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
           onPointerUp={handlePointerUp}
           onPointerCancel={handlePointerUp}
           onPointerLeave={handlePointerLeave}
-          className="w-full h-full cursor-pointer touch-none select-none block"
+          className="w-full h-full cursor-pointer touch-pan-y select-none block"
           style={{ width: "100%", height: "100%", display: "block" }}
         />
 

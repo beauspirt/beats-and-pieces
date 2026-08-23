@@ -105,7 +105,7 @@ export default function VaultPage() {
   };
 
   return (
-    <div className="w-full space-y-4 animate-in fade-in duration-300">
+    <div className="w-full space-y-12 sm:space-y-16 animate-in fade-in duration-300">
       
       {/* Section 1: Beat Breakdowns */}
       <section className="space-y-4">

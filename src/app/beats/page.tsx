@@ -141,57 +141,51 @@ export default function BeatsDiscoveryPage() {
             <Search className="w-4 h-4 text-[#666666] absolute left-4 top-1/2 -translate-y-1/2" />
           </div>
 
-          {/* Quick Action Controls Row (Favorites, Filter Drawer Toggle, Sort) */}
-          <div className="grid grid-cols-2 sm:flex items-center gap-2 sm:gap-3 w-full lg:w-auto">
-            {/* Top row on mobile / inline on desktop: Favorites + Filter */}
-            <div className="flex items-center gap-2 sm:gap-3 col-span-2 sm:col-span-1">
-              {/* Favorites Filter Button */}
-              <button
-                onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
-                className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-                  showOnlyFavorites
-                    ? "bg-amber-500/20 text-amber-300 shadow-sm"
-                    : "bg-[#181818] text-[#888888] hover:text-white"
-                }`}
-              >
-                <Star className={`w-4 h-4 ${showOnlyFavorites ? "fill-amber-400 text-amber-400" : ""}`} />
-                <span>Favorites</span>
-              </button>
+          {/* Quick Action Controls Row: Favorites + Filter + Sort in a single clean row */}
+          <div className="grid grid-cols-3 sm:flex items-center gap-3 w-full lg:w-auto">
+            {/* Favorites Filter Button */}
+            <button
+              onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
+              className={`flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer truncate ${
+                showOnlyFavorites
+                  ? "bg-amber-500/20 text-amber-300 shadow-sm"
+                  : "bg-[#181818] text-[#888888] hover:text-white"
+              }`}
+            >
+              <Star className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${showOnlyFavorites ? "fill-amber-400 text-amber-400" : ""}`} />
+              <span className="truncate">Favorites</span>
+            </button>
 
-              {/* Filter Toggle Button */}
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-                  showFilters || activeFiltersCount > 0
-                    ? "bg-[#7B61FF] text-white"
-                    : "bg-[#181818] text-[#888888] hover:text-white"
-                }`}
-              >
-                <Filter className="w-4 h-4" />
-                <span>Filter</span>
-                {activeFiltersCount > 0 && (
-                  <span className="w-5 h-5 rounded-full bg-white text-[#7B61FF] text-xs font-bold flex items-center justify-center ml-0.5">
-                    {activeFiltersCount}
-                  </span>
-                )}
-              </button>
-            </div>
+            {/* Filter Toggle Button */}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer truncate ${
+                showFilters || activeFiltersCount > 0
+                  ? "bg-[#7B61FF] text-white"
+                  : "bg-[#181818] text-[#888888] hover:text-white"
+              }`}
+            >
+              <Filter className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+              <span className="truncate">Filter</span>
+              {activeFiltersCount > 0 && (
+                <span className="w-4.5 h-4.5 rounded-full bg-white text-[#7B61FF] text-[10px] font-bold flex items-center justify-center ml-0.5 shrink-0">
+                  {activeFiltersCount}
+                </span>
+              )}
+            </button>
 
-            {/* Sort Dropdown - Responsive pill with rounded corners on all sides */}
-            <div className="col-span-2 sm:col-span-1 flex items-center justify-between sm:justify-start bg-[#181818] rounded-xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-[#888888] w-full sm:w-auto">
-              <div className="flex items-center gap-2">
-                <ArrowUpDown className="w-4 h-4 text-[#666666] shrink-0" />
-                <span className="text-[#666666] sm:hidden text-xs font-medium">Sort:</span>
-              </div>
+            {/* Sort Dropdown */}
+            <div className="flex items-center justify-center sm:justify-start bg-[#181818] rounded-xl px-2.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-[#888888] min-w-0">
+              <ArrowUpDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 text-[#666666] shrink-0" />
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="bg-transparent text-white font-semibold text-xs sm:text-sm focus:outline-none cursor-pointer pr-1 leading-none text-right sm:text-left"
+                className="bg-transparent text-white font-semibold text-xs sm:text-sm focus:outline-none cursor-pointer pr-0.5 leading-none truncate max-w-full"
               >
-                <option value="recent" className="bg-[#181818] text-white">Most Recent</option>
-                <option value="rating" className="bg-[#181818] text-white">Highest Rated</option>
-                <option value="bpm" className="bg-[#181818] text-white">BPM (Low to High)</option>
-                <option value="title" className="bg-[#181818] text-white">Title (A-Z)</option>
+                <option value="recent" className="bg-[#181818] text-white">Recent</option>
+                <option value="rating" className="bg-[#181818] text-white">Rated</option>
+                <option value="bpm" className="bg-[#181818] text-white">BPM</option>
+                <option value="title" className="bg-[#181818] text-white">A-Z</option>
               </select>
             </div>
           </div>

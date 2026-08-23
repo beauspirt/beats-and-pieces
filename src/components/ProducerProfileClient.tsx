@@ -981,7 +981,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                             {match && (
                               <Link
                                 href={`/battles/battle-${match[1]}`}
-                                className="px-2 py-0.5 rounded-md bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-[11px] font-bold shrink-0 transition-all inline-flex items-center gap-1"
+                                className="px-2 py-0.5 rounded-md bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-[11px] font-bold shrink-0 transition-all inline-flex items-center gap-1 select-none"
                                 title={`View ${beat.battleSource || `Beat Battle #${match[1]}`}`}
                               >
                                 <span>BB#{match[1]}</span>
@@ -995,16 +995,16 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                   </div>
 
                   {/* Right: BPM, Price Tag, Flames, Edit Button */}
-                  <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
+                  <div className="flex items-center gap-3 shrink-0 self-end sm:self-center select-none">
                     {beat.bpm ? (
-                      <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-[#121212] text-[#888888]">
+                      <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-[#121212] text-[#888888] select-none">
                         {beat.bpm} BPM
                       </span>
                     ) : null}
 
                     {beat.priceTag ? (
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        className={`px-3 py-1 rounded-full text-xs font-bold select-none ${
                           beat.priceTag === "Not For Sale"
                             ? "bg-[#121212] text-[#666666]"
                             : "bg-[#FF5E3A]/20 text-[#FF5E3A]"
@@ -1016,7 +1016,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
                     {/* Jury Score Avg */}
                     {typeof beat.juryScore === "number" && beat.juryScore > 0 ? (
-                      <div className="flex items-center gap-1 text-xs sm:text-sm text-[#7B61FF] font-bold px-2" title="Jury Score Average">
+                      <div className="flex items-center gap-1 text-xs sm:text-sm text-[#7B61FF] font-bold px-2 select-none" title="Jury Score Average">
                         <Star className="w-4 h-4 fill-current text-[#7B61FF]" />
                         <span>{beat.juryScore.toFixed(2)}</span>
                       </div>
@@ -1024,7 +1024,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
                     {/* Public Rating Avg */}
                     {typeof beat.flames === "number" && beat.flames >= 1 ? (
-                      <div className="flex items-center gap-1 text-xs sm:text-sm text-[#FF5E3A] font-bold px-2" title="Public Rating Average">
+                      <div className="flex items-center gap-1 text-xs sm:text-sm text-[#FF5E3A] font-bold px-2 select-none" title="Public Rating Average">
                         <Flame className="w-4 h-4 fill-current" />
                         <span>{beat.flames.toFixed(2)}</span>
                       </div>
@@ -1060,11 +1060,11 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
                 {/* Row 3: Beat Tags */}
                 {beat.tags && beat.tags.length > 0 && (
-                  <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                  <div className="flex flex-wrap items-center gap-2 pt-0.5 select-none">
                     {beat.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="px-3 py-1 rounded-full bg-[#121212] text-[#888888] font-medium text-xs"
+                        className="px-3 py-1 rounded-full bg-[#121212] text-[#888888] font-medium text-xs select-none"
                       >
                         {tag}
                       </span>

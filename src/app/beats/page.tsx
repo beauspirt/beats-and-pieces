@@ -374,10 +374,10 @@ export default function BeatsDiscoveryPage() {
                   </div>
 
                   {/* Right: Meta Badges (BPM, Price, Flames, Fav) */}
-                  <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 flex-wrap sm:flex-nowrap">
+                  <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 flex-wrap sm:flex-nowrap select-none">
                     {/* BPM */}
                     {beat.bpm ? (
-                      <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-[#121212] text-[#888888]">
+                      <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-[#121212] text-[#888888] select-none">
                         {beat.bpm} BPM
                       </span>
                     ) : null}
@@ -385,7 +385,7 @@ export default function BeatsDiscoveryPage() {
                     {/* Price Tag Pill */}
                     {beat.priceTag ? (
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        className={`px-3 py-1 rounded-full text-xs font-bold select-none ${
                           beat.priceTag === "Not For Sale"
                             ? "bg-[#121212] text-[#666666]"
                             : "bg-[#FF5E3A]/20 text-[#FF5E3A]"
@@ -397,7 +397,7 @@ export default function BeatsDiscoveryPage() {
 
                     {/* Jury Score Avg */}
                     {typeof beat.juryScore === "number" && beat.juryScore > 0 ? (
-                      <div className="flex items-center gap-1 text-xs sm:text-sm text-[#7B61FF] font-bold px-1.5" title="Jury Score Average">
+                      <div className="flex items-center gap-1 text-xs sm:text-sm text-[#7B61FF] font-bold px-1.5 select-none" title="Jury Score Average">
                         <Star className="w-4 h-4 fill-current text-[#7B61FF]" />
                         <span>{beat.juryScore.toFixed(2)}</span>
                       </div>
@@ -405,7 +405,7 @@ export default function BeatsDiscoveryPage() {
 
                     {/* Community Flames (Public Rating Avg) */}
                     {typeof beat.flames === "number" && beat.flames >= 1 ? (
-                      <div className="flex items-center gap-1 text-xs sm:text-sm text-[#FF5E3A] font-bold px-1.5" title="Public Rating Average">
+                      <div className="flex items-center gap-1 text-xs sm:text-sm text-[#FF5E3A] font-bold px-1.5 select-none" title="Public Rating Average">
                         <Flame className="w-4 h-4 fill-current" />
                         <span>{beat.flames.toFixed(2)}</span>
                       </div>
@@ -414,7 +414,7 @@ export default function BeatsDiscoveryPage() {
                     {/* Favorite Button */}
                     <button
                       onClick={() => toggleFavorite(beat.id)}
-                      className="p-2 rounded-xl bg-[#121212] hover:bg-[#222222] transition-colors text-[#888888] hover:text-amber-400 cursor-pointer ml-auto sm:ml-0"
+                      className="p-2 rounded-xl bg-[#121212] hover:bg-[#222222] transition-colors text-[#888888] hover:text-amber-400 cursor-pointer ml-auto sm:ml-0 select-none"
                       title={beat.isFavorite ? "Remove from favorites" : "Add to favorites"}
                     >
                       <Star
@@ -442,12 +442,12 @@ export default function BeatsDiscoveryPage() {
 
                 {/* Row 3: Clickable Genre & Tags */}
                 {((beat.genres && beat.genres.length > 0) || (beat.tags && beat.tags.length > 0)) ? (
-                  <div className="flex flex-wrap items-center gap-2 pt-0.5 text-xs">
+                  <div className="flex flex-wrap items-center gap-2 pt-0.5 text-xs select-none">
                     {beat.genres?.map((g) => (
                       <button
                         key={g}
                         onClick={() => handleTagClick(g)}
-                        className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors cursor-pointer ${
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors cursor-pointer select-none ${
                           selectedGenre === g
                             ? "bg-[#7B61FF] text-white"
                             : "bg-[#121212] text-[#888888] hover:text-white hover:bg-[#202020]"
@@ -461,7 +461,7 @@ export default function BeatsDiscoveryPage() {
                       <button
                         key={t}
                         onClick={() => handleTagClick(t)}
-                        className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer ${
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer select-none ${
                           selectedGenre === t
                             ? "bg-[#7B61FF] text-white"
                             : "bg-[#121212] text-[#777777] hover:text-white hover:bg-[#202020]"

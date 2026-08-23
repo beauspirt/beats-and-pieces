@@ -528,9 +528,9 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
           style={{ width: "100%", height: "100%", display: "block" }}
         />
 
-        {/* Bottom Right Corner Timecode Pillbox (Guaranteed contrast when playhead passes) */}
+        {/* Bottom Right Corner Timecode Pillbox (Border-free, Inter font) */}
         <div className="absolute bottom-1 right-1 flex items-center pointer-events-none select-none z-10">
-          <div className="px-2 py-0.5 rounded-md bg-[#141414]/90 backdrop-blur-sm border border-white/10 shadow-sm flex items-center gap-1 text-[11px] font-mono tabular-nums">
+          <div className="px-2 py-0.5 rounded-md bg-[#141414]/90 backdrop-blur-sm shadow-sm flex items-center gap-1 text-[11px] font-sans tabular-nums">
             {isThisTrackActive ? (
               <>
                 <span className="text-white font-bold">{formatTime(currentTime)}</span>

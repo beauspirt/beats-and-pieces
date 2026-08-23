@@ -262,7 +262,7 @@ export const BottomFloatingPlayer: React.FC = () => {
 
           {/* Scrubber Row: Time + Track + Duration */}
           <div className="flex items-center gap-2.5 w-full">
-            <span className="text-[11px] font-mono text-[#A7A7A7] select-none w-9 text-right shrink-0">
+            <span className="text-[11px] font-sans tabular-nums text-[#A7A7A7] select-none w-9 text-right shrink-0">
               {formatTime(currentDisplayTime)}
             </span>
 
@@ -299,7 +299,7 @@ export const BottomFloatingPlayer: React.FC = () => {
               </div>
             </div>
 
-            <span className="text-[11px] font-mono text-[#A7A7A7] select-none w-9 text-left shrink-0">
+            <span className="text-[11px] font-sans tabular-nums text-[#A7A7A7] select-none w-9 text-left shrink-0">
               {formatTime(duration)}
             </span>
           </div>
@@ -313,7 +313,7 @@ export const BottomFloatingPlayer: React.FC = () => {
           {showMobileVolume && (
             <div
               ref={mobileVolumePopupRef}
-              className="sm:hidden absolute bottom-full right-6 mb-3 bg-[#1A1A1A]/95 backdrop-blur-2xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] border border-white/10 rounded-2xl p-3 flex items-center gap-3 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150"
+              className="sm:hidden absolute bottom-full right-6 mb-3 bg-[#1A1A1A]/95 backdrop-blur-2xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] rounded-2xl p-3 flex items-center gap-3 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150"
             >
               <button
                 onClick={toggleMute}
@@ -348,7 +348,7 @@ export const BottomFloatingPlayer: React.FC = () => {
                 />
               </div>
 
-              <span className="text-[11px] font-mono text-zinc-400 min-w-[28px] text-right">
+              <span className="text-[11px] font-sans tabular-nums text-zinc-400 min-w-[28px] text-right">
                 {Math.round(currentVolumePercent * 100)}%
               </span>
             </div>

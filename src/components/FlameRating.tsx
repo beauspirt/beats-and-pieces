@@ -11,7 +11,7 @@ interface FlameRatingProps {
   showValue?: boolean;
 }
 
-export const FlameRating: React.FC<FlameRatingProps> = ({
+export const FlameRating: React.FC<FlameRatingProps> = React.memo(({
   value = 0,
   readOnly = false,
   onChange,
@@ -67,4 +67,4 @@ export const FlameRating: React.FC<FlameRatingProps> = ({
       )}
     </div>
   );
-};
+});

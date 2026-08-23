@@ -4,7 +4,24 @@ import React, { useRef, useEffect, useCallback, useState } from "react";
 import { Play, Pause, Download } from "lucide-react";
 import { useAudioPlayer } from "@/lib/audio-context";
 import { formatTime } from "@/lib/utils";
-import precomputedPeaksV2 from "@/lib/waveform-peaks-v2.json";
+
+// Async-loaded precomputed waveform peaks (moved from static import to reduce bundle by ~1.5MB)
+let precomputedPeaksV2: Record<string, WaveformData> | null = null;
+let peaksLoadPromise: Promise<void> | null = null;
+
+function loadPrecomputedPeaks(): Promise<void> {
+  if (precomputedPeaksV2) return Promise.resolve();
+  if (peaksLoadPromise) return peaksLoadPromise;
+  peaksLoadPromise = fetch("/waveform-peaks-v2.json")
+    .then((res) => res.json())
+    .then((data) => {
+      precomputedPeaksV2 = data as Record<string, WaveformData>;
+    })
+    .catch(() => {
+      precomputedPeaksV2 = {};
+    });
+  return peaksLoadPromise;
+}
 
 export interface WaveformData {
   peaks: number[];
@@ -40,22 +57,6 @@ export function extractRealAudioBufferWaveform(buffer: AudioBuffer, numSlices = 
   return { peaks, duration: Math.round(buffer.duration) };
 }
 
-export function generateProceduralPeaks(seedStr: string, count = 200): number[] {
-  let hash = 0;
-  for (let i = 0; i < seedStr.length; i++) {
-    hash = (hash << 5) - hash + seedStr.charCodeAt(i);
-    hash |= 0;
-  }
-  const peaks: number[] = [];
-  let prev = 45;
-  for (let i = 0; i < count; i++) {
-    const pseudoRand = Math.abs(Math.sin(hash + i * 1.37) * 10000) % 1;
-    const target = 18 + pseudoRand * 72;
-    prev = prev * 0.35 + target * 0.65;
-    peaks.push(Math.round(Math.min(95, Math.max(8, prev))));
-  }
-  return peaks;
-}
 
 export interface AudioWaveformPlayerProps {
   id: string;
@@ -72,7 +73,7 @@ export interface AudioWaveformPlayerProps {
   compact?: boolean;
 }
 
-export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
+export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = React.memo(({
   id,
   title = "Beat Track",
   artist,
@@ -104,8 +105,27 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
   const hoverFractionRef = useRef<number | null>(null);
   const touchStartPos = useRef<{ x: number; y: number; isScrolling: boolean } | null>(null);
 
+  // Offscreen canvas buffers for waveform rendering optimization
+  const offscreenUnplayedRef = useRef<HTMLCanvasElement | null>(null);
+  const offscreenPlayedRef = useRef<HTMLCanvasElement | null>(null);
+  const bufferedPeaksRef = useRef<number[] | null>(null);
+  const bufferedSizeRef = useRef<{ w: number; h: number }>({ w: 0, h: 0 });
+  const bufferedThemeRef = useRef<boolean>(false);
+
+  // Track whether async precomputed peaks have loaded
+  const [peaksLoaded, setPeaksLoaded] = useState(!!precomputedPeaksV2);
+
   const isThisTrackActive = currentTrackId === id;
   const isThisTrackPlaying = isThisTrackActive && isPlaying;
+
+  // Load precomputed peaks asynchronously on mount
+  useEffect(() => {
+    if (precomputedPeaksV2) {
+      setPeaksLoaded(true);
+      return;
+    }
+    loadPrecomputedPeaks().then(() => setPeaksLoaded(true));
+  }, []);
 
   const [waveformData, setWaveformData] = useState<WaveformData | null>(() => {
     if (waveformPeaks && waveformPeaks.length > 0) {
@@ -131,7 +151,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
       return;
     }
 
-    const dict = precomputedPeaksV2 as Record<string, WaveformData>;
+    const dict = precomputedPeaksV2 || {};
     const decodedUrl = decodeURIComponent(audioUrl);
     const filename = decodedUrl.split("/").pop() || "";
     if (dict[audioUrl] || dict[decodedUrl] || dict[filename]) {
@@ -171,7 +191,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [audioUrl]);
+  }, [audioUrl, peaksLoaded]);
 
   // Retrieve high-definition waveform peaks
   const getWaveformData = useCallback((): WaveformData => {
@@ -179,7 +199,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
       return waveformData;
     }
 
-    const dict = precomputedPeaksV2 as Record<string, WaveformData>;
+    const dict = precomputedPeaksV2 || {};
     if (audioUrl) {
       if (dict[audioUrl]) return dict[audioUrl];
       const decodedUrl = decodeURIComponent(audioUrl);
@@ -192,9 +212,50 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
 
     // Do not return placeholder procedural peaks to avoid jumping/flashing
     return { peaks: [], duration: duration || 60 };
-  }, [waveformData, audioUrl, duration]);
+  }, [waveformData, audioUrl, duration, peaksLoaded]);
 
-  // Render Clean Continuous Single-Shade Waveform (Transparent Container Background)
+  // Pre-render waveform bars to offscreen canvases (called only when peaks, size, or theme change)
+  const renderOffscreenBuffers = useCallback((pixelWidth: number, pixelHeight: number, peaks: number[], isLight: boolean) => {
+    const centerY = Math.floor(pixelHeight / 2);
+    const maxAmplitude = Math.floor(pixelHeight * 0.46);
+    const totalSlices = peaks.length;
+
+    // Unplayed buffer
+    if (!offscreenUnplayedRef.current) offscreenUnplayedRef.current = document.createElement("canvas");
+    const offUnplayed = offscreenUnplayedRef.current;
+    offUnplayed.width = pixelWidth;
+    offUnplayed.height = pixelHeight;
+    const ctxU = offUnplayed.getContext("2d")!;
+    ctxU.clearRect(0, 0, pixelWidth, pixelHeight);
+    ctxU.fillStyle = isLight ? "#D4D4D8" : "#262626";
+    for (let px = 0; px < pixelWidth; px++) {
+      const sliceIdx = Math.min(totalSlices - 1, Math.floor((px / Math.max(1, pixelWidth - 1)) * (totalSlices - 1)));
+      const peakVal = peaks[sliceIdx] || 10;
+      const peakHeight = Math.max(1, Math.round((peakVal / 100) * maxAmplitude));
+      ctxU.fillRect(px, centerY - peakHeight, 1, peakHeight * 2);
+    }
+
+    // Played buffer
+    if (!offscreenPlayedRef.current) offscreenPlayedRef.current = document.createElement("canvas");
+    const offPlayed = offscreenPlayedRef.current;
+    offPlayed.width = pixelWidth;
+    offPlayed.height = pixelHeight;
+    const ctxP = offPlayed.getContext("2d")!;
+    ctxP.clearRect(0, 0, pixelWidth, pixelHeight);
+    ctxP.fillStyle = isLight ? "#7B61FF" : "#FFFFFF";
+    for (let px = 0; px < pixelWidth; px++) {
+      const sliceIdx = Math.min(totalSlices - 1, Math.floor((px / Math.max(1, pixelWidth - 1)) * (totalSlices - 1)));
+      const peakVal = peaks[sliceIdx] || 10;
+      const peakHeight = Math.max(1, Math.round((peakVal / 100) * maxAmplitude));
+      ctxP.fillRect(px, centerY - peakHeight, 1, peakHeight * 2);
+    }
+
+    bufferedPeaksRef.current = peaks;
+    bufferedSizeRef.current = { w: pixelWidth, h: pixelHeight };
+    bufferedThemeRef.current = isLight;
+  }, []);
+
+  // Render waveform using offscreen buffers (fast per-frame compositing)
   const renderWaveform = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -218,7 +279,6 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
 
     const isLight = typeof document !== "undefined" && document.documentElement.classList.contains("light");
     const centerY = Math.floor(pixelHeight / 2);
-    const maxAmplitude = Math.floor(pixelHeight * 0.46);
 
     const { peaks } = getWaveformData();
     if (!peaks || peaks.length === 0) {
@@ -228,48 +288,74 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
       return;
     }
 
-    const totalSlices = peaks.length;
-    const progress = isThisTrackActive ? playbackProgress : 0;
-    
-    // Only show hover needle and brighter preview on ACTIVE tracks
-    const hoverFraction = isThisTrackActive ? hoverFractionRef.current : null;
+    // Rebuild offscreen buffers if peaks, canvas size, or theme changed
+    const needsRebuild =
+      bufferedPeaksRef.current !== peaks ||
+      bufferedSizeRef.current.w !== pixelWidth ||
+      bufferedSizeRef.current.h !== pixelHeight ||
+      bufferedThemeRef.current !== isLight;
 
-    // Single-Pass Solid Physical Device Pixel Rendering
-    // Every physical pixel column in [0..pixelWidth-1] is drawn at exact integer bounds with 100% solid opacity
-    for (let px = 0; px < pixelWidth; px++) {
-      const sliceIdx = Math.min(totalSlices - 1, Math.floor((px / Math.max(1, pixelWidth - 1)) * (totalSlices - 1)));
-      const peakVal = peaks[sliceIdx] || 10;
-      const peakHeight = Math.max(1, Math.round((peakVal / 100) * maxAmplitude));
-      const py = centerY - peakHeight;
-      const barHeight = peakHeight * 2;
-
-      const progressFraction = px / Math.max(1, pixelWidth - 1);
-      const isPlayed = progressFraction <= progress;
-      const isHovered = hoverFraction !== null && progressFraction <= hoverFraction;
-
-      if (isLight) {
-        ctx.fillStyle = isPlayed ? "#7B61FF" : isHovered ? "#9CA3AF" : "#D4D4D8";
-      } else {
-        ctx.fillStyle = isPlayed ? "#FFFFFF" : isHovered ? "#4A4A4A" : "#262626";
-      }
-
-      ctx.fillRect(px, py, 1, barHeight);
+    if (needsRebuild) {
+      renderOffscreenBuffers(pixelWidth, pixelHeight, peaks, isLight);
     }
 
-    // Playhead Needle Line (Active Track)
+    const progress = isThisTrackActive ? playbackProgress : 0;
+    const hoverFraction = isThisTrackActive ? hoverFractionRef.current : null;
+
+    // 1. Draw full unplayed waveform from buffer (1 drawImage call)
+    if (offscreenUnplayedRef.current) {
+      ctx.drawImage(offscreenUnplayedRef.current, 0, 0);
+    }
+
+    // 2. Draw hover region (slightly brighter unplayed bars)
+    if (hoverFraction !== null && hoverFraction > progress) {
+      const hoverStartX = Math.round(progress * pixelWidth);
+      const hoverEndX = Math.round(hoverFraction * pixelWidth);
+      const hoverWidth = hoverEndX - hoverStartX;
+      if (hoverWidth > 0) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(hoverStartX, 0, hoverWidth, pixelHeight);
+        ctx.clip();
+        // Draw hover-colored bars in the hover region
+        const maxAmplitude = Math.floor(pixelHeight * 0.46);
+        const totalSlices = peaks.length;
+        ctx.fillStyle = isLight ? "#9CA3AF" : "#4A4A4A";
+        for (let px = hoverStartX; px < hoverEndX && px < pixelWidth; px++) {
+          const sliceIdx = Math.min(totalSlices - 1, Math.floor((px / Math.max(1, pixelWidth - 1)) * (totalSlices - 1)));
+          const peakVal = peaks[sliceIdx] || 10;
+          const peakHeight = Math.max(1, Math.round((peakVal / 100) * maxAmplitude));
+          ctx.fillRect(px, centerY - peakHeight, 1, peakHeight * 2);
+        }
+        ctx.restore();
+      }
+    }
+
+    // 3. Draw played portion from buffer with clip (1 drawImage + 1 clip)
+    if (progress > 0 && offscreenPlayedRef.current) {
+      const playedWidth = Math.round(progress * pixelWidth);
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, 0, playedWidth, pixelHeight);
+      ctx.clip();
+      ctx.drawImage(offscreenPlayedRef.current, 0, 0);
+      ctx.restore();
+    }
+
+    // 4. Playhead Needle Line (Active Track)
     if (isThisTrackActive && progress > 0 && progress < 1) {
       const playheadX = Math.round(progress * pixelWidth);
       ctx.fillStyle = isLight ? "#7B61FF" : "#FFFFFF";
       ctx.fillRect(playheadX, 0, Math.max(1, Math.round(1.5 * dpr)), pixelHeight);
     }
 
-    // Hover Needle
+    // 5. Hover Needle
     if (hoverFraction !== null) {
       const needleX = Math.round(hoverFraction * pixelWidth);
       ctx.fillStyle = isLight ? "rgba(123, 97, 255, 0.8)" : "rgba(255, 255, 255, 0.4)";
       ctx.fillRect(needleX, 0, Math.max(1, Math.round(1 * dpr)), pixelHeight);
     }
-  }, [getWaveformData, isThisTrackActive, playbackProgress]);
+  }, [getWaveformData, isThisTrackActive, playbackProgress, renderOffscreenBuffers]);
 
   // Animation frame loop for continuous 60fps playback
   useEffect(() => {
@@ -556,4 +642,4 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
       </div>
     </div>
   );
-};
+});

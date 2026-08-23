@@ -7,7 +7,7 @@ import { Play, Pause, Volume2, Volume1, VolumeX, X, Disc } from "lucide-react";
 import { useAudioPlayer } from "@/lib/audio-context";
 import { formatTime } from "@/lib/utils";
 
-export const BottomFloatingPlayer: React.FC = () => {
+export const BottomFloatingPlayer: React.FC = React.memo(() => {
   const {
     currentTrackId,
     isPlaying,
@@ -438,4 +438,4 @@ export const BottomFloatingPlayer: React.FC = () => {
       </div>
     </div>
   );
-};
+});

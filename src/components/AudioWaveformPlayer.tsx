@@ -214,22 +214,17 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
       canvas.height = pixelHeight;
     }
 
-    ctx.save();
-    ctx.scale(dpr, dpr);
-    ctx.clearRect(0, 0, rect.width, rect.height);
+    ctx.clearRect(0, 0, pixelWidth, pixelHeight);
 
     const isLight = typeof document !== "undefined" && document.documentElement.classList.contains("light");
-    const width = Math.floor(rect.width);
-    const height = Math.floor(rect.height);
-    const centerY = Math.floor(height / 2);
-    const maxAmplitude = Math.floor(height * 0.46);
+    const centerY = Math.floor(pixelHeight / 2);
+    const maxAmplitude = Math.floor(pixelHeight * 0.46);
 
     const { peaks } = getWaveformData();
     if (!peaks || peaks.length === 0) {
       // Draw subtle flat baseline while waiting for real waveform to decode
       ctx.fillStyle = isLight ? "#d1d5db" : "#242424";
-      ctx.fillRect(0, centerY - 1, width, 2);
-      ctx.restore();
+      ctx.fillRect(0, centerY - Math.max(1, Math.round(dpr)), pixelWidth, Math.max(2, Math.round(2 * dpr)));
       return;
     }
 
@@ -239,15 +234,16 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
     // Only show hover needle and brighter preview on ACTIVE tracks
     const hoverFraction = isThisTrackActive ? hoverFractionRef.current : null;
 
-    // Single-Pass Solid Uniform Width Waveform (Pure crisp solid colors)
-    for (let x = 0; x < width; x++) {
-      const sliceIdx = Math.min(totalSlices - 1, Math.floor((x / Math.max(1, width - 1)) * (totalSlices - 1)));
+    // Single-Pass Solid Physical Device Pixel Rendering
+    // Every physical pixel column in [0..pixelWidth-1] is drawn at exact integer bounds with 100% solid opacity
+    for (let px = 0; px < pixelWidth; px++) {
+      const sliceIdx = Math.min(totalSlices - 1, Math.floor((px / Math.max(1, pixelWidth - 1)) * (totalSlices - 1)));
       const peakVal = peaks[sliceIdx] || 10;
       const peakHeight = Math.max(1, Math.round((peakVal / 100) * maxAmplitude));
-      const y = centerY - peakHeight;
+      const py = centerY - peakHeight;
       const barHeight = peakHeight * 2;
 
-      const progressFraction = x / Math.max(1, width - 1);
+      const progressFraction = px / Math.max(1, pixelWidth - 1);
       const isPlayed = progressFraction <= progress;
       const isHovered = hoverFraction !== null && progressFraction <= hoverFraction;
 
@@ -257,24 +253,22 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
         ctx.fillStyle = isPlayed ? "#FFFFFF" : isHovered ? "#4A4A4A" : "#262626";
       }
 
-      ctx.fillRect(x, y, 1, barHeight);
+      ctx.fillRect(px, py, 1, barHeight);
     }
 
     // Playhead Needle Line (Active Track)
     if (isThisTrackActive && progress > 0 && progress < 1) {
-      const playheadX = Math.round(progress * rect.width);
+      const playheadX = Math.round(progress * pixelWidth);
       ctx.fillStyle = isLight ? "#7B61FF" : "#FFFFFF";
-      ctx.fillRect(playheadX, 0, 1.5, rect.height);
+      ctx.fillRect(playheadX, 0, Math.max(1, Math.round(1.5 * dpr)), pixelHeight);
     }
 
     // Hover Needle
     if (hoverFraction !== null) {
-      const needleX = Math.round(hoverFraction * rect.width);
+      const needleX = Math.round(hoverFraction * pixelWidth);
       ctx.fillStyle = isLight ? "rgba(123, 97, 255, 0.8)" : "rgba(255, 255, 255, 0.4)";
-      ctx.fillRect(needleX, 0, 1, rect.height);
+      ctx.fillRect(needleX, 0, Math.max(1, Math.round(1 * dpr)), pixelHeight);
     }
-
-    ctx.restore();
   }, [getWaveformData, isThisTrackActive, playbackProgress]);
 
   // Animation frame loop for continuous 60fps playback
@@ -534,19 +528,19 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
           style={{ width: "100%", height: "100%", display: "block" }}
         />
 
-        {/* Bottom Right Corner Timecode (Zero Layout Shift) */}
-        <div className="absolute bottom-1 right-1 flex items-center gap-2 pointer-events-none select-none">
-          <span className="text-[11px] font-mono tabular-nums text-[#777777] px-1.5 py-0.5">
+        {/* Bottom Right Corner Timecode Pillbox (Guaranteed contrast when playhead passes) */}
+        <div className="absolute bottom-1 right-1 flex items-center pointer-events-none select-none z-10">
+          <div className="px-2 py-0.5 rounded-md bg-[#141414]/90 backdrop-blur-sm border border-white/10 shadow-sm flex items-center gap-1 text-[11px] font-mono tabular-nums">
             {isThisTrackActive ? (
               <>
                 <span className="text-white font-bold">{formatTime(currentTime)}</span>
-                <span className="text-[#555555]"> / </span>
-                <span>{formatTime(displayDuration)}</span>
+                <span className="text-[#666666]">/</span>
+                <span className="text-[#9E9E9E]">{formatTime(displayDuration)}</span>
               </>
             ) : (
-              <span>{formatTime(displayDuration)}</span>
+              <span className="text-[#888888] font-medium">{formatTime(displayDuration)}</span>
             )}
-          </span>
+          </div>
         </div>
 
         {/* Optional Download Button in Top Right */}

@@ -5,7 +5,8 @@ import { ProducerProfileClient } from "@/components/ProducerProfileClient";
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return producerService.getAllProducers().map((p) => ({
+  const allProducers = producerService.getAllProducers();
+  return allProducers.map((p) => ({
     id: p.id,
   }));
 }

@@ -60,6 +60,9 @@ export function generateProceduralPeaks(seedStr: string, count = 200): number[] 
 export interface AudioWaveformPlayerProps {
   id: string;
   title?: string;
+  artist?: string;
+  artistId?: string;
+  coverUrl?: string;
   audioUrl?: string;
   bpm?: number;
   duration?: number;
@@ -72,6 +75,9 @@ export interface AudioWaveformPlayerProps {
 export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
   id,
   title = "Beat Track",
+  artist,
+  artistId,
+  coverUrl,
   audioUrl,
   bpm = 90,
   duration = 45,
@@ -334,7 +340,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
     if (isThisTrackPlaying) {
       pauseTrack();
     } else {
-      playTrack(id, title, bpm, audioUrl, undefined, effectiveDuration);
+      playTrack(id, title, bpm, audioUrl, undefined, effectiveDuration, artist, artistId, coverUrl);
     }
   };
 
@@ -365,7 +371,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
 
     if (!isThisTrackActive) {
       // Initial click on inactive track: ALWAYS start from 0:00
-      playTrack(id, title, bpm, audioUrl, 0, effectiveDuration);
+      playTrack(id, title, bpm, audioUrl, 0, effectiveDuration, artist, artistId, coverUrl);
     } else {
       // Already active track: seek directly to clicked position
       seekTrack(p);

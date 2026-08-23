@@ -9,17 +9,29 @@ interface AudioContextType {
   currentTime: number;
   duration: number;
   playbackProgress: number; // 0 to 1
+  volume: number; // 0 to 1
+  isMuted: boolean;
+  setVolume: (volume: number) => void;
+  toggleMute: () => void;
   playTrack: (
     id: string,
     title?: string,
     bpm?: number,
     audioUrl?: string,
     startProgress?: number,
-    knownDuration?: number
+    knownDuration?: number,
+    artist?: string,
+    artistId?: string,
+    coverUrl?: string
   ) => void;
   pauseTrack: () => void;
+  togglePlay: () => void;
   seekTrack: (progress: number) => void;
+  closePlayer: () => void;
   activeTrackTitle: string | null;
+  activeTrackArtist: string | null;
+  activeTrackArtistId: string | null;
+  activeTrackCover: string | null;
 }
 
 const AudioPlayerContext = createContext<AudioContextType | undefined>(undefined);
@@ -39,6 +51,26 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(45);
   const [activeTrackTitle, setActiveTrackTitle] = useState<string | null>(null);
+  const [activeTrackArtist, setActiveTrackArtist] = useState<string | null>(null);
+  const [activeTrackArtistId, setActiveTrackArtistId] = useState<string | null>(null);
+  const [activeTrackCover, setActiveTrackCover] = useState<string | null>(null);
+  const [volume, setVolumeState] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("bnp_master_volume");
+        if (saved !== null) {
+          const parsed = parseFloat(saved);
+          if (!isNaN(parsed) && parsed >= 0 && parsed <= 1) return parsed;
+        }
+      } catch {}
+    }
+    return 0.8;
+  });
+  const [isMuted, setIsMuted] = useState(false);
+  const volumeRef = useRef(volume);
+  volumeRef.current = volume;
+  const isMutedRef = useRef(isMuted);
+  isMutedRef.current = isMuted;
 
   // Web Audio API and fallback references
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -235,9 +267,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const sourceNode = ctx.createBufferSource();
     sourceNode.buffer = buffer;
 
+    const targetGain = isMutedRef.current ? 0.0001 : Math.max(0.0001, volumeRef.current);
     const gainNode = ctx.createGain();
     gainNode.gain.setValueAtTime(0.0001, now);
-    gainNode.gain.linearRampToValueAtTime(1, now + DECLICK_FADE_DURATION);
+    gainNode.gain.linearRampToValueAtTime(targetGain, now + DECLICK_FADE_DURATION);
     gainNode.connect(ctx.destination);
 
     sourceNode.connect(gainNode);
@@ -262,6 +295,75 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     startTimeLoop();
   }, [getAudioContext, startTimeLoop, stopActiveSourceWithDeclick]);
 
+  const setVolume = useCallback((newVol: number) => {
+    const clamped = Math.max(0, Math.min(1, newVol));
+    setVolumeState(clamped);
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("bnp_master_volume", clamped.toString());
+      } catch {}
+    }
+    if (isMutedRef.current) {
+      setIsMuted(false);
+    }
+    if (activeGainNodeRef.current && audioContextRef.current) {
+      activeGainNodeRef.current.gain.setValueAtTime(clamped, audioContextRef.current.currentTime);
+    }
+    if (fallbackAudioRef.current) {
+      fallbackAudioRef.current.volume = clamped;
+    }
+  }, []);
+
+  const toggleMute = useCallback(() => {
+    setIsMuted((prev) => {
+      const next = !prev;
+      const effectiveGain = next ? 0.0001 : Math.max(0.0001, volumeRef.current);
+      if (activeGainNodeRef.current && audioContextRef.current) {
+        activeGainNodeRef.current.gain.setValueAtTime(effectiveGain, audioContextRef.current.currentTime);
+      }
+      if (fallbackAudioRef.current) {
+        fallbackAudioRef.current.volume = next ? 0 : volumeRef.current;
+      }
+      return next;
+    });
+  }, []);
+
+  const closePlayer = useCallback(() => {
+    pauseTrack();
+    setCurrentTrackId(null);
+    setActiveTrackTitle(null);
+    setActiveTrackArtist(null);
+    setActiveTrackArtistId(null);
+    setActiveTrackCover(null);
+    setCurrentTime(0);
+  }, [pauseTrack]);
+
+  const togglePlay = useCallback(() => {
+    if (isPlaying) {
+      pauseTrack();
+    } else {
+      if (currentBufferRef.current) {
+        startBufferPlayback(currentBufferRef.current, currentTime);
+      } else if (fallbackAudioRef.current) {
+        fallbackAudioRef.current.play();
+        setIsPlaying(true);
+        startTimeLoop();
+      } else if (currentTrackId && currentUrlRef.current) {
+        playTrack(
+          currentTrackId,
+          activeTrackTitle || undefined,
+          90,
+          currentUrlRef.current,
+          duration > 0 ? currentTime / duration : 0,
+          duration,
+          activeTrackArtist || undefined,
+          activeTrackArtistId || undefined,
+          activeTrackCover || undefined
+        );
+      }
+    }
+  }, [isPlaying, pauseTrack, startBufferPlayback, currentTime, currentTrackId, activeTrackTitle, duration, activeTrackArtist, activeTrackArtistId, activeTrackCover, startTimeLoop]);
+
   const seekTrack = useCallback((progress: number) => {
     if (typeof progress !== "number" || isNaN(progress) || !isFinite(progress)) return;
     const targetProgress = Math.max(0, Math.min(1, progress));
@@ -284,11 +386,14 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     bpm = 90,
     audioUrl?: string,
     startProgress?: number,
-    knownDuration?: number
+    knownDuration?: number,
+    artist?: string,
+    artistId?: string,
+    coverUrl?: string
   ) => {
     const ctx = getAudioContext();
-    const sourceUrl = audioUrl || "";
-    if (!sourceUrl) {
+    const sourceUrl = audioUrl || currentUrlRef.current || "";
+    if (!sourceUrl && !currentBufferRef.current && !fallbackAudioRef.current) {
       console.warn("playTrack called without valid audioUrl for track:", id);
       return;
     }
@@ -306,7 +411,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       : 0;
 
     // 1. If clicking the currently active track
-    if (currentTrackId === id && currentBufferRef.current) {
+    if ((currentTrackId === id || !id) && currentBufferRef.current) {
       if (startProgress !== undefined) {
         const targetTime = initialProgress * currentBufferRef.current.duration;
         startBufferPlayback(currentBufferRef.current, targetTime);
@@ -324,6 +429,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     pauseTrack();
     setCurrentTrackId(id);
     setActiveTrackTitle(title || `Beat #${id}`);
+    setActiveTrackArtist(artist || null);
+    setActiveTrackArtistId(artistId || null);
+    setActiveTrackCover(coverUrl || null);
     currentUrlRef.current = resolvedUrl;
     
     // Instantly reset time so previous track progress never flashes on new track
@@ -368,6 +476,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
     const audio = fallbackAudioRef.current;
     audio.src = resolvedUrl;
+    audio.volume = isMutedRef.current ? 0 : volumeRef.current;
 
     audio.onloadedmetadata = () => {
       if (isFinite(audio.duration) && audio.duration > 0) {
@@ -395,10 +504,19 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         currentTime,
         duration,
         playbackProgress,
+        volume,
+        isMuted,
+        setVolume,
+        toggleMute,
         playTrack,
         pauseTrack,
+        togglePlay,
         seekTrack,
+        closePlayer,
         activeTrackTitle,
+        activeTrackArtist,
+        activeTrackArtistId,
+        activeTrackCover,
       }}
     >
       {children}

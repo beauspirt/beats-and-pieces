@@ -943,6 +943,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                       <AudioWaveformPlayer
                         id="staged-preview"
                         title={stagedBeat.title || "Preview"}
+                        artist={currentUser?.nickname || "Your Entry"}
                         audioUrl={stagedBeat.audioUrl}
                         duration={stagedBeat.duration}
                         waveformPeaks={stagedBeat.waveformPeaks}
@@ -1073,6 +1074,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                       <AudioWaveformPlayer
                         id={myEntry.id}
                         title={myEntry.title}
+                        artist={currentUser?.nickname || "Your Entry"}
                         audioUrl={myEntry.audioUrl}
                         duration={myEntry.duration}
                         waveformPeaks={myEntry.waveformPeaks}
@@ -1145,6 +1147,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                         <AudioWaveformPlayer
                           id={track.id}
                           title={track.placeholder}
+                          artist="Blind Battle Entry"
                           audioUrl={track.audioUrl}
                           duration={track.duration}
                           bpm={track.bpm}
@@ -1429,6 +1432,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                     <AudioWaveformPlayer
                       id={`jury-${sub.id}`}
                       title={blindTitle}
+                      artist="Anonymous Finalist"
                       audioUrl={sub.audioUrl}
                       duration={sub.duration}
                       waveformPeaks={sub.waveform}
@@ -1586,6 +1590,9 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                       <AudioWaveformPlayer
                         id={`res-${sub.id}`}
                         title={sub.beatTitle}
+                        artist={sub.beatmakerTag || "Producer"}
+                        artistId={sub.userId}
+                        coverUrl={battle.coverImage}
                         audioUrl={sub.audioUrl}
                         duration={sub.duration}
                         waveformPeaks={sub.waveform}

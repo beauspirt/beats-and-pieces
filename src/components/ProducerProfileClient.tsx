@@ -1047,6 +1047,9 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                 <AudioWaveformPlayer
                   id={`prod-beat-${beat.id}`}
                   title={beat.title}
+                  artist={producer.nickname}
+                  artistId={producer.id}
+                  coverUrl={beat.beatmaker?.avatarUrl || producer.avatarUrl}
                   audioUrl={beat.audioUrl}
                   duration={beat.duration}
                   bpm={beat.bpm}

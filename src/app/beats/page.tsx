@@ -483,6 +483,9 @@ export default function BeatsDiscoveryPage() {
               <AudioWaveformPlayer
                 id={`disc-${beat.id}`}
                 title={beat.title}
+                artist={producerService.getProducerById(beat.beatmaker.id)?.nickname || beat.beatmaker.tag}
+                artistId={beat.beatmaker.id}
+                coverUrl={beat.beatmaker.avatarUrl}
                 audioUrl={beat.audioUrl}
                 duration={beat.duration}
                 bpm={beat.bpm}

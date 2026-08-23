@@ -6,6 +6,8 @@ import { Footer } from "@/components/Footer";
 import { AudioProvider } from "@/lib/audio-context";
 import { AuthProvider } from "@/lib/auth-context";
 
+import { BottomFloatingPlayer } from "@/components/BottomFloatingPlayer";
+
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
@@ -28,10 +30,11 @@ export default function RootLayout({
         <AuthProvider>
           <AudioProvider>
             <Navbar />
-            <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+            <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pb-24">
               {children}
             </main>
             <Footer />
+            <BottomFloatingPlayer />
           </AudioProvider>
         </AuthProvider>
       </body>

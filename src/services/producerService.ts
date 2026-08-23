@@ -1,5 +1,6 @@
 import { UserProfile } from "@/lib/types";
 import rawProducers from "@/data/producers.json";
+import rawDiscoveryBeats from "@/data/discovery-beats.json";
 import { supabase } from "@/lib/supabase";
 
 const STORAGE_KEY_PRODUCERS = "bnp_custom_producers";
@@ -30,23 +31,76 @@ let producersMap: Record<string, UserProfile> = {
 
 export const producerService = {
   getAllProducers(): UserProfile[] {
-    if (typeof window !== "undefined") {
-      const fresh = loadCustomProducers();
-      return Object.values({ ...(rawProducers as Record<string, UserProfile>), ...fresh });
-    }
-    return Object.values(producersMap);
+    const map = this.getProducersMap();
+    return Object.values(map);
   },
 
   getProducersMap(): Record<string, UserProfile> {
-    if (typeof window !== "undefined") {
-      const fresh = loadCustomProducers();
-      return { ...(rawProducers as Record<string, UserProfile>), ...fresh };
-    }
-    return { ...producersMap };
+    const custom = typeof window !== "undefined" ? loadCustomProducers() : {};
+    const base: Record<string, UserProfile> = {
+      ...(rawProducers as Record<string, UserProfile>),
+      ...custom,
+    };
+
+    // Auto-populate any beatmaker from discovery-beats.json that is not explicitly defined in producers.json
+    (rawDiscoveryBeats as any[]).forEach((beat) => {
+      const bId = beat.beatmaker?.id;
+      if (bId && !base[bId]) {
+        base[bId] = {
+          id: bId,
+          nickname: beat.beatmaker?.tag || bId,
+          email: `${bId}@beatsandpieces.ro`,
+          avatarUrl: beat.beatmaker?.avatarUrl || "/avatars/default-avatar.png",
+          bio: "Community Beatmaker & Battle Producer",
+          location: "Romania",
+          role: "producer",
+          discordRoles: ["Battle Producer"],
+          links: {},
+          stats: {
+            battlesEntered: 1,
+            battlesWon: beat.rank === 1 ? 1 : 0,
+            totalFlames: 0,
+          },
+          isClaimed: false,
+          createdAt: beat.createdAt || "2023-01-01T00:00:00Z",
+        };
+      }
+    });
+
+    return base;
   },
 
   getProducerById(id: string): UserProfile | undefined {
-    return this.getProducersMap()[id];
+    if (!id) return undefined;
+    const map = this.getProducersMap();
+    if (map[id]) return map[id];
+    
+    // Case-insensitive lookup
+    const lower = id.toLowerCase();
+    const match = Object.values(map).find(
+      (p) => p.id.toLowerCase() === lower || (p.nickname && p.nickname.toLowerCase() === lower)
+    );
+    if (match) return match;
+
+    // Fallback stub for unknown user IDs
+    return {
+      id,
+      nickname: id.length > 20 ? `Producer-${id.slice(0, 5)}` : id,
+      email: `${id}@beatsandpieces.ro`,
+      avatarUrl: "/avatars/default-avatar.png",
+      bio: "Community Beatmaker",
+      location: "Romania",
+      role: "producer",
+      discordRoles: ["Battle Producer"],
+      links: {},
+      stats: {
+        battlesEntered: 0,
+        battlesWon: 0,
+        totalFlames: 0,
+      },
+      isClaimed: false,
+      createdAt: new Date().toISOString(),
+    };
   },
 
   getProducerByEmail(email: string): UserProfile | undefined {

@@ -152,32 +152,35 @@ export const beatService = {
     try {
       const { data, error } = await supabase.from("beats").select("*");
       if (!error && data && data.length > 0) {
-        const mapped: DiscoveryBeat[] = data.map((b) => {
-          const prod = producerService.getProducerById(b.producer_id) || producerService.getProducerByTag(b.producer_id);
-          return {
-            id: b.id,
-            title: b.title,
-            beatmaker: {
-              id: b.producer_id,
-              tag: prod?.nickname || b.producer_id,
-              avatarUrl: prod?.avatarUrl || "/avatars/default-avatar.png",
-            },
-            audioUrl: b.audio_url,
-            duration: b.duration || 120,
-            waveform: b.waveform || [],
-            bpm: b.bpm,
-            priceTag: b.price_tag || "Not For Sale",
-            genres: b.genres || [],
-            tags: b.tags || [],
-            flames: b.flames || 0,
-            battleSource: b.battle_source,
-            tier: b.tier || 4,
-            rank: b.rank,
-            createdAt: b.created_at,
-          };
-        });
+        const deletedIds = new Set(loadDeletedBeatIds());
+        const mapped: DiscoveryBeat[] = data
+          .filter((b) => !deletedIds.has(b.id))
+          .map((b) => {
+            const prod = producerService.getProducerById(b.producer_id) || producerService.getProducerByTag(b.producer_id);
+            return {
+              id: b.id,
+              title: b.title,
+              beatmaker: {
+                id: b.producer_id,
+                tag: prod?.nickname || b.producer_id,
+                avatarUrl: prod?.avatarUrl || "/avatars/default-avatar.png",
+              },
+              audioUrl: b.audio_url,
+              duration: b.duration || 120,
+              waveform: b.waveform || [],
+              bpm: b.bpm,
+              priceTag: b.price_tag || "Not For Sale",
+              genres: b.genres || [],
+              tags: b.tags || [],
+              flames: b.flames || 0,
+              battleSource: b.battle_source,
+              tier: b.tier || 4,
+              rank: b.rank,
+              createdAt: b.created_at,
+            };
+          });
 
-        const currentCustom = loadCustomBeats();
+        const currentCustom = loadCustomBeats().filter((b) => !deletedIds.has(b.id));
         const existingIds = new Set(mapped.map((b) => b.id));
         const merged = [...mapped, ...currentCustom.filter((b) => !existingIds.has(b.id))];
         saveCustomBeats(merged);
@@ -226,9 +229,7 @@ export const beatService = {
     if (typeof window !== "undefined") {
       const custom = loadCustomBeats();
       const filtered = custom.filter((b) => b.id !== id);
-      if (filtered.length !== custom.length) {
-        saveCustomBeats(filtered);
-      }
+      saveCustomBeats(filtered);
 
       const deleted = loadDeletedBeatIds();
       if (!deleted.includes(id)) {

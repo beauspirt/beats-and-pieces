@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Play, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { vaultService } from "@/services/vaultService";
 import { producerService } from "@/services/producerService";
 import { VaultItem } from "@/lib/types";
@@ -26,34 +26,27 @@ export default function VaultPage() {
     return (
       <div
         key={item.id}
-        className="bg-[#181818] rounded-2xl overflow-hidden flex flex-col justify-between group hover:bg-[#1f1f1f] transition-all duration-200 shadow-lg"
+        className="bg-[#181818] rounded-2xl overflow-hidden flex flex-col justify-between group hover:bg-[#1f1f1f] transition-colors duration-200 shadow-lg"
       >
         {/* Thumbnail Preview Area */}
         <div
           onClick={() => setActiveModalItem(item)}
-          className="w-full aspect-video relative bg-[#121212] overflow-hidden cursor-pointer flex items-center justify-center select-none"
+          className="w-full aspect-video relative bg-[#121212] overflow-hidden cursor-pointer select-none"
         >
           <Image
             src={thumbnailUrl}
             alt={item.title}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300 opacity-90 group-hover:opacity-100"
+            className="object-cover opacity-90 group-hover:opacity-100 transition-opacity"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
-
-          {/* Hover Overlay with Play Button */}
-          <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-            <div className="w-12 h-12 rounded-full bg-black/70 backdrop-blur-sm group-hover:bg-[#7B61FF] text-white flex items-center justify-center shadow-xl group-hover:scale-110 transition-all duration-200">
-              <Play className="w-5 h-5 fill-current ml-0.5" />
-            </div>
-          </div>
         </div>
 
         {/* Card Content & Actions */}
         <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3">
           <h3
             onClick={() => setActiveModalItem(item)}
-            className="text-base sm:text-lg font-bold text-white leading-snug group-hover:text-[#A78BFA] transition-colors cursor-pointer"
+            className="text-base sm:text-lg font-bold text-white leading-snug cursor-pointer"
           >
             {item.title}
           </h3>

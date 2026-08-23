@@ -130,11 +130,8 @@ export default function VaultPage() {
             onClick={(e) => e.stopPropagation()}
             className="bg-[#181818] rounded-2xl max-w-4xl w-full overflow-hidden shadow-2xl space-y-4 p-4 sm:p-6 relative cursor-default"
           >
-            {/* Modal Header */}
-            <div className="flex items-center justify-between gap-4">
-              <h3 className="text-lg sm:text-xl font-bold text-white leading-snug truncate">
-                {activeModalItem.title}
-              </h3>
+            {/* Modal Close Button */}
+            <div className="flex items-center justify-end">
               <button
                 onClick={() => setActiveModalItem(null)}
                 className="w-8 h-8 rounded-full bg-[#121212] text-zinc-400 hover:text-white flex items-center justify-center text-sm cursor-pointer shrink-0"

@@ -29,7 +29,6 @@ export const BottomFloatingPlayer: React.FC = () => {
   } = useAudioPlayer();
 
   const [mounted, setMounted] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [isScrubbing, setIsScrubbing] = useState(false);
   const [scrubFraction, setScrubFraction] = useState(0);
@@ -48,14 +47,9 @@ export const BottomFloatingPlayer: React.FC = () => {
     setMounted(true);
   }, []);
 
-  // Slide-up enter animation on track activation
   useEffect(() => {
     if (currentTrackId) {
       setIsClosing(false);
-      const timer = setTimeout(() => setIsVisible(true), 20);
-      return () => clearTimeout(timer);
-    } else {
-      setIsVisible(false);
     }
   }, [currentTrackId]);
 
@@ -66,8 +60,7 @@ export const BottomFloatingPlayer: React.FC = () => {
     setTimeout(() => {
       closePlayer();
       setIsClosing(false);
-      setIsVisible(false);
-    }, 280);
+    }, 220);
   };
 
   // Close mobile volume flyout when tapping outside
@@ -180,8 +173,10 @@ export const BottomFloatingPlayer: React.FC = () => {
 
   return (
     <div
-      className={`fixed inset-x-0 z-50 bg-[#121212] select-none transition-[bottom] duration-300 ease-out border-b-[60px] border-[#121212] -mb-[60px] ${
-        isVisible && !isClosing ? "bottom-0" : "-bottom-36 pointer-events-none"
+      className={`fixed bottom-0 inset-x-0 z-50 bg-black select-none border-b-[100px] border-black -mb-[100px] ${
+        isClosing
+          ? "animate-out slide-out-to-bottom duration-200 fill-mode-forwards"
+          : "animate-in slide-in-from-bottom duration-300"
       }`}
     >
       

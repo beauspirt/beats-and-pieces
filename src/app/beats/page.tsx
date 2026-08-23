@@ -125,13 +125,6 @@ export default function BeatsDiscoveryPage() {
   return (
     <div className="space-y-4 w-full animate-in fade-in duration-300">
       
-      {/* Intro Description Box */}
-      <div className="text-sm sm:text-base text-[#A0A0A0] leading-relaxed space-y-1.5 font-normal w-full">
-        <p>
-          This library showcases beats entered in Beats & Pieces battles throughout the years, as well as original tracks uploaded directly by community producers.
-        </p>
-      </div>
-
       {/* Search & Filter Bar */}
       <div className="space-y-3">
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3">

@@ -400,7 +400,11 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         if (isPlaying) {
           pauseTrack();
         } else {
-          startBufferPlayback(currentBufferRef.current, currentTime);
+          const isAtEnd =
+            (duration > 0 && currentTime >= duration - 0.5) ||
+            currentTime >= currentBufferRef.current.duration - 0.5;
+          const resumeTime = isAtEnd ? 0 : currentTime;
+          startBufferPlayback(currentBufferRef.current, resumeTime);
         }
       }
       return;

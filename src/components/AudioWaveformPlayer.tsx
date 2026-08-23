@@ -93,6 +93,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
     playbackProgress,
     playTrack,
     pauseTrack,
+    togglePlay,
     seekTrack,
   } = useAudioPlayer();
 
@@ -340,7 +341,11 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = ({
     if (isThisTrackPlaying) {
       pauseTrack();
     } else {
-      playTrack(id, title, bpm, audioUrl, undefined, effectiveDuration, artist, artistId, coverUrl);
+      if (isThisTrackActive) {
+        togglePlay();
+      } else {
+        playTrack(id, title, bpm, audioUrl, 0, effectiveDuration, artist, artistId, coverUrl);
+      }
     }
   };
 

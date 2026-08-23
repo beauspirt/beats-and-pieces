@@ -182,12 +182,12 @@ export default function BeatsDiscoveryPage() {
             </button>
 
             {/* Sort Dropdown */}
-            <div className="flex items-center bg-[#181818] rounded-xl px-3 py-2 sm:py-1.5 text-xs sm:text-sm text-[#888888] shrink-0">
-              <ArrowUpDown className="w-3.5 h-3.5 mr-1.5 sm:mr-2 text-[#666666]" />
+            <div className="flex items-center bg-[#181818] rounded-xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-[#888888] shrink-0">
+              <ArrowUpDown className="w-4 h-4 mr-2 text-[#666666] shrink-0" />
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="bg-transparent text-white font-medium focus:outline-none cursor-pointer py-0.5 pr-1"
+                className="bg-transparent text-white font-semibold text-xs sm:text-sm focus:outline-none cursor-pointer pr-1 leading-none"
               >
                 <option value="recent" className="bg-[#181818] text-white">Most Recent</option>
                 <option value="rating" className="bg-[#181818] text-white">Highest Rated</option>

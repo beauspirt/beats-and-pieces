@@ -180,8 +180,8 @@ export const BottomFloatingPlayer: React.FC = () => {
 
   return (
     <div
-      className={`fixed inset-x-0 z-50 bg-[#121212]/95 backdrop-blur-2xl shadow-[0_-10px_30px_rgba(0,0,0,0.8)] select-none transition-[bottom,opacity] duration-300 ease-out ${
-        isVisible && !isClosing ? "bottom-0 opacity-100" : "-bottom-36 opacity-0 pointer-events-none"
+      className={`fixed inset-x-0 z-50 bg-[#121212]/95 backdrop-blur-2xl shadow-[0_-10px_30px_rgba(0,0,0,0.8)] select-none transition-[bottom] duration-300 ease-out before:content-[''] before:absolute before:top-full before:left-0 before:right-0 before:h-32 before:bg-[#121212] before:pointer-events-none ${
+        isVisible && !isClosing ? "bottom-0" : "-bottom-36 pointer-events-none"
       }`}
     >
       

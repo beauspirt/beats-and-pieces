@@ -546,7 +546,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     setTimeout(() => setCopiedEmail(false), 2000);
   };
 
-  const handleOpenEditModal = (beat: any) => {
+  const handleOpenEditModal = (beat: DiscoveryBeat & { competitionTitle?: string }) => {
     const isBattle = Boolean(
       beat.battleSource ||
       beat.rank ||
@@ -590,7 +590,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
           ctx.close();
         }
       } catch (decodeErr) {
-        console.warn("In-memory audio decode warning:", decodeErr);
+        // console.warn("In-memory audio decode warning:", decodeErr);
       }
 
       // 2. Upload to Supabase Storage 'beats' folder
@@ -617,7 +617,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
         });
       }
     } catch (err) {
-      console.error("Audio upload error:", err);
+      // console.error("Audio upload error:", err);
       alert("Failed to upload audio file. Please try again.");
     } finally {
       setIsUploadingBeatAudio(false);

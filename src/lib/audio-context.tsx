@@ -375,7 +375,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const ctx = getAudioContext();
     const sourceUrl = audioUrl || currentUrlRef.current || "";
     if (!sourceUrl && !currentBufferRef.current && !fallbackAudioRef.current) {
-      console.warn("playTrack called without valid audioUrl for track:", id);
+      // console.warn("playTrack called without valid audioUrl for track:", id);
       return;
     }
 
@@ -452,7 +452,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return;
       }
     } catch (err) {
-      console.warn("Web Audio fetch/decode failed, using HTML5 Audio fallback:", err);
+      // console.warn("Web Audio fetch/decode failed, using HTML5 Audio fallback:", err);
     }
 
     // Fallback to HTML5 audio element if Web Audio API decode is unavailable
@@ -475,7 +475,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     audio.play().then(() => {
       setIsPlaying(true);
       startTimeLoop();
-    }).catch(console.error);
+    }).catch(() => {});
 
   }, [currentTrackId, getAudioContext, isPlaying, currentTime, pauseTrack, startBufferPlayback, startTimeLoop, getCachedBuffer, setCachedBuffer]);
 

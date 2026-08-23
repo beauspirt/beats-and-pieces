@@ -2,13 +2,12 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { sampleModerationFlags } from "@/lib/mock-data";
 import { ModerationFlag } from "@/lib/types";
 import { ArrowLeft, ShieldAlert, CheckCircle2, Ban, AlertTriangle, Filter, Search, Flame, Clock } from "lucide-react";
 import { AdminGuard } from "@/components/AdminGuard";
 
 export default function VotingModerationPage() {
-  const [flags, setFlags] = useState<ModerationFlag[]>(sampleModerationFlags);
+  const [flags, setFlags] = useState<ModerationFlag[]>([]);
   const [filterStatus, setFilterStatus] = useState<"all" | "pending" | "approved" | "discarded">("pending");
 
   const handleAction = (flagId: string, action: "approved" | "discarded") => {

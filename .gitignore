@@ -41,3 +41,13 @@ next-env.d.ts
 /Old Database/
 *.tar
 *.tzst
+
+# design exports & legacy assets
+/Beat Battles/
+/Even Older Design*/
+/New Design*/
+/Old Design*/
+/Releases/
+/Sample Beats/
+BNP_Specs*
+.FullName

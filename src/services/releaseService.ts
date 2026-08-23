@@ -78,7 +78,7 @@ export const releaseService = {
         saveCustomReleases(mapped);
       }
     } catch (err) {
-      console.warn("releaseService.syncFromSupabase error:", err);
+      // console.warn("releaseService.syncFromSupabase error:", err);
     }
   },
 
@@ -119,7 +119,7 @@ export const releaseService = {
       soundcloud_url: newRelease.soundcloudUrl,
     }).then(
       ({ error }) => {
-        if (error) console.warn("Supabase release insert failed:", error.message);
+        // if (error) console.warn("Supabase release insert failed:", error.message);
       },
       () => {}
     );
@@ -152,7 +152,7 @@ export const releaseService = {
       soundcloud_url: updatedRelease.soundcloudUrl,
     }).then(
       ({ error }) => {
-        if (error) console.warn("Supabase release update failed:", error.message);
+        // if (error) console.warn("Supabase release update failed:", error.message);
       },
       () => {}
     );

@@ -243,7 +243,7 @@ export const battleService = {
       // Calculate rating stats from ratings table
       const ratingStats: Record<string, { totalScore: number; count: number }> = {};
       if (dbRatings && dbRatings.length > 0) {
-        dbRatings.forEach((r: any) => {
+        dbRatings.forEach((r: { submission_id: string; score: number; voter_id: string }) => {
           if (!ratingStats[r.submission_id]) {
             ratingStats[r.submission_id] = { totalScore: 0, count: 0 };
           }
@@ -259,10 +259,10 @@ export const battleService = {
           const calcVotes = stats && stats.count > 0 ? stats.count : (s.total_votes || 0);
 
           const feedbacks = s.jury_feedbacks || [];
-          const scoredFeedbacks = feedbacks.filter((f: any) => typeof f.score === "number" && !isNaN(f.score));
+          const scoredFeedbacks = feedbacks.filter((f: { score?: number; [key: string]: unknown }) => typeof f.score === "number" && !isNaN(f.score));
           let calculatedJuryScore = typeof s.jury_score === "number" ? s.jury_score : undefined;
           if (scoredFeedbacks.length > 0) {
-            const sum = scoredFeedbacks.reduce((acc: number, cur: any) => acc + (Number(cur.score) || 0), 0);
+            const sum = scoredFeedbacks.reduce((acc: number, cur: { score?: number; [key: string]: unknown }) => acc + (Number(cur.score) || 0), 0);
             calculatedJuryScore = Number((sum / scoredFeedbacks.length).toFixed(2));
           }
 
@@ -324,7 +324,7 @@ export const battleService = {
         submissionsList = mappedSubs;
       }
     } catch (err) {
-      console.warn("battleService.syncFromSupabase error:", err);
+      // console.warn("battleService.syncFromSupabase error:", err);
     }
   },
 
@@ -412,9 +412,9 @@ export const battleService = {
         top_finalists_cutoff: newBattle.topFinalistsCutoff,
         rules: newBattle.rules,
       });
-      if (error) console.warn("Supabase battle insert error:", error.message);
+      // if (error) console.warn("Supabase battle insert error:", error.message);
     } catch (err) {
-      console.warn("Supabase battle insert exception:", err);
+      // console.warn("Supabase battle insert exception:", err);
     }
 
     return newBattle;
@@ -475,9 +475,9 @@ export const battleService = {
         rules: updatedBattle.rules,
         winner: updatedBattle.winner,
       });
-      if (error) console.warn("Supabase battle update error:", error.message);
+      // if (error) console.warn("Supabase battle update error:", error.message);
     } catch (err) {
-      console.warn("Supabase battle update exception:", err);
+      // console.warn("Supabase battle update exception:", err);
     }
 
     return updatedBattle;
@@ -534,7 +534,7 @@ export const battleService = {
 
       await Promise.all(deletePromises);
     } catch (err) {
-      console.warn("Supabase delete battle exception:", err);
+      // console.warn("Supabase delete battle exception:", err);
     }
 
     return true;
@@ -564,7 +564,7 @@ export const battleService = {
     try {
       await supabase.from("submissions").update({ beat_title: cleanTitle }).eq("id", submissionId);
     } catch (err) {
-      console.warn("updateSubmissionTitle error:", err);
+      // console.warn("updateSubmissionTitle error:", err);
     }
 
     notifyBattlesUpdated();
@@ -656,7 +656,7 @@ export const battleService = {
       submitted_at: newSubmission.submittedAt || new Date().toISOString(),
     }).then(
       ({ error }) => {
-        if (error) console.warn("Supabase submission insert failed:", error.message);
+        // if (error) console.warn("Supabase submission insert failed:", error.message);
       },
       () => {}
     );
@@ -702,7 +702,7 @@ export const battleService = {
       notifyBattlesUpdated();
       return true;
     } catch (err) {
-      console.warn("deleteSubmission error:", err);
+      // console.warn("deleteSubmission error:", err);
       return false;
     }
   },
@@ -743,7 +743,7 @@ export const battleService = {
 
       const ratingStats: Record<string, { totalScore: number; count: number }> = {};
       if (dbRatings && dbRatings.length > 0) {
-        dbRatings.forEach((r: any) => {
+        dbRatings.forEach((r: { submission_id: string; score: number }) => {
           if (!ratingStats[r.submission_id]) {
             ratingStats[r.submission_id] = { totalScore: 0, count: 0 };
           }
@@ -773,9 +773,9 @@ export const battleService = {
 
       notifyBattlesUpdated();
       return { success: true };
-    } catch (err: any) {
-      console.error("submitUserRatings error:", err);
-      return { success: false, error: err.message };
+    } catch (err: unknown) {
+      // console.error("submitUserRatings error:", err);
+      return { success: false, error: err instanceof Error ? err.message : String(err) };
     }
   },
 
@@ -799,7 +799,7 @@ export const battleService = {
 
       const ratingStats: Record<string, { totalScore: number; count: number }> = {};
       if (dbRatings && dbRatings.length > 0) {
-        dbRatings.forEach((r: any) => {
+        dbRatings.forEach((r: { submission_id: string; score: number }) => {
           if (!ratingStats[r.submission_id]) {
             ratingStats[r.submission_id] = { totalScore: 0, count: 0 };
           }
@@ -829,9 +829,9 @@ export const battleService = {
 
       notifyBattlesUpdated();
       return { success: true };
-    } catch (err: any) {
-      console.error("unlockUserRatings error:", err);
-      return { success: false, error: err.message };
+    } catch (err: unknown) {
+      // console.error("unlockUserRatings error:", err);
+      return { success: false, error: err instanceof Error ? err.message : String(err) };
     }
   },
 
@@ -853,7 +853,7 @@ export const battleService = {
         .eq("voter_id", userId);
 
       if (dbRatings && dbRatings.length > 0) {
-        dbRatings.forEach((r: any) => {
+        dbRatings.forEach((r: { submission_id: string; score: number }) => {
           if (r.submission_id && typeof r.score === "number") {
             ratings[r.submission_id] = r.score;
           }
@@ -863,7 +863,7 @@ export const battleService = {
         }
       }
     } catch (err) {
-      console.warn("getUserRatingsForBattle error:", err);
+      // console.warn("getUserRatingsForBattle error:", err);
     }
 
     return { ratings, isSubmitted };
@@ -1009,9 +1009,9 @@ export const battleService = {
 
       notifyBattlesUpdated();
       return { success: true };
-    } catch (err: any) {
-      console.error("submitJuryBallot error:", err);
-      return { success: false, error: err.message || "Failed to submit jury ballot" };
+    } catch (err: unknown) {
+      // console.error("submitJuryBallot error:", err);
+      return { success: false, error: err instanceof Error ? err.message : String(err) || "Failed to submit jury ballot" };
     }
   },
 
@@ -1106,9 +1106,9 @@ export const battleService = {
 
       notifyBattlesUpdated();
       return { success: true };
-    } catch (err: any) {
-      console.warn("unsubmitJuryBallot error:", err);
-      return { success: false, error: err.message || "Failed to unsubmit jury ballot" };
+    } catch (err: unknown) {
+      // console.warn("unsubmitJuryBallot error:", err);
+      return { success: false, error: err instanceof Error ? err.message : String(err) || "Failed to unsubmit jury ballot" };
     }
   },
 };

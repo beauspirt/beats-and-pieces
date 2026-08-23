@@ -217,7 +217,7 @@ export default function NewBattlePage() {
         ratingEndsAt: ratingDeadline ? new Date(ratingDeadline).toISOString() : new Date(Date.now() + 21 * 86400000).toISOString(),
       });
     } catch (err) {
-      console.error("Failed to create battle:", err);
+      // console.error("Failed to create battle:", err);
     }
 
     setTimeout(() => {

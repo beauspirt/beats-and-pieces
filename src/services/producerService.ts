@@ -43,7 +43,7 @@ export const producerService = {
     };
 
     // Auto-populate any beatmaker from discovery-beats.json that is not explicitly defined in producers.json
-    (rawDiscoveryBeats as any[]).forEach((beat) => {
+    (rawDiscoveryBeats as Array<{ beatmaker?: { id?: string; tag?: string; avatarUrl?: string }; rank?: number; createdAt?: string }>).forEach((beat) => {
       const bId = beat.beatmaker?.id;
       if (bId && !base[bId]) {
         base[bId] = {
@@ -149,7 +149,7 @@ export const producerService = {
         saveCustomProducers(custom);
       }
     } catch (err) {
-      console.warn("producerService.syncFromSupabase error:", err);
+      // console.warn("producerService.syncFromSupabase error:", err);
     }
     return this.getProducersMap();
   },
@@ -179,7 +179,7 @@ export const producerService = {
       created_at: profile.createdAt || new Date().toISOString(),
     }).then(
       ({ error }) => {
-        if (error) console.warn("Supabase producer upsert failed:", error.message);
+        // if (error) console.warn("Supabase producer upsert failed:", error.message);
       },
       () => {}
     );
@@ -229,7 +229,7 @@ export const producerService = {
       created_at: updated.createdAt || new Date().toISOString(),
     }).then(
       ({ error }) => {
-        if (error) console.warn("Supabase producer update failed:", error.message);
+        // if (error) console.warn("Supabase producer update failed:", error.message);
       },
       () => {}
     );

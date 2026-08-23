@@ -1,10 +1,9 @@
-import { UserProfile, Competition, BattleSubmission, DiscoveryBeat, Release, ModerationFlag } from "@/lib/types";
+import { UserProfile, Competition, BattleSubmission, DiscoveryBeat, Release } from "@/lib/types";
 import {
   producerService,
   battleService,
   releaseService,
   beatService,
-  moderationService,
 } from "@/services";
 
 export const sampleProducers: Record<string, UserProfile> = producerService.getProducersMap();
@@ -13,4 +12,3 @@ export const sampleCompetitions: Competition[] = battleService.getAllCompetition
 export const sampleSubmissions: BattleSubmission[] = battleService.getAllSubmissions();
 export const sampleDiscoveryBeats: DiscoveryBeat[] = beatService.getAllDiscoveryBeats();
 export const sampleReleases: Release[] = releaseService.getAllReleases();
-export const sampleModerationFlags: ModerationFlag[] = moderationService.getAllFlags();

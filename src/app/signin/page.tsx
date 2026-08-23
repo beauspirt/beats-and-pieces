@@ -52,7 +52,7 @@ function SignInContent() {
       }
       await signInWithGoogle();
     } catch (err: unknown) {
-      console.error("Google OAuth error:", err);
+      // console.error("Google OAuth error:", err);
       setIsAuthenticating(false);
       setAuthError(
         err instanceof Error

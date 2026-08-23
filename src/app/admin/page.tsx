@@ -4,14 +4,14 @@ import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Shield, PlusCircle, Disc, Trophy, AlertTriangle, Users, Settings, UserCheck, ArrowRight, Layers, FileEdit } from "lucide-react";
-import { sampleModerationFlags, sampleProducers } from "@/lib/mock-data";
+import { sampleProducers } from "@/lib/mock-data";
 import { useAuth } from "@/lib/auth-context";
 import { AdminGuard } from "@/components/AdminGuard";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
   const { loginWithUser } = useAuth();
-  const pendingFlagsCount = sampleModerationFlags.filter((f) => f.status === "pending").length;
+  const pendingFlagsCount = 0;
 
   return (
     <AdminGuard>

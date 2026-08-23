@@ -81,7 +81,7 @@ export default function AuthCallbackPage() {
         }
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : "Authentication failed.";
-        console.error("Auth callback error:", err);
+        // console.error("Auth callback error:", err);
         setErrorMessage(message);
         setStatus("error");
       }

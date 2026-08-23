@@ -30,7 +30,7 @@ export const storageService = {
         });
 
       if (error) {
-        console.warn("Supabase Audio Upload failed:", error.message);
+        // console.warn("Supabase Audio Upload failed:", error.message);
         return { url: null, error: error.message };
       }
 
@@ -39,9 +39,9 @@ export const storageService = {
         .getPublicUrl(data.path);
 
       return { url: publicData.publicUrl, error: null };
-    } catch (err: any) {
-      console.error("storageService.uploadAudio error:", err);
-      return { url: null, error: err.message || "Failed to upload audio" };
+    } catch (err: unknown) {
+      // console.error("storageService.uploadAudio error:", err);
+      return { url: null, error: err instanceof Error ? err.message : String(err) || "Failed to upload audio" };
     }
   },
 
@@ -74,7 +74,7 @@ export const storageService = {
         });
 
       if (error) {
-        console.warn("Supabase Image Upload failed:", error.message);
+        // console.warn("Supabase Image Upload failed:", error.message);
         return { url: null, error: error.message };
       }
 
@@ -83,9 +83,9 @@ export const storageService = {
         .getPublicUrl(data.path);
 
       return { url: publicData.publicUrl, error: null };
-    } catch (err: any) {
-      console.error("storageService.uploadImage error:", err);
-      return { url: null, error: err.message || "Failed to upload image" };
+    } catch (err: unknown) {
+      // console.error("storageService.uploadImage error:", err);
+      return { url: null, error: err instanceof Error ? err.message : String(err) || "Failed to upload image" };
     }
   },
 };

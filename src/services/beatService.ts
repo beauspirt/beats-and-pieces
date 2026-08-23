@@ -32,7 +32,7 @@ function saveCustomBeats(beats: DiscoveryBeat[]) {
     try {
       localStorage.setItem(STORAGE_KEY_CUSTOM_BEATS, JSON.stringify(beats));
     } catch (err) {
-      console.warn("saveCustomBeats localStorage quota warning:", err);
+      // console.warn("saveCustomBeats localStorage quota warning:", err);
     }
   }
 }
@@ -183,7 +183,7 @@ export const beatService = {
         saveCustomBeats(merged);
       }
     } catch (err) {
-      console.warn("beatService.syncFromSupabase error:", err);
+      // console.warn("beatService.syncFromSupabase error:", err);
     }
   },
 
@@ -213,7 +213,7 @@ export const beatService = {
       audio_url: updates.audioUrl,
     }).eq("id", id).then(
       ({ error }) => {
-        if (error) console.warn("Supabase beat update failed:", error.message);
+        // if (error) console.warn("Supabase beat update failed:", error.message);
       },
       () => {}
     );
@@ -242,7 +242,7 @@ export const beatService = {
     // Async delete from Supabase
     supabase.from("beats").delete().eq("id", id).then(
       ({ error }) => {
-        if (error) console.warn("Supabase beat delete failed:", error.message);
+        // if (error) console.warn("Supabase beat delete failed:", error.message);
       },
       () => {}
     );
@@ -278,7 +278,7 @@ export const beatService = {
       created_at: newBeat.createdAt || new Date().toISOString(),
     }).then(
       ({ error }) => {
-        if (error) console.warn("Supabase beat insert failed:", error.message);
+        // if (error) console.warn("Supabase beat insert failed:", error.message);
       },
       () => {}
     );

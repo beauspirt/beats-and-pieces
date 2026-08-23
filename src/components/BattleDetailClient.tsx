@@ -174,7 +174,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
           const filename = s.title.toLowerCase().endsWith(`.${cleanExt}`) ? s.title : `${s.title}.${cleanExt}`;
           folder.file(filename, blob);
         } catch (err) {
-          console.warn(`Failed to add sample ${s.title} to zip:`, err);
+          // console.warn(`Failed to add sample ${s.title} to zip:`, err);
         }
       });
 
@@ -189,7 +189,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       document.body.removeChild(a);
       URL.revokeObjectURL(blobUrl);
     } catch (err) {
-      console.error("Failed to generate zip:", err);
+      // console.error("Failed to generate zip:", err);
       // Fallback: download first sample
       downloadAudioFile(battle.samples[0].audioUrl, battle.samples[0].title);
     } finally {
@@ -385,7 +385,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
           ctx.close();
         }
       } catch (decodeErr) {
-        console.warn("In-memory audio decode warning:", decodeErr);
+        // console.warn("In-memory audio decode warning:", decodeErr);
       }
 
       const tempAudioUrl = URL.createObjectURL(file);
@@ -400,9 +400,9 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
         duration: realDuration,
         waveformPeaks: extractedWaveform ? extractedWaveform.peaks : [],
       });
-    } catch (err: any) {
-      console.error("File staging error:", err);
-      alert(err.message || "Failed to load audio file");
+    } catch (err: unknown) {
+      // console.error("File staging error:", err);
+      alert(err instanceof Error ? err.message : String(err) || "Failed to load audio file");
     } finally {
       setIsUploading(false);
     }
@@ -463,9 +463,9 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       setStagedBeat(null);
       refreshBattleData();
       confetti({ particleCount: 60, spread: 60, origin: { y: 0.6 } });
-    } catch (err: any) {
-      console.error("Submission failed:", err);
-      alert(err.message || "Submission failed");
+    } catch (err: unknown) {
+      // console.error("Submission failed:", err);
+      alert(err instanceof Error ? err.message : String(err) || "Submission failed");
     } finally {
       setIsUploading(false);
     }
@@ -493,7 +493,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       setIsEditingMyEntryTitle(false);
       refreshBattleData();
     } catch (err) {
-      console.error("Failed to update title:", err);
+      // console.error("Failed to update title:", err);
     } finally {
       setIsUploading(false);
     }
@@ -509,7 +509,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       setStagedBeat(null);
       refreshBattleData();
     } catch (err) {
-      console.error("Failed to remove entry:", err);
+      // console.error("Failed to remove entry:", err);
     } finally {
       setIsUploading(false);
     }

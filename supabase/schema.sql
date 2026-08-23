@@ -184,13 +184,34 @@ create policy "Allow public read ratings" on public.ratings for select using (tr
 create policy "Allow public read beats" on public.beats for select using (true);
 create policy "Allow public read releases" on public.releases for select using (true);
 
--- Upsert / Modify policies
-create policy "Allow all modify producers" on public.producers for all using (true) with check (true);
-create policy "Allow all modify battles" on public.battles for all using (true) with check (true);
-create policy "Allow all modify submissions" on public.submissions for all using (true) with check (true);
-create policy "Allow all modify ratings" on public.ratings for all using (true) with check (true);
-create policy "Allow all modify beats" on public.beats for all using (true) with check (true);
-create policy "Allow all modify releases" on public.releases for all using (true) with check (true);
+-- Write policies: Only authenticated users can modify their own data
+create policy "Authenticated insert producers" on public.producers for insert with check (auth.uid()::text = id);
+create policy "Authenticated update producers" on public.producers for update using (auth.uid()::text = id);
+
+create policy "Admin modify battles" on public.battles for all using (
+  exists (select 1 from public.producers where id = auth.uid()::text and role = 'admin')
+) with check (
+  exists (select 1 from public.producers where id = auth.uid()::text and role = 'admin')
+);
+
+create policy "Authenticated insert submissions" on public.submissions for insert with check (auth.uid()::text = user_id);
+create policy "Authenticated update submissions" on public.submissions for update using (auth.uid()::text = user_id);
+create policy "Authenticated delete submissions" on public.submissions for delete using (auth.uid()::text = user_id);
+
+create policy "Authenticated insert ratings" on public.ratings for insert with check (auth.uid()::text = voter_id);
+create policy "Authenticated update ratings" on public.ratings for update using (auth.uid()::text = voter_id);
+
+create policy "Admin modify beats" on public.beats for all using (
+  exists (select 1 from public.producers where id = auth.uid()::text and role in ('admin', 'host'))
+) with check (
+  exists (select 1 from public.producers where id = auth.uid()::text and role in ('admin', 'host'))
+);
+
+create policy "Admin modify releases" on public.releases for all using (
+  exists (select 1 from public.producers where id = auth.uid()::text and role = 'admin')
+) with check (
+  exists (select 1 from public.producers where id = auth.uid()::text and role = 'admin')
+);
 
 -- Indexes for lightning fast queries
 create index if not exists idx_submissions_battle on public.submissions(battle_id);

@@ -89,13 +89,16 @@ export default function BattlesPage() {
                 </h1>
                 <div className="flex items-center gap-2 shrink-0 self-start sm:self-center flex-wrap">
                   <span className="px-3.5 py-1.5 rounded-full bg-[#7B61FF] text-xs font-bold text-white shadow-sm inline-flex items-center justify-center text-center leading-none">
-                    {activeBattle.phase === "submission"
-                      ? "Phase 1: Submissions Open"
-                      : activeBattle.phase === "rating"
-                      ? "Phase 2: Public Rating"
-                      : activeBattle.phase === "judging"
-                      ? "Phase 3: Jury Evaluation"
-                      : "Phase 4: Results"}
+                    {(() => {
+                      const hasActiveJudges = Boolean(
+                        (Array.isArray(activeBattle.judges) && activeBattle.judges.length > 0) ||
+                        (Array.isArray(activeBattle.judgeDetails) && activeBattle.judgeDetails.length > 0)
+                      );
+                      if (activeBattle.phase === "submission") return "Phase 1: Submissions Open";
+                      if (activeBattle.phase === "rating") return "Phase 2: Public Rating";
+                      if (activeBattle.phase === "judging") return "Phase 3: Jury Evaluation";
+                      return hasActiveJudges ? "Phase 4: Results" : "Phase 3: Results";
+                    })()}
                   </span>
                   <span className="px-3.5 py-1.5 rounded-full bg-[#121212] text-xs text-[#A0A0A0] inline-flex items-center justify-center text-center leading-none">
                     {activeBattle.totalSubmissions} Total Entries
@@ -135,7 +138,12 @@ export default function BattlesPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {additionalActive.map((battle) => (
+            {additionalActive.map((battle) => {
+              const hasBattleJudges = Boolean(
+                (Array.isArray(battle.judges) && battle.judges.length > 0) ||
+                (Array.isArray(battle.judgeDetails) && battle.judgeDetails.length > 0)
+              );
+              return (
               <Link
                 key={battle.id}
                 href={`/battles/${battle.id}`}
@@ -160,7 +168,7 @@ export default function BattlesPage() {
                           ? "Phase 2"
                           : battle.phase === "judging"
                           ? "Phase 3"
-                          : "Phase 4"}
+                          : hasBattleJudges ? "Phase 4" : "Phase 3"}
                       </span>
                       <span className="px-2.5 py-1 rounded-full bg-[#121212] text-[#A0A0A0] text-xs">
                         {battle.totalSubmissions} Entries
@@ -182,7 +190,8 @@ export default function BattlesPage() {
                   </div>
                 </div>
               </Link>
-            ))}
+              );
+            })}
           </div>
         </section>
       )}

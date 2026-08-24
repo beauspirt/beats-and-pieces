@@ -40,6 +40,8 @@ export function calculateBattlePhase(battle: {
   judgingEndsAt?: string;
   winner?: string;
   phase?: BattlePhase;
+  judges?: string[];
+  judgeDetails?: { name: string; email: string }[];
 }): BattlePhase {
   if (battle.phase === "completed") return "completed";
   const now = Date.now();
@@ -49,13 +51,25 @@ export function calculateBattlePhase(battle: {
   if (!isNaN(subEnd) && now < subEnd) return "submission";
   if (!isNaN(ratingEnd) && now < ratingEnd) return "rating";
 
-  // Once rating ends, the battle enters judging phase (Phase 3).
-  // Phase 3 has no deadline: it stays in judging until all assigned judges submit their scores.
-  if (battle.phase === "judging" || (!isNaN(ratingEnd) && now >= ratingEnd)) {
-    return "judging";
+  const hasJudges = Boolean(
+    (Array.isArray(battle.judges) && battle.judges.length > 0) ||
+    (Array.isArray(battle.judgeDetails) && battle.judgeDetails.length > 0)
+  );
+
+  // If no judges are assigned to this battle, the judging phase is skipped,
+  // and the battle transitions straight to completed (Results) once rating ends!
+  if (!hasJudges) {
+    if (!isNaN(ratingEnd) && now >= ratingEnd) {
+      return "completed";
+    }
   }
 
-  if (battle.phase && ["submission", "rating", "judging", "completed"].includes(battle.phase)) {
+  // Once rating ends, the battle enters judging phase (Phase 3) if judges exist
+  if (battle.phase === "judging" || (!isNaN(ratingEnd) && now >= ratingEnd)) {
+    return hasJudges ? "judging" : "completed";
+  }
+
+  if (battle.phase) {
     return battle.phase;
   }
 
@@ -275,15 +289,32 @@ export const battleService = {
         for (const b of allBattles) {
           const bSubs = mappedSubs.filter((s) => s.battleId === b.id);
           if (bSubs.length > 0) {
-            // Sort strictly by juryScore average (highest first)
+            const hasJudges = Boolean(
+              (Array.isArray(b.judges) && b.judges.length > 0) ||
+              (Array.isArray(b.judgeDetails) && b.judgeDetails.length > 0)
+            );
+
+            // Sort strictly by juryScore if judges assigned, otherwise by average public rating (flameRating)
             const sorted = [...bSubs].sort((a, b) => {
-              const aJury = typeof a.juryScore === "number" ? a.juryScore : -1;
-              const bJury = typeof b.juryScore === "number" ? b.juryScore : -1;
-              return bJury - aJury;
+              if (hasJudges) {
+                const aJury = typeof a.juryScore === "number" ? a.juryScore : -1;
+                const bJury = typeof b.juryScore === "number" ? b.juryScore : -1;
+                if (bJury !== aJury) return bJury - aJury;
+                const aFlame = typeof a.flameRating === "number" ? a.flameRating : -1;
+                const bFlame = typeof b.flameRating === "number" ? b.flameRating : -1;
+                return bFlame - aFlame;
+              } else {
+                const aFlame = typeof a.flameRating === "number" ? a.flameRating : -1;
+                const bFlame = typeof b.flameRating === "number" ? b.flameRating : -1;
+                if (bFlame !== aFlame) return bFlame - aFlame;
+                const aVotes = typeof a.totalVotes === "number" ? a.totalVotes : 0;
+                const bVotes = typeof b.totalVotes === "number" ? b.totalVotes : 0;
+                return bVotes - aVotes;
+              }
             });
 
             sorted.forEach((sub, idx) => {
-              if (!sub.rank) sub.rank = idx + 1;
+              if (!sub.rank || !hasJudges) sub.rank = idx + 1;
             });
 
             if (b.phase === "completed" && (!b.winner || b.winner === "TBD") && sorted[0]) {
@@ -745,6 +776,37 @@ export const battleService = {
             flame_rating: sub.flameRating,
             total_votes: sub.totalVotes,
           }).eq("id", sub.id);
+        }
+      }
+
+      // If no judges are assigned to this battle, re-rank submissions by public rating average
+      const battle = this.getBattleById(battleId);
+      const hasJudges = Boolean(
+        (Array.isArray(battle?.judges) && battle.judges.length > 0) ||
+        (Array.isArray(battle?.judgeDetails) && battle.judgeDetails.length > 0)
+      );
+
+      if (!hasJudges) {
+        const battleSubs = allSubs.filter((s) => s.battleId === battleId);
+        const ranked = [...battleSubs].sort((a, b) => {
+          const aFlame = typeof a.flameRating === "number" ? a.flameRating : -1;
+          const bFlame = typeof b.flameRating === "number" ? b.flameRating : -1;
+          if (bFlame !== aFlame) return bFlame - aFlame;
+          return (b.totalVotes || 0) - (a.totalVotes || 0);
+        });
+
+        ranked.forEach((s, idx) => {
+          s.rank = idx + 1;
+        });
+
+        for (const sub of ranked) {
+          await supabase.from("submissions").update({ rank: sub.rank }).eq("id", sub.id);
+        }
+
+        if (battle && (battle.phase === "completed" || battle.phase === "rating")) {
+          if (ranked[0]?.beatmakerTag) {
+            battle.winner = ranked[0].beatmakerTag;
+          }
         }
       }
 

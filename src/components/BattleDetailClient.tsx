@@ -741,12 +741,23 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     return !!ratings[prevTrack.id];
   };
 
-  const phasesList: { key: BattlePhase; label: string; number: string }[] = [
-    { key: "submission", label: "Submissions", number: "01" },
-    { key: "rating", label: "Public Rating", number: "02" },
-    { key: "judging", label: "Jury Evaluation", number: "03" },
-    { key: "completed", label: "Results", number: "04" },
-  ];
+  const hasJudges = Boolean(
+    (Array.isArray(battle.judges) && battle.judges.length > 0) ||
+    (Array.isArray(battle.judgeDetails) && battle.judgeDetails.length > 0)
+  );
+
+  const phasesList: { key: BattlePhase; label: string; number: string }[] = hasJudges
+    ? [
+        { key: "submission", label: "Submissions", number: "01" },
+        { key: "rating", label: "Public Rating", number: "02" },
+        { key: "judging", label: "Jury Evaluation", number: "03" },
+        { key: "completed", label: "Results", number: "04" },
+      ]
+    : [
+        { key: "submission", label: "Submissions", number: "01" },
+        { key: "rating", label: "Public Rating", number: "02" },
+        { key: "completed", label: "Results", number: "03" },
+      ];
 
   return (
     <div className="w-full space-y-4 animate-in fade-in duration-300">
@@ -814,7 +825,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                     ? "Phase 2: Public Rating"
                     : battle.phase === "judging"
                     ? "Phase 3: Jury Evaluation"
-                    : "Phase 4: Results"}
+                    : hasJudges ? "Phase 4: Results" : "Phase 3: Results"}
                 </span>
                 <span className="px-3.5 py-1.5 rounded-full bg-[#121212] text-xs text-[#A0A0A0] inline-flex items-center justify-center text-center leading-none">
                   {battle.totalSubmissions} Total Entries
@@ -824,7 +835,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
             <div className="space-y-1 text-sm text-[#A0A0A0]">
               <p>Hosted by: <span className="text-white">{Array.isArray(battle.hosts) && battle.hosts.length > 0 ? battle.hosts.join(", ") : "Nerub"}</span></p>
-              {Array.isArray(battle.judges) && battle.judges.length > 0 && (
+              {hasJudges && Array.isArray(battle.judges) && battle.judges.length > 0 && (
                 <p>Judged by: <span className="text-white">{battle.judges.join(", ")}</span></p>
               )}
             </div>
@@ -1581,10 +1592,23 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             <div className="space-y-4">
               {[...submissions]
                 .sort((a, b) => {
-                  const aScore = typeof a.juryScore === "number" ? a.juryScore : -1;
-                  const bScore = typeof b.juryScore === "number" ? b.juryScore : -1;
-                  if (bScore !== aScore) return bScore - aScore;
-                  return (a.rank || 999) - (b.rank || 999);
+                  if (hasJudges) {
+                    const aScore = typeof a.juryScore === "number" ? a.juryScore : -1;
+                    const bScore = typeof b.juryScore === "number" ? b.juryScore : -1;
+                    if (bScore !== aScore) return bScore - aScore;
+                    const aFlame = typeof a.flameRating === "number" ? a.flameRating : -1;
+                    const bFlame = typeof b.flameRating === "number" ? b.flameRating : -1;
+                    if (bFlame !== aFlame) return bFlame - aFlame;
+                    return (a.rank || 999) - (b.rank || 999);
+                  } else {
+                    const aFlame = typeof a.flameRating === "number" ? a.flameRating : -1;
+                    const bFlame = typeof b.flameRating === "number" ? b.flameRating : -1;
+                    if (bFlame !== aFlame) return bFlame - aFlame;
+                    const aVotes = typeof a.totalVotes === "number" ? a.totalVotes : 0;
+                    const bVotes = typeof b.totalVotes === "number" ? b.totalVotes : 0;
+                    if (bVotes !== aVotes) return bVotes - aVotes;
+                    return (a.rank || 999) - (b.rank || 999);
+                  }
                 })
                 .map((sub, idx) => {
                   const isTop1 = idx === 0 || sub.rank === 1;

@@ -271,13 +271,16 @@ export default function HostPanelPage() {
                           ? "bg-zinc-800 text-zinc-400"
                           : "bg-[#FF8A65]/20 text-[#FF8A65]"
                       }`}>
-                        {battle.phase === "submission"
-                          ? "Phase 1: Submissions"
-                          : battle.phase === "rating"
-                          ? "Phase 2: Rating"
-                          : battle.phase === "judging"
-                          ? "Phase 3: Judging"
-                          : "Phase 4: Results"}
+                        {(() => {
+                          const hasJudges = Boolean(
+                            (Array.isArray(battle.judges) && battle.judges.length > 0) ||
+                            (Array.isArray(battle.judgeDetails) && battle.judgeDetails.length > 0)
+                          );
+                          if (battle.phase === "submission") return "Phase 1: Submissions";
+                          if (battle.phase === "rating") return "Phase 2: Rating";
+                          if (battle.phase === "judging") return "Phase 3: Judging";
+                          return hasJudges ? "Phase 4: Results" : "Phase 3: Results";
+                        })()}
                       </span>
                     </div>
 

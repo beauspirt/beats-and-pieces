@@ -1023,8 +1023,8 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                     </button>
 
                     {emailCopiedTooltip && (
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-1.5 bg-[#222222] text-white text-xs font-bold rounded-3xl shadow-2xl whitespace-nowrap animate-in fade-in zoom-in-95 duration-150 border border-white/10 z-50 flex items-center gap-1.5 pointer-events-none">
-                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3.5 py-1.5 bg-[#222222] text-white text-xs font-bold rounded-full shadow-2xl whitespace-nowrap animate-in fade-in zoom-in-95 duration-150 z-50 flex items-center justify-center gap-1.5 leading-none pointer-events-none">
+                        <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                         <span>E-mail copied to clipboard!</span>
                         <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#222222]" />
                       </div>

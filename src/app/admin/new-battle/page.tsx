@@ -305,8 +305,8 @@ export default function NewBattlePage() {
                 Cover Art
               </label>
               <div className="sm:col-span-9">
-                <div className="flex items-center gap-4 bg-[#121212] p-3 rounded-3xl">
-                  <div className="w-16 h-16 rounded-3xl overflow-hidden relative bg-[#181818] shrink-0 flex items-center justify-center text-zinc-600 shadow-md">
+                <div className="flex items-center gap-4 bg-[#121212] p-4 rounded-[28px]">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden relative bg-[#181818] shrink-0 flex items-center justify-center text-zinc-600 shadow-md">
                     {coverImage ? (
                       <Image
                         src={coverImage}

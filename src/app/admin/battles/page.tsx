@@ -484,8 +484,8 @@ export default function AdminBattlesManagerPage() {
                 {/* Cover Image */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-zinc-300">Cover Artwork</label>
-                  <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-3xl overflow-hidden bg-[#121212] relative shrink-0">
+                  <div className="flex items-center gap-4 bg-[#121212] p-4 rounded-[28px]">
+                    <div className="w-16 h-16 rounded-xl overflow-hidden bg-[#181818] relative shrink-0">
                       <Image
                         src={editingBattle.coverImage}
                         alt="Cover"
@@ -494,7 +494,7 @@ export default function AdminBattlesManagerPage() {
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="px-4 py-2 rounded-xl bg-[#121212] hover:bg-[#202020] text-xs font-bold text-zinc-300 cursor-pointer inline-flex items-center gap-2 transition-colors">
+                      <label className="px-4 py-2 rounded-xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-zinc-300 cursor-pointer inline-flex items-center gap-2 transition-colors">
                         <Upload className="w-3.5 h-3.5 text-brand" />
                         <span>Upload New Cover</span>
                         <input type="file" accept="image/*" onChange={handleCoverFileChange} className="hidden" />

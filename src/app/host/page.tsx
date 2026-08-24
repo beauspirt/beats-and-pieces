@@ -350,8 +350,8 @@ export default function HostPanelPage() {
                   {/* Cover Art Upload */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-zinc-300">Cover Art</label>
-                    <div className="flex items-center gap-4 bg-[#121212] p-3 rounded-3xl">
-                      <div className="w-16 h-16 rounded-3xl overflow-hidden relative bg-[#181818] shrink-0 flex items-center justify-center text-zinc-600 shadow-md">
+                    <div className="flex items-center gap-4 bg-[#121212] p-4 rounded-[28px]">
+                      <div className="w-16 h-16 rounded-xl overflow-hidden relative bg-[#181818] shrink-0 flex items-center justify-center text-zinc-600 shadow-md">
                         {editingBattle.coverImage ? (
                           <Image
                             src={editingBattle.coverImage}
@@ -363,15 +363,15 @@ export default function HostPanelPage() {
                           <ImageIcon className="w-6 h-6 text-zinc-600" />
                         )}
                       </div>
-                    <div className="flex items-center justify-between flex-1">
-                      <span className="text-xs text-zinc-400">Change square cover artwork</span>
-                      <label className="px-4 py-2 rounded-3xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-white cursor-pointer transition-colors shrink-0">
-                        Browse File
-                        <input type="file" accept="image/*" onChange={handleCoverFileChange} className="hidden" />
-                      </label>
+                      <div className="flex items-center justify-between flex-1">
+                        <span className="text-xs text-zinc-400">Change square cover artwork</span>
+                        <label className="px-4 py-2 rounded-xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-white cursor-pointer transition-colors shrink-0">
+                          Browse File
+                          <input type="file" accept="image/*" onChange={handleCoverFileChange} className="hidden" />
+                        </label>
+                      </div>
                     </div>
                   </div>
-                </div>
 
                 {/* Judged by */}
                 <div className="space-y-2">

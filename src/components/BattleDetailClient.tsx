@@ -17,7 +17,6 @@ import {
   Lock, ShieldCheck, Flame, Star, Disc, Trophy, Award, Check, FileCheck, CassetteTape,
   ExternalLink, Pencil
 } from "lucide-react";
-import confetti from "canvas-confetti";
 import { BattlePhase, Competition, BattleSubmission } from "@/lib/types";
 import { useAudioPlayer } from "@/lib/audio-context";
 import { useAuth } from "@/lib/auth-context";
@@ -498,7 +497,6 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
       setStagedBeat(null);
       refreshBattleData();
-      confetti({ particleCount: 60, spread: 60, origin: { y: 0.6 } });
     } catch (err: unknown) {
       // console.error("Submission failed:", err);
       alert(err instanceof Error ? err.message : String(err) || "Submission failed");
@@ -703,7 +701,6 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     setShowSubmitWarningModal(false);
     await battleService.submitUserRatings(battle.id, currentUser.id, ratings);
     refreshBattleData();
-    confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
   };
 
   const handleUnlockRatings = async () => {
@@ -728,7 +725,6 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     await battleService.submitJuryBallot(battle.id, judgeId, judgeName, finalizedScores, juryFeedback);
     setIsJurySubmitted(true);
     refreshBattleData();
-    confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
   };
 
   const handleUnlockJuryBallot = async () => {
@@ -1602,10 +1598,42 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                       key={sub.id}
                       className="bg-[#181818] rounded-[28px] p-4 space-y-3.5"
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                         
-                        {/* Rank Badge + Producer Info */}
-                        <div className="flex items-center gap-4 min-w-[240px]">
+                        {/* Producer Info & Beat Title */}
+                        <div className="min-w-0 flex-1">
+                          {sub.beatTitle && sub.beatTitle !== battle.title && !sub.beatTitle.startsWith("Beat Battle #") && (
+                            <span className="text-xs text-[#888888] leading-tight block mb-0.5">
+                              {sub.beatTitle}
+                            </span>
+                          )}
+                          <Link
+                            href={`/${sub.userId || "guest"}`}
+                            className="text-2xl font-bold text-white hover:text-[#7B61FF] transition-colors leading-snug block"
+                          >
+                            {sub.beatmakerTag || "Producer"}
+                          </Link>
+                        </div>
+
+                        {/* Right: Scores & Place Pillbox (Aligned to Upper Right) */}
+                        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 text-xs font-bold flex-wrap self-start">
+                          {hasJury && (
+                            <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#7B61FF]/15 text-[#7B61FF] font-bold text-xs shadow-sm inline-flex items-center justify-center leading-none" title="Jury Score Average">
+                              <Star className="w-4 h-4 fill-current text-[#7B61FF]" />
+                              <span>{Number(sub.juryScore).toFixed(2)}</span>
+                              <span className="text-xs text-[#A0A0A0]">Jury Avg</span>
+                            </div>
+                          )}
+
+                          {hasFlame && (
+                            <div className="flex items-center gap-1.5 text-[#FF5E3A] px-2 inline-flex items-center justify-center leading-none" title="Public Rating Average">
+                              <Flame className="w-4 h-4 fill-current" />
+                              <span>{Number(sub.flameRating).toFixed(2)}</span>
+                              <span className="text-xs text-[#A0A0A0]">Public Rating Avg</span>
+                            </div>
+                          )}
+
+                          {/* Place Pillbox */}
                           {isTop1 ? (
                             <span className="h-7 px-3.5 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
                               1st Place
@@ -1619,42 +1647,9 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                               3rd Place
                             </span>
                           ) : (
-                            <span className="h-7 w-8 text-center text-xs font-bold text-[#666666] inline-flex items-center justify-center leading-none select-none shrink-0">
+                            <span className="h-7 w-8 text-center text-xs font-bold text-[#666666] inline-flex items-center justify-center leading-none select-none shrink-0 bg-[#121212] rounded-full">
                               #{sub.rank || (idx + 1)}
                             </span>
-                          )}
-
-                          <div>
-                            {sub.beatTitle && sub.beatTitle !== battle.title && !sub.beatTitle.startsWith("Beat Battle #") && (
-                              <span className="text-xs text-[#888888] leading-tight block">
-                                {sub.beatTitle}
-                              </span>
-                            )}
-                            <Link
-                              href={`/${sub.userId || "guest"}`}
-                              className="text-2xl font-bold text-white hover:text-[#7B61FF] transition-colors leading-snug"
-                            >
-                              {sub.beatmakerTag || "Producer"}
-                            </Link>
-                          </div>
-                        </div>
-
-                        {/* Leaderboard Score: Strict Jury Score Average */}
-                        <div className="flex items-center gap-3 shrink-0 text-xs font-bold flex-wrap">
-                          {hasJury && (
-                            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-3xl bg-[#7B61FF]/15 text-[#7B61FF] font-bold text-xs shadow-sm" title="Jury Score Average">
-                              <Star className="w-4 h-4 fill-current text-[#7B61FF]" />
-                              <span>{Number(sub.juryScore).toFixed(2)}</span>
-                              <span className="text-xs text-[#A0A0A0]">Jury Avg</span>
-                            </div>
-                          )}
-
-                          {hasFlame && (
-                            <div className="flex items-center gap-1.5 text-[#FF5E3A] px-2" title="Public Rating Average">
-                              <Flame className="w-4 h-4 fill-current" />
-                              <span>{Number(sub.flameRating).toFixed(2)}</span>
-                              <span className="text-xs text-[#A0A0A0]">Public Rating Avg</span>
-                            </div>
                           )}
                         </div>
 

@@ -791,7 +791,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
         </div>
 
         {/* Hero Header */}
-        <div className="bg-[#181818] rounded-[32px] sm:rounded-[36px] p-5 sm:p-6 flex flex-col md:flex-row gap-7 items-start relative overflow-hidden shadow-xl">
+        <div className="bg-[#181818] rounded-[28px] p-4 flex flex-col md:flex-row gap-6 items-start relative overflow-hidden shadow-xl">
           
           {/* Cover Art Thumbnail (Responsive Square) */}
           <div className="w-full sm:max-w-[320px] aspect-square rounded-xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl mx-auto md:mx-0">
@@ -963,7 +963,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             </div>
 
             {/* Right Column: Submit Your Entry Container (Reduces in size when submitted or staged) */}
-            <div className={`lg:col-span-6 bg-[#181818] rounded-[32px] sm:rounded-[36px] p-5 sm:p-6 space-y-4 flex flex-col ${(myEntry || stagedBeat) ? "h-auto" : "h-full justify-between"}`}>
+            <div className={`lg:col-span-6 bg-[#181818] rounded-[28px] p-4 space-y-4 flex flex-col ${(myEntry || stagedBeat) ? "h-auto" : "h-full justify-between"}`}>
               <div className="space-y-4 flex-1 flex flex-col">
                 <h3 className="text-2xl font-bold text-white flex items-center gap-2">
                   <Upload className="w-5 h-5 text-[#FF5E3A]" />

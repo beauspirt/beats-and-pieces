@@ -1573,14 +1573,11 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                   
                   {/* Left Column: Title, Availability, & Tags */}
                   <div className="lg:col-span-6 space-y-5">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-bold text-white flex items-center gap-1">
-                          <span>Beat Title</span>
-                          <span className="text-[#FF5E3A]">*</span>
-                        </label>
-                        <span className="text-xs text-zinc-400">Don&apos;t add your beatmaker name</span>
-                      </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-white flex items-center gap-1">
+                        <span>Beat Title</span>
+                        <span className="text-[#FF5E3A]">*</span>
+                      </label>
                       <input
                         type="text"
                         value={newBeatTitle}
@@ -1589,6 +1586,9 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                         className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#7B61FF] transition-all"
                         required
                       />
+                      <p className="text-xs text-[#888888]">
+                        Enter only the track title — your producer name is displayed automatically.
+                      </p>
                     </div>
 
                     <div className="space-y-2">

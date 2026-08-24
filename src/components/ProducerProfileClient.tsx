@@ -1495,12 +1495,12 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
               />
 
               {/* Modal Actions */}
-              <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 pt-3">
+              <div className="flex items-center justify-between gap-3 pt-3">
                 {!editingBeat.isBattleSubmission ? (
                   <button
                     type="button"
                     onClick={() => handleDeleteBeat(editingBeat.id)}
-                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap"
+                    className="px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     <span>Delete Beat</span>
@@ -1509,22 +1509,13 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                   <div />
                 )}
 
-                <div className="flex items-center gap-2.5 w-full sm:w-auto">
-                  <button
-                    type="button"
-                    onClick={() => setEditingBeat(null)}
-                    className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-[#121212] hover:bg-[#202020] text-zinc-300 text-xs font-bold transition-all cursor-pointer text-center whitespace-nowrap"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isUploadingBeatAudio || !editingBeat.title.trim()}
-                    className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 text-center whitespace-nowrap"
-                  >
-                    Save Changes
-                  </button>
-                </div>
+                <button
+                  type="submit"
+                  disabled={isUploadingBeatAudio || !editingBeat.title.trim()}
+                  className="px-6 py-2.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 text-center whitespace-nowrap ml-auto"
+                >
+                  Save Changes
+                </button>
               </div>
             </form>
           </div>

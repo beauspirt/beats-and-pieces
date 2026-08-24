@@ -158,7 +158,12 @@ export const beatService = {
    */
   async syncFromSupabase(): Promise<void> {
     try {
-      const { data, error } = await supabase.from("beats").select("*");
+      const { data, error } = await supabase
+        .from("beats")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(200);
+
       if (!error && data) {
         const deletedIds = new Set(loadDeletedBeatIds());
         const mapped: DiscoveryBeat[] = data
@@ -175,11 +180,11 @@ export const beatService = {
               },
               audioUrl: b.audio_url,
               duration: b.duration || 120,
-              waveform: b.waveform || [],
+              waveform: Array.isArray(b.waveform) ? b.waveform : [],
               bpm: b.bpm,
               priceTag: b.price_tag || "Not For Sale",
-              genres: b.genres || [],
-              tags: b.tags || [],
+              genres: Array.isArray(b.genres) ? b.genres : [],
+              tags: Array.isArray(b.tags) ? b.tags : [],
               flames: b.flames || 0,
               battleSource: b.battle_source,
               tier: b.tier || 4,

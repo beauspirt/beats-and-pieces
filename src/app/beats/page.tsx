@@ -503,7 +503,7 @@ export default function BeatsDiscoveryPage() {
                         {match && (
                           <Link
                             href={`/battles/battle-${match[1]}`}
-                            className="px-2.5 py-1 rounded-full bg-[#7B61FF]/15 text-zinc-300 hover:bg-[#7B61FF]/25 hover:text-white text-xs font-bold shrink-0 transition-all inline-flex items-center gap-1"
+                            className="px-3.5 py-1.5 rounded-full bg-[#7B61FF]/15 text-zinc-300 hover:bg-[#7B61FF]/25 hover:text-white text-xs font-bold shrink-0 transition-all inline-flex items-center gap-1 leading-none"
                             title={`View ${beat.battleSource || `Beat Battle #${match[1]}`}`}
                           >
                             <span>BB#{match[1]}</span>
@@ -526,7 +526,7 @@ export default function BeatsDiscoveryPage() {
                   <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 flex-wrap sm:flex-nowrap select-none self-start">
                     {/* BPM */}
                     {beat.bpm ? (
-                      <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#121212] text-[#888888] select-none inline-flex items-center justify-center text-center leading-none">
+                      <span className="text-xs font-bold px-3.5 py-1.5 rounded-full bg-[#121212] text-[#888888] select-none inline-flex items-center justify-center text-center leading-none">
                         {beat.bpm} BPM
                       </span>
                     ) : null}

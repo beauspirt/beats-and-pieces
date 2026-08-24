@@ -382,7 +382,7 @@ export default function AdminBattlesManagerPage() {
         {editingBattle && (
           <div
             onClick={() => setEditingBattle(null)}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
           >
             <div
               onClick={(e) => e.stopPropagation()}
@@ -891,7 +891,7 @@ export default function AdminBattlesManagerPage() {
         {showDeleteConfirm && editingBattle && (
           <div
             onClick={() => setShowDeleteConfirm(false)}
-            className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150 cursor-pointer"
+            className="fixed inset-0 z-[105] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150 cursor-pointer"
           >
             <div
               onClick={(e) => e.stopPropagation()}

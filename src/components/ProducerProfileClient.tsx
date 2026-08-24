@@ -1142,7 +1142,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
         <div
           onMouseDown={handleBackdropMouseDown}
           onMouseUp={(e) => handleBackdropMouseUp(e, () => setEditingBeat(null))}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
         >
           <div
             onMouseDown={(e) => e.stopPropagation()}
@@ -1321,7 +1321,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
         <div
           onMouseDown={handleBackdropMouseDown}
           onMouseUp={(e) => handleBackdropMouseUp(e, () => setIsAddModalOpen(false))}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
         >
           <div
             onMouseDown={(e) => e.stopPropagation()}
@@ -1447,7 +1447,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
         <div
           onMouseDown={handleBackdropMouseDown}
           onMouseUp={(e) => handleBackdropMouseUp(e, () => setShowContactModal(false))}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
         >
           <div
             onMouseDown={(e) => e.stopPropagation()}
@@ -1535,7 +1535,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
       {/* Floating Save Toast Pop-up Notification */}
       {saveToastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#181818] text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300 backdrop-blur-md">
+        <div className="fixed bottom-6 right-6 z-[110] bg-[#181818] text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300 backdrop-blur-md">
           <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
             <CheckCircle2 className="w-4 h-4" />
           </div>
@@ -1550,7 +1550,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       {activeVaultModalItem && (
         <div
           onClick={() => setActiveVaultModalItem(null)}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200 cursor-pointer"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200 cursor-pointer"
         >
           <div
             onClick={(e) => e.stopPropagation()}

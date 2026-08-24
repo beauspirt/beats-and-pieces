@@ -16,6 +16,7 @@ import { normalizeUrl } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { JudgeFeedbackTicker } from "@/components/JudgeFeedbackTicker";
+import { ClientPortal } from "@/components/ClientPortal";
 import { 
   Flame, Trophy, Mail, ExternalLink, 
   CheckCircle2, Copy, MapPin, Calendar, Star, Award, Globe,
@@ -1319,17 +1320,18 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       )}
 
       {/* EDIT BEAT MODAL */}
-      {editingBeat && (
-        <div
-          onMouseDown={handleBackdropMouseDown}
-          onMouseUp={(e) => handleBackdropMouseUp(e, () => setEditingBeat(null))}
-          className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
-        >
+      <ClientPortal>
+        {editingBeat && (
           <div
-            onMouseDown={(e) => e.stopPropagation()}
-            onClick={(e) => e.stopPropagation()}
-            className="bg-[#181818] rounded-2xl max-w-2xl sm:max-w-3xl w-full p-5 sm:p-7 space-y-5 shadow-2xl relative cursor-default max-h-[90vh] overflow-y-auto no-scrollbar"
+            onMouseDown={handleBackdropMouseDown}
+            onMouseUp={(e) => handleBackdropMouseUp(e, () => setEditingBeat(null))}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
           >
+            <div
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#181818] rounded-2xl max-w-2xl sm:max-w-3xl w-full p-5 sm:p-7 space-y-5 shadow-2xl relative cursor-default max-h-[90vh] overflow-y-auto no-scrollbar"
+            >
             <div className="flex items-center justify-between pb-1">
               <div className="space-y-0.5">
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
@@ -1459,124 +1461,110 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                   </button>
                 </div>
               </div>
-
-              {/* Preset Standard Tags Selector */}
+              
+              {/* Row 3: Preset Standard Tags Selector */}
               <StandardTagSelector
                 selectedTags={editingTags}
                 onChange={setEditingTags}
               />
 
-              {/* Actions */}
+              {/* Modal Actions */}
               <div className="flex items-center justify-between pt-3">
                 {!editingBeat.isBattleSubmission ? (
                   <button
                     type="button"
                     onClick={() => handleDeleteBeat(editingBeat.id)}
-                    className="px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                    className="px-3.5 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     <span>Delete Beat</span>
                   </button>
                 ) : (
-                  <span className="text-[11px] text-zinc-500">Battle archive protected</span>
+                  <div />
                 )}
 
-                <div className="flex items-center gap-2.5 ml-auto">
+                <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => setEditingBeat(null)}
-                    className="px-5 py-2.5 rounded-xl bg-[#121212] hover:bg-[#222222] text-zinc-300 text-xs font-bold transition-all cursor-pointer"
+                    className="px-4 py-2 rounded-xl bg-[#121212] hover:bg-[#202020] text-zinc-300 text-xs font-semibold transition-all cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-2.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
+                    disabled={isUploadingBeatAudio || !editingBeat.title.trim()}
+                    className="px-5 py-2 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50"
                   >
                     Save Changes
                   </button>
                 </div>
               </div>
-
             </form>
           </div>
         </div>
       )}
+    </ClientPortal>
 
       {/* ADD BEAT MODAL */}
-      {isAddModalOpen && (
-        <div
-          onMouseDown={handleBackdropMouseDown}
-          onMouseUp={(e) => handleBackdropMouseUp(e, () => {
-            setIsAddModalOpen(false);
-            setStagedNewBeatFile(null);
-            setNewBeatAudioUrl("");
-            setNewBeatAudioName("");
-          })}
-          className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
-        >
+      <ClientPortal>
+        {isAddModalOpen && (
           <div
-            onMouseDown={(e) => e.stopPropagation()}
-            onClick={(e) => e.stopPropagation()}
-            className="bg-[#181818] rounded-3xl max-w-4xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default max-h-[90vh] overflow-y-auto no-scrollbar"
+            onMouseDown={handleBackdropMouseDown}
+            onMouseUp={(e) => handleBackdropMouseUp(e, () => {
+              setIsAddModalOpen(false);
+              setStagedNewBeatFile(null);
+              setNewBeatAudioUrl("");
+              setNewBeatAudioName("");
+            })}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between pb-1">
-              <h3 className="text-xl font-bold text-white flex items-center gap-2.5">
-                <Upload className="w-5 h-5 text-[#7B61FF]" />
-                <span>Add Beat to Showcase</span>
-              </h3>
-              <button
-                onClick={() => {
-                  setIsAddModalOpen(false);
-                  setStagedNewBeatFile(null);
-                  setNewBeatAudioUrl("");
-                  setNewBeatAudioName("");
-                }}
-                className="w-8 h-8 rounded-full bg-[#121212] hover:bg-[#222222] text-zinc-400 hover:text-white flex items-center justify-center text-sm cursor-pointer transition-colors"
-              >
-                ✕
-              </button>
-            </div>
+            <div
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#181818] rounded-3xl max-w-4xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default max-h-[90vh] overflow-y-auto no-scrollbar"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between pb-1">
+                <h3 className="text-xl font-bold text-white flex items-center gap-2.5">
+                  <Plus className="w-5 h-5 text-[#7B61FF]" />
+                  <span>Add Beat to Showcase</span>
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAddModalOpen(false);
+                    setStagedNewBeatFile(null);
+                    setNewBeatAudioUrl("");
+                    setNewBeatAudioName("");
+                  }}
+                  className="w-9 h-9 rounded-full bg-[#121212] text-zinc-400 hover:text-white flex items-center justify-center text-sm cursor-pointer transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
 
-            <form onSubmit={handleCreateBeat} className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                
-                {/* Left Column: Metadata Fields */}
-                <div className="lg:col-span-6 space-y-4">
-                  {/* Beat Title */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-white flex items-center gap-1">
-                      <span>Beat Title</span>
-                      <span className="text-[#FF5E3A]">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={newBeatTitle}
-                      onChange={(e) => setNewBeatTitle(e.target.value)}
-                      placeholder="e.g. Midnight Soul Flip"
-                      className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#7B61FF] transition-all"
-                    />
-                  </div>
-
-                  {/* BPM & Availability Toggle (2 Columns) */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    {/* BPM */}
+              {/* Two-Column Responsive Upload & Configuration Form */}
+              <form onSubmit={handleCreateBeat} className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                  
+                  {/* Left Column: Title, Availability, & Tags */}
+                  <div className="lg:col-span-6 space-y-5">
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-white">
-                        BPM <span className="text-zinc-500 font-normal">(Optional)</span>
+                      <label className="text-sm font-semibold text-white flex items-center gap-1">
+                        <span>Beat Title</span>
+                        <span className="text-[#FF5E3A]">*</span>
                       </label>
                       <input
-                        type="number"
-                        placeholder="e.g. 140"
-                        value={newBeatBpm}
-                        onChange={(e) => setNewBeatBpm(e.target.value === "" ? "" : Number(e.target.value))}
-                        className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#7B61FF] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all"
+                        type="text"
+                        value={newBeatTitle}
+                        onChange={(e) => setNewBeatTitle(e.target.value)}
+                        placeholder="e.g. Midnight Heat"
+                        className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#7B61FF] transition-all"
+                        required
                       />
                     </div>
 
-                    {/* Availability Toggle */}
                     <div className="space-y-2">
                       <label className="text-sm font-semibold text-white">
                         Availability
@@ -1600,286 +1588,291 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                         </button>
                       </div>
                     </div>
+
+                    {/* Preset Standard Tags Selector */}
+                    <StandardTagSelector
+                      selectedTags={newBeatTags}
+                      onChange={setNewBeatTags}
+                    />
                   </div>
 
-                  {/* Preset Standard Tags Selector */}
-                  <StandardTagSelector
-                    selectedTags={newBeatTags}
-                    onChange={setNewBeatTags}
-                  />
-                </div>
-
-                {/* Right Column: Audio Drag & Drop & Live Preview */}
-                <div className="lg:col-span-6 space-y-2">
-                  <label className="text-sm font-semibold text-white flex items-center gap-1">
-                    <span>Audio File</span>
-                    <span className="text-[#FF5E3A]">*</span>
-                  </label>
-
-                  {isUploadingBeatAudio ? (
-                    <div className="bg-[#121212] p-6 rounded-2xl min-h-[220px] flex flex-col items-center justify-center text-center gap-3 border-2 border-dashed border-[#7B61FF]/40">
-                      <div className="w-8 h-8 border-2 border-[#7B61FF] border-t-transparent rounded-full animate-spin" />
-                      <p className="text-sm font-bold text-white">
-                        Uploading...
-                      </p>
-                    </div>
-                  ) : stagedNewBeatFile || newBeatAudioUrl ? (
-                    <div className="bg-[#121212] p-5 rounded-2xl space-y-4">
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-2 text-white font-semibold text-sm truncate">
-                          <Music className="w-4 h-4 text-[#7B61FF] shrink-0" />
-                          <span className="truncate">{newBeatAudioName || "Audio Staged"}</span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setStagedNewBeatFile(null);
-                            setNewBeatAudioUrl("");
-                            setNewBeatAudioName("");
-                            setNewBeatWaveformPeaks([]);
-                            setNewBeatDuration(0);
-                          }}
-                          className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-[#1C1C1C] hover:bg-red-500/20 text-zinc-300 hover:text-red-400 transition-all cursor-pointer shrink-0"
-                        >
-                          Remove
-                        </button>
-                      </div>
-
-                      <div className="pt-1" onClick={(e) => e.stopPropagation()}>
-                        <AudioWaveformPlayer
-                          id="profile-new-beat-preview"
-                          title={newBeatTitle || "Preview"}
-                          artist={producer.nickname}
-                          audioUrl={newBeatAudioUrl}
-                          duration={newBeatDuration}
-                          waveformPeaks={newBeatWaveformPeaks}
-                          compact={true}
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <label
-                      onDragOver={handleNewBeatDragOver}
-                      onDragEnter={handleNewBeatDragOver}
-                      onDragLeave={handleNewBeatDragLeave}
-                      onDrop={handleNewBeatDrop}
-                      className={`min-h-[220px] rounded-2xl p-7 flex flex-col items-center justify-center text-center gap-3 transition-all cursor-pointer border-2 border-dashed border-[#7B61FF] ${
-                        isDraggingNewBeat
-                          ? "bg-[#7B61FF]/15 border-solid scale-[1.01]"
-                          : "bg-[#121212]/70 hover:bg-[#121212]"
-                      }`}
-                    >
-                      <div className="w-12 h-12 rounded-full bg-[#7B61FF]/15 flex items-center justify-center text-[#7B61FF]">
-                        <Upload className="w-6 h-6" />
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-sm sm:text-base font-bold text-white">
-                          Drag & drop your beat audio file here
-                        </p>
-                        <p className="text-xs text-zinc-400">
-                          or <span className="text-[#7B61FF] font-medium underline underline-offset-2">browse files</span> from your device
-                        </p>
-                      </div>
-                      <input
-                        type="file"
-                        accept="audio/*"
-                        onChange={(e) => handleAudioUpload(e, true)}
-                        className="hidden"
-                      />
+                  {/* Right Column: Audio Drag & Drop & Live Preview */}
+                  <div className="lg:col-span-6 space-y-2">
+                    <label className="text-sm font-semibold text-white flex items-center gap-1">
+                      <span>Audio File</span>
+                      <span className="text-[#FF5E3A]">*</span>
                     </label>
-                  )}
+
+                    {isUploadingBeatAudio ? (
+                      <div className="bg-[#121212] p-6 rounded-2xl min-h-[220px] flex flex-col items-center justify-center text-center gap-3 border-2 border-dashed border-[#7B61FF]/40">
+                        <div className="w-8 h-8 border-2 border-[#7B61FF] border-t-transparent rounded-full animate-spin" />
+                        <p className="text-sm font-bold text-white">
+                          Uploading...
+                        </p>
+                      </div>
+                    ) : stagedNewBeatFile || newBeatAudioUrl ? (
+                      <div className="bg-[#121212] p-5 rounded-2xl space-y-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-2 text-white font-semibold text-sm truncate">
+                            <Music className="w-4 h-4 text-[#7B61FF] shrink-0" />
+                            <span className="truncate">{newBeatAudioName || "Audio Staged"}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setStagedNewBeatFile(null);
+                              setNewBeatAudioUrl("");
+                              setNewBeatAudioName("");
+                              setNewBeatWaveformPeaks([]);
+                              setNewBeatDuration(0);
+                            }}
+                            className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-[#1C1C1C] hover:bg-red-500/20 text-zinc-300 hover:text-red-400 transition-all cursor-pointer shrink-0"
+                          >
+                            Remove
+                          </button>
+                        </div>
+
+                        <div className="pt-1" onClick={(e) => e.stopPropagation()}>
+                          <AudioWaveformPlayer
+                            id="profile-new-beat-preview"
+                            title={newBeatTitle || "Preview"}
+                            artist={producer.nickname}
+                            audioUrl={newBeatAudioUrl}
+                            duration={newBeatDuration}
+                            waveformPeaks={newBeatWaveformPeaks}
+                            compact={true}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <label
+                        onDragOver={handleNewBeatDragOver}
+                        onDragEnter={handleNewBeatDragOver}
+                        onDragLeave={handleNewBeatDragLeave}
+                        onDrop={handleNewBeatDrop}
+                        className={`min-h-[220px] rounded-2xl p-7 flex flex-col items-center justify-center text-center gap-3 transition-all cursor-pointer border-2 border-dashed border-[#7B61FF] ${
+                          isDraggingNewBeat
+                            ? "bg-[#7B61FF]/15 border-solid scale-[1.01]"
+                            : "bg-[#121212]/70 hover:bg-[#121212]"
+                        }`}
+                      >
+                        <div className="w-12 h-12 rounded-full bg-[#7B61FF]/15 flex items-center justify-center text-[#7B61FF]">
+                          <Upload className="w-6 h-6" />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-sm sm:text-base font-bold text-white">
+                            Drag & drop your beat audio file here
+                          </p>
+                          <p className="text-xs text-zinc-400">
+                            or <span className="text-[#7B61FF] font-medium underline underline-offset-2">browse files</span> from your device
+                          </p>
+                        </div>
+                        <input
+                          type="file"
+                          accept="audio/*"
+                          onChange={(e) => handleAudioUpload(e, true)}
+                          className="hidden"
+                        />
+                      </label>
+                    )}
+                  </div>
+
                 </div>
 
-              </div>
-
-              {/* Actions Footer */}
-              <div className="flex items-center justify-end gap-3 pt-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsAddModalOpen(false);
-                    setStagedNewBeatFile(null);
-                    setNewBeatAudioUrl("");
-                    setNewBeatAudioName("");
-                  }}
-                  className="px-5 py-3 rounded-xl bg-[#121212] hover:bg-[#202020] text-zinc-300 text-sm font-semibold transition-all cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isUploadingBeatAudio || (!stagedNewBeatFile && !newBeatAudioUrl) || !newBeatTitle.trim()}
-                  className="px-6 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-sm font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-2"
-                >
-                  {isUploadingBeatAudio ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Uploading...</span>
-                    </>
-                  ) : (
-                    <span>Finish</span>
-                  )}
-                </button>
-              </div>
-
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* CONTACT / LICENSE MODAL */}
-      {showContactModal && (
-        <div
-          onMouseDown={handleBackdropMouseDown}
-          onMouseUp={(e) => handleBackdropMouseUp(e, () => setShowContactModal(false))}
-          className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
-        >
-          <div
-            onMouseDown={(e) => e.stopPropagation()}
-            onClick={(e) => e.stopPropagation()}
-            className="bg-[#181818] rounded-2xl max-w-md w-full p-5 sm:p-8 space-y-6 shadow-2xl relative cursor-default max-h-[90vh] overflow-y-auto no-scrollbar"
-          >
-            <div className="flex items-center justify-between pb-2">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <Mail className="w-5 h-5 text-[#7B61FF]" />
-                <span>Contact {producer.nickname}</span>
-              </h3>
-              <button
-                onClick={() => setShowContactModal(false)}
-                className="w-8 h-8 rounded-full bg-[#121212] text-zinc-400 hover:text-white flex items-center justify-center text-sm cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="space-y-4 text-xs sm:text-sm text-zinc-300">
-              <div className="bg-[#121212] p-4 rounded-xl">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-mono text-xs text-white truncate">{producer.email}</span>
+                {/* Actions Footer */}
+                <div className="flex items-center justify-end gap-3 pt-3">
                   <button
-                    onClick={handleCopyEmail}
-                    className="px-3 py-1.5 rounded-lg bg-[#222222] hover:bg-[#2c2c2c] text-white text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+                    type="button"
+                    onClick={() => {
+                      setIsAddModalOpen(false);
+                      setStagedNewBeatFile(null);
+                      setNewBeatAudioUrl("");
+                      setNewBeatAudioName("");
+                    }}
+                    className="px-5 py-3 rounded-xl bg-[#121212] hover:bg-[#202020] text-zinc-300 text-sm font-semibold transition-all cursor-pointer"
                   >
-                    {copiedEmail ? (
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isUploadingBeatAudio || (!stagedNewBeatFile && !newBeatAudioUrl) || !newBeatTitle.trim()}
+                    className="px-6 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-sm font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {isUploadingBeatAudio ? (
                       <>
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                        <span className="text-emerald-400">Copied</span>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Uploading...</span>
                       </>
                     ) : (
-                      <>
-                        <Copy className="w-3.5 h-3.5" />
-                        <span>Copy</span>
-                      </>
+                      <span>Finish</span>
                     )}
                   </button>
                 </div>
+
+              </form>
+            </div>
+          </div>
+        )}
+      </ClientPortal>
+
+      {/* CONTACT / LICENSE MODAL */}
+      <ClientPortal>
+        {showContactModal && (
+          <div
+            onMouseDown={handleBackdropMouseDown}
+            onMouseUp={(e) => handleBackdropMouseUp(e, () => setShowContactModal(false))}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
+          >
+            <div
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#181818] rounded-2xl max-w-md w-full p-5 sm:p-8 space-y-6 shadow-2xl relative cursor-default max-h-[90vh] overflow-y-auto no-scrollbar"
+            >
+              <div className="flex items-center justify-between pb-2">
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <Mail className="w-5 h-5 text-[#7B61FF]" />
+                  <span>Contact {producer.nickname}</span>
+                </h3>
+                <button
+                  onClick={() => setShowContactModal(false)}
+                  className="w-8 h-8 rounded-full bg-[#121212] text-zinc-400 hover:text-white flex items-center justify-center text-sm cursor-pointer"
+                >
+                  ✕
+                </button>
               </div>
 
-              {/* Socials */}
-              {activeLinks.length > 0 && (
-                <div className="space-y-2.5 pt-1">
-                  <span className="text-[11px] text-zinc-500 uppercase tracking-wider font-semibold block">
-                    Socials
-                  </span>
-                  <div className="flex flex-wrap items-center gap-3.5">
-                    {activeLinks.map(([platform, url]) => {
-                      const IconComponent = SocialIcons[platform.toLowerCase()] || SocialIcons.website;
-                      const hoverColorClasses: Record<string, string> = {
-                        instagram: "hover:text-[#E4405F]",
-                        youtube: "hover:text-[#FF0000]",
-                        spotify: "hover:text-[#1DB954]",
-                        bandcamp: "hover:text-[#1DA0C3]",
-                        soundcloud: "hover:text-[#FF5500]",
-                        beatstars: "hover:text-[#FF3B30]",
-                        facebook: "hover:text-[#1877F2]",
-                        website: "hover:text-[#7B61FF]",
-                      };
-                      const hoverColor = hoverColorClasses[platform.toLowerCase()] || "hover:text-[#7B61FF]";
-                      const formattedUrl = normalizeUrl(url);
-
-                      return (
-                        <a
-                          key={platform}
-                          href={formattedUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={`text-zinc-400 ${hoverColor} transition-colors duration-200 active:scale-95 inline-flex items-center justify-center`}
-                          title={`${platform.charAt(0).toUpperCase() + platform.slice(1)}: ${url}`}
-                        >
-                          <IconComponent className="w-5 h-5" />
-                        </a>
-                      );
-                    })}
+              <div className="space-y-4 text-xs sm:text-sm text-zinc-300">
+                <div className="bg-[#121212] p-4 rounded-xl">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono text-xs text-white truncate">{producer.email}</span>
+                    <button
+                      onClick={handleCopyEmail}
+                      className="px-3 py-1.5 rounded-lg bg-[#222222] hover:bg-[#2c2c2c] text-white text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+                    >
+                      {copiedEmail ? (
+                        <>
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                          <span className="text-emerald-400">Copied</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5" />
+                          <span>Copy</span>
+                        </>
+                      )}
+                    </button>
                   </div>
                 </div>
-              )}
+
+                {/* Socials */}
+                {activeLinks.length > 0 && (
+                  <div className="space-y-2.5 pt-1">
+                    <span className="text-[11px] text-zinc-500 uppercase tracking-wider font-semibold block">
+                      Socials
+                    </span>
+                    <div className="flex flex-wrap items-center gap-3.5">
+                      {activeLinks.map(([platform, url]) => {
+                        const IconComponent = SocialIcons[platform.toLowerCase()] || SocialIcons.website;
+                        const hoverColorClasses: Record<string, string> = {
+                          instagram: "hover:text-[#E4405F]",
+                          youtube: "hover:text-[#FF0000]",
+                          spotify: "hover:text-[#1DB954]",
+                          bandcamp: "hover:text-[#1DA0C3]",
+                          soundcloud: "hover:text-[#FF5500]",
+                          beatstars: "hover:text-[#FF3B30]",
+                          facebook: "hover:text-[#1877F2]",
+                          website: "hover:text-[#7B61FF]",
+                        };
+                        const hoverColor = hoverColorClasses[platform.toLowerCase()] || "hover:text-[#7B61FF]";
+                        const formattedUrl = normalizeUrl(url);
+
+                        return (
+                          <a
+                            key={platform}
+                            href={formattedUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`text-zinc-400 ${hoverColor} transition-colors duration-200 active:scale-95 inline-flex items-center justify-center`}
+                            title={`${platform.charAt(0).toUpperCase() + platform.slice(1)}: ${url}`}
+                          >
+                            <IconComponent className="w-5 h-5" />
+                          </a>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </ClientPortal>
 
       {/* Floating Save Toast Pop-up Notification */}
-      {saveToastMessage && (
-        <div className="fixed bottom-6 right-6 z-[210] bg-[#181818] text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300 backdrop-blur-md">
-          <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-            <CheckCircle2 className="w-4 h-4" />
+      <ClientPortal>
+        {saveToastMessage && (
+          <div className="fixed bottom-6 right-6 z-[210] bg-[#181818] text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300 backdrop-blur-md">
+            <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-white">Showcase Updated</p>
+              <p className="text-[11px] text-zinc-400">{saveToastMessage}</p>
+            </div>
           </div>
-          <div>
-            <p className="text-xs font-bold text-white">Showcase Updated</p>
-            <p className="text-[11px] text-zinc-400">{saveToastMessage}</p>
-          </div>
-        </div>
-      )}
+        )}
+      </ClientPortal>
 
       {/* IN-APP VAULT VIDEO MODAL */}
-      {activeVaultModalItem && (
-        <div
-          onClick={() => setActiveVaultModalItem(null)}
-          className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200 cursor-pointer"
-        >
+      <ClientPortal>
+        {activeVaultModalItem && (
           <div
-            onClick={(e) => e.stopPropagation()}
-            className="bg-[#181818] rounded-2xl max-w-4xl w-full overflow-hidden shadow-2xl space-y-4 p-4 sm:p-6 relative cursor-default"
+            onClick={() => setActiveVaultModalItem(null)}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200 cursor-pointer"
           >
-            {/* Modal Close Button */}
-            <div className="flex items-center justify-end">
-              <button
-                onClick={() => setActiveVaultModalItem(null)}
-                className="w-8 h-8 rounded-full bg-[#121212] text-zinc-400 hover:text-white flex items-center justify-center text-sm cursor-pointer shrink-0"
-              >
-                ✕
-              </button>
-            </div>
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#181818] rounded-2xl max-w-4xl w-full overflow-hidden shadow-2xl space-y-4 p-4 sm:p-6 relative cursor-default"
+            >
+              {/* Modal Close Button */}
+              <div className="flex items-center justify-end">
+                <button
+                  onClick={() => setActiveVaultModalItem(null)}
+                  className="w-8 h-8 rounded-full bg-[#121212] text-zinc-400 hover:text-white flex items-center justify-center text-sm cursor-pointer shrink-0"
+                >
+                  ✕
+                </button>
+              </div>
 
-            {/* Embedded 16:9 YouTube Player */}
-            <div className="w-full aspect-video rounded-xl overflow-hidden bg-black relative shadow-inner">
-              <iframe
-                src={`https://www.youtube.com/embed/${activeVaultModalItem.youtubeId}?autoplay=1`}
-                title={activeVaultModalItem.title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full border-0"
-              />
-            </div>
+              {/* Embedded 16:9 YouTube Player */}
+              <div className="w-full aspect-video rounded-xl overflow-hidden bg-black relative shadow-inner">
+                <iframe
+                  src={`https://www.youtube.com/embed/${activeVaultModalItem.youtubeId}?autoplay=1`}
+                  title={activeVaultModalItem.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="w-full h-full border-0"
+                />
+              </div>
 
-            {/* Modal Footer */}
-            <div className="flex items-center justify-end pt-1 text-xs">
-              <a
-                href={activeVaultModalItem.youtubeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 rounded-xl bg-[#222222] hover:bg-[#2c2c2c] text-white font-semibold flex items-center gap-2 shrink-0 transition-colors"
-              >
-                <span>Watch on YouTube</span>
-                <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
-              </a>
+              {/* Modal Footer */}
+              <div className="flex items-center justify-end pt-1 text-xs">
+                <a
+                  href={activeVaultModalItem.youtubeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 rounded-xl bg-[#222222] hover:bg-[#2c2c2c] text-white font-semibold flex items-center gap-2 shrink-0 transition-colors"
+                >
+                  <span>Watch on YouTube</span>
+                  <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
+                </a>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-
+        )}
+      </ClientPortal>
     </div>
   );
 }

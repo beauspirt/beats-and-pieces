@@ -192,12 +192,12 @@ export default function BeatsDiscoveryPage() {
           </div>
 
           {/* Quick Action Controls Row: Favorites + Filter + Sort Criteria Dropdown + Upload Beat Button */}
-          <div className="grid grid-cols-4 sm:flex items-center gap-2 sm:gap-3 w-full lg:w-auto">
+          <div className="grid grid-cols-4 sm:flex items-center gap-1.5 sm:gap-3 w-full max-w-full min-w-0 lg:w-auto">
             {/* Favorites Filter Button */}
             <button
               type="button"
               onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
-              className={`w-full sm:w-auto h-11 sm:h-auto px-2 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              className={`w-full min-w-0 sm:w-auto h-11 sm:h-auto px-1 sm:px-4 py-2 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                 showOnlyFavorites
                   ? "bg-amber-500/20 text-amber-300 shadow-sm"
                   : "bg-[#181818] hover:bg-[#202020] text-zinc-400 hover:text-white"
@@ -213,7 +213,7 @@ export default function BeatsDiscoveryPage() {
             <button
               type="button"
               onClick={() => setShowFilters(!showFilters)}
-              className={`w-full sm:w-auto h-11 sm:h-auto px-2 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              className={`w-full min-w-0 sm:w-auto h-11 sm:h-auto px-1 sm:px-4 py-2 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                 showFilters || activeFiltersCount > 0
                   ? "bg-[#7B61FF] text-white"
                   : "bg-[#181818] hover:bg-[#202020] text-zinc-400 hover:text-white"
@@ -231,7 +231,7 @@ export default function BeatsDiscoveryPage() {
             </button>
 
             {/* Redesigned Sleek Sort Dropdown */}
-            <div className="relative w-full sm:w-auto sm:flex-initial" ref={sortMenuRef}>
+            <div className="relative w-full min-w-0 sm:w-auto sm:flex-initial" ref={sortMenuRef}>
               <button
                 type="button"
                 onClick={(e) => {
@@ -239,9 +239,9 @@ export default function BeatsDiscoveryPage() {
                   e.stopPropagation();
                   setIsSortOpen((prev) => !prev);
                 }}
-                className="w-full h-11 sm:h-auto flex items-center justify-between sm:justify-center gap-1 sm:gap-2 bg-[#181818] hover:bg-[#202020] rounded-xl px-2 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white font-semibold transition-all cursor-pointer"
+                className="w-full min-w-0 h-11 sm:h-auto flex items-center justify-between sm:justify-center gap-1 sm:gap-2 bg-[#181818] hover:bg-[#202020] rounded-xl px-1.5 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-white font-semibold transition-all cursor-pointer"
               >
-                <div className="flex items-center gap-1 truncate">
+                <div className="flex items-center gap-1 min-w-0 truncate">
                   <SlidersHorizontal className="w-3.5 h-3.5 text-[#7B61FF] shrink-0" />
                   <span className="truncate">{sortLabelMap[sortBy]}</span>
                 </div>
@@ -283,11 +283,10 @@ export default function BeatsDiscoveryPage() {
             {/* Upload Beat Button */}
             <Link
               href={currentUser?.id ? `/${currentUser.id}` : "/profile"}
-              className="w-full sm:w-auto h-11 sm:h-auto inline-flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 cursor-pointer text-center"
+              className="w-full min-w-0 sm:w-auto h-11 sm:h-auto inline-flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-5 py-2 sm:py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 cursor-pointer text-center"
             >
               <Upload className="w-4 h-4 shrink-0" />
-              <span className="hidden xs:inline sm:inline whitespace-nowrap">Upload Beat</span>
-              <span className="xs:hidden sm:hidden whitespace-nowrap">Upload</span>
+              <span className="truncate">Upload</span>
             </Link>
 
           </div>
@@ -326,8 +325,8 @@ export default function BeatsDiscoveryPage() {
         {showFilters && (
           <div className="bg-[#181818] rounded-2xl p-5 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
-                Filter Catalogue
+              <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
+                Tags
               </span>
               <button
                 type="button"
@@ -342,26 +341,9 @@ export default function BeatsDiscoveryPage() {
               </button>
             </div>
 
-            {/* Genre Filters with Multi-Select support */}
+            {/* Tags Multi-Select */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-zinc-300 font-semibold block">Genre / Style (Select multiple)</span>
-                {selectedTags.length > 0 && (
-                  <span className="text-[11px] text-[#7B61FF] font-medium">{selectedTags.length} selected</span>
-                )}
-              </div>
               <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => setSelectedTags([])}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
-                    selectedTags.length === 0
-                      ? "bg-[#7B61FF] text-white"
-                      : "bg-[#121212] text-zinc-400 hover:text-white"
-                  }`}
-                >
-                  All Genres
-                </button>
                 {allGenres.map((genre) => {
                   const isSelected = selectedTags.includes(genre);
                   return (
@@ -383,42 +365,37 @@ export default function BeatsDiscoveryPage() {
               </div>
             </div>
 
-            {/* Price Tag / Availability Filters */}
-            <div className="space-y-2 pt-2 border-t border-[#222222]">
-              <span className="text-xs text-zinc-300 font-semibold block">Licensing / Price Status</span>
+            {/* Availability Filters */}
+            <div className="space-y-2 pt-3 border-t border-[#222222]">
+              <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider block">
+                Availability
+              </span>
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
-                  onClick={() => setSelectedSaleFilter("all")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                    selectedSaleFilter === "all"
-                      ? "bg-[#7B61FF] text-white"
-                      : "bg-[#121212] text-[#888888] hover:text-white"
-                  }`}
-                >
-                  All Beats
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSelectedSaleFilter("for_sale")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                  onClick={() =>
+                    setSelectedSaleFilter((prev) => (prev === "for_sale" ? "all" : "for_sale"))
+                  }
+                  className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
                     selectedSaleFilter === "for_sale"
-                      ? "bg-[#7B61FF] text-white"
-                      : "bg-[#121212] text-[#888888] hover:text-white"
+                      ? "bg-[#7B61FF] text-white shadow-sm"
+                      : "bg-[#121212] text-zinc-400 hover:text-white"
                   }`}
                 >
-                  Available For Sale / License
+                  For Sale
                 </button>
                 <button
                   type="button"
-                  onClick={() => setSelectedSaleFilter("not_for_sale")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                  onClick={() =>
+                    setSelectedSaleFilter((prev) => (prev === "not_for_sale" ? "all" : "not_for_sale"))
+                  }
+                  className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
                     selectedSaleFilter === "not_for_sale"
-                      ? "bg-[#7B61FF] text-white"
-                      : "bg-[#121212] text-[#888888] hover:text-white"
+                      ? "bg-[#7B61FF] text-white shadow-sm"
+                      : "bg-[#121212] text-zinc-400 hover:text-white"
                   }`}
                 >
-                  Showcase Only
+                  Not For Sale
                 </button>
               </div>
             </div>

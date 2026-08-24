@@ -8,6 +8,7 @@ import { vaultService } from "@/services/vaultService";
 import { producerService } from "@/services/producerService";
 import { VaultItem } from "@/lib/types";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
+import { ClientPortal } from "@/components/ClientPortal";
 
 export default function VaultPage() {
   const [activeModalItem, setActiveModalItem] = useState<VaultItem | null>(null);
@@ -102,21 +103,29 @@ export default function VaultPage() {
   };
 
   return (
-    <div className="w-full space-y-12 sm:space-y-16 animate-in fade-in duration-300">
+    <div className="space-y-10 animate-in fade-in duration-300">
       
-      {/* Section 1: Beat Breakdowns */}
+      {/* Page Header */}
+      <div className="space-y-1">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-white">The Vault</h1>
+        <p className="text-sm text-zinc-400">
+          Exclusive track breakdowns, live sets, and studio archives from the community.
+        </p>
+      </div>
+
+      {/* Breakdowns Section */}
       <section className="space-y-4">
-        <h2 className="text-xl sm:text-2xl font-bold text-white">
-          Beat Breakdowns
+        <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+          Track Breakdowns
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {breakdowns.map(renderCard)}
         </div>
       </section>
 
-      {/* Section 2: Live Sets */}
+      {/* Live Sets Section */}
       <section className="space-y-4">
-        <h2 className="text-xl sm:text-2xl font-bold text-white">
+        <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
           Live Sets
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -125,51 +134,53 @@ export default function VaultPage() {
       </section>
 
       {/* In-App Video Modal Player */}
-      {activeModalItem && (
-        <div
-          onClick={() => setActiveModalItem(null)}
-          className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200 cursor-pointer"
-        >
+      <ClientPortal>
+        {activeModalItem && (
           <div
-            onClick={(e) => e.stopPropagation()}
-            className="bg-[#181818] rounded-2xl max-w-4xl w-full overflow-hidden shadow-2xl space-y-4 p-4 sm:p-6 relative cursor-default"
+            onClick={() => setActiveModalItem(null)}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200 cursor-pointer"
           >
-            {/* Modal Close Button */}
-            <div className="flex items-center justify-end">
-              <button
-                onClick={() => setActiveModalItem(null)}
-                className="w-8 h-8 rounded-full bg-[#121212] text-zinc-400 hover:text-white flex items-center justify-center text-sm cursor-pointer shrink-0"
-              >
-                ✕
-              </button>
-            </div>
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#181818] rounded-2xl max-w-4xl w-full overflow-hidden shadow-2xl space-y-4 p-4 sm:p-6 relative cursor-default"
+            >
+              {/* Modal Close Button */}
+              <div className="flex items-center justify-end">
+                <button
+                  onClick={() => setActiveModalItem(null)}
+                  className="w-8 h-8 rounded-full bg-[#121212] text-zinc-400 hover:text-white flex items-center justify-center text-sm cursor-pointer shrink-0"
+                >
+                  ✕
+                </button>
+              </div>
 
-            {/* Embedded 16:9 YouTube Player */}
-            <div className="w-full aspect-video rounded-xl overflow-hidden bg-black relative shadow-inner">
-              <iframe
-                src={`https://www.youtube.com/embed/${activeModalItem.youtubeId}?autoplay=1`}
-                title={activeModalItem.title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full border-0"
-              />
-            </div>
+              {/* Embedded 16:9 YouTube Player */}
+              <div className="w-full aspect-video rounded-xl overflow-hidden bg-black relative shadow-inner">
+                <iframe
+                  src={`https://www.youtube.com/embed/${activeModalItem.youtubeId}?autoplay=1`}
+                  title={activeModalItem.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="w-full h-full border-0"
+                />
+              </div>
 
-            {/* Modal Footer */}
-            <div className="flex items-center justify-end pt-1 text-xs">
-              <a
-                href={activeModalItem.youtubeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 rounded-xl bg-[#222222] hover:bg-[#2c2c2c] text-white font-semibold flex items-center gap-2 shrink-0 transition-colors"
-              >
-                <span>Watch on YouTube</span>
-                <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
-              </a>
+              {/* Modal Footer */}
+              <div className="flex items-center justify-end pt-1 text-xs">
+                <a
+                  href={activeModalItem.youtubeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 rounded-xl bg-[#222222] hover:bg-[#2c2c2c] text-white font-semibold flex items-center gap-2 shrink-0 transition-colors"
+                >
+                  <span>Watch on YouTube</span>
+                  <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
+                </a>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </ClientPortal>
 
     </div>
   );

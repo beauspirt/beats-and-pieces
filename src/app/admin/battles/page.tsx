@@ -8,6 +8,7 @@ import { AdminGuard } from "@/components/AdminGuard";
 import { battleService, producerService, storageService } from "@/services";
 import { Competition, BattlePhase, BattleSample } from "@/lib/types";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
+import { ClientPortal } from "@/components/ClientPortal";
 
 interface PersonEntry {
   name: string;
@@ -417,11 +418,12 @@ export default function AdminBattlesManagerPage() {
         </div>
 
         {/* EDIT BATTLE MODAL */}
-        {editingBattle && (
-          <div
-            onClick={() => setEditingBattle(null)}
-            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
-          >
+        <ClientPortal>
+          {editingBattle && (
+            <div
+              onClick={() => setEditingBattle(null)}
+              className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
+            >
             <div
               onClick={(e) => e.stopPropagation()}
               className="bg-[#181818] rounded-2xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto cursor-default"
@@ -928,8 +930,10 @@ export default function AdminBattlesManagerPage() {
             </div>
           </div>
         )}
+      </ClientPortal>
 
-        {/* DELETE CONFIRMATION MODAL */}
+      {/* DELETE CONFIRMATION MODAL */}
+      <ClientPortal>
         {showDeleteConfirm && editingBattle && (
           <div
             onClick={() => setShowDeleteConfirm(false)}
@@ -968,6 +972,7 @@ export default function AdminBattlesManagerPage() {
             </div>
           </div>
         )}
+      </ClientPortal>
 
       </div>
     </AdminGuard>

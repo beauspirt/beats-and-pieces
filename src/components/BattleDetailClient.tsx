@@ -22,6 +22,7 @@ import { BattlePhase, Competition, BattleSubmission } from "@/lib/types";
 import { useAudioPlayer } from "@/lib/audio-context";
 import { useAuth } from "@/lib/auth-context";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
+import { ClientPortal } from "./ClientPortal";
 
 // Deterministic pseudo-random seeded shuffle (Mulberry32 PRNG)
 function seededShuffle<T>(array: T[], seedStr: string): T[] {
@@ -1266,101 +1267,99 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
           )}
 
           {/* INSUFFICIENT RATINGS ERROR MODAL */}
-          {submitError && (
-            <div 
-              onClick={() => setSubmitError(null)}
-              className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150 cursor-pointer"
-            >
+          <ClientPortal>
+            {submitError && (
               <div 
-                onClick={(e) => e.stopPropagation()}
-                className="bg-[#181818] rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl relative cursor-default"
+                onClick={() => setSubmitError(null)}
+                className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150 cursor-pointer"
               >
-                <div className="space-y-2">
-                  <h3 className="text-xl font-bold text-[#FF5E3A] flex items-center gap-2">
-                    <span>More Ratings Required</span>
-                  </h3>
-                  <p className="text-xs sm:text-sm text-[#D1D1D1] leading-relaxed">
-                    {submitError}
-                  </p>
-                </div>
-
-                <div className="bg-[#121212] p-4 rounded-xl space-y-1.5 text-xs text-[#A0A0A0]">
-                  <div className="flex items-center justify-between">
-                    <span>Beats Rated So Far:</span>
-                    <strong className="text-white">{currentVotesCount} / {totalEntries}</strong>
+                <div 
+                  onClick={(e) => e.stopPropagation()}
+                  className="bg-[#181818] rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl relative cursor-default"
+                >
+                  <div className="space-y-2">
+                    <h3 className="text-xl font-bold text-[#FF5E3A] flex items-center gap-2">
+                      <span>More Ratings Required</span>
+                    </h3>
+                    <p className="text-xs sm:text-sm text-[#D1D1D1] leading-relaxed">
+                      {submitError}
+                    </p>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span>Minimum Required to Submit:</span>
-                    <strong className="text-white">{requiredVotes} beats ({minPercentage}%)</strong>
-                  </div>
-                </div>
 
-                <div className="flex justify-end pt-2">
-                  <button
-                    onClick={() => setSubmitError(null)}
-                    className="px-6 py-2.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
-                  >
-                    Got it, continue rating
-                  </button>
+                  <div className="bg-[#121212] p-4 rounded-xl space-y-1.5 text-xs text-[#A0A0A0]">
+                    <div className="flex items-center justify-between">
+                      <span>Beats Rated So Far:</span>
+                      <strong className="text-white">{currentVotesCount} / {totalEntries}</strong>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Minimum Required to Submit:</span>
+                      <strong className="text-white">{requiredVotes} beats ({minPercentage}%)</strong>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end pt-2">
+                    <button
+                      onClick={() => setSubmitError(null)}
+                      className="px-6 py-2.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
+                    >
+                      Got it, continue rating
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </ClientPortal>
 
           {/* SUBMIT RATINGS FINAL LOCK WARNING & CONFIRMATION MODAL */}
-          {showSubmitWarningModal && (
-            <div 
-              onClick={() => setShowSubmitWarningModal(false)}
-              className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150 cursor-pointer"
-            >
+          <ClientPortal>
+            {showSubmitWarningModal && (
               <div 
-                onClick={(e) => e.stopPropagation()}
-                className="bg-[#181818] rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default"
+                onClick={() => setShowSubmitWarningModal(false)}
+                className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150 cursor-pointer"
               >
-                <div className="space-y-2">
-                  <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                    <ShieldCheck className="w-5 h-5 text-[#7B61FF]" />
-                    <span>Submit & Lock Your Ratings</span>
-                  </h3>
-                  <p className="text-xs sm:text-sm text-[#D1D1D1] leading-relaxed">
-                    Once submitted, your ratings will be <strong className="text-white font-bold">final and permanently locked</strong>. You will not be able to edit them afterwards.
-                  </p>
-                </div>
-
-                <div className="bg-[#121212] p-4 rounded-xl space-y-1.5 text-xs text-[#A0A0A0]">
-                  <div className="flex items-center justify-between">
-                    <span>Total Beats Rated:</span>
-                    <strong className="text-white">{currentVotesCount} / {totalEntries}</strong>
+                <div 
+                  onClick={(e) => e.stopPropagation()}
+                  className="bg-[#181818] rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default"
+                >
+                  <div className="space-y-2">
+                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                      <ShieldCheck className="w-5 h-5 text-[#7B61FF]" />
+                      <span>Submit & Lock Your Ratings</span>
+                    </h3>
+                    <p className="text-xs sm:text-sm text-[#D1D1D1] leading-relaxed">
+                      Once submitted, your ratings will be <strong className="text-white font-bold">final and permanently locked</strong>. You will not be able to edit them afterwards.
+                    </p>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span>Qualification Status:</span>
-                    <span className="text-emerald-400 font-bold">Verified & Counted ✓</span>
+
+                  <div className="bg-[#121212] p-4 rounded-xl space-y-1.5 text-xs text-[#A0A0A0]">
+                    <div className="flex items-center justify-between">
+                      <span>Total Beats Rated:</span>
+                      <strong className="text-white">{currentVotesCount} / {totalEntries}</strong>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Qualification Status:</span>
+                      <span className="text-emerald-400 font-bold">Verified & Counted ✓</span>
+                    </div>
                   </div>
-                </div>
 
-                <p className="text-xs text-[#888888]">
-                  Are you ready to lock in your votes towards the Finalists?
-                </p>
-
-                <div className="flex items-center justify-end gap-3 pt-2">
-                  <button
-                    onClick={() => setShowSubmitWarningModal(false)}
-                    className="px-5 py-2.5 rounded-xl bg-[#222222] hover:bg-[#2A2A2A] text-[#A0A0A0] hover:text-white text-xs font-semibold transition-colors cursor-pointer"
-                  >
-                    Keep Reviewing
-                  </button>
-
-                  <button
-                    onClick={handleConfirmSubmitRatings}
-                    className="px-6 py-2.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer flex items-center gap-1.5"
-                  >
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>Confirm & Lock Ratings</span>
-                  </button>
+                  <div className="flex items-center justify-end gap-3 pt-2">
+                    <button
+                      onClick={() => setShowSubmitWarningModal(false)}
+                      className="px-5 py-2.5 rounded-xl bg-[#121212] hover:bg-[#202020] text-zinc-300 text-xs font-semibold transition-all cursor-pointer"
+                    >
+                      Keep Editing
+                    </button>
+                    <button
+                      onClick={handleConfirmSubmitRatings}
+                      className="px-6 py-2.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer flex items-center gap-2"
+                    >
+                      <span>Confirm & Lock Ratings</span>
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </ClientPortal>
 
         </div>
       )}

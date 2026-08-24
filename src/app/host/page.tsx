@@ -9,6 +9,7 @@ import { battleService, producerService, storageService } from "@/services";
 import { useAuth } from "@/lib/auth-context";
 import { Competition, BattlePhase, BattleSample } from "@/lib/types";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
+import { ClientPortal } from "@/components/ClientPortal";
 
 interface PersonEntry {
   name: string;
@@ -310,57 +311,58 @@ export default function HostPanelPage() {
         )}
 
         {/* EDIT BATTLE MODAL */}
-        {editingBattle && (
-          <div
-            onClick={() => setEditingBattle(null)}
-            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150 cursor-pointer"
-          >
+        <ClientPortal>
+          {editingBattle && (
             <div
-              onClick={(e) => e.stopPropagation()}
-              className="bg-[#181818] rounded-2xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto cursor-default"
+              onClick={() => setEditingBattle(null)}
+              className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150 cursor-pointer"
             >
-              <div className="flex items-center justify-between pb-2">
-                <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                  <Edit3 className="w-5 h-5 text-[#FF8A65]" />
-                  <span>Edit Hosted Battle</span>
-                </h2>
-                <button
-                  onClick={() => setEditingBattle(null)}
-                  className="w-8 h-8 rounded-full bg-[#121212] text-zinc-400 hover:text-white flex items-center justify-center text-sm cursor-pointer"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <form onSubmit={handleSave} className="space-y-5 text-left text-xs">
-                {/* Title */}
-                <div className="space-y-1.5">
-                  <label className="font-semibold text-zinc-300">Battle Title</label>
-                  <input
-                    type="text"
-                    value={editingBattle.title}
-                    onChange={(e) => setEditingBattle({ ...editingBattle, title: e.target.value })}
-                    className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
-                    required
-                  />
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="bg-[#181818] rounded-2xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto cursor-default"
+              >
+                <div className="flex items-center justify-between pb-2">
+                  <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                    <Edit3 className="w-5 h-5 text-[#FF8A65]" />
+                    <span>Edit Hosted Battle</span>
+                  </h2>
+                  <button
+                    onClick={() => setEditingBattle(null)}
+                    className="w-8 h-8 rounded-full bg-[#121212] text-zinc-400 hover:text-white flex items-center justify-center text-sm cursor-pointer"
+                  >
+                    ✕
+                  </button>
                 </div>
 
-                {/* Cover Art Upload */}
-                <div className="space-y-1.5">
-                  <label className="font-semibold text-zinc-300">Cover Art</label>
-                  <div className="flex items-center gap-4 bg-[#121212] p-3 rounded-xl">
-                    <div className="w-16 h-16 rounded-xl overflow-hidden relative bg-[#181818] shrink-0 flex items-center justify-center text-zinc-600 shadow-md">
-                      {editingBattle.coverImage ? (
-                        <Image
-                          src={editingBattle.coverImage}
-                          alt="Cover Preview"
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <ImageIcon className="w-6 h-6 text-zinc-600" />
-                      )}
-                    </div>
+                <form onSubmit={handleSave} className="space-y-5 text-left text-xs">
+                  {/* Title */}
+                  <div className="space-y-1.5">
+                    <label className="font-semibold text-zinc-300">Battle Title</label>
+                    <input
+                      type="text"
+                      value={editingBattle.title}
+                      onChange={(e) => setEditingBattle({ ...editingBattle, title: e.target.value })}
+                      className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                      required
+                    />
+                  </div>
+
+                  {/* Cover Art Upload */}
+                  <div className="space-y-1.5">
+                    <label className="font-semibold text-zinc-300">Cover Art</label>
+                    <div className="flex items-center gap-4 bg-[#121212] p-3 rounded-xl">
+                      <div className="w-16 h-16 rounded-xl overflow-hidden relative bg-[#181818] shrink-0 flex items-center justify-center text-zinc-600 shadow-md">
+                        {editingBattle.coverImage ? (
+                          <Image
+                            src={editingBattle.coverImage}
+                            alt="Cover Preview"
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <ImageIcon className="w-6 h-6 text-zinc-600" />
+                        )}
+                      </div>
                     <div className="flex items-center justify-between flex-1">
                       <span className="text-xs text-zinc-400">Change square cover artwork</span>
                       <label className="px-4 py-2 rounded-xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-white cursor-pointer transition-colors shrink-0">
@@ -613,6 +615,7 @@ export default function HostPanelPage() {
             </div>
           </div>
         )}
+      </ClientPortal>
 
       </div>
     </HostGuard>

@@ -99,7 +99,7 @@ export default function NewReleasePage() {
                   placeholder="e.g. Beats & Pieces - Flip Tape #3"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full bg-[#121212] rounded-3xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+                  className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
                   required
                 />
               </div>
@@ -122,7 +122,7 @@ export default function NewReleasePage() {
                   </div>
                   <div className="flex items-center justify-between flex-1">
                     <span className="text-xs text-[#777777]">Upload square cover artwork</span>
-                    <label className="px-4 py-2 rounded-3xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-white cursor-pointer transition-colors shrink-0">
+                    <label className="px-4 py-2 rounded-xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-white cursor-pointer transition-colors shrink-0">
                       Browse File
                       <input type="file" accept="image/*" onChange={handleImageFileChange} className="hidden" />
                     </label>
@@ -142,7 +142,7 @@ export default function NewReleasePage() {
                   placeholder="Compilation tracklist, producer credits, and release details..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full bg-[#121212] rounded-3xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF] resize-none leading-relaxed"
+                  className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF] resize-none leading-relaxed"
                 />
               </div>
             </div>
@@ -157,7 +157,7 @@ export default function NewReleasePage() {
                   type="date"
                   value={releaseDate}
                   onChange={(e) => setReleaseDate(e.target.value)}
-                  className="w-full bg-[#121212] rounded-3xl px-4 py-2.5 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+                  className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
                 />
               </div>
             </div>
@@ -175,7 +175,7 @@ export default function NewReleasePage() {
                   type="url"
                   value={spotifyUrl}
                   onChange={(e) => setSpotifyUrl(e.target.value)}
-                  className="w-full bg-[#121212] rounded-3xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                  className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
                 />
               </div>
             </div>
@@ -187,7 +187,7 @@ export default function NewReleasePage() {
                   type="url"
                   value={appleMusicUrl}
                   onChange={(e) => setAppleMusicUrl(e.target.value)}
-                  className="w-full bg-[#121212] rounded-3xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                  className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
                 />
               </div>
             </div>
@@ -199,7 +199,7 @@ export default function NewReleasePage() {
                   type="url"
                   value={youtubeUrl}
                   onChange={(e) => setYoutubeUrl(e.target.value)}
-                  className="w-full bg-[#121212] rounded-3xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                  className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
                 />
               </div>
             </div>
@@ -211,7 +211,7 @@ export default function NewReleasePage() {
                   type="url"
                   value={bandcampUrl}
                   onChange={(e) => setBandcampUrl(e.target.value)}
-                  className="w-full bg-[#121212] rounded-3xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                  className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
                 />
               </div>
             </div>
@@ -223,7 +223,7 @@ export default function NewReleasePage() {
                   type="url"
                   value={soundcloudUrl}
                   onChange={(e) => setSoundcloudUrl(e.target.value)}
-                  className="w-full bg-[#121212] rounded-3xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                  className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
                 />
               </div>
             </div>

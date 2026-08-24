@@ -47,7 +47,7 @@ export default function ReleasesPage() {
           className="flex flex-col md:flex-row items-start gap-8 sm:gap-10 w-full"
         >
           {/* Square Cover Artwork (Full width on mobile, 380px on desktop) */}
-          <div className="w-full aspect-square md:w-88 md:h-88 lg:w-[380px] lg:h-[380px] rounded-3xl overflow-hidden relative shrink-0 bg-[#181818] shadow-2xl mx-auto md:mx-0">
+          <div className="w-full aspect-square md:w-88 md:h-88 lg:w-[380px] lg:h-[380px] rounded-2xl overflow-hidden relative shrink-0 bg-[#181818] shadow-2xl mx-auto md:mx-0">
             <Image
               src={release.coverImage}
               alt={release.title}
@@ -83,7 +83,7 @@ export default function ReleasesPage() {
                   href={release.spotifyUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2 rounded-3xl bg-[#181818] hover:bg-[#222222] text-white text-xs font-bold transition-all flex items-center gap-2"
+                  className="px-4 py-2 rounded-xl bg-[#181818] hover:bg-[#222222] text-white text-xs font-bold transition-all flex items-center gap-2"
                 >
                   <span>Spotify</span>
                   <ExternalLink className="w-3.5 h-3.5 text-[#888888]" />
@@ -95,7 +95,7 @@ export default function ReleasesPage() {
                   href={release.appleMusicUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2 rounded-3xl bg-[#181818] hover:bg-[#222222] text-white text-xs font-bold transition-all flex items-center gap-2"
+                  className="px-4 py-2 rounded-xl bg-[#181818] hover:bg-[#222222] text-white text-xs font-bold transition-all flex items-center gap-2"
                 >
                   <span>Apple Music</span>
                   <ExternalLink className="w-3.5 h-3.5 text-[#888888]" />
@@ -107,7 +107,7 @@ export default function ReleasesPage() {
                   href={release.youtubeUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2 rounded-3xl bg-[#181818] hover:bg-[#222222] text-white text-xs font-bold transition-all flex items-center gap-2"
+                  className="px-4 py-2 rounded-xl bg-[#181818] hover:bg-[#222222] text-white text-xs font-bold transition-all flex items-center gap-2"
                 >
                   <span>YouTube</span>
                   <ExternalLink className="w-3.5 h-3.5 text-[#888888]" />
@@ -119,7 +119,7 @@ export default function ReleasesPage() {
                   href={release.bandcampUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2 rounded-3xl bg-[#181818] hover:bg-[#222222] text-white text-xs font-bold transition-all flex items-center gap-2"
+                  className="px-4 py-2 rounded-xl bg-[#181818] hover:bg-[#222222] text-white text-xs font-bold transition-all flex items-center gap-2"
                 >
                   <span>Bandcamp</span>
                   <ExternalLink className="w-3.5 h-3.5 text-[#888888]" />
@@ -131,7 +131,7 @@ export default function ReleasesPage() {
                   href={release.soundcloudUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2 rounded-3xl bg-[#181818] hover:bg-[#222222] text-white text-xs font-bold transition-all flex items-center gap-2"
+                  className="px-4 py-2 rounded-xl bg-[#181818] hover:bg-[#222222] text-white text-xs font-bold transition-all flex items-center gap-2"
                 >
                   <span>SoundCloud</span>
                   <ExternalLink className="w-3.5 h-3.5 text-[#888888]" />

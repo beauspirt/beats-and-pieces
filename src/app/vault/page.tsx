@@ -163,7 +163,7 @@ export default function VaultPage() {
                   href={activeModalItem.youtubeUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2 rounded-3xl bg-[#222222] hover:bg-[#2c2c2c] text-white font-bold flex items-center gap-2 shrink-0 transition-colors"
+                  className="px-4 py-2 rounded-xl bg-[#222222] hover:bg-[#2c2c2c] text-white font-bold flex items-center gap-2 shrink-0 transition-colors"
                 >
                   <span>Watch on YouTube</span>
                   <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />

@@ -422,7 +422,7 @@ export default function BeatsDiscoveryPage() {
                   <button
                     type="button"
                     onClick={() => setShowOnlyFavorites(false)}
-                    className="px-5 py-2.5 rounded-3xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer inline-flex items-center gap-1.5"
+                    className="px-5 py-2.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer inline-flex items-center gap-1.5"
                   >
                     <span>Explore Beats</span>
                   </button>
@@ -458,7 +458,7 @@ export default function BeatsDiscoveryPage() {
             return (
               <div
                 key={beat.id}
-                className="bg-[#181818] rounded-3xl p-4 sm:p-5 space-y-3.5 sm:space-y-4 shadow-md"
+                className="bg-[#181818] rounded-2xl p-4 sm:p-5 space-y-3.5 sm:space-y-4 shadow-md"
               >
                 {/* Row 1: Header (Title, Producer, Avatar, Badges, Meta) */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">

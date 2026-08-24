@@ -223,7 +223,7 @@ function ProfileContent() {
                 type="text"
                 value={profile.nickname}
                 onChange={(e) => setProfile({ ...profile, nickname: e.target.value })}
-                className="w-full bg-[#121212] rounded-3xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+                className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
                 required
               />
             </div>
@@ -239,7 +239,7 @@ function ProfileContent() {
                 type="text"
                 value={profile.location || ""}
                 onChange={(e) => setProfile({ ...profile, location: e.target.value })}
-                className="w-full bg-[#121212] rounded-3xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+                className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
               />
             </div>
           </div>
@@ -254,7 +254,7 @@ function ProfileContent() {
                 rows={3}
                 value={profile.bio || ""}
                 onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-                className="w-full bg-[#121212] rounded-3xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF] resize-none leading-relaxed"
+                className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF] resize-none leading-relaxed"
               />
             </div>
           </div>
@@ -265,7 +265,7 @@ function ProfileContent() {
               Google E-mail
             </label>
             <div className="sm:col-span-9 space-y-3">
-              <div className="w-full bg-[#121212] rounded-3xl px-4 py-3 text-sm text-[#E0E0E0] flex items-center justify-between gap-3">
+              <div className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-[#E0E0E0] flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5 min-w-0 truncate">
                   <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                     <path fill="#EA4335" d="M12 5c1.5 0 2.9.5 4 1.4l3-3C17.2 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/>

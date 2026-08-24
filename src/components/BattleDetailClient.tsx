@@ -791,7 +791,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
         </div>
 
         {/* Hero Header */}
-        <div className="bg-[#181818] rounded-3xl p-5 sm:p-7 flex flex-col md:flex-row gap-7 items-start relative overflow-hidden shadow-xl">
+        <div className="bg-[#181818] rounded-2xl p-5 sm:p-7 flex flex-col md:flex-row gap-7 items-start relative overflow-hidden shadow-xl">
           
           {/* Cover Art Thumbnail (Responsive Square) */}
           <div className="w-full sm:max-w-[320px] aspect-square rounded-3xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl mx-auto md:mx-0">
@@ -950,7 +950,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             </div>
 
             {/* Right Column: Submit Your Entry Container (Reduces in size when submitted or staged) */}
-            <div className={`lg:col-span-6 bg-[#181818] rounded-3xl p-5 sm:p-7 space-y-4 flex flex-col ${(myEntry || stagedBeat) ? "h-auto" : "h-full justify-between"}`}>
+            <div className={`lg:col-span-6 bg-[#181818] rounded-2xl p-5 sm:p-7 space-y-4 flex flex-col ${(myEntry || stagedBeat) ? "h-auto" : "h-full justify-between"}`}>
               <div className="space-y-4 flex-1 flex flex-col">
                 <h3 className="text-2xl font-bold text-white flex items-center gap-2">
                   <Upload className="w-5 h-5 text-[#FF5E3A]" />
@@ -1190,7 +1190,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                 return (
                   <div
                     key={track.id}
-                    className={`bg-[#181818] rounded-3xl p-4 sm:p-5 ${
+                    className={`bg-[#181818] rounded-2xl p-4 sm:p-5 ${
                       unlocked ? "" : "opacity-40"
                     }`}
                   >
@@ -1300,7 +1300,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                   <div className="flex justify-end pt-2">
                     <button
                       onClick={() => setSubmitError(null)}
-                      className="px-6 py-2.5 rounded-3xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
+                      className="px-6 py-2.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
                     >
                       Got it, continue rating
                     </button>
@@ -1345,13 +1345,13 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                   <div className="flex items-center justify-end gap-3 pt-2">
                     <button
                       onClick={() => setShowSubmitWarningModal(false)}
-                      className="px-5 py-2.5 rounded-3xl bg-[#121212] hover:bg-[#202020] text-zinc-300 text-xs font-bold transition-all cursor-pointer"
+                      className="px-5 py-2.5 rounded-xl bg-[#121212] hover:bg-[#202020] text-zinc-300 text-xs font-bold transition-all cursor-pointer"
                     >
                       Keep Editing
                     </button>
                     <button
                       onClick={handleConfirmSubmitRatings}
-                      className="px-6 py-2.5 rounded-3xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer flex items-center gap-2"
+                      className="px-6 py-2.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer flex items-center gap-2"
                     >
                       <span>Confirm & Lock Ratings</span>
                     </button>
@@ -1391,12 +1391,12 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                 <div className="pt-2">
                   {isJurySubmitted ? (
                     <div className="flex items-center gap-3 flex-wrap">
-                      <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-3xl bg-emerald-500/15 text-emerald-300 font-bold text-xs shadow-sm">
+                      <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500/15 text-emerald-300 font-bold text-xs shadow-sm">
                         Scores Submitted ✓
                       </div>
                       <button
                         onClick={handleUnlockJuryBallot}
-                        className="px-4 py-2.5 rounded-3xl bg-[#202020] hover:bg-[#282828] text-[#D1D1D1] hover:text-white text-xs font-bold transition-all cursor-pointer active:scale-95 shadow-sm"
+                        className="px-4 py-2.5 rounded-xl bg-[#202020] hover:bg-[#282828] text-[#D1D1D1] hover:text-white text-xs font-bold transition-all cursor-pointer active:scale-95 shadow-sm"
                       >
                         Unlock & Edit Scores
                       </button>
@@ -1404,7 +1404,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                   ) : (
                     <button
                       onClick={handlePublishJuryBallot}
-                      className="px-7 py-3 rounded-3xl bg-[#7B61FF] hover:bg-[#684DE6] text-white font-bold text-xs shadow-lg active:scale-95 transition-all cursor-pointer"
+                      className="px-7 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white font-bold text-xs shadow-lg active:scale-95 transition-all cursor-pointer"
                     >
                       Submit Scores
                     </button>
@@ -1489,7 +1489,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                 return (
                   <div
                     key={sub.id}
-                    className="bg-[#181818] rounded-3xl p-4 sm:p-5 space-y-3.5"
+                    className="bg-[#181818] rounded-2xl p-4 sm:p-5 space-y-3.5"
                   >
                     <div className="flex items-center justify-between gap-4">
                       <div>
@@ -1512,7 +1512,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                     {isUserJudge && (
                       <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 pt-1 items-center">
                         {/* Score Slider */}
-                        <div className="md:col-span-5 flex items-center gap-3 bg-[#121212] px-4 py-2.5 rounded-3xl">
+                        <div className="md:col-span-5 flex items-center gap-3 bg-[#121212] px-4 py-2.5 rounded-xl">
                           <span className="text-xs text-[#888888] font-bold shrink-0">Score:</span>
                           <input
                             type="range"
@@ -1540,7 +1540,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                             placeholder={isJurySubmitted ? "Feedback submitted and locked" : "Leave feedback note for the beatmaker (optional)"}
                             value={feedbackVal}
                             onChange={(e) => handleJuryFeedbackChange(sub.id, e.target.value)}
-                            className={`w-full bg-[#121212] rounded-3xl px-4 py-2.5 text-xs text-white placeholder-[#555555] focus:outline-none ${isJurySubmitted ? "opacity-70 cursor-not-allowed" : ""}`}
+                            className={`w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white placeholder-[#555555] focus:outline-none ${isJurySubmitted ? "opacity-70 cursor-not-allowed" : ""}`}
                           />
                         </div>
                       </div>
@@ -1587,7 +1587,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                   return (
                     <div
                       key={sub.id}
-                      className="bg-[#181818] rounded-3xl p-4 sm:p-5 space-y-3.5"
+                      className="bg-[#181818] rounded-2xl p-4 sm:p-5 space-y-3.5"
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         
@@ -1684,7 +1684,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                             {finalFeedbacks.map((f, fIdx) => (
                               <div
                                 key={fIdx}
-                                className="bg-[#121212] px-4 py-2.5 rounded-3xl text-xs text-[#D1D1D1] italic"
+                                className="bg-[#121212] px-4 py-2.5 rounded-xl text-xs text-[#D1D1D1] italic"
                               >
                                 "{f.feedback}" - <span className="text-[#888888] not-italic font-bold">{f.judgeName}</span>
                               </div>

@@ -347,7 +347,7 @@ export default function AdminBattlesManagerPage() {
 
           <Link
             href="/admin/new-battle"
-            className="px-5 py-2.5 rounded-3xl bg-brand hover:bg-brand/90 text-xs font-bold text-white transition-all shadow-md active:scale-95 flex items-center gap-2 self-start sm:self-auto"
+            className="px-5 py-2.5 rounded-xl bg-brand hover:bg-brand/90 text-xs font-bold text-white transition-all shadow-md active:scale-95 flex items-center gap-2 self-start sm:self-auto"
           >
             <Plus className="w-4 h-4" />
             <span>Create New Battle</span>
@@ -401,14 +401,14 @@ export default function AdminBattlesManagerPage() {
               <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
                 <button
                   onClick={() => handleEditClick(battle)}
-                  className="px-4 py-2 rounded-3xl bg-[#222222] hover:bg-brand hover:text-white text-xs font-bold text-zinc-300 transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-[#222222] hover:bg-brand hover:text-white text-xs font-bold text-zinc-300 transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   <Edit3 className="w-3.5 h-3.5" />
                   <span>Edit</span>
                 </button>
                 <Link
                   href={`/battles/${battle.id}`}
-                  className="px-4 py-2 rounded-3xl bg-[#181818] hover:bg-[#252525] text-xs font-bold text-zinc-400 hover:text-white transition-all"
+                  className="px-4 py-2 rounded-xl bg-[#181818] hover:bg-[#252525] text-xs font-bold text-zinc-400 hover:text-white transition-all"
                 >
                   View Public
                 </Link>
@@ -450,7 +450,7 @@ export default function AdminBattlesManagerPage() {
                     type="text"
                     value={editingBattle.title}
                     onChange={(e) => setEditingBattle({ ...editingBattle, title: e.target.value })}
-                    className="w-full bg-[#121212] rounded-3xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                    className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
                   />
                 </div>
 
@@ -494,7 +494,7 @@ export default function AdminBattlesManagerPage() {
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="px-4 py-2 rounded-3xl bg-[#121212] hover:bg-[#202020] text-xs font-bold text-zinc-300 cursor-pointer inline-flex items-center gap-2 transition-colors">
+                      <label className="px-4 py-2 rounded-xl bg-[#121212] hover:bg-[#202020] text-xs font-bold text-zinc-300 cursor-pointer inline-flex items-center gap-2 transition-colors">
                         <Upload className="w-3.5 h-3.5 text-brand" />
                         <span>Upload New Cover</span>
                         <input type="file" accept="image/*" onChange={handleCoverFileChange} className="hidden" />
@@ -688,7 +688,7 @@ export default function AdminBattlesManagerPage() {
                     rows={3}
                     value={editingBattle.description}
                     onChange={(e) => setEditingBattle({ ...editingBattle, description: e.target.value })}
-                    className="w-full bg-[#121212] rounded-3xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand resize-none"
+                    className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand resize-none"
                   />
                 </div>
 
@@ -822,7 +822,7 @@ export default function AdminBattlesManagerPage() {
                   )}
 
                   <div>
-                    <label className={`px-4 py-2 rounded-3xl text-xs font-bold text-white transition-colors inline-flex items-center gap-2 ${
+                    <label className={`px-4 py-2 rounded-xl text-xs font-bold text-white transition-colors inline-flex items-center gap-2 ${
                       isUploadingSamples ? "bg-[#333333] cursor-not-allowed opacity-75" : "bg-[#222222] hover:bg-[#2A2A2A] cursor-pointer"
                     }`}>
                       <Music className="w-3.5 h-3.5 text-brand" />
@@ -913,14 +913,14 @@ export default function AdminBattlesManagerPage() {
                     <button
                       type="button"
                       onClick={() => setEditingBattle(null)}
-                      className="px-5 py-2.5 rounded-3xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                      className="px-5 py-2.5 rounded-xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-zinc-400 hover:text-white transition-colors cursor-pointer"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={isUploadingSamples}
-                      className="px-7 py-2.5 rounded-3xl bg-brand hover:bg-brand/90 text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-7 py-2.5 rounded-xl bg-brand hover:bg-brand/90 text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isUploadingSamples ? "Uploading Samples..." : isSaved ? "Saved ✓" : "Save Changes"}
                     </button>
@@ -957,14 +957,14 @@ export default function AdminBattlesManagerPage() {
                 <button
                   type="button"
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="px-4 py-2 rounded-3xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-zinc-300 transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-zinc-300 transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={handleDeleteBattle}
-                  className="px-5 py-2 rounded-3xl bg-red-600 hover:bg-red-700 text-xs font-bold text-white transition-all shadow-md cursor-pointer"
+                  className="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-xs font-bold text-white transition-all shadow-md cursor-pointer"
                 >
                   Confirm Delete
                 </button>

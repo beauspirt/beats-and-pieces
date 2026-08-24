@@ -99,7 +99,7 @@ export default function AdminReleasesManagerPage() {
 
           <Link
             href="/admin/new-release"
-            className="px-5 py-2.5 rounded-3xl bg-brand hover:bg-brand/90 text-xs font-bold text-white transition-all shadow-md active:scale-95 flex items-center gap-2 self-start sm:self-auto"
+            className="px-5 py-2.5 rounded-xl bg-brand hover:bg-brand/90 text-xs font-bold text-white transition-all shadow-md active:scale-95 flex items-center gap-2 self-start sm:self-auto"
           >
             <Plus className="w-4 h-4" />
             <span>Create New Release</span>
@@ -137,14 +137,14 @@ export default function AdminReleasesManagerPage() {
               <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
                 <button
                   onClick={() => handleEditClick(release)}
-                  className="px-4 py-2 rounded-3xl bg-[#222222] hover:bg-brand hover:text-white text-xs font-bold text-zinc-300 transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-[#222222] hover:bg-brand hover:text-white text-xs font-bold text-zinc-300 transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   <Edit3 className="w-3.5 h-3.5" />
                   <span>Edit</span>
                 </button>
                 <Link
                   href="/releases"
-                  className="px-4 py-2 rounded-3xl bg-[#181818] hover:bg-[#252525] text-xs font-bold text-zinc-400 hover:text-white transition-all"
+                  className="px-4 py-2 rounded-xl bg-[#181818] hover:bg-[#252525] text-xs font-bold text-zinc-400 hover:text-white transition-all"
                 >
                   View Public
                 </Link>
@@ -185,7 +185,7 @@ export default function AdminReleasesManagerPage() {
                       type="text"
                       value={editingRelease.title}
                       onChange={(e) => setEditingRelease({ ...editingRelease, title: e.target.value })}
-                      className="w-full bg-[#121212] rounded-3xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                      className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
                       required
                     />
                   </div>
@@ -204,7 +204,7 @@ export default function AdminReleasesManagerPage() {
                       </div>
                       <div className="flex items-center justify-between flex-1">
                         <span className="text-xs text-zinc-400">Change square cover artwork</span>
-                        <label className="px-4 py-2 rounded-3xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-white cursor-pointer transition-colors shrink-0">
+                        <label className="px-4 py-2 rounded-xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-white cursor-pointer transition-colors shrink-0">
                           Browse File
                           <input type="file" accept="image/*" onChange={handleCoverFileChange} className="hidden" />
                         </label>
@@ -219,7 +219,7 @@ export default function AdminReleasesManagerPage() {
                       rows={4}
                       value={editingRelease.description}
                       onChange={(e) => setEditingRelease({ ...editingRelease, description: e.target.value })}
-                      className="w-full bg-[#121212] rounded-3xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand resize-none"
+                      className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand resize-none"
                     />
                   </div>
 
@@ -230,7 +230,7 @@ export default function AdminReleasesManagerPage() {
                       type="date"
                       value={editingRelease.releaseDate ? editingRelease.releaseDate.slice(0, 10) : ""}
                       onChange={(e) => setEditingRelease({ ...editingRelease, releaseDate: e.target.value })}
-                      className="w-full bg-[#121212] rounded-3xl px-4 py-2.5 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                      className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-brand"
                     />
                   </div>
 
@@ -298,13 +298,13 @@ export default function AdminReleasesManagerPage() {
                     <button
                       type="button"
                       onClick={() => setEditingRelease(null)}
-                      className="px-5 py-2.5 rounded-3xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                      className="px-5 py-2.5 rounded-xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-zinc-400 hover:text-white transition-colors cursor-pointer"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="px-7 py-2.5 rounded-3xl bg-brand hover:bg-brand/90 text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
+                      className="px-7 py-2.5 rounded-xl bg-brand hover:bg-brand/90 text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
                     >
                       {isSaved ? "Saved ✓" : "Save Changes"}
                     </button>

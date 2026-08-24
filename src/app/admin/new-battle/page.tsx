@@ -293,7 +293,7 @@ export default function NewBattlePage() {
                   placeholder="e.g. Beat Battle #9"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full bg-[#121212] rounded-3xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+                  className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
                   required
                 />
               </div>
@@ -322,7 +322,7 @@ export default function NewBattlePage() {
                     <span className="text-xs text-[#777777]">
                       {coverImage ? "Custom image selected" : "No artwork selected (square format recommended)"}
                     </span>
-                    <label className="px-4 py-2 rounded-3xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-white cursor-pointer transition-colors shrink-0">
+                    <label className="px-4 py-2 rounded-xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-white cursor-pointer transition-colors shrink-0">
                       Browse File
                       <input type="file" accept="image/*" onChange={handleImageFileChange} className="hidden" />
                     </label>
@@ -528,7 +528,7 @@ export default function NewBattlePage() {
                   placeholder="Enter battle rules, theme, and sample guidelines..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full bg-[#121212] rounded-3xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF] resize-none leading-relaxed"
+                  className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF] resize-none leading-relaxed"
                 />
               </div>
             </div>
@@ -656,7 +656,7 @@ export default function NewBattlePage() {
                 )}
 
                 <div>
-                  <label className={`px-4 py-2 rounded-3xl text-xs font-bold text-white transition-colors inline-flex items-center gap-2 ${
+                  <label className={`px-4 py-2 rounded-xl text-xs font-bold text-white transition-colors inline-flex items-center gap-2 ${
                     isUploadingSamples ? "bg-[#333333] cursor-not-allowed opacity-75" : "bg-[#222222] hover:bg-[#2A2A2A] cursor-pointer"
                   }`}>
                     <Music className="w-3.5 h-3.5 text-[#7B61FF]" />
@@ -684,7 +684,7 @@ export default function NewBattlePage() {
                   type="datetime-local"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full bg-[#121212] rounded-3xl px-4 py-2.5 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+                  className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
                 />
               </div>
             </div>
@@ -698,7 +698,7 @@ export default function NewBattlePage() {
                   type="datetime-local"
                   value={submissionDeadline}
                   onChange={(e) => setSubmissionDeadline(e.target.value)}
-                  className="w-full bg-[#121212] rounded-3xl px-4 py-2.5 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+                  className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
                 />
               </div>
             </div>
@@ -712,7 +712,7 @@ export default function NewBattlePage() {
                   type="datetime-local"
                   value={ratingDeadline}
                   onChange={(e) => setRatingDeadline(e.target.value)}
-                  className="w-full bg-[#121212] rounded-3xl px-4 py-2.5 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+                  className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
                 />
               </div>
             </div>

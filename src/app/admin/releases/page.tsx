@@ -156,7 +156,7 @@ export default function AdminReleasesManagerPage() {
         {editingRelease && (
           <div
             onClick={() => setEditingRelease(null)}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150 cursor-pointer"
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150 cursor-pointer"
           >
             <div
               onClick={(e) => e.stopPropagation()}

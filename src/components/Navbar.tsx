@@ -86,7 +86,7 @@ export const Navbar: React.FC = () => {
 
   return (
     <>
-      <header className="fixed top-0 inset-x-0 z-[120] bg-[#0A0A0A] sm:bg-[#0A0A0A]/90 backdrop-blur-none sm:backdrop-blur-[8px]">
+      <header className="fixed top-0 inset-x-0 z-40 bg-[#0A0A0A] sm:bg-[#0A0A0A]/90 backdrop-blur-none sm:backdrop-blur-[8px]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 sm:h-24 py-4 sm:py-5 flex items-center justify-between">
           
           {/* Left: Brand Logo & Desktop Nav */}

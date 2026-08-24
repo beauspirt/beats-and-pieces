@@ -574,6 +574,8 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     }
 
     // Instantly decode arrayBuffer in memory for exact waveform & duration preview
+    let realDuration = 120;
+    let extractedPeaks: number[] = [];
     try {
       const arrayBuf = await file.arrayBuffer();
       const AudioCtx =
@@ -583,7 +585,8 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
         const ctx = new AudioCtx();
         const decoded = await ctx.decodeAudioData(arrayBuf.slice(0));
         const extracted = extractRealAudioBufferWaveform(decoded, 800);
-        const duration = Math.round(decoded.duration);
+        realDuration = Math.round(decoded.duration);
+        extractedPeaks = extracted ? extracted.peaks : [];
         ctx.close();
 
         const tempAudioUrl = URL.createObjectURL(file);
@@ -591,12 +594,46 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
           globalWaveformCache.set(tempAudioUrl, extracted);
         }
         setNewBeatAudioUrl(tempAudioUrl);
-        setNewBeatDuration(duration);
-        setNewBeatWaveformPeaks(extracted ? extracted.peaks : []);
+        setNewBeatDuration(realDuration);
+        setNewBeatWaveformPeaks(extractedPeaks);
       }
     } catch {
       const tempAudioUrl = URL.createObjectURL(file);
       setNewBeatAudioUrl(tempAudioUrl);
+    }
+
+    // Transcode and upload to Supabase Storage immediately in the background
+    setIsUploadingBeatAudio(true);
+    try {
+      const { url, error: uploadError, duration, waveformPeaks } = await storageService.uploadAudio(
+        file,
+        "beats",
+        `${producer.id}-${Date.now()}`
+      );
+
+      if (!url) {
+        alert("Audio upload failed: " + (uploadError || "Unable to upload audio file."));
+        return;
+      }
+
+      setNewBeatAudioUrl(url);
+      if (duration) setNewBeatDuration(duration);
+      if (waveformPeaks && waveformPeaks.length > 0) {
+        setNewBeatWaveformPeaks(waveformPeaks);
+        globalWaveformCache.set(url, {
+          peaks: waveformPeaks,
+          duration: duration || realDuration,
+        });
+      } else if (extractedPeaks.length > 0) {
+        globalWaveformCache.set(url, {
+          peaks: extractedPeaks,
+          duration: duration || realDuration,
+        });
+      }
+    } catch (err: unknown) {
+      alert("Failed to upload audio: " + (err instanceof Error ? err.message : String(err)));
+    } finally {
+      setIsUploadingBeatAudio(false);
     }
   };
 
@@ -741,18 +778,23 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       alert("Please enter a beat title.");
       return;
     }
-    if (!stagedNewBeatFile && !newBeatAudioUrl) {
+    if (isUploadingBeatAudio) {
+      alert("Please wait for audio transcoding and upload to complete.");
+      return;
+    }
+    if (!newBeatAudioUrl && !stagedNewBeatFile) {
       alert("Please select or drop an audio file.");
       return;
     }
 
-    setIsUploadingBeatAudio(true);
     try {
       let finalAudioUrl = newBeatAudioUrl;
       let finalDuration = newBeatDuration;
       let finalPeaks = newBeatWaveformPeaks;
 
-      if (stagedNewBeatFile) {
+      // Fallback if background upload hasn't replaced blob URL
+      if (stagedNewBeatFile && (!finalAudioUrl || finalAudioUrl.startsWith("blob:"))) {
+        setIsUploadingBeatAudio(true);
         const { url, error: uploadError, duration, waveformPeaks } = await storageService.uploadAudio(
           stagedNewBeatFile,
           "beats",
@@ -1235,7 +1277,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
         <div
           onMouseDown={handleBackdropMouseDown}
           onMouseUp={(e) => handleBackdropMouseUp(e, () => setEditingBeat(null))}
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
+          className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
         >
           <div
             onMouseDown={(e) => e.stopPropagation()}
@@ -1425,7 +1467,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
             setNewBeatAudioUrl("");
             setNewBeatAudioName("");
           })}
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
+          className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
         >
           <div
             onMouseDown={(e) => e.stopPropagation()}
@@ -1528,7 +1570,19 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                     <span className="text-[#FF5E3A]">*</span>
                   </label>
 
-                  {stagedNewBeatFile || newBeatAudioUrl ? (
+                  {isUploadingBeatAudio ? (
+                    <div className="bg-[#121212] p-6 rounded-2xl min-h-[220px] flex flex-col items-center justify-center text-center gap-3 border-2 border-dashed border-[#7B61FF]/40">
+                      <div className="w-8 h-8 border-2 border-[#7B61FF] border-t-transparent rounded-full animate-spin" />
+                      <div className="space-y-1">
+                        <p className="text-sm font-bold text-white">
+                          Transcoding to Opus & Uploading...
+                        </p>
+                        <p className="text-xs text-zinc-400">
+                          Optimizing audio for studio playback
+                        </p>
+                      </div>
+                    </div>
+                  ) : stagedNewBeatFile || newBeatAudioUrl ? (
                     <div className="bg-[#121212] p-5 rounded-2xl space-y-4">
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-2 text-white font-semibold text-sm truncate">
@@ -1620,10 +1674,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                       <span>Transcoding & Uploading...</span>
                     </>
                   ) : (
-                    <>
-                      <Plus className="w-4 h-4" />
-                      <span>Add Beat to Showcase</span>
-                    </>
+                    <span>Finish</span>
                   )}
                 </button>
               </div>
@@ -1638,7 +1689,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
         <div
           onMouseDown={handleBackdropMouseDown}
           onMouseUp={(e) => handleBackdropMouseUp(e, () => setShowContactModal(false))}
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
+          className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
         >
           <div
             onMouseDown={(e) => e.stopPropagation()}
@@ -1726,7 +1777,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
       {/* Floating Save Toast Pop-up Notification */}
       {saveToastMessage && (
-        <div className="fixed bottom-6 right-6 z-[110] bg-[#181818] text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300 backdrop-blur-md">
+        <div className="fixed bottom-6 right-6 z-[210] bg-[#181818] text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300 backdrop-blur-md">
           <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
             <CheckCircle2 className="w-4 h-4" />
           </div>
@@ -1741,7 +1792,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       {activeVaultModalItem && (
         <div
           onClick={() => setActiveVaultModalItem(null)}
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200 cursor-pointer"
+          className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200 cursor-pointer"
         >
           <div
             onClick={(e) => e.stopPropagation()}

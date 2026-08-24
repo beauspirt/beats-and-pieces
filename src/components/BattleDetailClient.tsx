@@ -1619,7 +1619,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                               </span>
                             )}
                             <Link
-                              href={`/producers/${sub.userId || "guest"}`}
+                              href={`/${sub.userId || "guest"}`}
                               className="text-base sm:text-lg font-bold text-white hover:text-[#7B61FF] transition-colors leading-snug"
                             >
                               {sub.beatmakerTag || "Producer"}

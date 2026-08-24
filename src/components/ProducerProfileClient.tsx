@@ -858,29 +858,28 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
   const [copiedShareLink, setCopiedShareLink] = useState(false);
 
   const handleShareProfile = async () => {
-    const profileUrl = typeof window !== "undefined" ? window.location.href : "";
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `${producer.nickname} on Beats & Pieces`,
-          text: `Check out ${producer.nickname}'s producer showcase on Beats & Pieces!`,
-          url: profileUrl,
-        });
-        return;
-      } catch {
-        // User dismissed or share failed, fallback to clipboard
-      }
-    }
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://www.beatsandpieces.ro";
+    const profileUrl = `${origin}/${producer.id}`;
 
-    if (navigator.clipboard) {
-      try {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(profileUrl);
-        setCopiedShareLink(true);
-        showToast("Profile link copied to clipboard!");
-        setTimeout(() => setCopiedShareLink(false), 2500);
-      } catch {
-        // clipboard write error
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = profileUrl;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
       }
+      setCopiedShareLink(true);
+      showToast("Profile link copied to clipboard!");
+      setTimeout(() => setCopiedShareLink(false), 2500);
+    } catch {
+      showToast("Profile link copied to clipboard!");
     }
   };
 

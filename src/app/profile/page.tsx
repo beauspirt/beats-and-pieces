@@ -148,7 +148,7 @@ function ProfileContent() {
         <h1 className="text-2xl sm:text-3xl font-black text-white">User Profile</h1>
 
         <Link
-          href={`/producers/${profile.id}`}
+          href={`/${profile.id}`}
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-[#7B61FF] hover:bg-[#684DE6] text-xs font-bold text-white transition-all shadow-md active:scale-95 group"
         >
           <span>View Public Profile</span>

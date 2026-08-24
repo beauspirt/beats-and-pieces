@@ -59,7 +59,7 @@ export default function VaultPage() {
           <div className="flex items-center justify-between gap-3 pt-1">
             {prod ? (
               <Link
-                href={`/producers/${prod.id}`}
+                href={`/${prod.id}`}
                 className="flex items-center gap-2 group/prod text-xs font-semibold text-zinc-300 hover:text-white truncate"
               >
                 <div className="w-6 h-6 rounded-full overflow-hidden relative shrink-0 bg-[#222222]">

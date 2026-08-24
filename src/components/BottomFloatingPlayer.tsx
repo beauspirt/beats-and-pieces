@@ -264,7 +264,7 @@ export const BottomFloatingPlayer: React.FC = React.memo(() => {
             {/* Clickable Beatmaker (when public) or Anonymized Tag */}
             {activeTrackArtistId ? (
               <Link
-                href={`/producers/${activeTrackArtistId}`}
+                href={`/${activeTrackArtistId}`}
                 className="text-[11px] sm:text-xs text-[#B3B3B3] hover:text-white hover:underline transition-colors block truncate mt-0.5 sm:mt-1 font-medium"
               >
                 {activeTrackArtist || "Producer"}

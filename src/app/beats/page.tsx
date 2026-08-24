@@ -10,7 +10,7 @@ import { beatService } from "@/services/beatService";
 import { producerService } from "@/services/producerService";
 import { JudgeFeedbackTicker } from "@/components/JudgeFeedbackTicker";
 import { useAuth } from "@/lib/auth-context";
-import { Search, Filter, ArrowUpDown, Star, Flame, ChevronDown, Upload, X, Check } from "lucide-react";
+import { Search, Filter, ArrowUpDown, ArrowDownUp, Star, Flame, ChevronDown, Upload, Check } from "lucide-react";
 
 export default function BeatsDiscoveryPage() {
   const { user: currentUser } = useAuth();
@@ -20,6 +20,7 @@ export default function BeatsDiscoveryPage() {
   const [selectedSaleFilter, setSelectedSaleFilter] = useState<"all" | "for_sale" | "not_for_sale">("all");
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
   const [sortBy, setSortBy] = useState<"recent" | "rating" | "bpm">("recent");
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
   const [showFilters, setShowFilters] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
   const sortMenuRef = useRef<HTMLDivElement | null>(null);
@@ -71,7 +72,7 @@ export default function BeatsDiscoveryPage() {
   // Reset pagination when search or filters change
   useEffect(() => {
     setVisibleCount(15);
-  }, [searchQuery, selectedTags, selectedSaleFilter, showOnlyFavorites, sortBy]);
+  }, [searchQuery, selectedTags, selectedSaleFilter, showOnlyFavorites, sortBy, sortOrder]);
 
   const toggleFavorite = (beatId: string) => {
     setBeats((prev) => {
@@ -122,16 +123,41 @@ export default function BeatsDiscoveryPage() {
         return matchesQuery && matchesTags && matchesSale && matchesFav;
       })
       .sort((a, b) => {
+        let diff = 0;
         if (sortBy === "recent") {
           const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
           const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-          return timeB - timeA;
+          diff = timeB - timeA;
+          if (diff === 0) {
+            diff = (b.id || "").localeCompare(a.id || "");
+          }
+        } else if (sortBy === "rating") {
+          const scoreA = (typeof a.flames === "number" && a.flames > 0) 
+            ? a.flames 
+            : ((typeof a.juryScore === "number" && a.juryScore > 0) 
+                ? a.juryScore 
+                : (a.rank === 1 ? 5 : a.rank === 2 ? 4 : a.rank === 3 ? 3 : 0));
+          const scoreB = (typeof b.flames === "number" && b.flames > 0) 
+            ? b.flames 
+            : ((typeof b.juryScore === "number" && b.juryScore > 0) 
+                ? b.juryScore 
+                : (b.rank === 1 ? 5 : b.rank === 2 ? 4 : b.rank === 3 ? 3 : 0));
+          diff = scoreB - scoreA;
+          if (diff === 0) {
+            diff = (b.id || "").localeCompare(a.id || "");
+          }
+        } else if (sortBy === "bpm") {
+          const bpmA = typeof a.bpm === "number" ? a.bpm : 0;
+          const bpmB = typeof b.bpm === "number" ? b.bpm : 0;
+          diff = bpmB - bpmA;
+          if (diff === 0) {
+            diff = (b.id || "").localeCompare(a.id || "");
+          }
         }
-        if (sortBy === "rating") return (b.flames || 0) - (a.flames || 0);
-        if (sortBy === "bpm") return (a.bpm || 0) - (b.bpm || 0);
-        return 0;
+
+        return sortOrder === "asc" ? -diff : diff;
       });
-  }, [beats, searchQuery, selectedTags, selectedSaleFilter, showOnlyFavorites, sortBy]);
+  }, [beats, searchQuery, selectedTags, selectedSaleFilter, showOnlyFavorites, sortBy, sortOrder]);
 
   const activeFiltersCount =
     selectedTags.length +
@@ -150,33 +176,13 @@ export default function BeatsDiscoveryPage() {
   const sortLabelMap: Record<"recent" | "rating" | "bpm", string> = {
     recent: "Newest First",
     rating: "Top Rated",
-    bpm: "BPM (Tempo)",
+    bpm: "Tempo (BPM)",
   };
 
   return (
-    <div className="space-y-5 w-full animate-in fade-in duration-300">
+    <div className="space-y-4 w-full animate-in fade-in duration-300">
       
-      {/* Top Header & Upload Beat Action Row */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-            Beats
-          </h1>
-          <p className="text-xs sm:text-sm text-zinc-400">
-            Discover producer tracks, battle entries, and beats for sale
-          </p>
-        </div>
-
-        <Link
-          href={currentUser?.id ? `/producers/${currentUser.id}` : "/profile"}
-          className="inline-flex items-center gap-2 px-5 py-2.5 sm:py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 cursor-pointer shrink-0"
-        >
-          <Upload className="w-4 h-4" />
-          <span>Upload Beat</span>
-        </Link>
-      </div>
-
-      {/* Search & Filter Bar */}
+      {/* Unified Search, Favorites, Filter, Sort, & Upload Beat Action Bar */}
       <div className="space-y-3">
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3">
           
@@ -192,12 +198,13 @@ export default function BeatsDiscoveryPage() {
             <Search className="w-4 h-4 text-zinc-500 absolute left-4 top-1/2 -translate-y-1/2" />
           </div>
 
-          {/* Quick Action Controls Row: Favorites + Filter + Sort in a single clean row */}
-          <div className="grid grid-cols-3 sm:flex items-center gap-3 w-full lg:w-auto">
+          {/* Quick Action Controls Row: Favorites + Filter + Reverse Toggle + Sort Dropdown + Upload Beat Button */}
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 sm:gap-3 w-full lg:w-auto">
             {/* Favorites Filter Button */}
             <button
+              type="button"
               onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
-              className={`flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer truncate ${
+              className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer truncate ${
                 showOnlyFavorites
                   ? "bg-amber-500/20 text-amber-300 shadow-sm"
                   : "bg-[#181818] hover:bg-[#202020] text-zinc-400 hover:text-white"
@@ -209,8 +216,9 @@ export default function BeatsDiscoveryPage() {
 
             {/* Filter Toggle Button */}
             <button
+              type="button"
               onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer truncate ${
+              className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer truncate ${
                 showFilters || activeFiltersCount > 0
                   ? "bg-[#7B61FF] text-white"
                   : "bg-[#181818] hover:bg-[#202020] text-zinc-400 hover:text-white"
@@ -225,8 +233,19 @@ export default function BeatsDiscoveryPage() {
               )}
             </button>
 
-            {/* Redesigned Sleek Sort Dropdown */}
-            <div className="relative" ref={sortMenuRef}>
+            {/* Reverse Order Toggle Button (Left of Sort) */}
+            <button
+              type="button"
+              onClick={() => setSortOrder((prev) => (prev === "desc" ? "asc" : "desc"))}
+              className="p-2.5 sm:p-3 rounded-xl bg-[#181818] hover:bg-[#202020] text-zinc-300 hover:text-white transition-all cursor-pointer flex items-center justify-center shrink-0"
+              title={sortOrder === "desc" ? "Order: Descending (Click for Ascending)" : "Order: Ascending (Click for Descending)"}
+              aria-label="Toggle sort order"
+            >
+              <ArrowDownUp className={`w-4 h-4 text-[#7B61FF] transition-transform duration-200 ${sortOrder === "asc" ? "rotate-180" : ""}`} />
+            </button>
+
+            {/* Redesigned Sleek Sort Dropdown (Borderless) */}
+            <div className="relative flex-1 sm:flex-initial" ref={sortMenuRef}>
               <button
                 type="button"
                 onClick={() => setIsSortOpen(!isSortOpen)}
@@ -240,7 +259,7 @@ export default function BeatsDiscoveryPage() {
               </button>
 
               {isSortOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-[#181818] rounded-2xl shadow-2xl p-2 z-40 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150 border border-white/5">
+                <div className="absolute right-0 mt-2 w-48 bg-[#181818] rounded-2xl shadow-2xl p-2 z-40 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
                   {(["recent", "rating", "bpm"] as const).map((key) => {
                     const isSelected = sortBy === key;
                     return (
@@ -265,6 +284,15 @@ export default function BeatsDiscoveryPage() {
                 </div>
               )}
             </div>
+
+            {/* Upload Beat Button (Far Right) */}
+            <Link
+              href={currentUser?.id ? `/${currentUser.id}` : "/profile"}
+              className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 cursor-pointer shrink-0"
+            >
+              <Upload className="w-4 h-4" />
+              <span className="whitespace-nowrap">Upload Beat</span>
+            </Link>
 
           </div>
         </div>
@@ -306,6 +334,7 @@ export default function BeatsDiscoveryPage() {
                 Filter Catalogue
               </span>
               <button
+                type="button"
                 onClick={() => {
                   setSelectedTags([]);
                   setSelectedSaleFilter("all");
@@ -327,6 +356,7 @@ export default function BeatsDiscoveryPage() {
               </div>
               <div className="flex flex-wrap gap-2">
                 <button
+                  type="button"
                   onClick={() => setSelectedTags([])}
                   className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
                     selectedTags.length === 0
@@ -341,6 +371,7 @@ export default function BeatsDiscoveryPage() {
                   return (
                     <button
                       key={genre}
+                      type="button"
                       onClick={() => handleTagToggle(genre)}
                       className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
                         isSelected
@@ -361,8 +392,9 @@ export default function BeatsDiscoveryPage() {
               <span className="text-xs text-zinc-300 font-semibold block">Licensing / Price Status</span>
               <div className="flex flex-wrap gap-2">
                 <button
+                  type="button"
                   onClick={() => setSelectedSaleFilter("all")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                     selectedSaleFilter === "all"
                       ? "bg-[#7B61FF] text-white"
                       : "bg-[#121212] text-[#888888] hover:text-white"
@@ -371,8 +403,9 @@ export default function BeatsDiscoveryPage() {
                   All Beats
                 </button>
                 <button
+                  type="button"
                   onClick={() => setSelectedSaleFilter("for_sale")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                     selectedSaleFilter === "for_sale"
                       ? "bg-[#7B61FF] text-white"
                       : "bg-[#121212] text-[#888888] hover:text-white"
@@ -381,8 +414,9 @@ export default function BeatsDiscoveryPage() {
                   Available For Sale / License
                 </button>
                 <button
+                  type="button"
                   onClick={() => setSelectedSaleFilter("not_for_sale")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                     selectedSaleFilter === "not_for_sale"
                       ? "bg-[#7B61FF] text-white"
                       : "bg-[#121212] text-[#888888] hover:text-white"
@@ -402,6 +436,7 @@ export default function BeatsDiscoveryPage() {
           <div className="bg-[#181818] rounded-2xl p-12 text-center space-y-3">
             <p className="text-white font-semibold">No beats match your search criteria.</p>
             <button
+              type="button"
               onClick={() => {
                 setSearchQuery("");
                 setSelectedTags([]);
@@ -433,7 +468,7 @@ export default function BeatsDiscoveryPage() {
                   {/* Left: Beat Title + Producer Avatar/Tag + Badges */}
                   <div className="flex items-center gap-3.5 min-w-0 flex-1">
                     <Link
-                      href={`/producers/${beat.beatmaker.id}`}
+                      href={`/${beat.beatmaker.id}`}
                       className="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden relative shrink-0 hover:opacity-80 transition-opacity bg-[#121212]"
                     >
                       <Image
@@ -481,7 +516,7 @@ export default function BeatsDiscoveryPage() {
 
                       {/* Beatmaker name */}
                       <Link
-                        href={`/producers/${beat.beatmaker.id}`}
+                        href={`/${beat.beatmaker.id}`}
                         className="text-xs sm:text-sm text-[#7B61FF] hover:underline font-semibold block truncate mt-0.5"
                       >
                         {displayTag}
@@ -529,8 +564,9 @@ export default function BeatsDiscoveryPage() {
 
                     {/* Favorite Button */}
                     <button
+                      type="button"
                       onClick={() => toggleFavorite(beat.id)}
-                      className="p-2 rounded-xl bg-[#121212] hover:bg-[#222222] transition-colors text-[#888888] hover:text-amber-400 cursor-pointer ml-auto sm:ml-0 select-none"
+                      className="p-2 rounded-xl bg-[#121212] hover:bg-[#202020] transition-colors text-[#888888] hover:text-amber-400 cursor-pointer ml-auto sm:ml-0 select-none"
                       title={beat.isFavorite ? "Remove from favorites" : "Add to favorites"}
                     >
                       <Star
@@ -562,6 +598,7 @@ export default function BeatsDiscoveryPage() {
                     {beat.genres?.map((g) => (
                       <button
                         key={g}
+                        type="button"
                         onClick={() => handleTagToggle(g)}
                         className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors cursor-pointer select-none ${
                           selectedTags.includes(g)
@@ -576,6 +613,7 @@ export default function BeatsDiscoveryPage() {
                     {beat.tags.map((t) => (
                       <button
                         key={t}
+                        type="button"
                         onClick={() => handleTagToggle(t)}
                         className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer select-none ${
                           selectedTags.includes(t)
@@ -604,6 +642,7 @@ export default function BeatsDiscoveryPage() {
       {filteredBeats.length > visibleCount && (
         <div className="flex justify-center pt-6 pb-6">
           <button
+            type="button"
             onClick={() => setVisibleCount((prev) => prev + 15)}
             className="px-8 py-3.5 rounded-xl bg-[#181818] hover:bg-[#222222] text-white text-sm font-bold transition-all shadow-md active:scale-95 flex items-center gap-2 cursor-pointer"
           >

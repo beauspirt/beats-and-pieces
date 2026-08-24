@@ -41,6 +41,13 @@ export default function NotFound() {
     }
   }
 
+  // Handle direct root producer routes e.g. /nerub or /[producerId]
+  const cleanPath = pathname.replace(/^\//, "").split("/")[0].split("?")[0];
+  const reservedRoutes = ["admin", "api", "auth", "battles", "beats", "host", "profile", "releases", "signin", "vault", "producers"];
+  if (cleanPath && !reservedRoutes.includes(cleanPath)) {
+    return <ProducerProfileClient producerId={cleanPath} />;
+  }
+
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4">
       <h1 className="text-6xl font-black text-[#FF5E3A] mb-4">404</h1>

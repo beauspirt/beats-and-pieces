@@ -379,7 +379,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
     const baseBeats = allBeats.filter((b) => matchesProducer(b.beatmaker.id, b.beatmaker.tag));
 
-    const submissions = sampleSubmissions.filter((s) => matchesProducer(s.userId, s.beatmakerTag));
+    const submissions = battleService.getAllSubmissions().filter((s) => matchesProducer(s.userId, s.beatmakerTag));
 
     const mergedList: (DiscoveryBeat & {
       tier: number;

@@ -129,6 +129,9 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = React.mem
 
   const [waveformData, setWaveformData] = useState<WaveformData | null>(() => {
     if (waveformPeaks && waveformPeaks.length > 0) {
+      if (audioUrl) {
+        globalWaveformCache.set(audioUrl, { peaks: waveformPeaks, duration });
+      }
       return { peaks: waveformPeaks, duration };
     }
     if (audioUrl && globalWaveformCache.has(audioUrl)) {
@@ -139,13 +142,17 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = React.mem
 
   useEffect(() => {
     if (waveformPeaks && waveformPeaks.length > 0) {
+      if (audioUrl) {
+        globalWaveformCache.set(audioUrl, { peaks: waveformPeaks, duration });
+      }
       setWaveformData({ peaks: waveformPeaks, duration });
     }
-  }, [waveformPeaks, duration]);
+  }, [waveformPeaks, duration, audioUrl]);
 
-  // Decode real AudioBuffer only for custom newly uploaded tracks not in precomputed dictionary
+  // Decode real AudioBuffer only for custom newly uploaded tracks not in precomputed dictionary or without stored peaks
   useEffect(() => {
     if (!audioUrl || typeof window === "undefined") return;
+    if (waveformPeaks && waveformPeaks.length >= 50) return;
     if (globalWaveformCache.has(audioUrl)) {
       setWaveformData(globalWaveformCache.get(audioUrl)!);
       return;

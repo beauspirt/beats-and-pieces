@@ -1203,7 +1203,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                 return (
                   <div
                     key={track.id}
-                    className={`bg-[#181818] rounded-[28px] p-4 sm:p-5 ${
+                    className={`bg-[#181818] rounded-[28px] p-4 ${
                       unlocked ? "" : "opacity-40"
                     }`}
                   >
@@ -1441,7 +1441,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
               ).length;
 
               return (
-                <div className="lg:col-span-5 bg-[#181818] p-4 sm:p-5 rounded-3xl space-y-3 shadow-lg">
+                <div className="lg:col-span-5 bg-[#181818] p-4 rounded-[28px] space-y-3 shadow-lg">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-white">Assigned Judges</span>
                     <span className="text-xs text-zinc-400 font-mono">
@@ -1502,7 +1502,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                 return (
                   <div
                     key={sub.id}
-                    className="bg-[#181818] rounded-[28px] p-4 sm:p-5 space-y-3.5"
+                    className="bg-[#181818] rounded-[28px] p-4 space-y-3.5"
                   >
                     <div className="flex items-center justify-between gap-4">
                       <div>
@@ -1600,7 +1600,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                   return (
                     <div
                       key={sub.id}
-                      className="bg-[#181818] rounded-[28px] p-4 sm:p-5 space-y-3.5"
+                      className="bg-[#181818] rounded-[28px] p-4 space-y-3.5"
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         

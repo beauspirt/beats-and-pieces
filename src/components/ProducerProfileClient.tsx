@@ -1115,7 +1115,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
             {prioritizedBeats.map((beat) => (
               <div
                 key={beat.id}
-                className="bg-[#181818] rounded-[28px] p-4 sm:p-5 space-y-3 shadow-md group relative"
+                className="bg-[#181818] rounded-[28px] p-4 space-y-3 shadow-md group relative"
               >
                 {/* Row 1: Header (Title, Rank Badge, Meta, Edit Action) */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">

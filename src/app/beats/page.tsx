@@ -323,7 +323,7 @@ export default function BeatsDiscoveryPage() {
 
         {/* Expandable Filter Drawer */}
         {showFilters && (
-          <div className="bg-[#181818] rounded-[28px] p-5 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="bg-[#181818] rounded-[28px] p-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
                 Tags
@@ -458,7 +458,7 @@ export default function BeatsDiscoveryPage() {
             return (
               <div
                 key={beat.id}
-                className="bg-[#181818] rounded-[28px] p-4 sm:p-5 space-y-3.5 sm:space-y-4 shadow-md"
+                className="bg-[#181818] rounded-[28px] p-4 space-y-3.5 sm:space-y-4 shadow-md"
               >
                 {/* Row 1: Header (Title, Producer, Avatar, Badges, Meta) */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">

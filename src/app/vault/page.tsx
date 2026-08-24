@@ -48,7 +48,7 @@ export default function VaultPage() {
         </div>
 
         {/* Card Content & Actions */}
-        <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3">
+        <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
           <h3
             onClick={() => setActiveModalItem(item)}
             className="text-lg font-bold text-white leading-snug cursor-pointer"

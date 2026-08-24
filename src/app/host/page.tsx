@@ -251,7 +251,7 @@ export default function HostPanelPage() {
             {hostedBattles.map((battle) => (
               <div
                 key={battle.id}
-                className="bg-surface-card rounded-[28px] p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg hover:bg-surface-hover transition-all"
+                className="bg-surface-card rounded-[28px] p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg hover:bg-surface-hover transition-all"
               >
                 <div className="flex items-center gap-4 min-w-0">
                   <div className="w-14 h-14 rounded-xl overflow-hidden relative shrink-0 bg-[#121212] shadow-md">

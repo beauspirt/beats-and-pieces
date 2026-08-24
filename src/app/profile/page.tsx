@@ -81,7 +81,7 @@ function ProfileContent() {
     SOCIAL_PLATFORMS.forEach(({ key }) => {
       const val = currentLinks[key]?.trim() || "";
       if (val) {
-        const normalized = normalizeUrl(val);
+        const normalized = normalizeUrl(val, key);
         normalizedFormLinks[key] = normalized;
         sanitizedSaveLinks[key] = normalized;
       } else {

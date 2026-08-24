@@ -20,18 +20,45 @@ export function formatRelativeDate(dateStr: string): string {
   });
 }
 
-/**
- * Automatically formats user input links into https://www. format
- * e.g. "instagram.com/user" -> "https://www.instagram.com/user"
- * e.g. "www.spotify.com/..." -> "https://www.spotify.com/..."
- * e.g. "artist.bandcamp.com" -> "https://artist.bandcamp.com"
- */
-export function normalizeUrl(url: string): string {
+export function normalizeUrl(url: string, platform?: string): string {
   if (!url) return "";
   let trimmed = url.trim();
   if (!trimmed) return "";
 
-  // Strip leading protocols
+  // If already starts with http:// or https://
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+
+  // Handle specific platforms if user typed just a handle/username
+  if (platform) {
+    const cleanHandle = trimmed.replace(/^@/, "");
+    const lowerPlatform = platform.toLowerCase();
+    
+    // Check if trimmed already contains a domain name or dot
+    if (!trimmed.includes(".")) {
+      switch (lowerPlatform) {
+        case "instagram":
+          return `https://www.instagram.com/${cleanHandle}`;
+        case "facebook":
+          return `https://www.facebook.com/${cleanHandle}`;
+        case "youtube":
+          return `https://www.youtube.com/@${cleanHandle}`;
+        case "spotify":
+          return `https://open.spotify.com/artist/${cleanHandle}`;
+        case "bandcamp":
+          return `https://${cleanHandle}.bandcamp.com`;
+        case "soundcloud":
+          return `https://soundcloud.com/${cleanHandle}`;
+        case "beatstars":
+          return `https://www.beatstars.com/${cleanHandle}`;
+        default:
+          return `https://${cleanHandle}`;
+      }
+    }
+  }
+
+  // Strip leading protocols if any was malformed
   trimmed = trimmed.replace(/^https?:\/\//i, "");
 
   // If already starts with www.

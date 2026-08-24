@@ -988,7 +988,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                     website: "hover:text-[#7B61FF]",
                   };
                   const hoverColor = hoverColorClasses[platform.toLowerCase()] || "hover:text-[#7B61FF]";
-                  const formattedUrl = normalizeUrl(url);
+                  const formattedUrl = normalizeUrl(url, platform);
 
                   return (
                     <a

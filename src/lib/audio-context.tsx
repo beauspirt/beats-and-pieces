@@ -36,8 +36,8 @@ interface AudioContextType {
 
 const AudioPlayerContext = createContext<AudioContextType | undefined>(undefined);
 
-// 12ms micro-fade de-click constant (standard DAW / Web Audio anti-aliasing crossfade)
-const DECLICK_FADE_DURATION = 0.012;
+// 15ms micro-fade de-click constant (standard DAW / Web Audio anti-aliasing crossfade)
+const DECLICK_FADE_DURATION = 0.015;
 
 // Maximum number of uncompressed AudioBuffers kept in browser memory (prevents mobile OOM)
 const MAX_CACHED_BUFFERS = 4;

@@ -460,7 +460,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = React.mem
       return;
     }
 
-    // For mouse, immediately seek/play and capture pointer
+    // For mouse, capture pointer and visually set needle (audio seeks smoothly on release)
     e.preventDefault();
     e.stopPropagation();
     try {
@@ -470,12 +470,6 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = React.mem
     }
     const p = getProgressFromPointer(e);
     hoverFractionRef.current = p;
-
-    if (!isThisTrackActive) {
-      playTrack(id, title, bpm, audioUrl, 0, effectiveDuration, artist, artistId, coverUrl);
-    } else {
-      seekTrack(p);
-    }
     renderWaveform();
   };
 
@@ -498,14 +492,11 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = React.mem
         return;
       }
 
-      // If moved horizontally more than 10px while holding, start scrubbing
+      // If moved horizontally more than 10px while holding, track visual scrub needle silently
       if (dx > 10) {
         e.preventDefault();
         const p = getProgressFromPointer(e);
         hoverFractionRef.current = p;
-        if (wasActiveOnDownRef.current && isThisTrackActive) {
-          seekTrack(p);
-        }
         renderWaveform();
         return;
       }
@@ -517,10 +508,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = React.mem
 
     if (isPointerDownRef.current) {
       e.preventDefault();
-      // Only scrub on drag if the track was already active when pointer went down
-      if (wasActiveOnDownRef.current && isThisTrackActive) {
-        seekTrack(p);
-      }
+      // Silently update visual needle during drag with zero audio chatter
     }
     renderWaveform();
   };
@@ -540,7 +528,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = React.mem
         return;
       }
 
-      // Otherwise it was an intentional tap on the waveform: seek/play!
+      // Otherwise it was an intentional tap/scrub on the waveform: perform smooth seek
       const p = getProgressFromPointer(e);
       hoverFractionRef.current = p;
       if (!isThisTrackActive) {
@@ -561,9 +549,14 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = React.mem
     } catch {
       // ignore
     }
-    // Keep hover needle right where cursor was released
+
     const p = getProgressFromPointer(e);
     hoverFractionRef.current = p;
+    if (!isThisTrackActive) {
+      playTrack(id, title, bpm, audioUrl, p, effectiveDuration, artist, artistId, coverUrl);
+    } else {
+      seekTrack(p);
+    }
     renderWaveform();
   };
 

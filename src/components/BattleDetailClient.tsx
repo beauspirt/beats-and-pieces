@@ -794,7 +794,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
         <div className="bg-[#181818] rounded-2xl p-5 sm:p-7 flex flex-col md:flex-row gap-7 items-start relative overflow-hidden shadow-xl">
           
           {/* Cover Art Thumbnail (Responsive Square) */}
-          <div className="w-full sm:max-w-[320px] aspect-square rounded-3xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl mx-auto md:mx-0">
+          <div className="w-full sm:max-w-[320px] aspect-square rounded-xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl mx-auto md:mx-0">
             <Image
               src={battle.coverImage}
               alt={battle.title}
@@ -866,7 +866,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                     "Use at least 1 of the samples (if) provided.",
                     ...(battle.rules || []).map((r) => r.replace(/^\d+\.\s*/, "")),
                   ].map((rule, idx) => (
-                    <div key={idx} className="bg-[#181818] p-3.5 rounded-3xl">
+                    <div key={idx} className="bg-[#181818] p-3.5 rounded-xl">
                       <p className="text-xs text-[#D1D1D1]">{idx + 1}. {rule}</p>
                     </div>
                   ))}
@@ -885,7 +885,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                       type="button"
                       onClick={downloadSamples}
                       disabled={isDownloadingSamples}
-                      className="px-4 py-2 rounded-3xl bg-[#7B61FF] hover:bg-[#684DE6] text-white font-bold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all w-fit shrink-0 cursor-pointer disabled:opacity-60"
+                      className="px-4 py-2 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white font-bold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all w-fit shrink-0 cursor-pointer disabled:opacity-60"
                     >
                       {isDownloadingSamples ? (
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -904,7 +904,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                       return (
                         <div
                           key={sample.id}
-                          className="relative overflow-hidden rounded-3xl p-3 sm:p-3.5 flex items-center justify-between gap-3 transition-all bg-[#181818] border-0"
+                          className="relative overflow-hidden rounded-xl p-3 sm:p-3.5 flex items-center justify-between gap-3 transition-all bg-[#181818] border-0"
                         >
                           {/* Live playback progress fill overlay */}
                           {isPlaying && (
@@ -958,7 +958,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                 </h3>
 
                 {isUserJudge ? (
-                  <div className="flex-1 min-h-[260px] rounded-3xl p-6 bg-[#121212]/70 flex flex-col items-center justify-center text-center gap-3">
+                  <div className="flex-1 min-h-[260px] rounded-xl p-6 bg-[#121212]/70 flex flex-col items-center justify-center text-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-[#7B61FF]/15 flex items-center justify-center text-[#7B61FF]">
                       <Star className="w-6 h-6 fill-current" />
                     </div>
@@ -970,7 +970,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                     </div>
                   </div>
                 ) : !myEntry && stagedBeat ? (
-                  <div className="bg-[#121212] p-5 sm:p-7 rounded-3xl space-y-5">
+                  <div className="bg-[#121212] p-5 sm:p-7 rounded-xl space-y-5">
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2 text-[#7B61FF] text-lg font-bold">
                         <Upload className="w-4 h-4" />
@@ -995,7 +995,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                         value={stagedBeat.title}
                         onChange={(e) => setStagedBeat({ ...stagedBeat, title: e.target.value })}
                         placeholder="Enter your beat title..."
-                        className="w-full px-4 py-3 rounded-3xl bg-[#1A1A1A] border border-[#333333] focus:border-[#7B61FF] text-white text-sm outline-none transition-all"
+                        className="w-full px-4 py-3 rounded-xl bg-[#1A1A1A] border border-[#333333] focus:border-[#7B61FF] text-white text-sm outline-none transition-all"
                         autoFocus
                       />
                       <p className="text-xs text-[#888888]">
@@ -1018,7 +1018,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                     <button
                       onClick={handleConfirmSubmitStagedEntry}
                       disabled={isUploading || !stagedBeat.title.trim()}
-                      className="w-full py-3.5 rounded-3xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold shadow-xl active:scale-98 transition-all disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+                      className="w-full py-3.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold shadow-xl active:scale-98 transition-all disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
                     >
                       {isUploading ? (
                         <>
@@ -1039,7 +1039,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                     onDragEnter={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
-                    className={`flex-1 min-h-[300px] rounded-3xl p-8 flex flex-col items-center justify-center gap-4 cursor-pointer transition-all group ${
+                    className={`flex-1 min-h-[300px] rounded-xl p-8 flex flex-col items-center justify-center gap-4 cursor-pointer transition-all group ${
                       isDraggingOver
                         ? "bg-[#7B61FF]/15 border-2 border-solid border-[#7B61FF] scale-[1.01]"
                         : "bg-[#121212]/70 hover:bg-[#121212] border-2 border-dashed border-[#7B61FF]"
@@ -1076,7 +1076,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                     onDragEnter={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
-                    className={`bg-[#121212] p-5 sm:p-7 rounded-3xl space-y-5 transition-all ${
+                    className={`bg-[#121212] p-5 sm:p-7 rounded-xl space-y-5 transition-all ${
                       isDraggingOver ? "ring-2 ring-[#7B61FF] bg-[#7B61FF]/10" : ""
                     }`}
                   >

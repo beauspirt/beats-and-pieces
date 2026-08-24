@@ -128,7 +128,7 @@ function StandardTagSelector({
 
       {/* Dropdown Options List */}
       {isDropdownOpen && (
-        <div className="p-2 bg-[#121212] rounded-2xl max-h-48 overflow-y-auto space-y-1 shadow-2xl z-20">
+        <div className="p-2 bg-[#121212] rounded-xl max-h-48 overflow-y-auto space-y-1 shadow-2xl z-20">
           <div className="flex flex-wrap gap-1.5">
             {filteredOptions.map((tag) => {
               const isSelected = selectedTags.includes(tag);
@@ -137,7 +137,7 @@ function StandardTagSelector({
                   key={tag}
                   type="button"
                   onClick={() => toggleTag(tag)}
-                  className={`px-3 py-1.5 rounded-3xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                     isSelected
                       ? "bg-[#7B61FF] text-white shadow-sm"
                       : "bg-[#1f1f1f] text-zinc-300 hover:bg-[#2a2a2a] hover:text-white"
@@ -1436,11 +1436,11 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                       <label className="text-xs font-bold text-white">
                         Availability
                       </label>
-                      <div className="grid grid-cols-2 gap-1 bg-[#121212] p-1 rounded-2xl h-[48px] items-center">
+                      <div className="grid grid-cols-2 gap-1 bg-[#121212] p-1 rounded-xl h-[48px] items-center">
                         <button
                           type="button"
                           onClick={() => setEditingBeat({ ...editingBeat, isForSale: true })}
-                          className={`h-full rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
+                          className={`h-full rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
                             editingBeat.isForSale
                               ? "bg-[#7B61FF] text-white shadow-sm"
                               : "text-zinc-400 hover:text-white hover:bg-white/5"
@@ -1451,7 +1451,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                         <button
                           type="button"
                           onClick={() => setEditingBeat({ ...editingBeat, isForSale: false })}
-                          className={`h-full rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
+                          className={`h-full rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
                             !editingBeat.isForSale
                               ? "bg-[#7B61FF] text-white shadow-sm"
                               : "text-zinc-400 hover:text-white hover:bg-white/5"
@@ -1484,21 +1484,21 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                     </label>
 
                     {isUploadingBeatAudio ? (
-                      <div className="bg-[#121212] p-6 rounded-2xl min-h-[220px] flex flex-col items-center justify-center text-center gap-3 border-2 border-dashed border-[#7B61FF]/40">
+                      <div className="bg-[#121212] p-6 rounded-xl min-h-[220px] flex flex-col items-center justify-center text-center gap-3 border-2 border-dashed border-[#7B61FF]/40">
                         <div className="w-8 h-8 border-2 border-[#7B61FF] border-t-transparent rounded-full animate-spin" />
                         <p className="text-lg font-bold text-white">
                           Uploading...
                         </p>
                       </div>
                     ) : (
-                      <div className="bg-[#121212] p-5 rounded-2xl space-y-4">
+                      <div className="bg-[#121212] p-5 rounded-xl space-y-4">
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-2 text-white text-lg font-bold truncate">
                             <Music className="w-4 h-4 text-[#7B61FF] shrink-0" />
                             <span className="truncate">{editingBeat.audioUrl.split("/").pop() || "Audio File"}</span>
                           </div>
                           {!editingBeat.isBattleSubmission && (
-                            <label className="text-xs font-bold px-3.5 py-1.5 rounded-xl bg-[#1C1C1C] hover:bg-[#252525] text-zinc-300 hover:text-white transition-all cursor-pointer shrink-0">
+                            <label className="text-xs font-bold px-3.5 py-1.5 rounded-lg bg-[#1C1C1C] hover:bg-[#252525] text-zinc-300 hover:text-white transition-all cursor-pointer shrink-0">
                               <span>Replace</span>
                               <input
                                 type="file"
@@ -1526,7 +1526,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
                     {/* Battle submission notice if applicable */}
                     {editingBeat.isBattleSubmission && (
-                      <div className="p-3.5 rounded-3xl bg-amber-500/10 text-amber-300 text-xs flex items-start gap-2.5 leading-relaxed mt-3">
+                      <div className="p-3.5 rounded-xl bg-amber-500/10 text-amber-300 text-xs flex items-start gap-2.5 leading-relaxed mt-3">
                         <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                         <p>
                           This beat is part of a historical battle archive ({((editingBeat.battleSource || "Beat Battle").replace(/\s*\([^)]*\)/g, "")).trim()}). The <strong>Beat Title</strong> and <strong>Audio Master</strong> cannot be changed or deleted to preserve competition records.
@@ -1648,11 +1648,11 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                       <label className="text-xs font-bold text-white">
                         Availability
                       </label>
-                      <div className="grid grid-cols-2 gap-1 bg-[#121212] p-1 rounded-2xl h-[48px] items-center">
+                      <div className="grid grid-cols-2 gap-1 bg-[#121212] p-1 rounded-xl h-[48px] items-center">
                         <button
                           type="button"
                           onClick={() => setNewBeatIsForSale(true)}
-                          className={`h-full rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
+                          className={`h-full rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
                             newBeatIsForSale
                               ? "bg-[#7B61FF] text-white shadow-sm"
                               : "text-zinc-400 hover:text-white hover:bg-white/5"
@@ -1663,7 +1663,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                         <button
                           type="button"
                           onClick={() => setNewBeatIsForSale(false)}
-                          className={`h-full rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
+                          className={`h-full rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
                             !newBeatIsForSale
                               ? "bg-[#7B61FF] text-white shadow-sm"
                               : "text-zinc-400 hover:text-white hover:bg-white/5"
@@ -1689,14 +1689,14 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                     </label>
 
                     {isUploadingBeatAudio ? (
-                      <div className="bg-[#121212] p-6 rounded-2xl min-h-[220px] flex flex-col items-center justify-center text-center gap-3 border-2 border-dashed border-[#7B61FF]/40">
+                      <div className="bg-[#121212] p-6 rounded-xl min-h-[220px] flex flex-col items-center justify-center text-center gap-3 border-2 border-dashed border-[#7B61FF]/40">
                         <div className="w-8 h-8 border-2 border-[#7B61FF] border-t-transparent rounded-full animate-spin" />
                         <p className="text-lg font-bold text-white">
                           Uploading...
                         </p>
                       </div>
                     ) : stagedNewBeatFile || newBeatAudioUrl ? (
-                      <div className="bg-[#121212] p-5 rounded-2xl space-y-4">
+                      <div className="bg-[#121212] p-5 rounded-xl space-y-4">
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-2 text-white text-lg font-bold truncate">
                             <Music className="w-4 h-4 text-[#7B61FF] shrink-0" />
@@ -1713,7 +1713,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                               setNewBeatWaveformPeaks([]);
                               setNewBeatDuration(0);
                             }}
-                            className="text-xs font-bold px-3.5 py-1.5 rounded-xl bg-[#1C1C1C] hover:bg-red-500/20 text-zinc-300 hover:text-red-400 transition-all cursor-pointer shrink-0"
+                            className="text-xs font-bold px-3.5 py-1.5 rounded-lg bg-[#1C1C1C] hover:bg-red-500/20 text-zinc-300 hover:text-red-400 transition-all cursor-pointer shrink-0"
                           >
                             Remove
                           </button>
@@ -1737,7 +1737,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                         onDragEnter={handleNewBeatDragOver}
                         onDragLeave={handleNewBeatDragLeave}
                         onDrop={handleNewBeatDrop}
-                        className={`min-h-[220px] rounded-2xl p-7 flex flex-col items-center justify-center text-center gap-3 transition-all cursor-pointer border-2 border-dashed border-[#7B61FF] ${
+                        className={`min-h-[220px] rounded-xl p-7 flex flex-col items-center justify-center text-center gap-3 transition-all cursor-pointer border-2 border-dashed border-[#7B61FF] ${
                           isDraggingNewBeat
                             ? "bg-[#7B61FF]/15 border-solid scale-[1.01]"
                             : "bg-[#121212]/70 hover:bg-[#121212]"

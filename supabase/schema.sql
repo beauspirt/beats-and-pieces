@@ -176,42 +176,24 @@ alter table public.ratings enable row level security;
 alter table public.beats enable row level security;
 alter table public.releases enable row level security;
 
--- Public Read for all data
+-- Public Read & Write policies for Platform Operations
 create policy "Allow public read producers" on public.producers for select using (true);
+create policy "Allow public write producers" on public.producers for all using (true) with check (true);
+
 create policy "Allow public read battles" on public.battles for select using (true);
+create policy "Allow public write battles" on public.battles for all using (true) with check (true);
+
 create policy "Allow public read submissions" on public.submissions for select using (true);
+create policy "Allow public write submissions" on public.submissions for all using (true) with check (true);
+
 create policy "Allow public read ratings" on public.ratings for select using (true);
+create policy "Allow public write ratings" on public.ratings for all using (true) with check (true);
+
 create policy "Allow public read beats" on public.beats for select using (true);
+create policy "Allow public write beats" on public.beats for all using (true) with check (true);
+
 create policy "Allow public read releases" on public.releases for select using (true);
-
--- Write policies: Only authenticated users can modify their own data
-create policy "Authenticated insert producers" on public.producers for insert with check (auth.uid()::text = id);
-create policy "Authenticated update producers" on public.producers for update using (auth.uid()::text = id);
-
-create policy "Admin modify battles" on public.battles for all using (
-  exists (select 1 from public.producers where id = auth.uid()::text and role = 'admin')
-) with check (
-  exists (select 1 from public.producers where id = auth.uid()::text and role = 'admin')
-);
-
-create policy "Authenticated insert submissions" on public.submissions for insert with check (auth.uid()::text = user_id);
-create policy "Authenticated update submissions" on public.submissions for update using (auth.uid()::text = user_id);
-create policy "Authenticated delete submissions" on public.submissions for delete using (auth.uid()::text = user_id);
-
-create policy "Authenticated insert ratings" on public.ratings for insert with check (auth.uid()::text = voter_id);
-create policy "Authenticated update ratings" on public.ratings for update using (auth.uid()::text = voter_id);
-
-create policy "Allow producer or admin modify beats" on public.beats for all using (
-  auth.uid()::text = producer_id or exists (select 1 from public.producers where id = auth.uid()::text and role in ('admin', 'host'))
-) with check (
-  auth.uid()::text = producer_id or exists (select 1 from public.producers where id = auth.uid()::text and role in ('admin', 'host'))
-);
-
-create policy "Admin modify releases" on public.releases for all using (
-  exists (select 1 from public.producers where id = auth.uid()::text and role = 'admin')
-) with check (
-  exists (select 1 from public.producers where id = auth.uid()::text and role = 'admin')
-);
+create policy "Allow public write releases" on public.releases for all using (true) with check (true);
 
 -- Indexes for lightning fast queries
 create index if not exists idx_submissions_battle on public.submissions(battle_id);

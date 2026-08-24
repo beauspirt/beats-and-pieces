@@ -631,13 +631,18 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       }
 
       // 2. Upload to Supabase Storage 'beats' folder
-      const { url } = await storageService.uploadAudio(
+      const { url, error: uploadError } = await storageService.uploadAudio(
         file,
         "beats",
         `${producer.id}-${Date.now()}`
       );
 
-      const finalAudioUrl = url || URL.createObjectURL(file);
+      if (!url) {
+        alert("Audio upload failed: " + (uploadError || "Unable to upload audio file."));
+        return;
+      }
+
+      const finalAudioUrl = url;
       if (extractedWaveform) {
         globalWaveformCache.set(finalAudioUrl, extractedWaveform);
       }
@@ -706,7 +711,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     }
   };
 
-  const handleCreateBeat = (e: React.FormEvent) => {
+  const handleCreateBeat = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isAtBeatLimit) {
       alert(`You have reached the maximum limit of ${MAX_FREE_BEATS} uploaded showcase beats.`);
@@ -723,7 +728,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
     const bpmValue = newBeatBpm !== "" && !isNaN(Number(newBeatBpm)) ? Number(newBeatBpm) : undefined;
 
-    beatService.createBeat({
+    await beatService.createBeat({
       title: newBeatTitle.trim(),
       beatmaker: {
         id: producer.id,

@@ -263,7 +263,7 @@ export const beatService = {
     return true;
   },
 
-  createBeat(beat: Omit<DiscoveryBeat, "id"> & { id?: string }): DiscoveryBeat {
+  async createBeat(beat: Omit<DiscoveryBeat, "id"> & { id?: string }): Promise<DiscoveryBeat> {
     const newBeat: DiscoveryBeat = {
       ...beat,
       id: beat.id || `beat-custom-${Date.now()}`,
@@ -274,28 +274,54 @@ export const beatService = {
     saveCustomBeats(updated);
     notifyBeatsUpdated();
 
-    // Async insert to Supabase
-    supabase.from("beats").upsert({
-      id: newBeat.id,
-      title: newBeat.title,
-      producer_id: newBeat.beatmaker.id,
-      audio_url: newBeat.audioUrl,
-      duration: newBeat.duration || 120,
-      bpm: newBeat.bpm,
-      price_tag: newBeat.priceTag || "Not For Sale",
-      genres: newBeat.genres || [],
-      tags: newBeat.tags || [],
-      flames: newBeat.flames || 0,
-      battle_source: newBeat.battleSource,
-      tier: newBeat.tier || 4,
-      rank: newBeat.rank,
-      created_at: newBeat.createdAt || new Date().toISOString(),
-    }).then(
-      ({ error }) => {
-        // if (error) console.warn("Supabase beat insert failed:", error.message);
-      },
-      () => {}
-    );
+    try {
+      // 1. Ensure producer row exists in public.producers (satisfies foreign key)
+      const prod = producerService.getProducerById(newBeat.beatmaker.id) || producerService.getProducerByTag(newBeat.beatmaker.tag);
+      if (prod) {
+        await supabase.from("producers").upsert({
+          id: prod.id,
+          nickname: prod.nickname,
+          email: prod.email,
+          avatar_url: prod.avatarUrl,
+          bio: prod.bio || "",
+          location: prod.location || "",
+          role: prod.role || "producer",
+          discord_id: prod.discordId,
+          discord_username: prod.discordUsername,
+          discord_roles: prod.discordRoles || [],
+          links: prod.links || {},
+          stats: prod.stats || { battlesEntered: 0, battlesWon: 0, totalFlames: 0 },
+          is_claimed: prod.isClaimed || false,
+          claimed_at: prod.claimedAt,
+          created_at: prod.createdAt || new Date().toISOString(),
+        });
+      }
+
+      // 2. Insert beat to Supabase beats table
+      const { error } = await supabase.from("beats").upsert({
+        id: newBeat.id,
+        title: newBeat.title,
+        producer_id: newBeat.beatmaker.id,
+        audio_url: newBeat.audioUrl,
+        duration: newBeat.duration || 120,
+        waveform: newBeat.waveform || [],
+        bpm: newBeat.bpm,
+        price_tag: newBeat.priceTag || "Not For Sale",
+        genres: newBeat.genres || [],
+        tags: newBeat.tags || [],
+        flames: newBeat.flames || 0,
+        battle_source: newBeat.battleSource,
+        tier: newBeat.tier || 4,
+        rank: newBeat.rank,
+        created_at: newBeat.createdAt || new Date().toISOString(),
+      });
+
+      if (error) {
+        // console.warn("Supabase beat upsert error:", error.message);
+      }
+    } catch (err) {
+      // console.warn("Supabase beat upsert error:", err);
+    }
 
     return newBeat;
   },

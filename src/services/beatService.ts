@@ -57,6 +57,14 @@ function loadDeletedBeatIds(): string[] {
   return [];
 }
 
+export function notifyBeatsUpdated() {
+  if (typeof window !== "undefined") {
+    try {
+      window.dispatchEvent(new CustomEvent("bnp_beats_updated"));
+    } catch {}
+  }
+}
+
 export const beatService = {
   getAllDiscoveryBeats(): DiscoveryBeat[] {
     const raw = [...(rawDiscoveryBeats as DiscoveryBeat[])];
@@ -154,7 +162,7 @@ export const beatService = {
       if (!error && data) {
         const deletedIds = new Set(loadDeletedBeatIds());
         const mapped: DiscoveryBeat[] = data
-          .filter((b) => !deletedIds.has(b.id))
+          .filter((b) => !deletedIds.has(b.id) && !(b.title && deletedIds.has(b.title.toLowerCase())))
           .map((b) => {
             const prod = producerService.getProducerById(b.producer_id) || producerService.getProducerByTag(b.producer_id);
             return {
@@ -180,19 +188,8 @@ export const beatService = {
             };
           });
 
-        // Supabase is the single source of truth for remote showcase beats.
-        // We only preserve local drafts created in the last 2 minutes that haven't synced yet.
-        const currentCustom = loadCustomBeats();
-        const serverIds = new Set(mapped.map((b) => b.id));
-        const unsyncedDrafts = currentCustom.filter((b) => {
-          if (deletedIds.has(b.id)) return false;
-          if (serverIds.has(b.id)) return false;
-          const age = Date.now() - (b.createdAt ? new Date(b.createdAt).getTime() : 0);
-          return b.id.startsWith("beat-custom-") && age < 120000;
-        });
-
-        const merged = [...mapped, ...unsyncedDrafts];
-        saveCustomBeats(merged);
+        saveCustomBeats(mapped);
+        notifyBeatsUpdated();
       }
     } catch (err) {
       // console.warn("beatService.syncFromSupabase error:", err);
@@ -213,6 +210,7 @@ export const beatService = {
           localStorage.setItem(STORAGE_KEY_BEAT_OVERRIDES, JSON.stringify(overrides));
         } catch {}
       }
+      notifyBeatsUpdated();
     }
 
     // Async write to Supabase
@@ -237,22 +235,27 @@ export const beatService = {
   deleteBeat(id: string): boolean {
     if (typeof window !== "undefined") {
       const custom = loadCustomBeats();
+      const beatToDelete = custom.find((b) => b.id === id);
       const filtered = custom.filter((b) => b.id !== id);
       saveCustomBeats(filtered);
 
       const deleted = loadDeletedBeatIds();
       if (!deleted.includes(id)) {
         deleted.push(id);
-        try {
-          localStorage.setItem(STORAGE_KEY_DELETED_BEATS, JSON.stringify(deleted));
-        } catch {}
       }
+      if (beatToDelete?.title && !deleted.includes(beatToDelete.title.toLowerCase())) {
+        deleted.push(beatToDelete.title.toLowerCase());
+      }
+      try {
+        localStorage.setItem(STORAGE_KEY_DELETED_BEATS, JSON.stringify(deleted));
+      } catch {}
+      notifyBeatsUpdated();
     }
 
     // Async delete from Supabase
     supabase.from("beats").delete().eq("id", id).then(
-      ({ error }) => {
-        // if (error) console.warn("Supabase beat delete failed:", error.message);
+      () => {
+        notifyBeatsUpdated();
       },
       () => {}
     );
@@ -269,6 +272,7 @@ export const beatService = {
     const custom = loadCustomBeats();
     const updated = [newBeat, ...custom.filter((b) => b.id !== newBeat.id)];
     saveCustomBeats(updated);
+    notifyBeatsUpdated();
 
     // Async insert to Supabase
     supabase.from("beats").upsert({

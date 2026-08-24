@@ -29,6 +29,14 @@ let producersMap: Record<string, UserProfile> = {
   ...customProducers,
 };
 
+export function notifyProducersUpdated() {
+  if (typeof window !== "undefined") {
+    try {
+      window.dispatchEvent(new CustomEvent("bnp_producers_updated"));
+    } catch {}
+  }
+}
+
 export const producerService = {
   getAllProducers(): UserProfile[] {
     const map = this.getProducersMap();
@@ -147,6 +155,7 @@ export const producerService = {
           producersMap[p.id] = custom[p.id];
         });
         saveCustomProducers(custom);
+        notifyProducersUpdated();
       }
     } catch (err) {
       // console.warn("producerService.syncFromSupabase error:", err);
@@ -159,6 +168,7 @@ export const producerService = {
     custom[profile.id] = profile;
     saveCustomProducers(custom);
     producersMap[profile.id] = profile;
+    notifyProducersUpdated();
 
     // Async write to Supabase
     supabase.from("producers").upsert({
@@ -190,25 +200,34 @@ export const producerService = {
   updateProducer(id: string, updates: Partial<UserProfile>): UserProfile {
     const current = this.getProducerById(id) || producersMap[id];
     if (!current) {
-      const newProfile: UserProfile = {
+      const fallback: UserProfile = {
         id,
-        nickname: updates.nickname || id,
-        email: updates.email || `${id}@beatsandpieces.ro`,
-        avatarUrl: updates.avatarUrl || "/avatars/default-avatar.png",
-        role: updates.role || "producer",
-        isClaimed: true,
+        nickname: id,
+        email: `${id}@beatsandpieces.ro`,
+        avatarUrl: "/avatars/default-avatar.png",
+        bio: "",
+        location: "",
+        role: "producer",
+        discordRoles: [],
+        links: {},
+        stats: { battlesEntered: 0, battlesWon: 0, totalFlames: 0 },
+        isClaimed: false,
         createdAt: new Date().toISOString(),
         ...updates,
       };
-      return this.createProducer(newProfile);
+      return this.createProducer(fallback);
     }
 
-    const updated = { ...current, ...updates, isClaimed: true };
+    const updated: UserProfile = {
+      ...current,
+      ...updates,
+    };
+
     const custom = loadCustomProducers();
     custom[id] = updated;
     saveCustomProducers(custom);
-
     producersMap[id] = updated;
+    notifyProducersUpdated();
 
     // Async write to Supabase
     supabase.from("producers").upsert({

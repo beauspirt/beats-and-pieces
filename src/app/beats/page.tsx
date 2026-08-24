@@ -24,19 +24,32 @@ export default function BeatsDiscoveryPage() {
 
   // Load fresh beats from beatService (including user custom beats) & favorites from localStorage
   useEffect(() => {
-    try {
+    const refresh = () => {
       const allBeats = beatService.getAllDiscoveryBeats();
-      const savedFavs = localStorage.getItem("bnp_favorites");
-      const favIds: string[] = savedFavs ? JSON.parse(savedFavs) : [];
-      setBeats(
-        allBeats.map((b) => ({
-          ...b,
-          isFavorite: favIds.includes(b.id),
-        }))
-      );
-    } catch {
-      setBeats(beatService.getAllDiscoveryBeats());
-    }
+      try {
+        const savedFavs = localStorage.getItem("bnp_favorites");
+        const favIds: string[] = savedFavs ? JSON.parse(savedFavs) : [];
+        setBeats(
+          allBeats.map((b) => ({
+            ...b,
+            isFavorite: favIds.includes(b.id),
+          }))
+        );
+      } catch {
+        setBeats(allBeats);
+      }
+    };
+
+    refresh();
+    beatService.syncFromSupabase().then(refresh);
+
+    window.addEventListener("bnp_beats_updated", refresh);
+    window.addEventListener("storage", refresh);
+
+    return () => {
+      window.removeEventListener("bnp_beats_updated", refresh);
+      window.removeEventListener("storage", refresh);
+    };
   }, []);
 
   // Reset pagination when search or filters change

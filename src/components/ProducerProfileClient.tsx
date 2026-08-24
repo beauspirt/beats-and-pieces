@@ -273,10 +273,30 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
   });
 
   useEffect(() => {
-    const fresh = producerService.getProducerById(producerId);
-    if (fresh) {
-      setProducer(fresh);
-    }
+    const refresh = () => {
+      const fresh = producerService.getProducerById(producerId) || producerService.getProducerByTag(producerId);
+      if (fresh) {
+        setProducer(fresh);
+      }
+      setBeatsVersion((v) => v + 1);
+    };
+
+    // 1. Sync latest producers and beats from Supabase
+    Promise.all([
+      producerService.syncFromSupabase(),
+      beatService.syncFromSupabase(),
+    ]).then(refresh);
+
+    // 2. Listen to real-time local updates and storage changes
+    window.addEventListener("bnp_beats_updated", refresh);
+    window.addEventListener("bnp_producers_updated", refresh);
+    window.addEventListener("storage", refresh);
+
+    return () => {
+      window.removeEventListener("bnp_beats_updated", refresh);
+      window.removeEventListener("bnp_producers_updated", refresh);
+      window.removeEventListener("storage", refresh);
+    };
   }, [producerId]);
 
   const [copiedEmail, setCopiedEmail] = useState(false);
@@ -389,17 +409,29 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
   // Merge and prioritize all beats for this producer dynamically from beatService
   const prioritizedBeats = useMemo(() => {
     const allBeats = beatService.getAllDiscoveryBeats();
-    const baseBeats = allBeats.filter(
-      (b) =>
-        b.beatmaker.id === producer.id ||
-        b.beatmaker.tag.toLowerCase() === producer.nickname.toLowerCase()
-    );
 
-    const submissions = sampleSubmissions.filter(
-      (s) =>
-        s.userId === producer.id ||
-        s.beatmakerTag.toLowerCase() === producer.nickname.toLowerCase()
-    );
+    const matchesProducer = (bId: string, bTag: string) => {
+      const cleanBId = (bId || "").toLowerCase().trim();
+      const cleanBTag = (bTag || "").toLowerCase().trim();
+      const pId = (producer.id || "").toLowerCase().trim();
+      const pNick = (producer.nickname || "").toLowerCase().trim();
+      const pEmail = (producer.email || "").toLowerCase().trim();
+
+      if (cleanBId && (cleanBId === pId || cleanBId === pNick || cleanBId === pEmail)) return true;
+      if (cleanBTag && (cleanBTag === pId || cleanBTag === pNick || cleanBTag === pEmail)) return true;
+
+      const resolvedFromId = producerService.getProducerById(bId) || producerService.getProducerByTag(bId);
+      if (resolvedFromId && (resolvedFromId.id.toLowerCase() === pId || resolvedFromId.nickname.toLowerCase() === pNick)) return true;
+
+      const resolvedFromTag = producerService.getProducerById(bTag) || producerService.getProducerByTag(bTag);
+      if (resolvedFromTag && (resolvedFromTag.id.toLowerCase() === pId || resolvedFromTag.nickname.toLowerCase() === pNick)) return true;
+
+      return false;
+    };
+
+    const baseBeats = allBeats.filter((b) => matchesProducer(b.beatmaker.id, b.beatmaker.tag));
+
+    const submissions = sampleSubmissions.filter((s) => matchesProducer(s.userId, s.beatmakerTag));
 
     const mergedList: (DiscoveryBeat & {
       tier: number;

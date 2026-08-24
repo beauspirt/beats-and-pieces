@@ -1364,8 +1364,9 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
               onClick={(e) => e.stopPropagation()}
               className="bg-[#181818] rounded-3xl max-w-4xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default max-h-[90vh] overflow-y-auto no-scrollbar"
             >
-              {/* Header Close Button */}
-              <div className="flex items-center justify-end">
+              {/* Header Title & Close Button */}
+              <div className="flex items-center justify-between pb-1">
+                <h3 className="text-2xl font-bold text-white">Edit Beat</h3>
                 <button
                   type="button"
                   onClick={() => setEditingBeat(null)}
@@ -1417,7 +1418,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                     {/* BPM (Optional) */}
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold text-white">
-                        BPM (Tempo)
+                        BPM
                       </label>
                       <input
                         type="number"
@@ -1435,22 +1436,28 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                       <label className="text-xs font-bold text-white">
                         Availability
                       </label>
-                      <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-[#121212] h-[48px]">
-                        <span className="text-sm text-zinc-300">
-                          {editingBeat.isForSale ? "For Sale" : "Not For Sale"}
-                        </span>
+                      <div className="grid grid-cols-2 gap-2 bg-[#121212] p-1 rounded-xl h-[48px] items-center">
                         <button
                           type="button"
-                          onClick={() => setEditingBeat({ ...editingBeat, isForSale: !editingBeat.isForSale })}
-                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full p-0.5 transition-colors duration-200 ease-in-out focus:outline-none ${
-                            editingBeat.isForSale ? "bg-[#7B61FF]" : "bg-[#282828]"
+                          onClick={() => setEditingBeat({ ...editingBeat, isForSale: true })}
+                          className={`h-full rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
+                            editingBeat.isForSale
+                              ? "bg-[#7B61FF] text-white shadow-sm"
+                              : "text-zinc-400 hover:text-white hover:bg-white/5"
                           }`}
                         >
-                          <span
-                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-                              editingBeat.isForSale ? "translate-x-5" : "translate-x-0"
-                            }`}
-                          />
+                          For Sale
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingBeat({ ...editingBeat, isForSale: false })}
+                          className={`h-full rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
+                            !editingBeat.isForSale
+                              ? "bg-[#282828] text-white shadow-sm"
+                              : "text-zinc-400 hover:text-white hover:bg-white/5"
+                          }`}
+                        >
+                          Not For Sale
                         </button>
                       </div>
                     </div>
@@ -1577,8 +1584,9 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
               onClick={(e) => e.stopPropagation()}
               className="bg-[#181818] rounded-3xl max-w-4xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default max-h-[90vh] overflow-y-auto no-scrollbar"
             >
-              {/* Header Close Button */}
-              <div className="flex items-center justify-end">
+              {/* Header Title & Close Button */}
+              <div className="flex items-center justify-between pb-1">
+                <h3 className="text-2xl font-bold text-white">Add Beat</h3>
                 <button
                   type="button"
                   onClick={() => {
@@ -1586,6 +1594,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                     setStagedNewBeatFile(null);
                     setNewBeatAudioUrl("");
                     setNewBeatAudioName("");
+                    setNewBeatBpm("");
                   }}
                   className="w-9 h-9 rounded-full bg-[#121212] text-zinc-400 hover:text-white flex items-center justify-center text-sm cursor-pointer transition-colors"
                 >
@@ -1597,8 +1606,9 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
               <form onSubmit={handleCreateBeat} className="space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                   
-                  {/* Left Column: Title, Availability, & Tags */}
+                  {/* Left Column: Title, BPM, Availability, & Tags */}
                   <div className="lg:col-span-6 space-y-5">
+                    {/* Beat Title */}
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold text-white flex items-center gap-1">
                         <span>Beat Title</span>
@@ -1617,26 +1627,49 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                       </p>
                     </div>
 
+                    {/* BPM (Optional) */}
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-white">
+                        BPM
+                      </label>
+                      <input
+                        type="number"
+                        placeholder="e.g. 90 (optional)"
+                        value={newBeatBpm}
+                        onChange={(e) =>
+                          setNewBeatBpm(e.target.value === "" ? "" : Number(e.target.value))
+                        }
+                        className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#7B61FF] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all"
+                      />
+                    </div>
+
+                    {/* Availability */}
                     <div className="space-y-2">
                       <label className="text-xs font-bold text-white">
                         Availability
                       </label>
-                      <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-[#121212] h-[48px]">
-                        <span className="text-sm text-zinc-300">
-                          {newBeatIsForSale ? "For Sale" : "Not For Sale"}
-                        </span>
+                      <div className="grid grid-cols-2 gap-2 bg-[#121212] p-1 rounded-xl h-[48px] items-center">
                         <button
                           type="button"
-                          onClick={() => setNewBeatIsForSale(!newBeatIsForSale)}
-                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full p-0.5 transition-colors duration-200 ease-in-out focus:outline-none ${
-                            newBeatIsForSale ? "bg-[#7B61FF]" : "bg-[#282828]"
+                          onClick={() => setNewBeatIsForSale(true)}
+                          className={`h-full rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
+                            newBeatIsForSale
+                              ? "bg-[#7B61FF] text-white shadow-sm"
+                              : "text-zinc-400 hover:text-white hover:bg-white/5"
                           }`}
                         >
-                          <span
-                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-                              newBeatIsForSale ? "translate-x-5" : "translate-x-0"
-                            }`}
-                          />
+                          For Sale
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setNewBeatIsForSale(false)}
+                          className={`h-full rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
+                            !newBeatIsForSale
+                              ? "bg-[#282828] text-white shadow-sm"
+                              : "text-zinc-400 hover:text-white hover:bg-white/5"
+                          }`}
+                        >
+                          Not For Sale
                         </button>
                       </div>
                     </div>

@@ -27,16 +27,21 @@ export default function BeatsDiscoveryPage() {
   // Pagination: 15 beats at a time
   const [visibleCount, setVisibleCount] = useState(15);
 
-  // Close sort menu on click outside
+  // Close sort menu on click outside only when open
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    if (!isSortOpen) return;
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
       if (sortMenuRef.current && !sortMenuRef.current.contains(e.target as Node)) {
         setIsSortOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    document.addEventListener("touchstart", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, [isSortOpen]);
 
   // Load fresh beats from beatService (including user custom beats) & favorites from localStorage
   useEffect(() => {
@@ -187,12 +192,12 @@ export default function BeatsDiscoveryPage() {
           </div>
 
           {/* Quick Action Controls Row: Favorites + Filter + Sort Criteria Dropdown + Upload Beat Button */}
-          <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-3 w-full lg:w-auto shrink-0">
+          <div className="grid grid-cols-4 sm:flex items-center gap-2 sm:gap-3 w-full lg:w-auto">
             {/* Favorites Filter Button */}
             <button
               type="button"
               onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
-              className={`h-11 sm:h-auto px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${
+              className={`w-full sm:w-auto h-11 sm:h-auto px-2 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                 showOnlyFavorites
                   ? "bg-amber-500/20 text-amber-300 shadow-sm"
                   : "bg-[#181818] hover:bg-[#202020] text-zinc-400 hover:text-white"
@@ -208,7 +213,7 @@ export default function BeatsDiscoveryPage() {
             <button
               type="button"
               onClick={() => setShowFilters(!showFilters)}
-              className={`h-11 sm:h-auto px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${
+              className={`w-full sm:w-auto h-11 sm:h-auto px-2 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                 showFilters || activeFiltersCount > 0
                   ? "bg-[#7B61FF] text-white"
                   : "bg-[#181818] hover:bg-[#202020] text-zinc-400 hover:text-white"
@@ -225,14 +230,18 @@ export default function BeatsDiscoveryPage() {
               )}
             </button>
 
-            {/* Redesigned Sleek Sort Dropdown (SlidersHorizontal icon + borderless menu) */}
-            <div className="relative flex-1 sm:flex-initial" ref={sortMenuRef}>
+            {/* Redesigned Sleek Sort Dropdown */}
+            <div className="relative w-full sm:w-auto sm:flex-initial" ref={sortMenuRef}>
               <button
                 type="button"
-                onClick={() => setIsSortOpen(!isSortOpen)}
-                className="w-full h-11 sm:h-auto flex items-center justify-between sm:justify-center gap-1.5 sm:gap-2 bg-[#181818] hover:bg-[#202020] rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white font-semibold transition-all cursor-pointer"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsSortOpen((prev) => !prev);
+                }}
+                className="w-full h-11 sm:h-auto flex items-center justify-between sm:justify-center gap-1 sm:gap-2 bg-[#181818] hover:bg-[#202020] rounded-xl px-2 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white font-semibold transition-all cursor-pointer"
               >
-                <div className="flex items-center gap-1.5 truncate">
+                <div className="flex items-center gap-1 truncate">
                   <SlidersHorizontal className="w-3.5 h-3.5 text-[#7B61FF] shrink-0" />
                   <span className="truncate">{sortLabelMap[sortBy]}</span>
                 </div>
@@ -240,14 +249,19 @@ export default function BeatsDiscoveryPage() {
               </button>
 
               {isSortOpen && (
-                <div className="absolute right-0 mt-2 w-44 bg-[#181818] rounded-2xl shadow-2xl p-2 z-40 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  className="absolute right-0 mt-2 w-44 bg-[#181818] rounded-2xl shadow-2xl p-2 z-[100] space-y-1 animate-in fade-in slide-in-from-top-2 duration-150"
+                >
                   {(["recent", "rating"] as const).map((key) => {
                     const isSelected = sortBy === key;
                     return (
                       <button
                         key={key}
                         type="button"
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
                           setSortBy(key);
                           setIsSortOpen(false);
                         }}
@@ -266,13 +280,14 @@ export default function BeatsDiscoveryPage() {
               )}
             </div>
 
-            {/* Upload Beat Button (Far Right) */}
+            {/* Upload Beat Button */}
             <Link
               href={currentUser?.id ? `/${currentUser.id}` : "/profile"}
-              className="h-11 sm:h-auto inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 cursor-pointer shrink-0"
+              className="w-full sm:w-auto h-11 sm:h-auto inline-flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 cursor-pointer text-center"
             >
               <Upload className="w-4 h-4 shrink-0" />
-              <span className="whitespace-nowrap">Upload Beat</span>
+              <span className="hidden xs:inline sm:inline whitespace-nowrap">Upload Beat</span>
+              <span className="xs:hidden sm:hidden whitespace-nowrap">Upload</span>
             </Link>
 
           </div>

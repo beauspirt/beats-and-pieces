@@ -1115,7 +1115,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
             {prioritizedBeats.map((beat) => (
               <div
                 key={beat.id}
-                className="bg-[#181818] rounded-2xl p-4 sm:p-5 space-y-3 shadow-md group relative"
+                className="bg-[#181818] rounded-[28px] p-4 sm:p-5 space-y-3 shadow-md group relative"
               >
                 {/* Row 1: Header (Title, Rank Badge, Meta, Edit Action) */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
@@ -1296,7 +1296,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
             ))}
           </div>
         ) : (
-          <div className="bg-[#181818] rounded-3xl p-8 text-center space-y-2">
+          <div className="bg-[#181818] rounded-[28px] p-8 text-center space-y-2">
             <p className="text-zinc-400 text-sm">
               This producer hasn&apos;t submitted any beats yet.
             </p>
@@ -1362,7 +1362,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
             <div
               onMouseDown={(e) => e.stopPropagation()}
               onClick={(e) => e.stopPropagation()}
-              className="bg-[#181818] rounded-3xl max-w-4xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default max-h-[90vh] overflow-y-auto no-scrollbar"
+              className="bg-[#181818] rounded-[28px] max-w-4xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default max-h-[90vh] overflow-y-auto no-scrollbar"
             >
               {/* Header Title & Close Button */}
               <div className="flex items-center justify-between pb-1">

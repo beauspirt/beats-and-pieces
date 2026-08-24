@@ -1188,7 +1188,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
           </div>
 
           {blindTracks.length === 0 ? (
-            <div className="bg-[#181818] rounded-3xl p-8 text-center space-y-2">
+            <div className="bg-[#181818] rounded-[28px] p-8 text-center space-y-2">
               <p className="text-white text-lg font-bold">No Submissions Yet</p>
               <p className="text-xs text-[#888888]">
                 No beats have been submitted for this battle yet. When beats are entered, they will appear here anonymized for fair public rating.
@@ -1203,7 +1203,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                 return (
                   <div
                     key={track.id}
-                    className={`bg-[#181818] rounded-2xl p-4 sm:p-5 ${
+                    className={`bg-[#181818] rounded-[28px] p-4 sm:p-5 ${
                       unlocked ? "" : "opacity-40"
                     }`}
                   >
@@ -1288,7 +1288,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
               >
                 <div 
                   onClick={(e) => e.stopPropagation()}
-                  className="bg-[#181818] rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl relative cursor-default"
+                  className="bg-[#181818] rounded-[28px] max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl relative cursor-default"
                 >
                   <div className="space-y-2">
                     <h3 className="text-2xl font-bold text-[#FF5E3A] flex items-center gap-2">
@@ -1332,7 +1332,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
               >
                 <div 
                   onClick={(e) => e.stopPropagation()}
-                  className="bg-[#181818] rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default"
+                  className="bg-[#181818] rounded-[28px] max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default"
                 >
                   <div className="space-y-2">
                     <h3 className="text-2xl font-bold text-white flex items-center gap-2">
@@ -1502,7 +1502,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                 return (
                   <div
                     key={sub.id}
-                    className="bg-[#181818] rounded-2xl p-4 sm:p-5 space-y-3.5"
+                    className="bg-[#181818] rounded-[28px] p-4 sm:p-5 space-y-3.5"
                   >
                     <div className="flex items-center justify-between gap-4">
                       <div>
@@ -1600,7 +1600,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                   return (
                     <div
                       key={sub.id}
-                      className="bg-[#181818] rounded-2xl p-4 sm:p-5 space-y-3.5"
+                      className="bg-[#181818] rounded-[28px] p-4 sm:p-5 space-y-3.5"
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         

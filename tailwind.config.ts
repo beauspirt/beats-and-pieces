@@ -35,6 +35,10 @@ const config: Config = {
           bronze: "#D97706",
         }
       },
+      borderRadius: {
+        card: "28px",
+        "3xl": "28px",
+      },
       fontFamily: {
         sans: ["var(--font-inter)", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
         heading: ["var(--font-inter)", "-apple-system", "BlinkMacSystemFont", "sans-serif"],

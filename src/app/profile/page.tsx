@@ -179,7 +179,7 @@ function ProfileContent() {
       <form onSubmit={handleSave} className="space-y-4">
         
         {/* CONTAINER 1: DETAILS */}
-        <div className="bg-[#181818] rounded-3xl p-6 sm:p-8 space-y-5 shadow-lg">
+        <div className="bg-[#181818] rounded-[28px] p-6 sm:p-8 space-y-5 shadow-lg">
           <h2 className="text-2xl font-bold text-white">Details</h2>
 
           {/* Profile Picture Upload */}
@@ -304,7 +304,7 @@ function ProfileContent() {
         </div>
 
         {/* CONTAINER 2: SOCIALS */}
-        <div className="bg-[#181818] rounded-3xl p-6 sm:p-8 space-y-6 shadow-lg">
+        <div className="bg-[#181818] rounded-[28px] p-6 sm:p-8 space-y-6 shadow-lg">
           <h2 className="text-2xl font-bold text-white">Socials</h2>
 
           {SOCIAL_PLATFORMS.map(({ key, label }) => {

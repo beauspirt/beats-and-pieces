@@ -241,7 +241,7 @@ export default function HostPanelPage() {
 
         {/* Battles List */}
         {hostedBattles.length === 0 ? (
-          <div className="bg-[#181818] rounded-3xl p-8 text-center space-y-3 shadow-lg">
+          <div className="bg-[#181818] rounded-[28px] p-8 text-center space-y-3 shadow-lg">
             <p className="text-sm text-zinc-400">
               You are not currently assigned as an active host for any upcoming battles.
             </p>
@@ -251,7 +251,7 @@ export default function HostPanelPage() {
             {hostedBattles.map((battle) => (
               <div
                 key={battle.id}
-                className="bg-surface-card rounded-3xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg hover:bg-surface-hover transition-all"
+                className="bg-surface-card rounded-[28px] p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg hover:bg-surface-hover transition-all"
               >
                 <div className="flex items-center gap-4 min-w-0">
                   <div className="w-14 h-14 rounded-xl overflow-hidden relative shrink-0 bg-[#121212] shadow-md">

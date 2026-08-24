@@ -31,7 +31,7 @@ export default function VaultPage() {
     return (
       <div
         key={item.id}
-        className="bg-[#181818] rounded-2xl overflow-hidden flex flex-col justify-between group hover:bg-[#1f1f1f] transition-colors duration-200 shadow-lg"
+        className="bg-[#181818] rounded-[28px] overflow-hidden flex flex-col justify-between group hover:bg-[#1f1f1f] transition-colors duration-200 shadow-lg"
       >
         {/* Thumbnail Preview Area */}
         <div
@@ -134,7 +134,7 @@ export default function VaultPage() {
           >
             <div
               onClick={(e) => e.stopPropagation()}
-              className="bg-[#181818] rounded-3xl max-w-4xl w-full overflow-hidden shadow-2xl space-y-4 p-4 sm:p-6 relative cursor-default"
+              className="bg-[#181818] rounded-[28px] max-w-4xl w-full overflow-hidden shadow-2xl space-y-4 p-4 sm:p-6 relative cursor-default"
             >
               {/* Modal Close Button */}
               <div className="flex items-center justify-end">

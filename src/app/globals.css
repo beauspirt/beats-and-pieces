@@ -222,17 +222,17 @@ html.light input[type="range"] {
   }
   @media (min-width: 640px) {
     .battle-hero-cover {
-      width: calc((100% - 48px) / 2);
+      width: calc((100% - 3rem) / 2);
     }
   }
   @media (min-width: 768px) {
     .battle-hero-cover {
-      width: calc((100% - 96px) / 3);
+      width: calc((100% - 6rem) / 3);
     }
   }
   @media (min-width: 1024px) {
     .battle-hero-cover {
-      width: calc(25% - 36px);
+      width: calc(25% - 2.25rem);
     }
   }
 }

@@ -68,7 +68,7 @@ export default function BattlesPage() {
 
           <Link
             href={`/battles/${activeBattle.id}`}
-            className="bg-[#181818] rounded-[28px] p-4 flex flex-col md:flex-row gap-6 items-start hover:bg-[#1A1A1A] transition-all shadow-xl block cursor-pointer group relative overflow-hidden"
+            className="bg-[#181818] rounded-[28px] p-4 flex flex-col md:flex-row gap-6 items-start hover:bg-[#1A1A1A] transition-all shadow-xl cursor-pointer group relative overflow-hidden"
           >
             {/* Cover Art Thumbnail (Matches Archive Card Dimensions Across All Breakpoints) */}
             <div className="battle-hero-cover aspect-square rounded-xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl mx-auto md:mx-0">

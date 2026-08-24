@@ -260,6 +260,8 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     isForSale: boolean;
     isBattleSubmission: boolean;
     battleSource?: string;
+    duration?: number;
+    waveform?: number[];
   } | null>(null);
   const [editingTags, setEditingTags] = useState<string[]>([]);
   const [editingTagInput, setEditingTagInput] = useState("");
@@ -544,6 +546,8 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       isForSale: isForSale,
       isBattleSubmission: isBattle,
       battleSource: beat.battleSource || beat.competitionTitle,
+      duration: beat.duration || 120,
+      waveform: beat.waveform || [],
     });
     setEditingTags(rawTags.filter(Boolean));
     setEditingTagInput("");
@@ -705,6 +709,8 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
         setEditingBeat({
           ...editingBeat,
           audioUrl: finalAudioUrl,
+          duration: realDuration || editingBeat.duration || 120,
+          waveform: extractedWaveform ? extractedWaveform.peaks : (editingBeat.waveform || []),
         });
       }
     } catch {
@@ -1356,181 +1362,202 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
             <div
               onMouseDown={(e) => e.stopPropagation()}
               onClick={(e) => e.stopPropagation()}
-              className="bg-[#181818] rounded-2xl max-w-2xl sm:max-w-3xl w-full p-5 sm:p-7 space-y-5 shadow-2xl relative cursor-default max-h-[90vh] overflow-y-auto no-scrollbar"
+              className="bg-[#181818] rounded-3xl max-w-4xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default max-h-[90vh] overflow-y-auto no-scrollbar"
             >
-            <div className="flex items-center justify-between pb-1">
-              <div className="space-y-0.5">
-                <h3 className="text-2xl font-bold text-white flex items-center gap-2">
-                  <Pencil className="w-4 h-4 text-[#7B61FF]" />
-                  <span>Edit Beat Details</span>
-                </h3>
-                {editingBeat.isBattleSubmission && (
-                  <p className="text-xs text-amber-400 font-bold flex items-center gap-1">
-                    <Lock className="w-3 h-3" />
-                    <span>Battle Submission Archive</span>
-                  </p>
-                )}
+              {/* Header Close Button */}
+              <div className="flex items-center justify-end">
+                <button
+                  type="button"
+                  onClick={() => setEditingBeat(null)}
+                  className="w-9 h-9 rounded-full bg-[#121212] text-zinc-400 hover:text-white flex items-center justify-center text-sm cursor-pointer transition-colors"
+                >
+                  ✕
+                </button>
               </div>
-              <button
-                onClick={() => setEditingBeat(null)}
-                className="w-8 h-8 rounded-full bg-[#121212] text-zinc-400 hover:text-white flex items-center justify-center text-sm cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
 
-            {/* Battle submission limitation notice */}
-            {editingBeat.isBattleSubmission && (
-              <div className="p-3 rounded-xl bg-amber-500/10 text-amber-300 text-xs flex items-start gap-2.5 leading-relaxed">
-                <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                <p>
-                  This beat is part of a historical battle archive ({((editingBeat.battleSource || "Beat Battle").replace(/\s*\([^)]*\)/g, "")).trim()}). The <strong>Beat Title</strong> and <strong>Audio Master</strong> cannot be changed or deleted to preserve competition records.
-                </p>
-              </div>
-            )}
-
-            <form onSubmit={handleSaveEditBeat} className="space-y-4">
-              
-              {/* Row 1: Beat Title & Audio File (2 Columns on sm+) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                {/* Beat Title */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#D1D1D1] flex items-center justify-between">
-                    <span>Beat Title</span>
-                    {editingBeat.isBattleSubmission && (
-                      <span className="text-xs text-zinc-500 flex items-center gap-1">
-                        <Lock className="w-2.5 h-2.5" /> Locked
-                      </span>
-                    )}
-                  </label>
-                  <input
-                    type="text"
-                    disabled={editingBeat.isBattleSubmission}
-                    value={editingBeat.title}
-                    onChange={(e) =>
-                      setEditingBeat({ ...editingBeat, title: e.target.value })
-                    }
-                    className={`w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none ${
-                      editingBeat.isBattleSubmission
-                        ? "opacity-60 cursor-not-allowed"
-                        : "focus:ring-1 focus:ring-[#7B61FF]"
-                    }`}
-                  />
-                </div>
-
-                {/* Audio Replacement */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#D1D1D1] flex items-center justify-between">
-                    <span>Audio File</span>
-                    {editingBeat.isBattleSubmission && (
-                      <span className="text-xs text-zinc-500 flex items-center gap-1">
-                        <Lock className="w-2.5 h-2.5" /> Locked
-                      </span>
-                    )}
-                  </label>
-                  {editingBeat.isBattleSubmission ? (
-                    <div className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-zinc-500 flex items-center gap-2 cursor-not-allowed">
-                      <Music className="w-3.5 h-3.5 text-zinc-600 shrink-0" />
-                      <span className="truncate">{editingBeat.audioUrl.split("/").pop()}</span>
-                    </div>
-                  ) : (
-                    <label className="w-full bg-[#121212] hover:bg-[#1a1a1a] rounded-xl px-4 py-2.5 text-xs text-zinc-300 flex items-center justify-between cursor-pointer transition-colors">
-                      <span className="truncate">{editingBeat.audioUrl.split("/").pop() || "Select new audio"}</span>
-                      <span className="text-[#7B61FF] font-bold text-xs shrink-0 ml-2">Replace</span>
+              {/* Two-Column Responsive Configuration Form */}
+              <form onSubmit={handleSaveEditBeat} className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                  
+                  {/* Left Column: Title, BPM, Availability, & Tags */}
+                  <div className="lg:col-span-6 space-y-5">
+                    {/* Beat Title */}
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-white flex items-center justify-between">
+                        <div className="flex items-center gap-1">
+                          <span>Beat Title</span>
+                          <span className="text-[#FF5E3A]">*</span>
+                        </div>
+                        {editingBeat.isBattleSubmission && (
+                          <span className="text-xs text-zinc-500 flex items-center gap-1">
+                            <Lock className="w-3 h-3" /> Locked
+                          </span>
+                        )}
+                      </label>
                       <input
-                        type="file"
-                        accept="audio/*"
-                        onChange={(e) => handleAudioUpload(e, false)}
-                        className="hidden"
+                        type="text"
+                        disabled={editingBeat.isBattleSubmission}
+                        value={editingBeat.title}
+                        onChange={(e) =>
+                          setEditingBeat({ ...editingBeat, title: e.target.value })
+                        }
+                        placeholder="e.g. Midnight Heat"
+                        className={`w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none transition-all ${
+                          editingBeat.isBattleSubmission
+                            ? "opacity-60 cursor-not-allowed"
+                            : "focus:ring-1 focus:ring-[#7B61FF]"
+                        }`}
+                        required
                       />
-                    </label>
-                  )}
-                </div>
-              </div>
+                      <p className="text-xs text-[#888888]">
+                        Only the track title is needed, your name is displayed automatically.
+                      </p>
+                    </div>
 
-              {/* Row 2: BPM & Availability Toggle (2 Columns on sm+) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                {/* BPM */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#D1D1D1]">BPM</label>
-                  <input
-                    type="number"
-                    placeholder="e.g. 90 (optional)"
-                    value={editingBeat.bpm}
-                    onChange={(e) =>
-                      setEditingBeat({ ...editingBeat, bpm: e.target.value === "" ? "" : Number(e.target.value) })
-                    }
-                    className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-[#7B61FF] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
-                </div>
+                    {/* BPM (Optional) */}
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-white">
+                        BPM (Tempo)
+                      </label>
+                      <input
+                        type="number"
+                        placeholder="e.g. 90 (optional)"
+                        value={editingBeat.bpm}
+                        onChange={(e) =>
+                          setEditingBeat({ ...editingBeat, bpm: e.target.value === "" ? "" : Number(e.target.value) })
+                        }
+                        className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#7B61FF] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all"
+                      />
+                    </div>
 
-                {/* For Sale / Not For Sale Toggle */}
-                <div className="flex items-center justify-between px-4 py-2.5 rounded-xl bg-[#121212] self-end">
-                  <div className="space-y-0.5">
-                    <span className="text-xs font-bold text-white block">Available for Sale / Licensing</span>
-                    <span className="text-xs text-zinc-400 block">
-                      {editingBeat.isForSale ? "For Sale" : "Not For Sale"}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setEditingBeat({ ...editingBeat, isForSale: !editingBeat.isForSale })}
-                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full p-0.5 transition-colors duration-200 ease-in-out focus:outline-none ${
-                      editingBeat.isForSale ? "bg-[#7B61FF]" : "bg-[#282828]"
-                    }`}
-                  >
-                    <span
-                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-                        editingBeat.isForSale ? "translate-x-5" : "translate-x-0"
-                      }`}
+                    {/* Availability */}
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-white">
+                        Availability
+                      </label>
+                      <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-[#121212] h-[48px]">
+                        <span className="text-sm text-zinc-300">
+                          {editingBeat.isForSale ? "For Sale" : "Not For Sale"}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setEditingBeat({ ...editingBeat, isForSale: !editingBeat.isForSale })}
+                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full p-0.5 transition-colors duration-200 ease-in-out focus:outline-none ${
+                            editingBeat.isForSale ? "bg-[#7B61FF]" : "bg-[#282828]"
+                          }`}
+                        >
+                          <span
+                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                              editingBeat.isForSale ? "translate-x-5" : "translate-x-0"
+                            }`}
+                          />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Preset Standard Tags Selector */}
+                    <StandardTagSelector
+                      selectedTags={editingTags}
+                      onChange={setEditingTags}
                     />
-                  </button>
-                </div>
-              </div>
-              
-              {/* Row 3: Preset Standard Tags Selector */}
-              <StandardTagSelector
-                selectedTags={editingTags}
-                onChange={setEditingTags}
-              />
+                  </div>
 
-              {/* Modal Actions */}
-              <div className="pt-3">
-                {!editingBeat.isBattleSubmission ? (
-                  <div className="grid grid-cols-2 gap-3 w-full">
+                  {/* Right Column: Audio File & Waveform Preview */}
+                  <div className="lg:col-span-6 space-y-2">
+                    <label className="text-xs font-bold text-white flex items-center justify-between">
+                      <div className="flex items-center gap-1">
+                        <span>Audio File</span>
+                        <span className="text-[#FF5E3A]">*</span>
+                      </div>
+                      {editingBeat.isBattleSubmission && (
+                        <span className="text-xs text-zinc-500 flex items-center gap-1">
+                          <Lock className="w-3 h-3" /> Locked
+                        </span>
+                      )}
+                    </label>
+
+                    {isUploadingBeatAudio ? (
+                      <div className="bg-[#121212] p-6 rounded-2xl min-h-[220px] flex flex-col items-center justify-center text-center gap-3 border-2 border-dashed border-[#7B61FF]/40">
+                        <div className="w-8 h-8 border-2 border-[#7B61FF] border-t-transparent rounded-full animate-spin" />
+                        <p className="text-lg font-bold text-white">
+                          Uploading...
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="bg-[#121212] p-5 rounded-2xl space-y-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-2 text-white text-lg font-bold truncate">
+                            <Music className="w-4 h-4 text-[#7B61FF] shrink-0" />
+                            <span className="truncate">{editingBeat.audioUrl.split("/").pop() || "Audio File"}</span>
+                          </div>
+                          {!editingBeat.isBattleSubmission && (
+                            <label className="text-xs font-bold px-3 py-1.5 rounded-xl bg-[#1C1C1C] hover:bg-[#252525] text-zinc-300 hover:text-white transition-all cursor-pointer shrink-0">
+                              <span>Replace</span>
+                              <input
+                                type="file"
+                                accept="audio/*"
+                                onChange={(e) => handleAudioUpload(e, false)}
+                                className="hidden"
+                              />
+                            </label>
+                          )}
+                        </div>
+
+                        <div className="pt-1" onClick={(e) => e.stopPropagation()}>
+                          <AudioWaveformPlayer
+                            id={`profile-edit-beat-${editingBeat.id}`}
+                            title={editingBeat.title || "Preview"}
+                            artist={producer.nickname}
+                            audioUrl={editingBeat.audioUrl}
+                            duration={editingBeat.duration}
+                            waveformPeaks={editingBeat.waveform}
+                            compact={true}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Battle submission notice if applicable */}
+                    {editingBeat.isBattleSubmission && (
+                      <div className="p-3.5 rounded-2xl bg-amber-500/10 text-amber-300 text-xs flex items-start gap-2.5 leading-relaxed mt-3">
+                        <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                        <p>
+                          This beat is part of a historical battle archive ({((editingBeat.battleSource || "Beat Battle").replace(/\s*\([^)]*\)/g, "")).trim()}). The <strong>Beat Title</strong> and <strong>Audio Master</strong> cannot be changed or deleted to preserve competition records.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                </div>
+
+                {/* Actions Footer */}
+                <div className="flex items-center justify-between gap-3 pt-3">
+                  {!editingBeat.isBattleSubmission ? (
                     <button
                       type="button"
                       onClick={() => handleDeleteBeat(editingBeat.id)}
-                      className="w-full py-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap shadow-sm"
+                      className="px-6 py-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap shadow-sm"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       <span>Delete Beat</span>
                     </button>
-                    <button
-                      type="submit"
-                      disabled={isUploadingBeatAudio || !editingBeat.title.trim()}
-                      className="w-full py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 flex items-center justify-center whitespace-nowrap"
-                    >
-                      Save Changes
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex justify-end">
-                    <button
-                      type="submit"
-                      disabled={isUploadingBeatAudio || !editingBeat.title.trim()}
-                      className="w-full sm:w-auto px-8 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 flex items-center justify-center whitespace-nowrap"
-                    >
-                      Save Changes
-                    </button>
-                  </div>
-                )}
-              </div>
-            </form>
+                  ) : (
+                    <div />
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={isUploadingBeatAudio || !editingBeat.title.trim()}
+                    className="px-8 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 flex items-center justify-center whitespace-nowrap ml-auto"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
-      )}
-    </ClientPortal>
+        )}
+      </ClientPortal>
 
       {/* ADD BEAT MODAL */}
       <ClientPortal>

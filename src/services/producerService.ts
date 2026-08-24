@@ -135,23 +135,31 @@ export const producerService = {
       if (!error && data && data.length > 0) {
         const custom = loadCustomProducers();
         data.forEach((p) => {
+          const local = custom[p.id];
+          const remoteBio = p.bio?.trim();
+          const remoteLocation = p.location?.trim();
+          const remoteNickname = p.nickname?.trim();
+          const remoteAvatar = p.avatar_url;
+
           custom[p.id] = {
             id: p.id,
-            nickname: p.nickname,
-            email: p.email,
-            hideEmail: p.hide_email !== undefined && p.hide_email !== null ? Boolean(p.hide_email) : (custom[p.id]?.hideEmail ?? false),
-            avatarUrl: p.avatar_url,
-            bio: p.bio || "",
-            location: p.location || "",
-            role: p.role,
-            discordId: p.discord_id,
-            discordUsername: p.discord_username,
-            discordRoles: p.discord_roles || [],
-            links: p.links || {},
-            stats: p.stats || { battlesEntered: 0, battlesWon: 0, totalFlames: 0 },
-            isClaimed: p.is_claimed,
-            claimedAt: p.claimed_at,
-            createdAt: p.created_at,
+            nickname: remoteNickname || local?.nickname || p.id,
+            email: p.email || local?.email || "",
+            hideEmail: p.hide_email !== undefined && p.hide_email !== null 
+              ? Boolean(p.hide_email) 
+              : (local?.hideEmail ?? false),
+            avatarUrl: remoteAvatar || local?.avatarUrl || "/avatars/default-avatar.png",
+            bio: remoteBio !== undefined && remoteBio !== "" ? remoteBio : (local?.bio || ""),
+            location: remoteLocation !== undefined && remoteLocation !== "" ? remoteLocation : (local?.location || ""),
+            role: p.role || local?.role || "producer",
+            discordId: p.discord_id || local?.discordId,
+            discordUsername: p.discord_username || local?.discordUsername,
+            discordRoles: p.discord_roles || local?.discordRoles || [],
+            links: (p.links && Object.keys(p.links).length > 0) ? p.links : (local?.links || {}),
+            stats: p.stats || local?.stats || { battlesEntered: 0, battlesWon: 0, totalFlames: 0 },
+            isClaimed: p.is_claimed !== undefined ? p.is_claimed : (local?.isClaimed ?? false),
+            claimedAt: p.claimed_at || local?.claimedAt,
+            createdAt: p.created_at || local?.createdAt || new Date().toISOString(),
           };
           producersMap[p.id] = custom[p.id];
         });

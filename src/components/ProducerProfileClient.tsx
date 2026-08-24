@@ -866,10 +866,9 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
         document.body.removeChild(textArea);
       }
       setCopiedShareLink(true);
-      showToast("Profile link copied to clipboard!");
       setTimeout(() => setCopiedShareLink(false), 2500);
     } catch {
-      showToast("Profile link copied to clipboard!");
+      // Fallback silent handle
     }
   };
 
@@ -1587,7 +1586,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                         required
                       />
                       <p className="text-xs text-[#888888]">
-                        Enter only the track title - your producer name is displayed automatically.
+                        Only the track title is needed, your name is displayed automatically.
                       </p>
                     </div>
 

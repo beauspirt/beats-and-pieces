@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { User as UserIcon, LogOut, Menu, X, Shield, Radio, LayoutGrid, Music, Disc, Sparkles } from "lucide-react";
+import { User as UserIcon, Settings, LogOut, Menu, X, Shield, Radio, LayoutGrid, Music, Disc, Sparkles } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { battleService } from "@/services";
 
@@ -184,19 +184,28 @@ export const Navbar: React.FC = () => {
                 </button>
 
                 {showProfileMenu && (
-                  <div className="absolute right-0 mt-3 w-52 bg-[#181818] rounded-xl shadow-2xl py-1 z-50 animate-in fade-in slide-in-from-top-1 duration-150 border border-white/5">
-                    <div className="px-4 py-2.5 border-b border-white/5">
+                  <div className="absolute right-0 mt-3 w-52 bg-[#181818] rounded-xl shadow-2xl py-1 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                    <div className="px-4 py-2.5">
                       <p className="text-sm font-bold text-white truncate">{currentUser.nickname}</p>
                       <p className="text-xs text-[#888888] truncate">{currentUser.email}</p>
                     </div>
+
+                    <Link
+                      href={`/${currentUser.id}`}
+                      onClick={() => setShowProfileMenu(false)}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-[#D1D1D1] hover:text-white hover:bg-[#7B61FF] transition-colors"
+                    >
+                      <UserIcon className="w-4 h-4" />
+                      <span>Your Page</span>
+                    </Link>
 
                     <Link
                       href="/profile"
                       onClick={() => setShowProfileMenu(false)}
                       className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-[#D1D1D1] hover:text-white hover:bg-[#7B61FF] transition-colors"
                     >
-                      <UserIcon className="w-4 h-4" />
-                      <span>User Profile</span>
+                      <Settings className="w-4 h-4" />
+                      <span>Edit Profile</span>
                     </Link>
 
                     {currentUser?.role === "admin" && (

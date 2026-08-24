@@ -248,7 +248,6 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
   }, [producerId]);
 
   const [copiedEmail, setCopiedEmail] = useState(false);
-  const [showContactModal, setShowContactModal] = useState(false);
   const [activeVaultModalItem, setActiveVaultModalItem] = useState<VaultItem | null>(null);
   const [beatsVersion, setBeatsVersion] = useState(0);
 
@@ -283,7 +282,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
   const [saveToastMessage, setSaveToastMessage] = useState<string | null>(null);
 
   // Lock page scrolling when any modal is open
-  useBodyScrollLock(Boolean(editingBeat || isAddModalOpen || showContactModal || activeVaultModalItem));
+  useBodyScrollLock(Boolean(editingBeat || isAddModalOpen || activeVaultModalItem));
 
   const backdropMouseDownRef = useRef<EventTarget | null>(null);
 
@@ -339,7 +338,6 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        setShowContactModal(false);
         setEditingBeat(null);
         setIsAddModalOpen(false);
       }
@@ -526,12 +524,6 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
   const producerVaultItems = useMemo(() => {
     return vaultService.getItemsByProducer(producer.id || producer.nickname);
   }, [producer]);
-
-  const handleCopyEmail = () => {
-    navigator.clipboard.writeText(producer.email);
-    setCopiedEmail(true);
-    setTimeout(() => setCopiedEmail(false), 2000);
-  };
 
   const handleOpenEditModal = (beat: DiscoveryBeat & { competitionTitle?: string }) => {
     const isBattle = Boolean(
@@ -881,6 +873,28 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     }
   };
 
+  const handleCopyEmail = async () => {
+    if (!producer.email) return;
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(producer.email);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = producer.email;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+      showToast("Email copied to clipboard!");
+    } catch {
+      showToast("Email copied to clipboard!");
+    }
+  };
+
   const activeLinks = useMemo(() => {
     return Object.entries(producer.links || {})
       .filter(([_, url]) => Boolean(url && url.trim()))
@@ -959,9 +973,22 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
               </span>
             </div>
 
-            {/* Clickable Social Icons */}
-            {activeLinks.length > 0 && (
+            {/* Clickable Social Icons (Including Email at beginning if not hidden) */}
+            {((Boolean(producer.email) && !producer.hideEmail) || activeLinks.length > 0) && (
               <div className="flex flex-wrap items-center gap-3.5 pt-1">
+                {/* Email Icon at the beginning */}
+                {Boolean(producer.email) && !producer.hideEmail && (
+                  <button
+                    type="button"
+                    onClick={handleCopyEmail}
+                    className="text-zinc-400 hover:text-[#7B61FF] transition-colors duration-200 active:scale-95 inline-flex items-center justify-center cursor-pointer"
+                    title={`Copy email (${producer.email})`}
+                    aria-label="Copy Email"
+                  >
+                    <Mail className="w-5 h-5" />
+                  </button>
+                )}
+
                 {activeLinks.map(([platform, url]) => {
                   const IconComponent = SocialIcons[platform.toLowerCase()] || SocialIcons.website;
                   const hoverColorClasses: Record<string, string> = {
@@ -994,19 +1021,11 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
             )}
           </div>
 
-          {/* Action Buttons: Contact / License & Share Profile */}
-          <div className="flex flex-col sm:flex-row md:flex-col gap-2.5 shrink-0 w-full md:w-auto self-start md:self-center">
-            <button
-              onClick={() => setShowContactModal(true)}
-              className="px-6 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <Mail className="w-4 h-4" />
-              <span>Contact / License</span>
-            </button>
-
+          {/* Action Button: Share Profile */}
+          <div className="shrink-0 w-full md:w-auto self-start md:self-center">
             <button
               onClick={handleShareProfile}
-              className="px-5 py-3 rounded-xl bg-[#121212] hover:bg-[#202020] text-zinc-300 hover:text-white text-xs sm:text-sm font-semibold transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full md:w-auto px-5 py-3 rounded-xl bg-[#121212] hover:bg-[#202020] text-zinc-300 hover:text-white text-xs sm:text-sm font-semibold transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
             >
               {copiedShareLink ? (
                 <>
@@ -1701,99 +1720,6 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
         )}
       </ClientPortal>
 
-      {/* CONTACT / LICENSE MODAL */}
-      <ClientPortal>
-        {showContactModal && (
-          <div
-            onMouseDown={handleBackdropMouseDown}
-            onMouseUp={(e) => handleBackdropMouseUp(e, () => setShowContactModal(false))}
-            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
-          >
-            <div
-              onMouseDown={(e) => e.stopPropagation()}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-[#181818] rounded-2xl max-w-md w-full p-5 sm:p-8 space-y-6 shadow-2xl relative cursor-default max-h-[90vh] overflow-y-auto no-scrollbar"
-            >
-              <div className="flex items-center justify-between pb-2">
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <Mail className="w-5 h-5 text-[#7B61FF]" />
-                  <span>Contact {producer.nickname}</span>
-                </h3>
-                <button
-                  onClick={() => setShowContactModal(false)}
-                  className="w-8 h-8 rounded-full bg-[#121212] text-zinc-400 hover:text-white flex items-center justify-center text-sm cursor-pointer"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div className="space-y-4 text-xs sm:text-sm text-zinc-300">
-                <div className="bg-[#121212] p-4 rounded-xl">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-mono text-xs text-white truncate">{producer.email}</span>
-                    <button
-                      onClick={handleCopyEmail}
-                      className="px-3 py-1.5 rounded-lg bg-[#222222] hover:bg-[#2c2c2c] text-white text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
-                    >
-                      {copiedEmail ? (
-                        <>
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                          <span className="text-emerald-400">Copied</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3.5 h-3.5" />
-                          <span>Copy</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Socials */}
-                {activeLinks.length > 0 && (
-                  <div className="space-y-2.5 pt-1">
-                    <span className="text-[11px] text-zinc-500 uppercase tracking-wider font-semibold block">
-                      Socials
-                    </span>
-                    <div className="flex flex-wrap items-center gap-3.5">
-                      {activeLinks.map(([platform, url]) => {
-                        const IconComponent = SocialIcons[platform.toLowerCase()] || SocialIcons.website;
-                        const hoverColorClasses: Record<string, string> = {
-                          instagram: "hover:text-[#E4405F]",
-                          youtube: "hover:text-[#FF0000]",
-                          spotify: "hover:text-[#1DB954]",
-                          bandcamp: "hover:text-[#1DA0C3]",
-                          soundcloud: "hover:text-[#FF5500]",
-                          beatstars: "hover:text-[#FF3B30]",
-                          facebook: "hover:text-[#1877F2]",
-                          website: "hover:text-[#7B61FF]",
-                        };
-                        const hoverColor = hoverColorClasses[platform.toLowerCase()] || "hover:text-[#7B61FF]";
-                        const formattedUrl = normalizeUrl(url);
-
-                        return (
-                          <a
-                            key={platform}
-                            href={formattedUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`text-zinc-400 ${hoverColor} transition-colors duration-200 active:scale-95 inline-flex items-center justify-center`}
-                            title={`${platform.charAt(0).toUpperCase() + platform.slice(1)}: ${url}`}
-                          >
-                            <IconComponent className="w-5 h-5" />
-                          </a>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-      </ClientPortal>
-
       {/* Floating Save Toast Pop-up Notification */}
       <ClientPortal>
         {saveToastMessage && (
@@ -1802,7 +1728,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
               <CheckCircle2 className="w-4 h-4" />
             </div>
             <div>
-              <p className="text-xs font-bold text-white">Showcase Updated</p>
+              <p className="text-xs font-bold text-white">Notification</p>
               <p className="text-[11px] text-zinc-400">{saveToastMessage}</p>
             </div>
           </div>

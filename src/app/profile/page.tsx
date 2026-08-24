@@ -114,6 +114,7 @@ function ProfileContent() {
       avatarUrl: profile.avatarUrl || "/avatars/default-avatar.png",
       bio: profile.bio || "",
       location: profile.location || "",
+      hideEmail: Boolean(profile.hideEmail),
       links: sanitizedSaveLinks,
       isClaimed: true,
       claimedAt: profile.claimedAt || new Date().toISOString(),
@@ -273,7 +274,7 @@ function ProfileContent() {
             <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">
               Google E-mail
             </label>
-            <div className="sm:col-span-9">
+            <div className="sm:col-span-9 space-y-3">
               <div className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-[#E0E0E0] flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5 min-w-0 truncate">
                   <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
@@ -288,6 +289,31 @@ function ProfileContent() {
                   <ShieldCheck className="w-3.5 h-3.5" />
                   <span>Google Auth</span>
                 </span>
+              </div>
+
+              {/* Option to hide e-mail from public profile */}
+              <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-[#121212]">
+                <div className="space-y-0.5">
+                  <span className="text-xs font-semibold text-white block">Hide email from public profile</span>
+                  <span className="text-[11px] text-zinc-400 block">
+                    {profile.hideEmail
+                      ? "Hidden (email icon will not be shown on your public page)"
+                      : "Visible (visitors can copy your email on your public page)"}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setProfile({ ...profile, hideEmail: !profile.hideEmail })}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full p-0.5 transition-colors duration-200 ease-in-out focus:outline-none ${
+                    profile.hideEmail ? "bg-[#7B61FF]" : "bg-[#282828]"
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                      profile.hideEmail ? "translate-x-5" : "translate-x-0"
+                    }`}
+                  />
+                </button>
               </div>
             </div>
           </div>

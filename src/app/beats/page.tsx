@@ -458,7 +458,7 @@ export default function BeatsDiscoveryPage() {
             return (
               <div
                 key={beat.id}
-                className="bg-[#181818] rounded-[28px] p-4 space-y-3.5 sm:space-y-4 shadow-md"
+                className="bg-[#181818] rounded-[28px] p-4 space-y-3.5 shadow-md"
               >
                 {/* Row 1: Header (Title, Producer, Avatar, Badges, Meta) */}
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 min-w-0">
@@ -485,17 +485,17 @@ export default function BeatsDiscoveryPage() {
                         </h3>
 
                         {beat.rank === 1 && (
-                          <span className="h-5 sm:h-6 px-2.5 sm:px-3 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center leading-none">
+                          <span className="h-6 px-3.5 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
                             1st Place
                           </span>
                         )}
                         {beat.rank === 2 && (
-                          <span className="h-5 sm:h-6 px-2.5 sm:px-3 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-bold inline-flex items-center justify-center leading-none">
+                          <span className="h-6 px-3.5 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
                             2nd Place
                           </span>
                         )}
                         {beat.rank === 3 && (
-                          <span className="h-5 sm:h-6 px-2.5 sm:px-3 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center leading-none">
+                          <span className="h-6 px-3.5 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
                             3rd Place
                           </span>
                         )}
@@ -503,7 +503,7 @@ export default function BeatsDiscoveryPage() {
                         {match && (
                           <Link
                             href={`/battles/battle-${match[1]}`}
-                            className="px-2 py-0.5 rounded-3xl bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-xs font-bold shrink-0 transition-all inline-flex items-center gap-1"
+                            className="px-2.5 py-1 rounded-full bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-xs font-bold shrink-0 transition-all inline-flex items-center gap-1"
                             title={`View ${beat.battleSource || `Beat Battle #${match[1]}`}`}
                           >
                             <span>BB#{match[1]}</span>
@@ -526,7 +526,7 @@ export default function BeatsDiscoveryPage() {
                   <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 flex-wrap sm:flex-nowrap select-none self-start">
                     {/* BPM */}
                     {beat.bpm ? (
-                      <span className="text-xs font-bold px-2.5 py-1 rounded-3xl bg-[#121212] text-[#888888] select-none">
+                      <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#121212] text-[#888888] select-none inline-flex items-center justify-center text-center leading-none">
                         {beat.bpm} BPM
                       </span>
                     ) : null}
@@ -534,7 +534,7 @@ export default function BeatsDiscoveryPage() {
                     {/* Price Tag Pill */}
                     {beat.priceTag ? (
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-bold select-none ${
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-bold select-none inline-flex items-center justify-center text-center leading-none ${
                           beat.priceTag === "Not For Sale"
                             ? "bg-[#121212] text-[#666666]"
                             : "bg-[#FF5E3A]/20 text-[#FF5E3A]"
@@ -564,7 +564,7 @@ export default function BeatsDiscoveryPage() {
                     <button
                       type="button"
                       onClick={() => toggleFavorite(beat.id)}
-                      className="p-2 rounded-3xl bg-[#121212] hover:bg-[#202020] transition-colors text-[#888888] hover:text-amber-400 cursor-pointer ml-auto sm:ml-0 select-none"
+                      className="p-1.5 rounded-full bg-[#121212] hover:bg-[#202020] transition-colors text-[#888888] hover:text-amber-400 cursor-pointer ml-auto sm:ml-0 select-none"
                       title={beat.isFavorite ? "Remove from favorites" : "Add to favorites"}
                     >
                       <Star
@@ -598,7 +598,7 @@ export default function BeatsDiscoveryPage() {
                         key={g}
                         type="button"
                         onClick={() => handleTagToggle(g)}
-                        className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer select-none ${
+                        className={`px-2.5 py-1 rounded-full text-xs font-bold transition-colors cursor-pointer select-none ${
                           selectedTags.includes(g)
                             ? "bg-[#7B61FF] text-white"
                             : "bg-[#121212] text-[#888888] hover:text-white hover:bg-[#202020]"
@@ -613,7 +613,7 @@ export default function BeatsDiscoveryPage() {
                         key={t}
                         type="button"
                         onClick={() => handleTagToggle(t)}
-                        className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer select-none ${
+                        className={`px-2.5 py-1 rounded-full text-xs font-bold transition-colors cursor-pointer select-none ${
                           selectedTags.includes(t)
                             ? "bg-[#7B61FF] text-white"
                             : "bg-[#121212] text-[#777777] hover:text-white hover:bg-[#202020]"

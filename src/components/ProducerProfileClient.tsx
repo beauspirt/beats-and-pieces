@@ -1132,17 +1132,17 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                         {/* Desktop Inline Badges */}
                         <div className="hidden sm:inline-flex items-center gap-2">
                           {beat.rank === 1 && (
-                            <span className="h-6 px-3 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center leading-none">
+                            <span className="h-6 px-3.5 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
                               1st Place
                             </span>
                           )}
                           {beat.rank === 2 && (
-                            <span className="h-6 px-3 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-bold inline-flex items-center justify-center leading-none">
+                            <span className="h-6 px-3.5 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
                               2nd Place
                             </span>
                           )}
                           {beat.rank === 3 && (
-                            <span className="h-6 px-3 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center leading-none">
+                            <span className="h-6 px-3.5 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
                               3rd Place
                             </span>
                           )}
@@ -1157,7 +1157,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                             return (
                               <Link
                                 href={battleUrl}
-                                className="px-2 py-0.5 rounded-3xl bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-xs font-bold shrink-0 transition-all inline-flex items-center gap-1"
+                                className="px-2.5 py-1 rounded-full bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-xs font-bold shrink-0 transition-all inline-flex items-center gap-1"
                                 title={`View ${beat.battleSource || `Beat Battle #${match[1]}`}`}
                               >
                                 <span>{battleLabel}</span>
@@ -1179,17 +1179,17 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                         return (
                           <div className="flex sm:hidden items-center gap-2 pt-1 flex-wrap">
                             {beat.rank === 1 && (
-                              <span className="h-6 px-2.5 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center leading-none">
+                              <span className="h-6 px-3.5 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
                                 1st Place
                               </span>
                             )}
                             {beat.rank === 2 && (
-                              <span className="h-6 px-2.5 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-bold inline-flex items-center justify-center leading-none">
+                              <span className="h-6 px-3.5 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
                                 2nd Place
                               </span>
                             )}
                             {beat.rank === 3 && (
-                              <span className="h-6 px-2.5 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center leading-none">
+                              <span className="h-6 px-3.5 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
                                 3rd Place
                               </span>
                             )}
@@ -1197,7 +1197,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                             {match && (
                               <Link
                                 href={`/battles/battle-${match[1]}`}
-                                className="px-2 py-0.5 rounded-3xl bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-xs font-bold shrink-0 transition-all inline-flex items-center gap-1 select-none"
+                                className="px-2.5 py-1 rounded-full bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-xs font-bold shrink-0 transition-all inline-flex items-center gap-1 select-none"
                                 title={`View ${beat.battleSource || `Beat Battle #${match[1]}`}`}
                               >
                                 <span>BB#{match[1]}</span>
@@ -1211,16 +1211,16 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                   </div>
 
                   {/* Right: BPM, Price Tag, Flames, Edit Button */}
-                  <div className="flex items-center gap-3 shrink-0 self-end sm:self-center select-none">
+                  <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 self-start select-none">
                     {beat.bpm ? (
-                      <span className="text-xs font-bold px-2.5 py-1 rounded-3xl bg-[#121212] text-[#888888] select-none">
+                      <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#121212] text-[#888888] select-none inline-flex items-center justify-center text-center leading-none">
                         {beat.bpm} BPM
                       </span>
                     ) : null}
 
                     {beat.priceTag ? (
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-bold select-none ${
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-bold select-none inline-flex items-center justify-center text-center leading-none ${
                           beat.priceTag === "Not For Sale"
                             ? "bg-[#121212] text-[#666666]"
                             : "bg-[#FF5E3A]/20 text-[#FF5E3A]"
@@ -1232,7 +1232,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
                     {/* Jury Score Avg */}
                     {typeof beat.juryScore === "number" && beat.juryScore > 0 ? (
-                      <div className="flex items-center gap-1 text-xs text-[#7B61FF] font-bold px-2 select-none" title="Jury Score Average">
+                      <div className="flex items-center gap-1 text-xs text-[#7B61FF] font-bold px-1.5 select-none" title="Jury Score Average">
                         <Star className="w-4 h-4 fill-current text-[#7B61FF]" />
                         <span>{beat.juryScore.toFixed(2)}</span>
                       </div>
@@ -1240,7 +1240,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
                     {/* Public Rating Avg */}
                     {typeof beat.flames === "number" && beat.flames >= 1 ? (
-                      <div className="flex items-center gap-1 text-xs text-[#FF5E3A] font-bold px-2 select-none" title="Public Rating Average">
+                      <div className="flex items-center gap-1 text-xs text-[#FF5E3A] font-bold px-1.5 select-none" title="Public Rating Average">
                         <Flame className="w-4 h-4 fill-current" />
                         <span>{beat.flames.toFixed(2)}</span>
                       </div>
@@ -1250,7 +1250,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                     {isProfileOwner && (
                       <button
                         onClick={() => handleOpenEditModal(beat)}
-                        className="p-2 rounded-3xl bg-[#121212] hover:bg-[#222222] text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                        className="p-1.5 rounded-full bg-[#121212] hover:bg-[#202020] text-zinc-400 hover:text-white transition-colors cursor-pointer select-none"
                         title="Edit beat details"
                       >
                         <Pencil className="w-3.5 h-3.5" />

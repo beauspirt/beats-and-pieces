@@ -187,12 +187,12 @@ export default function BeatsDiscoveryPage() {
           </div>
 
           {/* Quick Action Controls Row: Favorites + Filter + Sort Criteria Dropdown + Upload Beat Button */}
-          <div className="flex items-center gap-2 sm:gap-3 w-full lg:w-auto overflow-x-auto no-scrollbar shrink-0">
+          <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-3 w-full lg:w-auto shrink-0">
             {/* Favorites Filter Button */}
             <button
               type="button"
               onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
-              className={`p-2.5 sm:px-4 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${
+              className={`h-11 sm:h-auto px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${
                 showOnlyFavorites
                   ? "bg-amber-500/20 text-amber-300 shadow-sm"
                   : "bg-[#181818] hover:bg-[#202020] text-zinc-400 hover:text-white"
@@ -208,7 +208,7 @@ export default function BeatsDiscoveryPage() {
             <button
               type="button"
               onClick={() => setShowFilters(!showFilters)}
-              className={`p-2.5 sm:px-4 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${
+              className={`h-11 sm:h-auto px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${
                 showFilters || activeFiltersCount > 0
                   ? "bg-[#7B61FF] text-white"
                   : "bg-[#181818] hover:bg-[#202020] text-zinc-400 hover:text-white"
@@ -226,15 +226,15 @@ export default function BeatsDiscoveryPage() {
             </button>
 
             {/* Redesigned Sleek Sort Dropdown (SlidersHorizontal icon + borderless menu) */}
-            <div className="relative shrink-0" ref={sortMenuRef}>
+            <div className="relative flex-1 sm:flex-initial" ref={sortMenuRef}>
               <button
                 type="button"
                 onClick={() => setIsSortOpen(!isSortOpen)}
-                className="flex items-center justify-between gap-1.5 sm:gap-2 bg-[#181818] hover:bg-[#202020] rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white font-semibold transition-all cursor-pointer"
+                className="w-full h-11 sm:h-auto flex items-center justify-between sm:justify-center gap-1.5 sm:gap-2 bg-[#181818] hover:bg-[#202020] rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white font-semibold transition-all cursor-pointer"
               >
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 truncate">
                   <SlidersHorizontal className="w-3.5 h-3.5 text-[#7B61FF] shrink-0" />
-                  <span className="whitespace-nowrap">{sortLabelMap[sortBy]}</span>
+                  <span className="truncate">{sortLabelMap[sortBy]}</span>
                 </div>
                 <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 shrink-0 ${isSortOpen ? "rotate-180" : ""}`} />
               </button>
@@ -269,11 +269,10 @@ export default function BeatsDiscoveryPage() {
             {/* Upload Beat Button (Far Right) */}
             <Link
               href={currentUser?.id ? `/${currentUser.id}` : "/profile"}
-              className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 cursor-pointer shrink-0"
+              className="h-11 sm:h-auto inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 cursor-pointer shrink-0"
             >
-              <Upload className="w-4 h-4" />
-              <span className="hidden xs:inline sm:inline whitespace-nowrap">Upload Beat</span>
-              <span className="xs:hidden sm:hidden whitespace-nowrap">Upload</span>
+              <Upload className="w-4 h-4 shrink-0" />
+              <span className="whitespace-nowrap">Upload Beat</span>
             </Link>
 
           </div>
@@ -415,20 +414,45 @@ export default function BeatsDiscoveryPage() {
       {/* Beats Feed List */}
       <div className="space-y-4">
         {visibleBeats.length === 0 ? (
-          <div className="bg-[#181818] rounded-2xl p-12 text-center space-y-3">
-            <p className="text-white font-semibold">No beats match your search criteria.</p>
-            <button
-              type="button"
-              onClick={() => {
-                setSearchQuery("");
-                setSelectedTags([]);
-                setSelectedSaleFilter("all");
-                setShowOnlyFavorites(false);
-              }}
-              className="text-xs text-[#7B61FF] hover:underline font-semibold cursor-pointer"
-            >
-              Clear filters and search
-            </button>
+          <div className="bg-[#181818] rounded-2xl p-10 sm:p-14 text-center space-y-3">
+            {showOnlyFavorites ? (
+              <div className="space-y-3 max-w-sm mx-auto animate-in fade-in duration-200">
+                <div className="w-12 h-12 rounded-full bg-amber-500/15 text-amber-400 flex items-center justify-center mx-auto">
+                  <Star className="w-5 h-5 fill-amber-400" />
+                </div>
+                <p className="text-white font-semibold text-base sm:text-lg">
+                  You have no beats added to your favorites.
+                </p>
+                <p className="text-xs text-zinc-400">
+                  Click the star icon on any beat to save it to your favorites list for quick access.
+                </p>
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowOnlyFavorites(false)}
+                    className="px-5 py-2.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer inline-flex items-center gap-1.5"
+                  >
+                    <span>Explore Beats</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-white font-semibold">No beats match your search criteria.</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedTags([]);
+                    setSelectedSaleFilter("all");
+                    setShowOnlyFavorites(false);
+                  }}
+                  className="text-xs text-[#7B61FF] hover:underline font-semibold cursor-pointer"
+                >
+                  Clear filters and search
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           visibleBeats.map((beat) => {

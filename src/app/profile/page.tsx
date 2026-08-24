@@ -198,7 +198,7 @@ function ProfileContent() {
               </div>
 
               <div className="flex items-center gap-3">
-                <label className="px-4 py-2 rounded-xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-white cursor-pointer transition-colors flex items-center gap-2">
+                <label className="px-4 py-2 rounded-2xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-white cursor-pointer transition-colors flex items-center gap-2">
                   <Camera className="w-3.5 h-3.5 text-brand" />
                   <span>Change Picture</span>
                   <input
@@ -223,7 +223,7 @@ function ProfileContent() {
                 type="text"
                 value={profile.nickname}
                 onChange={(e) => setProfile({ ...profile, nickname: e.target.value })}
-                className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+                className="w-full bg-[#121212] rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
                 required
               />
             </div>
@@ -239,7 +239,7 @@ function ProfileContent() {
                 type="text"
                 value={profile.location || ""}
                 onChange={(e) => setProfile({ ...profile, location: e.target.value })}
-                className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+                className="w-full bg-[#121212] rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
               />
             </div>
           </div>
@@ -254,7 +254,7 @@ function ProfileContent() {
                 rows={3}
                 value={profile.bio || ""}
                 onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-                className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF] resize-none leading-relaxed"
+                className="w-full bg-[#121212] rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF] resize-none leading-relaxed"
               />
             </div>
           </div>
@@ -265,7 +265,7 @@ function ProfileContent() {
               Google E-mail
             </label>
             <div className="sm:col-span-9 space-y-3">
-              <div className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-[#E0E0E0] flex items-center justify-between gap-3">
+              <div className="w-full bg-[#121212] rounded-2xl px-4 py-3 text-sm text-[#E0E0E0] flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5 min-w-0 truncate">
                   <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                     <path fill="#EA4335" d="M12 5c1.5 0 2.9.5 4 1.4l3-3C17.2 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/>
@@ -282,7 +282,7 @@ function ProfileContent() {
               </div>
 
               {/* Option to hide e-mail from public profile */}
-              <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-[#121212]">
+              <div className="flex items-center justify-between px-4 py-3 rounded-2xl bg-[#121212]">
                 <span className="text-xs font-bold text-white block">Hide email from public profile</span>
                 <button
                   type="button"
@@ -324,7 +324,7 @@ function ProfileContent() {
                     onChange={(e) =>
                       setLinks((prev) => ({ ...prev, [key]: e.target.value }))
                     }
-                    className="w-full bg-[#121212] rounded-xl pl-4 pr-10 py-3 text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+                    className="w-full bg-[#121212] rounded-2xl pl-4 pr-10 py-3 text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
                   />
                   {url && (
                     <button
@@ -351,7 +351,7 @@ function ProfileContent() {
           <button
             type="submit"
             disabled={isSaving}
-            className="px-8 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-lg active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-2"
+            className="px-8 py-3 rounded-2xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-lg active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-2"
           >
             <span>Save Changes</span>
           </button>

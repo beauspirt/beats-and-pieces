@@ -628,7 +628,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = React.mem
 
         {/* Bottom Right Corner Timecode Pillbox (Border-free, Inter font) */}
         <div className="absolute bottom-1 right-1 flex items-center pointer-events-none select-none z-10">
-          <div className="px-2 py-0.5 rounded-md bg-[#141414]/90 backdrop-blur-sm shadow-sm flex items-center gap-1 text-xs font-sans tabular-nums">
+          <div className="px-2 py-0.5 rounded-2xl bg-[#141414]/90 backdrop-blur-sm shadow-sm flex items-center gap-1 text-xs font-sans tabular-nums">
             {isThisTrackActive ? (
               <>
                 <span className="text-white font-bold">{formatTime(currentTime)}</span>
@@ -647,7 +647,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = React.mem
             type="button"
             onClick={handleDownload}
             aria-label="Download audio file"
-            className="absolute top-1 right-1 p-1.5 rounded-lg bg-[#1C1C1C] text-[#888888] hover:text-white hover:bg-[#252525] transition-colors"
+            className="absolute top-1 right-1 p-1.5 rounded-2xl bg-[#1C1C1C] text-[#888888] hover:text-white hover:bg-[#252525] transition-colors"
           >
             <Download className="w-3.5 h-3.5" />
           </button>

@@ -242,7 +242,7 @@ export const BottomFloatingPlayer: React.FC = React.memo(() => {
         {/* LEFT COLUMN: Track Info (Cover, Title, Clickable Artist) */}
         <div className="flex items-center gap-3 min-w-0 flex-1 sm:flex-initial sm:w-1/3 sm:max-w-[280px]">
           {/* Artwork Thumbnail */}
-          <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-md overflow-hidden bg-[#242424] relative shrink-0 shadow-md flex items-center justify-center">
+          <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-2xl overflow-hidden bg-[#242424] relative shrink-0 shadow-md flex items-center justify-center">
             {activeTrackCover ? (
               <Image
                 src={activeTrackCover}
@@ -398,7 +398,7 @@ export const BottomFloatingPlayer: React.FC = React.memo(() => {
                 toggleMute();
               }
             }}
-            className={`p-1.5 transition-colors cursor-pointer shrink-0 rounded-lg ${
+            className={`p-1.5 transition-colors cursor-pointer shrink-0 rounded-2xl ${
               showMobileVolume ? "text-white bg-white/10" : "text-[#B3B3B3] hover:text-white"
             }`}
             title={isMuted ? "Unmute" : "Volume"}

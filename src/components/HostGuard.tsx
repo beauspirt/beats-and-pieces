@@ -40,7 +40,7 @@ export const HostGuard: React.FC<{ children: React.ReactNode }> = ({ children })
   if (!isLoggedIn || !user || !isHost) {
     return (
       <div className="min-h-[65vh] flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-[#181818] rounded-3xl p-8 text-center space-y-6 shadow-2xl animate-in zoom-in-95 duration-200">
+        <div className="max-w-md w-full bg-[#181818] rounded-2xl p-8 text-center space-y-6 shadow-2xl animate-in zoom-in-95 duration-200">
           <div className="w-16 h-16 rounded-2xl bg-[#FF8A65]/10 text-[#FF8A65] mx-auto flex items-center justify-center">
             <Disc className="w-8 h-8" />
           </div>
@@ -57,7 +57,7 @@ export const HostGuard: React.FC<{ children: React.ReactNode }> = ({ children })
           <div className="pt-2 flex flex-col gap-2.5">
             <Link
               href="/signin"
-              className="w-full py-3 rounded-xl bg-brand hover:bg-brand/90 text-white text-xs font-bold transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-2xl bg-brand hover:bg-brand/90 text-white text-xs font-bold transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
             >
               <LogIn className="w-4 h-4" />
               <span>Sign In as Host</span>
@@ -65,7 +65,7 @@ export const HostGuard: React.FC<{ children: React.ReactNode }> = ({ children })
 
             <Link
               href="/"
-              className="w-full py-2.5 rounded-xl bg-[#202020] hover:bg-[#282828] text-zinc-400 hover:text-white text-xs transition-colors flex items-center justify-center gap-1.5"
+              className="w-full py-2.5 rounded-2xl bg-[#202020] hover:bg-[#282828] text-zinc-400 hover:text-white text-xs transition-colors flex items-center justify-center gap-1.5"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Back to Home</span>

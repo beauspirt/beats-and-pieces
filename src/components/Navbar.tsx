@@ -120,7 +120,7 @@ export const Navbar: React.FC = () => {
             {/* Mobile Hamburger Toggle Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2.5 rounded-xl bg-[#181818] hover:bg-[#222222] text-zinc-300 hover:text-white transition-colors cursor-pointer focus:outline-none"
+              className="md:hidden p-2.5 rounded-2xl bg-[#181818] hover:bg-[#222222] text-zinc-300 hover:text-white transition-colors cursor-pointer focus:outline-none"
               aria-label="Toggle navigation menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -172,7 +172,7 @@ export const Navbar: React.FC = () => {
                   </button>
 
                   {showProfileMenu && (
-                    <div className="absolute right-0 mt-3 w-52 bg-[#181818] rounded-xl shadow-2xl py-1 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                    <div className="absolute right-0 mt-3 w-52 bg-[#181818] rounded-2xl shadow-2xl py-1 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
                       <div className="px-4 py-2.5">
                         <p className="text-lg font-bold text-white truncate">{currentUser.nickname}</p>
                         <p className="text-xs text-[#888888] truncate">{currentUser.email}</p>
@@ -223,7 +223,7 @@ export const Navbar: React.FC = () => {
               ) : (
                 <Link
                   href={pathname && pathname !== "/signin" && pathname !== "/auth/callback" ? `/signin?redirect=${encodeURIComponent(pathname)}` : "/signin"}
-                  className="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 flex items-center gap-1.5"
+                  className="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-2xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 flex items-center gap-1.5"
                 >
                   <span>Log in</span>
                 </Link>
@@ -249,7 +249,7 @@ export const Navbar: React.FC = () => {
                     key={link.href}
                     href={link.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`px-4 py-3 rounded-xl text-sm transition-all flex items-center justify-between ${
+                    className={`px-4 py-3 rounded-2xl text-sm transition-all flex items-center justify-between ${
                       isActive
                         ? "bg-[#7B61FF] text-white shadow-md"
                         : "text-zinc-300 hover:bg-[#1f1f1f] hover:text-white"

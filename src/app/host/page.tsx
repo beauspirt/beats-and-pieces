@@ -254,7 +254,7 @@ export default function HostPanelPage() {
                 className="bg-surface-card rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg hover:bg-surface-hover transition-all"
               >
                 <div className="flex items-center gap-4 min-w-0">
-                  <div className="w-14 h-14 rounded-xl overflow-hidden relative shrink-0 bg-[#121212] shadow-md">
+                  <div className="w-14 h-14 rounded-2xl overflow-hidden relative shrink-0 bg-[#121212] shadow-md">
                     <Image
                       src={battle.coverImage}
                       alt={battle.title}
@@ -293,14 +293,14 @@ export default function HostPanelPage() {
                 <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
                   <button
                     onClick={() => handleEditClick(battle)}
-                    className="px-4 py-2 rounded-xl bg-[#222222] hover:bg-[#FF8A65] hover:text-white text-xs font-bold text-zinc-300 transition-all flex items-center gap-1.5 cursor-pointer"
+                    className="px-4 py-2 rounded-2xl bg-[#222222] hover:bg-[#FF8A65] hover:text-white text-xs font-bold text-zinc-300 transition-all flex items-center gap-1.5 cursor-pointer"
                   >
                     <Edit3 className="w-3.5 h-3.5" />
                     <span>Edit Battle</span>
                   </button>
                   <Link
                     href={`/battles/${battle.id}`}
-                    className="px-4 py-2 rounded-xl bg-[#181818] hover:bg-[#252525] text-xs font-bold text-zinc-400 hover:text-white transition-all"
+                    className="px-4 py-2 rounded-2xl bg-[#181818] hover:bg-[#252525] text-xs font-bold text-zinc-400 hover:text-white transition-all"
                   >
                     View Public
                   </Link>
@@ -342,7 +342,7 @@ export default function HostPanelPage() {
                       type="text"
                       value={editingBattle.title}
                       onChange={(e) => setEditingBattle({ ...editingBattle, title: e.target.value })}
-                      className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                      className="w-full bg-[#121212] rounded-2xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
                       required
                     />
                   </div>
@@ -350,8 +350,8 @@ export default function HostPanelPage() {
                   {/* Cover Art Upload */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-zinc-300">Cover Art</label>
-                    <div className="flex items-center gap-4 bg-[#121212] p-3 rounded-xl">
-                      <div className="w-16 h-16 rounded-xl overflow-hidden relative bg-[#181818] shrink-0 flex items-center justify-center text-zinc-600 shadow-md">
+                    <div className="flex items-center gap-4 bg-[#121212] p-3 rounded-2xl">
+                      <div className="w-16 h-16 rounded-2xl overflow-hidden relative bg-[#181818] shrink-0 flex items-center justify-center text-zinc-600 shadow-md">
                         {editingBattle.coverImage ? (
                           <Image
                             src={editingBattle.coverImage}
@@ -365,7 +365,7 @@ export default function HostPanelPage() {
                       </div>
                     <div className="flex items-center justify-between flex-1">
                       <span className="text-xs text-zinc-400">Change square cover artwork</span>
-                      <label className="px-4 py-2 rounded-xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-white cursor-pointer transition-colors shrink-0">
+                      <label className="px-4 py-2 rounded-2xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-white cursor-pointer transition-colors shrink-0">
                         Browse File
                         <input type="file" accept="image/*" onChange={handleCoverFileChange} className="hidden" />
                       </label>
@@ -384,7 +384,7 @@ export default function HostPanelPage() {
                     {judgeEntries.map((judge, idx) => (
                       <div
                         key={idx}
-                        className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-xl bg-[#121212] text-xs font-bold text-white shadow-sm"
+                        className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-2xl bg-[#121212] text-xs font-bold text-white shadow-sm"
                       >
                         <div className="flex items-center gap-1.5">
                           <span className="font-bold">{judge.name}</span>
@@ -402,14 +402,14 @@ export default function HostPanelPage() {
                   </div>
 
                   {showAddJudge ? (
-                    <div className="bg-[#121212] p-3.5 rounded-xl space-y-2.5 animate-in fade-in">
+                    <div className="bg-[#121212] p-3.5 rounded-2xl space-y-2.5 animate-in fade-in">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <input
                           type="text"
                           placeholder="Judge Name (e.g. Vlad Dobrescu)"
                           value={judgeNameInput}
                           onChange={(e) => setJudgeNameInput(e.target.value)}
-                          className="bg-[#181818] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                          className="bg-[#181818] rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
                           autoFocus
                         />
                         <input
@@ -417,7 +417,7 @@ export default function HostPanelPage() {
                           placeholder="Judge Google E-mail"
                           value={judgeEmailInput}
                           onChange={(e) => setJudgeEmailInput(e.target.value)}
-                          className="bg-[#181818] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                          className="bg-[#181818] rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
                         />
                       </div>
                       <div className="flex items-center justify-end gap-2 pt-1">
@@ -432,7 +432,7 @@ export default function HostPanelPage() {
                           type="button"
                           onClick={handleAddJudge}
                           disabled={!judgeNameInput.trim() || !judgeEmailInput.trim()}
-                          className="px-4 py-1.5 rounded-lg bg-[#FF8A65] hover:bg-[#FF7A50] text-xs text-white font-bold cursor-pointer disabled:opacity-50"
+                          className="px-4 py-1.5 rounded-2xl bg-[#FF8A65] hover:bg-[#FF7A50] text-xs text-white font-bold cursor-pointer disabled:opacity-50"
                         >
                           Assign Judge
                         </button>
@@ -442,7 +442,7 @@ export default function HostPanelPage() {
                     <button
                       type="button"
                       onClick={() => setShowAddJudge(true)}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#121212] hover:bg-[#202020] text-xs text-[#D1D1D1] font-bold transition-all cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-[#121212] hover:bg-[#202020] text-xs text-[#D1D1D1] font-bold transition-all cursor-pointer"
                     >
                       <Plus className="w-3.5 h-3.5 text-[#FF8A65]" />
                       <span>Add Judge</span>
@@ -457,14 +457,14 @@ export default function HostPanelPage() {
                     rows={3}
                     value={editingBattle.description}
                     onChange={(e) => setEditingBattle({ ...editingBattle, description: e.target.value })}
-                    className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand resize-none"
+                    className="w-full bg-[#121212] rounded-2xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand resize-none"
                   />
                 </div>
 
                 {/* Rules */}
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-zinc-300 block">Rules</label>
-                  <div className="bg-[#121212] p-3.5 rounded-xl space-y-1.5 text-xs text-zinc-400">
+                  <div className="bg-[#121212] p-3.5 rounded-2xl space-y-1.5 text-xs text-zinc-400">
                     <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider block mb-1">
                       Standard Default Rules:
                     </span>
@@ -476,7 +476,7 @@ export default function HostPanelPage() {
                 </div>
 
                 {/* Sample(s) Management (Upload file only, clean row without audio player) */}
-                <div className="space-y-3 bg-[#121212] p-4 rounded-xl">
+                <div className="space-y-3 bg-[#121212] p-4 rounded-2xl">
                   <div className="flex items-center justify-between">
                     <label className="font-bold text-white uppercase tracking-wider text-xs">
                       Sample(s)
@@ -491,10 +491,10 @@ export default function HostPanelPage() {
                       {samples.map((sample) => (
                         <div
                           key={sample.id}
-                          className="bg-[#181818] p-3 rounded-xl flex items-center justify-between gap-3 text-xs"
+                          className="bg-[#181818] p-3 rounded-2xl flex items-center justify-between gap-3 text-xs"
                         >
                           <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <div className="w-7 h-7 rounded-lg bg-[#FF8A65]/10 text-[#FF8A65] flex items-center justify-center shrink-0">
+                            <div className="w-7 h-7 rounded-2xl bg-[#FF8A65]/10 text-[#FF8A65] flex items-center justify-center shrink-0">
                               <Music className="w-3.5 h-3.5" />
                             </div>
                             <input
@@ -518,7 +518,7 @@ export default function HostPanelPage() {
                   )}
 
                   <div>
-                    <label className={`px-4 py-2 rounded-xl text-xs font-bold text-white transition-colors inline-flex items-center gap-2 ${
+                    <label className={`px-4 py-2 rounded-2xl text-xs font-bold text-white transition-colors inline-flex items-center gap-2 ${
                       isUploadingSamples ? "bg-[#333333] cursor-not-allowed opacity-75" : "bg-[#222222] hover:bg-[#2A2A2A] cursor-pointer"
                     }`}>
                       <Music className="w-3.5 h-3.5 text-[#FF8A65]" />
@@ -536,7 +536,7 @@ export default function HostPanelPage() {
                 </div>
 
                 {/* Timeline Deadlines */}
-                <div className="bg-[#121212] p-4 rounded-xl space-y-3">
+                <div className="bg-[#121212] p-4 rounded-2xl space-y-3">
                   <div className="flex items-center justify-between">
                     <label className="font-bold text-white uppercase tracking-wider text-xs">
                       Timeline & Deadlines
@@ -558,7 +558,7 @@ export default function HostPanelPage() {
                             submissionStartsAt: e.target.value ? new Date(e.target.value).toISOString() : "",
                           })
                         }
-                        className="w-full bg-[#181818] rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                        className="w-full bg-[#181818] rounded-2xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-brand"
                       />
                     </div>
 
@@ -573,7 +573,7 @@ export default function HostPanelPage() {
                             submissionEndsAt: e.target.value ? new Date(e.target.value).toISOString() : "",
                           })
                         }
-                        className="w-full bg-[#181818] rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                        className="w-full bg-[#181818] rounded-2xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-brand"
                       />
                     </div>
 
@@ -588,7 +588,7 @@ export default function HostPanelPage() {
                             ratingEndsAt: e.target.value ? new Date(e.target.value).toISOString() : "",
                           })
                         }
-                        className="w-full bg-[#181818] rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                        className="w-full bg-[#181818] rounded-2xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-brand"
                       />
                     </div>
                   </div>
@@ -599,14 +599,14 @@ export default function HostPanelPage() {
                   <button
                     type="button"
                     onClick={() => setEditingBattle(null)}
-                    className="px-5 py-2.5 rounded-xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                    className="px-5 py-2.5 rounded-2xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-zinc-400 hover:text-white transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isUploadingSamples}
-                    className="px-7 py-2.5 rounded-xl bg-[#FF8A65] hover:bg-[#FF7A50] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-7 py-2.5 rounded-2xl bg-[#FF8A65] hover:bg-[#FF7A50] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isUploadingSamples ? "Uploading Samples..." : isSaved ? "Saved ✓" : "Save Changes"}
                   </button>

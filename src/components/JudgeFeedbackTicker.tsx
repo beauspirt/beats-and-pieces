@@ -32,7 +32,7 @@ export function JudgeFeedbackTicker({
   const current = validFeedbacks[currentIndex] || validFeedbacks[0];
 
   return (
-    <div className={`bg-[#121212] rounded-xl px-3.5 py-2 flex items-center justify-between gap-2 text-xs border border-white/[0.04] ${className}`}>
+    <div className={`bg-[#121212] rounded-2xl px-3.5 py-2 flex items-center justify-between gap-2 text-xs border border-white/[0.04] ${className}`}>
       <div className="flex-1 flex items-baseline gap-2 min-w-0 transition-all duration-300">
         <span className="font-bold text-[#7B61FF] shrink-0 text-xs">
           {current.judgeName || "Judge"}:

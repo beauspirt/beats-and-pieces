@@ -60,13 +60,13 @@ export default function VotingModerationPage() {
 
         {/* Metric Cards */}
         <div className="flex items-center gap-3">
-          <div className="bg-surface-card rounded-xl px-4 py-2 text-center shadow-sm">
+          <div className="bg-surface-card rounded-2xl px-4 py-2 text-center shadow-sm">
             <span className="text-xs text-zinc-500 uppercase font-mono block">Pending</span>
             <span className="text-lg font-bold text-[#FF5E3A] font-mono">
               {flags.filter((f) => f.status === "pending").length}
             </span>
           </div>
-          <div className="bg-surface-card rounded-xl px-4 py-2 text-center shadow-sm">
+          <div className="bg-surface-card rounded-2xl px-4 py-2 text-center shadow-sm">
             <span className="text-xs text-zinc-500 uppercase font-mono block">Discarded</span>
             <span className="text-lg font-bold text-zinc-400 font-mono">
               {flags.filter((f) => f.status === "discarded").length}
@@ -81,7 +81,7 @@ export default function VotingModerationPage() {
           <button
             key={status}
             onClick={() => setFilterStatus(status)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold capitalize transition-all ${
+            className={`px-4 py-2 rounded-2xl text-xs font-bold capitalize transition-all ${
               filterStatus === status
                 ? "bg-brand text-white shadow-md"
                 : "bg-surface-card text-zinc-400 hover:text-white"
@@ -111,7 +111,7 @@ export default function VotingModerationPage() {
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <span className={`px-2.5 py-1 rounded-lg text-xs font-bold font-mono ${badge.color}`}>
+                    <span className={`px-2.5 py-1 rounded-2xl text-xs font-bold font-mono ${badge.color}`}>
                       {badge.label}
                     </span>
                     <span className="text-xs font-mono text-zinc-500">
@@ -132,7 +132,7 @@ export default function VotingModerationPage() {
                 </div>
 
                 {/* Voter and Violation Details */}
-                <div className="bg-surface-subtle rounded-xl p-4 space-y-2">
+                <div className="bg-surface-subtle rounded-2xl p-4 space-y-2">
                   <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
                     <div>
                       <span className="text-zinc-500">Voter: </span>
@@ -160,7 +160,7 @@ export default function VotingModerationPage() {
                   <div className="flex items-center justify-end gap-3 pt-2">
                     <button
                       onClick={() => handleAction(flag.id, "approved")}
-                      className="px-4 py-2 rounded-xl bg-surface-subtle hover:bg-emerald-500/20 text-zinc-300 hover:text-emerald-300 text-xs font-bold transition-colors flex items-center gap-1.5"
+                      className="px-4 py-2 rounded-2xl bg-surface-subtle hover:bg-emerald-500/20 text-zinc-300 hover:text-emerald-300 text-xs font-bold transition-colors flex items-center gap-1.5"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       <span>Approve & Keep Votes</span>
@@ -168,7 +168,7 @@ export default function VotingModerationPage() {
 
                     <button
                       onClick={() => handleAction(flag.id, "discarded")}
-                      className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all shadow-lg active:scale-95 flex items-center gap-1.5"
+                      className="px-4 py-2 rounded-2xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all shadow-lg active:scale-95 flex items-center gap-1.5"
                     >
                       <Ban className="w-3.5 h-3.5" />
                       <span>Discard Votes & Penalize</span>

@@ -119,7 +119,7 @@ export default function AuthCallbackPage() {
           <p className="text-xs text-zinc-400 leading-relaxed">{errorMessage}</p>
           <button
             onClick={() => router.push("/signin")}
-            className="px-6 py-2.5 rounded-xl bg-brand text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer mt-2"
+            className="px-6 py-2.5 rounded-2xl bg-brand text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer mt-2"
           >
             Try Again
           </button>

@@ -69,10 +69,7 @@ function StandardTagSelector({
   return (
     <div ref={containerRef} className="space-y-2 relative">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-semibold text-white">Genres & Tags</label>
-          <span className="text-xs text-zinc-500 font-medium">({selectedTags.length}/5 max)</span>
-        </div>
+        <label className="text-sm font-semibold text-white">Tags</label>
         {selectedTags.length > 0 && (
           <button
             type="button"
@@ -1449,13 +1446,13 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                   <button
                     type="button"
                     onClick={() => setEditingBeat({ ...editingBeat, isForSale: !editingBeat.isForSale })}
-                    className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full p-0.5 transition-colors duration-200 ease-in-out focus:outline-none ${
                       editingBeat.isForSale ? "bg-[#7B61FF]" : "bg-[#282828]"
                     }`}
                   >
                     <span
-                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-                        editingBeat.isForSale ? "translate-x-5" : "translate-x-0.5"
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                        editingBeat.isForSale ? "translate-x-5" : "translate-x-0"
                       }`}
                     />
                   </button>
@@ -1524,12 +1521,8 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
               onClick={(e) => e.stopPropagation()}
               className="bg-[#181818] rounded-3xl max-w-4xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default max-h-[90vh] overflow-y-auto no-scrollbar"
             >
-              {/* Header */}
-              <div className="flex items-center justify-between pb-1">
-                <h3 className="text-xl font-bold text-white flex items-center gap-2.5">
-                  <Plus className="w-5 h-5 text-[#7B61FF]" />
-                  <span>Add Beat to Showcase</span>
-                </h3>
+              {/* Header Close Button */}
+              <div className="flex items-center justify-end">
                 <button
                   type="button"
                   onClick={() => {
@@ -1551,10 +1544,13 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                   {/* Left Column: Title, Availability, & Tags */}
                   <div className="lg:col-span-6 space-y-5">
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-white flex items-center gap-1">
-                        <span>Beat Title</span>
-                        <span className="text-[#FF5E3A]">*</span>
-                      </label>
+                      <div className="flex items-center justify-between">
+                        <label className="text-sm font-semibold text-white flex items-center gap-1">
+                          <span>Beat Title</span>
+                          <span className="text-[#FF5E3A]">*</span>
+                        </label>
+                        <span className="text-xs text-zinc-400 font-medium">Don&apos;t add your beatmaker name</span>
+                      </div>
                       <input
                         type="text"
                         value={newBeatTitle}
@@ -1576,13 +1572,13 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                         <button
                           type="button"
                           onClick={() => setNewBeatIsForSale(!newBeatIsForSale)}
-                          className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${
+                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full p-0.5 transition-colors duration-200 ease-in-out focus:outline-none ${
                             newBeatIsForSale ? "bg-[#7B61FF]" : "bg-[#282828]"
                           }`}
                         >
                           <span
-                            className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-                              newBeatIsForSale ? "translate-x-5" : "translate-x-0.5"
+                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                              newBeatIsForSale ? "translate-x-5" : "translate-x-0"
                             }`}
                           />
                         </button>
@@ -1682,23 +1678,11 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                 </div>
 
                 {/* Actions Footer */}
-                <div className="flex items-center justify-end gap-3 pt-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsAddModalOpen(false);
-                      setStagedNewBeatFile(null);
-                      setNewBeatAudioUrl("");
-                      setNewBeatAudioName("");
-                    }}
-                    className="px-5 py-3 rounded-xl bg-[#121212] hover:bg-[#202020] text-zinc-300 text-sm font-semibold transition-all cursor-pointer"
-                  >
-                    Cancel
-                  </button>
+                <div className="flex items-center justify-end pt-3">
                   <button
                     type="submit"
                     disabled={isUploadingBeatAudio || (!stagedNewBeatFile && !newBeatAudioUrl) || !newBeatTitle.trim()}
-                    className="px-6 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-sm font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                    className="px-8 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-sm font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-2"
                   >
                     {isUploadingBeatAudio ? (
                       <>

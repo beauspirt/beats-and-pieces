@@ -791,12 +791,12 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
         </div>
 
         {/* Hero Header */}
-        <div className="bg-[#181818] rounded-2xl p-5 sm:p-7 flex flex-col md:flex-row gap-7 items-start relative overflow-hidden shadow-xl">
+        <div className="bg-[#181818] rounded-2xl p-5 sm:p-6 flex flex-col md:flex-row gap-7 items-start relative overflow-hidden shadow-xl">
           
           {/* Cover Art Thumbnail (Responsive Square) */}
           <div className="w-full sm:max-w-[320px] aspect-square rounded-xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl mx-auto md:mx-0">
             <Image
-              src={battle.coverImage}
+              src={battle.coverImage || "/covers/default-battle.png"}
               alt={battle.title}
               fill
               className="object-cover"
@@ -804,41 +804,54 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             />
           </div>
 
-        {/* Meta Info (identical natural flow and position to battles listing page) */}
-        <div className="flex-1 w-full min-w-0 space-y-3.5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <h1 className="text-2xl font-bold text-white tracking-tight leading-tight">
-              {battle.title}
-            </h1>
-            <span className="px-3.5 py-1.5 rounded-full bg-[#121212] text-xs text-[#A0A0A0] shrink-0 self-start sm:self-center">
-              {battle.totalSubmissions} Total Entries
-            </span>
-          </div>
+          {/* Meta Info (identical natural flow and position to battles listing page) */}
+          <div className="flex-1 w-full min-w-0 space-y-3.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <h1 className="text-2xl font-bold text-white tracking-tight leading-tight">
+                {battle.title}
+              </h1>
+              <div className="flex items-center gap-2 shrink-0 self-start sm:self-center flex-wrap">
+                <span className="px-3.5 py-1.5 rounded-full bg-[#7B61FF] text-xs font-bold text-white shadow-sm inline-flex items-center justify-center text-center leading-none">
+                  {battle.phase === "submission"
+                    ? "Phase 1: Submissions Open"
+                    : battle.phase === "rating"
+                    ? "Phase 2: Public Rating"
+                    : battle.phase === "judging"
+                    ? "Phase 3: Jury Evaluation"
+                    : "Phase 4: Results"}
+                </span>
+                <span className="px-3.5 py-1.5 rounded-full bg-[#121212] text-xs text-[#A0A0A0] inline-flex items-center justify-center text-center leading-none">
+                  {battle.totalSubmissions} Total Entries
+                </span>
+              </div>
+            </div>
 
-          <div className="space-y-1 text-sm text-[#A0A0A0]">
-            <p>Hosted by: <span className="text-white">{Array.isArray(battle.hosts) && battle.hosts.length > 0 ? battle.hosts.join(", ") : "Nerub"}</span></p>
-            {Array.isArray(battle.judges) && battle.judges.length > 0 && (
-              <p>Judged by: <span className="text-white">{battle.judges.join(", ")}</span></p>
+            <div className="space-y-1 text-sm text-[#A0A0A0]">
+              <p>Hosted by: <span className="text-white">{Array.isArray(battle.hosts) && battle.hosts.length > 0 ? battle.hosts.join(", ") : "Nerub"}</span></p>
+              {Array.isArray(battle.judges) && battle.judges.length > 0 && (
+                <p>Judged by: <span className="text-white">{battle.judges.join(", ")}</span></p>
+              )}
+            </div>
+
+            {battle.description && (
+              <p className="text-sm text-[#D1D1D1] leading-relaxed">
+                {battle.description}
+              </p>
+            )}
+
+            {battle.phase === "completed" ? (
+              battle.endedAt && (
+                <div className="text-xs text-[#888888] pt-2">
+                  Ended on {new Date(battle.endedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" })}
+                </div>
+              )
+            ) : (
+              <div className="text-xs text-[#888888] pt-2">
+                Submissions close {battle.submissionEndsAt ? new Date(battle.submissionEndsAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "TBD"} • Public rating open until {battle.ratingEndsAt ? new Date(battle.ratingEndsAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "TBD"}
+              </div>
             )}
           </div>
-
-          <p className="text-sm text-[#D1D1D1] leading-relaxed">
-            {battle.description}
-          </p>
-
-          {battle.phase === "completed" ? (
-            battle.endedAt && (
-              <div className="text-xs text-[#888888] pt-2">
-                Ended on {new Date(battle.endedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" })}
-              </div>
-            )
-          ) : (
-            <div className="text-xs text-[#888888] pt-2">
-              Submissions close {battle.submissionEndsAt ? new Date(battle.submissionEndsAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "TBD"} • Public rating open until {battle.ratingEndsAt ? new Date(battle.ratingEndsAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "TBD"}
-            </div>
-          )}
         </div>
-      </div>
       </section>
 
       {/* ========================================================================= */}

@@ -461,7 +461,7 @@ export default function BeatsDiscoveryPage() {
                 className="bg-[#181818] rounded-[28px] p-4 space-y-3.5 sm:space-y-4 shadow-md"
               >
                 {/* Row 1: Header (Title, Producer, Avatar, Badges, Meta) */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 min-w-0">
                   
                   {/* Left: Beat Title + Producer Avatar/Tag + Badges */}
                   <div className="flex items-center gap-3.5 min-w-0 flex-1">
@@ -523,7 +523,7 @@ export default function BeatsDiscoveryPage() {
                   </div>
 
                   {/* Right: Meta Badges (BPM, Price, Flames, Fav) */}
-                  <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 flex-wrap sm:flex-nowrap select-none">
+                  <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 flex-wrap sm:flex-nowrap select-none self-start">
                     {/* BPM */}
                     {beat.bpm ? (
                       <span className="text-xs font-bold px-2.5 py-1 rounded-3xl bg-[#121212] text-[#888888] select-none">

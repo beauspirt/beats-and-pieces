@@ -1118,7 +1118,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                 className="bg-[#181818] rounded-[28px] p-4 space-y-3 shadow-md group relative"
               >
                 {/* Row 1: Header (Title, Rank Badge, Meta, Edit Action) */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 min-w-0">
                   
                   {/* Left: Beat Title + Quick Link Badge + Rank Badge */}
                   <div className="flex items-center gap-3.5 min-w-0 flex-1">

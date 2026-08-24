@@ -51,7 +51,12 @@ function loadDeletedBeatIds(): string[] {
   if (typeof window !== "undefined") {
     try {
       const stored = localStorage.getItem(STORAGE_KEY_DELETED_BEATS);
-      if (stored) return JSON.parse(stored);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          return parsed.filter((id) => typeof id === "string" && id.startsWith("disc-bb"));
+        }
+      }
     } catch {}
   }
   return [];
@@ -165,33 +170,30 @@ export const beatService = {
         .limit(200);
 
       if (!error && data) {
-        const deletedIds = new Set(loadDeletedBeatIds());
-        const mapped: DiscoveryBeat[] = data
-          .filter((b) => !deletedIds.has(b.id) && !(b.title && deletedIds.has(b.title.toLowerCase())))
-          .map((b) => {
-            const prod = producerService.getProducerById(b.producer_id) || producerService.getProducerByTag(b.producer_id);
-            return {
-              id: b.id,
-              title: b.title,
-              beatmaker: {
-                id: b.producer_id,
-                tag: prod?.nickname || b.producer_id,
-                avatarUrl: prod?.avatarUrl || "/avatars/default-avatar.png",
-              },
-              audioUrl: b.audio_url,
-              duration: b.duration || 120,
-              waveform: Array.isArray(b.waveform) ? b.waveform : [],
-              bpm: b.bpm,
-              priceTag: b.price_tag || "Not For Sale",
-              genres: Array.isArray(b.genres) ? b.genres : [],
-              tags: Array.isArray(b.tags) ? b.tags : [],
-              flames: b.flames || 0,
-              battleSource: b.battle_source,
-              tier: b.tier || 4,
-              rank: b.rank,
-              createdAt: b.created_at,
-            };
-          });
+        const mapped: DiscoveryBeat[] = data.map((b) => {
+          const prod = producerService.getProducerById(b.producer_id) || producerService.getProducerByTag(b.producer_id);
+          return {
+            id: b.id,
+            title: b.title,
+            beatmaker: {
+              id: b.producer_id,
+              tag: prod?.nickname || b.producer_id,
+              avatarUrl: prod?.avatarUrl || "/avatars/default-avatar.png",
+            },
+            audioUrl: b.audio_url,
+            duration: b.duration || 120,
+            waveform: Array.isArray(b.waveform) ? b.waveform : [],
+            bpm: b.bpm,
+            priceTag: b.price_tag || "Not For Sale",
+            genres: Array.isArray(b.genres) ? b.genres : [],
+            tags: Array.isArray(b.tags) ? b.tags : [],
+            flames: b.flames || 0,
+            battleSource: b.battle_source,
+            tier: b.tier || 4,
+            rank: b.rank,
+            createdAt: b.created_at,
+          };
+        });
 
         saveCustomBeats(mapped);
         notifyBeatsUpdated();
@@ -240,20 +242,18 @@ export const beatService = {
   deleteBeat(id: string): boolean {
     if (typeof window !== "undefined") {
       const custom = loadCustomBeats();
-      const beatToDelete = custom.find((b) => b.id === id);
       const filtered = custom.filter((b) => b.id !== id);
       saveCustomBeats(filtered);
 
-      const deleted = loadDeletedBeatIds();
-      if (!deleted.includes(id)) {
-        deleted.push(id);
+      if (id.startsWith("disc-bb")) {
+        const deleted = loadDeletedBeatIds();
+        if (!deleted.includes(id)) {
+          deleted.push(id);
+          try {
+            localStorage.setItem(STORAGE_KEY_DELETED_BEATS, JSON.stringify(deleted));
+          } catch {}
+        }
       }
-      if (beatToDelete?.title && !deleted.includes(beatToDelete.title.toLowerCase())) {
-        deleted.push(beatToDelete.title.toLowerCase());
-      }
-      try {
-        localStorage.setItem(STORAGE_KEY_DELETED_BEATS, JSON.stringify(deleted));
-      } catch {}
       notifyBeatsUpdated();
     }
 

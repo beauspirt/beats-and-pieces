@@ -37,6 +37,25 @@ function saveCustomBeats(beats: DiscoveryBeat[]) {
   }
 }
 
+export function normalizeBeatTags(tags: string[] | undefined): string[] {
+  if (!Array.isArray(tags)) return [];
+  const normalized: string[] = [];
+  tags.forEach((t) => {
+    if (typeof t === "string") {
+      if (t.includes("/")) {
+        t.split("/").forEach((part) => {
+          const trimmed = part.trim();
+          if (trimmed && !normalized.includes(trimmed)) normalized.push(trimmed);
+        });
+      } else {
+        const trimmed = t.trim();
+        if (trimmed && !normalized.includes(trimmed)) normalized.push(trimmed);
+      }
+    }
+  });
+  return normalized;
+}
+
 function loadBeatOverrides(): Record<string, Partial<DiscoveryBeat>> {
   if (typeof window !== "undefined") {
     try {
@@ -137,6 +156,8 @@ export const beatService = {
       const enrichedBeat: DiscoveryBeat = {
         ...b,
         title: finalTitle,
+        tags: normalizeBeatTags(b.tags),
+        genres: normalizeBeatTags(b.genres),
         beatmaker: {
           id: b.beatmaker.id,
           tag: prod?.nickname || b.beatmaker.tag,
@@ -144,7 +165,10 @@ export const beatService = {
         },
       };
 
-      uniqueBeats.push(overrides[b.id] ? { ...enrichedBeat, ...overrides[b.id] } : enrichedBeat);
+      const finalBeat = overrides[b.id] ? { ...enrichedBeat, ...overrides[b.id] } : enrichedBeat;
+      if (finalBeat.tags) finalBeat.tags = normalizeBeatTags(finalBeat.tags);
+      if (finalBeat.genres) finalBeat.genres = normalizeBeatTags(finalBeat.genres);
+      uniqueBeats.push(finalBeat);
     }
 
     return uniqueBeats;
@@ -186,8 +210,8 @@ export const beatService = {
             waveform: Array.isArray(b.waveform) ? b.waveform : [],
             bpm: b.bpm,
             priceTag: b.price_tag || "Not For Sale",
-            genres: Array.isArray(b.genres) ? b.genres : [],
-            tags: Array.isArray(b.tags) ? b.tags : [],
+            genres: normalizeBeatTags(b.genres),
+            tags: normalizeBeatTags(b.tags),
             flames: b.flames || 0,
             battleSource: b.battle_source,
             tier: b.tier || 4,
@@ -210,8 +234,8 @@ export const beatService = {
     if (!existing) return null;
 
     const safeTags = updates.tags !== undefined
-      ? (Array.isArray(updates.tags) ? updates.tags.slice(0, 5) : [])
-      : (existing.tags || []).slice(0, 5);
+      ? normalizeBeatTags(Array.isArray(updates.tags) ? updates.tags : [])
+      : normalizeBeatTags(existing.tags || []);
 
     const mergedBeat: DiscoveryBeat = {
       ...existing,

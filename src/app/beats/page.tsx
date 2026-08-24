@@ -162,9 +162,9 @@ export default function BeatsDiscoveryPage() {
       beats.flatMap((b) => [
         ...(Array.isArray(b.genres) ? b.genres : []),
         ...(Array.isArray(b.tags) ? b.tags : []),
-      ])
+      ]).flatMap((t) => (typeof t === "string" && t.includes("/") ? t.split("/").map((s) => s.trim()) : [t]))
     )
-  );
+  ).filter(Boolean);
   const visibleBeats = filteredBeats.slice(0, visibleCount);
 
   const sortLabelMap: Record<"recent" | "rating", string> = {

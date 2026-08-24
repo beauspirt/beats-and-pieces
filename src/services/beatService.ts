@@ -151,7 +151,7 @@ export const beatService = {
   async syncFromSupabase(): Promise<void> {
     try {
       const { data, error } = await supabase.from("beats").select("*");
-      if (!error && data && data.length > 0) {
+      if (!error && data) {
         const deletedIds = new Set(loadDeletedBeatIds());
         const mapped: DiscoveryBeat[] = data
           .filter((b) => !deletedIds.has(b.id))
@@ -180,9 +180,18 @@ export const beatService = {
             };
           });
 
-        const currentCustom = loadCustomBeats().filter((b) => !deletedIds.has(b.id));
-        const existingIds = new Set(mapped.map((b) => b.id));
-        const merged = [...mapped, ...currentCustom.filter((b) => !existingIds.has(b.id))];
+        // Supabase is the single source of truth for remote showcase beats.
+        // We only preserve local drafts created in the last 2 minutes that haven't synced yet.
+        const currentCustom = loadCustomBeats();
+        const serverIds = new Set(mapped.map((b) => b.id));
+        const unsyncedDrafts = currentCustom.filter((b) => {
+          if (deletedIds.has(b.id)) return false;
+          if (serverIds.has(b.id)) return false;
+          const age = Date.now() - (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+          return b.id.startsWith("beat-custom-") && age < 120000;
+        });
+
+        const merged = [...mapped, ...unsyncedDrafts];
         saveCustomBeats(merged);
       }
     } catch (err) {

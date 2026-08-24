@@ -201,10 +201,10 @@ create policy "Authenticated delete submissions" on public.submissions for delet
 create policy "Authenticated insert ratings" on public.ratings for insert with check (auth.uid()::text = voter_id);
 create policy "Authenticated update ratings" on public.ratings for update using (auth.uid()::text = voter_id);
 
-create policy "Admin modify beats" on public.beats for all using (
-  exists (select 1 from public.producers where id = auth.uid()::text and role in ('admin', 'host'))
+create policy "Allow producer or admin modify beats" on public.beats for all using (
+  auth.uid()::text = producer_id or exists (select 1 from public.producers where id = auth.uid()::text and role in ('admin', 'host'))
 ) with check (
-  exists (select 1 from public.producers where id = auth.uid()::text and role in ('admin', 'host'))
+  auth.uid()::text = producer_id or exists (select 1 from public.producers where id = auth.uid()::text and role in ('admin', 'host'))
 );
 
 create policy "Admin modify releases" on public.releases for all using (

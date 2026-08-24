@@ -130,7 +130,7 @@ export default function BattlesPage() {
       {/* SECTION 1.5: ADDITIONAL ACTIVE BATTLES (IF MORE THAN ONE) */}
       {additionalActive.length > 0 && (
         <section className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between h-9">
             <h2 className="text-2xl font-bold text-white flex items-center gap-2.5">
               <span className="w-2.5 h-2.5 rounded-full bg-brand animate-pulse" />
               <span>Other Ongoing Battles</span>
@@ -198,7 +198,7 @@ export default function BattlesPage() {
 
       {/* SECTION 2: BATTLES ARCHIVE */}
       <section className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between h-9">
           <h2 className="text-2xl font-bold text-white">Battles Archive</h2>
         </div>
 

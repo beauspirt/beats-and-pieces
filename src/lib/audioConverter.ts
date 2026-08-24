@@ -55,13 +55,7 @@ export async function optimizeAndConvertToOpus(
 
   const waveformPeaks = extractedWaveform ? extractedWaveform.peaks : [];
 
-  // Check if file is already an ultra-lightweight Opus or small MP3 file (< 4MB)
-  const isAlreadySmallCompressed =
-    fileName.toLowerCase().endsWith(".opus") ||
-    fileName.toLowerCase().endsWith(".ogg") ||
-    (fileName.toLowerCase().endsWith(".mp3") && originalSize < 4 * 1024 * 1024);
-
-  if (isAlreadySmallCompressed || !decodedAudioBuffer) {
+  if (!decodedAudioBuffer) {
     return {
       file: inputFile,
       duration: realDuration,

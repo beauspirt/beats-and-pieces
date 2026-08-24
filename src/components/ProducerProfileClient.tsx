@@ -19,7 +19,7 @@ import { JudgeFeedbackTicker } from "@/components/JudgeFeedbackTicker";
 import { 
   Flame, Trophy, Mail, ExternalLink, 
   CheckCircle2, Copy, MapPin, Calendar, Star, Award, Globe,
-  Pencil, Plus, Lock, Trash2, AlertTriangle, Music, Sliders, X, Play
+  Pencil, Plus, Lock, Trash2, AlertTriangle, Music, Sliders, X, Play, Upload
 } from "lucide-react";
 
 /**
@@ -268,6 +268,8 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
   // Add Beat Modal state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [stagedNewBeatFile, setStagedNewBeatFile] = useState<File | null>(null);
+  const [isDraggingNewBeat, setIsDraggingNewBeat] = useState(false);
   const [newBeatTitle, setNewBeatTitle] = useState("");
   const [newBeatAudioUrl, setNewBeatAudioUrl] = useState("");
   const [newBeatAudioName, setNewBeatAudioName] = useState("");
@@ -556,9 +558,78 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     setEditingTagInput("");
   };
 
+  const processNewBeatFile = async (file: File) => {
+    if (!file) return;
+    const MAX_FILE_SIZE = 250 * 1024 * 1024;
+    if (file.size > MAX_FILE_SIZE) {
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+      alert(`File is too large (${sizeMB} MB). Maximum source audio size is 250 MB.`);
+      return;
+    }
+
+    setStagedNewBeatFile(file);
+    setNewBeatAudioName(file.name);
+    if (!newBeatTitle.trim()) {
+      setNewBeatTitle(file.name.replace(/\.[^/.]+$/, ""));
+    }
+
+    // Instantly decode arrayBuffer in memory for exact waveform & duration preview
+    try {
+      const arrayBuf = await file.arrayBuffer();
+      const AudioCtx =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (AudioCtx) {
+        const ctx = new AudioCtx();
+        const decoded = await ctx.decodeAudioData(arrayBuf.slice(0));
+        const extracted = extractRealAudioBufferWaveform(decoded, 800);
+        const duration = Math.round(decoded.duration);
+        ctx.close();
+
+        const tempAudioUrl = URL.createObjectURL(file);
+        if (extracted) {
+          globalWaveformCache.set(tempAudioUrl, extracted);
+        }
+        setNewBeatAudioUrl(tempAudioUrl);
+        setNewBeatDuration(duration);
+        setNewBeatWaveformPeaks(extracted ? extracted.peaks : []);
+      }
+    } catch {
+      const tempAudioUrl = URL.createObjectURL(file);
+      setNewBeatAudioUrl(tempAudioUrl);
+    }
+  };
+
+  const handleNewBeatDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingNewBeat(true);
+  };
+
+  const handleNewBeatDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingNewBeat(false);
+  };
+
+  const handleNewBeatDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingNewBeat(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processNewBeatFile(file);
+    }
+  };
+
   const handleAudioUpload = async (e: React.ChangeEvent<HTMLInputElement>, isNew: boolean) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (isNew) {
+      await processNewBeatFile(file);
+      return;
+    }
 
     const MAX_FILE_SIZE = 250 * 1024 * 1024;
     if (file.size > MAX_FILE_SIZE) {
@@ -570,7 +641,6 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
     setIsUploadingBeatAudio(true);
     try {
-      // 1. Instantly decode arrayBuffer in memory for exact waveform & duration
       let extractedWaveform: WaveformData | null = null;
       let realDuration = 120;
       try {
@@ -583,11 +653,10 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
           realDuration = Math.round(decoded.duration);
           ctx.close();
         }
-      } catch (decodeErr) {
-        // console.warn("In-memory audio decode warning:", decodeErr);
+      } catch {
+        // decode fallback
       }
 
-      // 2. Upload to Supabase Storage 'beats' folder
       const { url, error: uploadError } = await storageService.uploadAudio(
         file,
         "beats",
@@ -604,19 +673,13 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
         globalWaveformCache.set(finalAudioUrl, extractedWaveform);
       }
 
-      if (isNew) {
-        setNewBeatAudioUrl(finalAudioUrl);
-        setNewBeatAudioName(file.name);
-        setNewBeatDuration(realDuration);
-        setNewBeatWaveformPeaks(extractedWaveform ? extractedWaveform.peaks : []);
-      } else if (editingBeat && !editingBeat.isBattleSubmission) {
+      if (editingBeat && !editingBeat.isBattleSubmission) {
         setEditingBeat({
           ...editingBeat,
           audioUrl: finalAudioUrl,
         });
       }
-    } catch (err) {
-      // console.error("Audio upload error:", err);
+    } catch {
       alert("Failed to upload audio file. Please try again.");
     } finally {
       setIsUploadingBeatAudio(false);
@@ -678,41 +741,75 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       alert("Please enter a beat title.");
       return;
     }
-    if (!newBeatAudioUrl) {
-      alert("Please select and upload an audio file.");
+    if (!stagedNewBeatFile && !newBeatAudioUrl) {
+      alert("Please select or drop an audio file.");
       return;
     }
 
-    const bpmValue = newBeatBpm !== "" && !isNaN(Number(newBeatBpm)) ? Number(newBeatBpm) : undefined;
+    setIsUploadingBeatAudio(true);
+    try {
+      let finalAudioUrl = newBeatAudioUrl;
+      let finalDuration = newBeatDuration;
+      let finalPeaks = newBeatWaveformPeaks;
 
-    await beatService.createBeat({
-      title: newBeatTitle.trim(),
-      beatmaker: {
-        id: producer.id,
-        tag: producer.nickname,
-        avatarUrl: producer.avatarUrl || "/avatars/default-avatar.png",
-      },
-      audioUrl: newBeatAudioUrl,
-      duration: newBeatDuration,
-      waveform: newBeatWaveformPeaks,
-      bpm: bpmValue,
-      priceTag: newBeatIsForSale ? "For Sale" : "Not For Sale",
-      tags: newBeatTags,
-      genres: [],
-      createdAt: new Date().toISOString(),
-    });
+      if (stagedNewBeatFile) {
+        const { url, error: uploadError, duration, waveformPeaks } = await storageService.uploadAudio(
+          stagedNewBeatFile,
+          "beats",
+          `${producer.id}-${Date.now()}`
+        );
 
-    setIsAddModalOpen(false);
-    setNewBeatTitle("");
-    setNewBeatAudioUrl("");
-    setNewBeatAudioName("");
-    setNewBeatBpm("");
-    setNewBeatIsForSale(false);
-    setNewBeatTags([]);
-    setNewBeatTagInput("");
-    setNewBeatWaveformPeaks([]);
-    setBeatsVersion((v) => v + 1);
-    showToast("Beat added to your showcase!");
+        if (!url) {
+          throw new Error(uploadError || "Failed to upload audio to cloud storage.");
+        }
+        finalAudioUrl = url;
+        if (duration) finalDuration = duration;
+        if (waveformPeaks && waveformPeaks.length > 0) finalPeaks = waveformPeaks;
+      }
+
+      if (finalPeaks && finalPeaks.length > 0) {
+        globalWaveformCache.set(finalAudioUrl, {
+          peaks: finalPeaks,
+          duration: finalDuration,
+        });
+      }
+
+      const bpmValue = newBeatBpm !== "" && !isNaN(Number(newBeatBpm)) ? Number(newBeatBpm) : undefined;
+
+      await beatService.createBeat({
+        title: newBeatTitle.trim(),
+        beatmaker: {
+          id: producer.id,
+          tag: producer.nickname,
+          avatarUrl: producer.avatarUrl || "/avatars/default-avatar.png",
+        },
+        audioUrl: finalAudioUrl,
+        duration: finalDuration,
+        waveform: finalPeaks,
+        bpm: bpmValue,
+        priceTag: newBeatIsForSale ? "For Sale" : "Not For Sale",
+        tags: newBeatTags,
+        genres: [],
+        createdAt: new Date().toISOString(),
+      });
+
+      setIsAddModalOpen(false);
+      setNewBeatTitle("");
+      setNewBeatAudioUrl("");
+      setNewBeatAudioName("");
+      setStagedNewBeatFile(null);
+      setNewBeatBpm("");
+      setNewBeatIsForSale(false);
+      setNewBeatTags([]);
+      setNewBeatTagInput("");
+      setNewBeatWaveformPeaks([]);
+      setBeatsVersion((v) => v + 1);
+      showToast("Beat added to your showcase!");
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : String(err) || "Failed to create beat");
+    } finally {
+      setIsUploadingBeatAudio(false);
+    }
   };
 
   const activeLinks = useMemo(() => {
@@ -1322,125 +1419,234 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       {isAddModalOpen && (
         <div
           onMouseDown={handleBackdropMouseDown}
-          onMouseUp={(e) => handleBackdropMouseUp(e, () => setIsAddModalOpen(false))}
+          onMouseUp={(e) => handleBackdropMouseUp(e, () => {
+            setIsAddModalOpen(false);
+            setStagedNewBeatFile(null);
+            setNewBeatAudioUrl("");
+            setNewBeatAudioName("");
+          })}
           className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
         >
           <div
             onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
-            className="bg-[#181818] rounded-2xl max-w-2xl sm:max-w-3xl w-full p-5 sm:p-7 space-y-5 shadow-2xl relative cursor-default max-h-[90vh] overflow-y-auto no-scrollbar"
+            className="bg-[#181818] rounded-3xl max-w-4xl w-full p-5 sm:p-7 space-y-5 shadow-2xl relative cursor-default max-h-[90vh] overflow-y-auto no-scrollbar border border-[#262626]"
           >
-            <div className="flex items-center justify-between pb-1">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <Plus className="w-4 h-4 text-[#7B61FF]" />
-                <span>Add Beat to Showcase</span>
-              </h3>
+            {/* Header */}
+            <div className="flex items-center justify-between pb-1 border-b border-[#252525]">
+              <div className="space-y-0.5">
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <Upload className="w-5 h-5 text-[#7B61FF]" />
+                  <span>Add Beat to Showcase</span>
+                </h3>
+                <p className="text-xs text-[#888888]">
+                  Upload and publish a beat to your producer showcase and public portfolio.
+                </p>
+              </div>
               <button
-                onClick={() => setIsAddModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-[#121212] text-zinc-400 hover:text-white flex items-center justify-center text-sm cursor-pointer"
+                onClick={() => {
+                  setIsAddModalOpen(false);
+                  setStagedNewBeatFile(null);
+                  setNewBeatAudioUrl("");
+                  setNewBeatAudioName("");
+                }}
+                className="w-8 h-8 rounded-full bg-[#121212] text-zinc-400 hover:text-white flex items-center justify-center text-sm cursor-pointer transition-colors"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleCreateBeat} className="space-y-4">
-              
-              {/* Row 1: Beat Title & Audio Upload (2 Columns on sm+) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                {/* Beat Title */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-[#D1D1D1]">Beat Title *</label>
-                  <input
-                    type="text"
-                    required
-                    value={newBeatTitle}
-                    onChange={(e) => setNewBeatTitle(e.target.value)}
-                    placeholder="e.g. Midnight Soul Flip"
-                    className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
-                  />
-                </div>
-
-                {/* Audio Upload */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-[#D1D1D1]">Audio File (MP3 / WAV / Opus) *</label>
-                  <label className="w-full bg-[#121212] hover:bg-[#1a1a1a] rounded-xl px-4 py-2.5 text-xs text-zinc-300 flex items-center justify-between cursor-pointer transition-colors">
-                    <span className="truncate">{newBeatAudioName || "Click to upload audio file"}</span>
-                    <span className="text-[#7B61FF] font-bold text-[11px] shrink-0 ml-2">Upload</span>
+            <form onSubmit={handleCreateBeat} className="space-y-5">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                
+                {/* Left Column: Metadata Fields */}
+                <div className="lg:col-span-6 space-y-4">
+                  {/* Beat Title */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1">
+                      <span>Beat Title</span>
+                      <span className="text-[#FF5E3A]">*</span>
+                    </label>
                     <input
-                      type="file"
-                      accept="audio/*"
-                      onChange={(e) => handleAudioUpload(e, true)}
-                      className="hidden"
+                      type="text"
+                      required
+                      value={newBeatTitle}
+                      onChange={(e) => setNewBeatTitle(e.target.value)}
+                      placeholder="e.g. Midnight Soul Flip"
+                      className="w-full bg-[#121212] rounded-xl px-4 py-3 text-xs text-white placeholder-zinc-600 border border-[#2a2a2a] focus:border-[#7B61FF] focus:outline-none transition-colors"
                     />
-                  </label>
-                </div>
-              </div>
+                    <p className="text-[11px] text-[#888888] font-normal">
+                      Give your beat a catchy, recognizable title.
+                    </p>
+                  </div>
 
-              {/* Row 2: BPM & Availability Toggle (2 Columns on sm+) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                {/* BPM */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-[#D1D1D1]">BPM</label>
-                  <input
-                    type="number"
-                    placeholder="Optional"
-                    value={newBeatBpm}
-                    onChange={(e) => setNewBeatBpm(e.target.value === "" ? "" : Number(e.target.value))}
-                    className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-[#7B61FF] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  {/* BPM & Availability Toggle (2 Columns) */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* BPM */}
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-white uppercase tracking-wider">
+                        BPM <span className="text-zinc-500 font-normal normal-case">(Optional)</span>
+                      </label>
+                      <input
+                        type="number"
+                        placeholder="e.g. 140"
+                        value={newBeatBpm}
+                        onChange={(e) => setNewBeatBpm(e.target.value === "" ? "" : Number(e.target.value))}
+                        className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white placeholder-zinc-600 border border-[#2a2a2a] focus:border-[#7B61FF] focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-colors"
+                      />
+                    </div>
+
+                    {/* For Sale Toggle */}
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-white uppercase tracking-wider">
+                        Availability
+                      </label>
+                      <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-[#121212] border border-[#2a2a2a] h-[40px]">
+                        <span className="text-[11px] font-semibold text-zinc-300">
+                          {newBeatIsForSale ? "For Sale" : "Not For Sale"}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setNewBeatIsForSale(!newBeatIsForSale)}
+                          className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${
+                            newBeatIsForSale ? "bg-[#7B61FF]" : "bg-[#282828]"
+                          }`}
+                        >
+                          <span
+                            className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                              newBeatIsForSale ? "translate-x-5" : "translate-x-0.5"
+                            }`}
+                          />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Preset Standard Tags Selector */}
+                  <StandardTagSelector
+                    selectedTags={newBeatTags}
+                    onChange={setNewBeatTags}
                   />
                 </div>
 
-                {/* For Sale / Not For Sale Toggle */}
-                <div className="flex items-center justify-between px-4 py-2.5 rounded-xl bg-[#121212] self-end">
-                  <div className="space-y-0.5">
-                    <span className="text-xs font-semibold text-white block">Available for Sale / Licensing</span>
-                    <span className="text-[10px] text-zinc-400 block">
-                      {newBeatIsForSale ? "For Sale" : "Not For Sale"}
+                {/* Right Column: Audio Drag & Drop & Live Preview */}
+                <div className="lg:col-span-6 space-y-3">
+                  <label className="text-xs font-bold text-white uppercase tracking-wider flex items-center justify-between">
+                    <span className="flex items-center gap-1">
+                      <span>Audio File</span>
+                      <span className="text-[#FF5E3A]">*</span>
                     </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setNewBeatIsForSale(!newBeatIsForSale)}
-                    className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${
-                      newBeatIsForSale ? "bg-[#7B61FF]" : "bg-[#282828]"
-                    }`}
-                  >
-                    <span
-                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-                        newBeatIsForSale ? "translate-x-5" : "translate-x-0.5"
+                    <span className="text-[10px] text-[#7B61FF] font-semibold lowercase">
+                      auto-converts to 192kbps opus
+                    </span>
+                  </label>
+
+                  {stagedNewBeatFile || newBeatAudioUrl ? (
+                    <div className="bg-[#121212] p-4 sm:p-5 rounded-2xl border border-[#2a2a2a] space-y-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2 text-white font-bold text-xs truncate">
+                          <Music className="w-4 h-4 text-[#7B61FF] shrink-0" />
+                          <span className="truncate">{newBeatAudioName || "Audio Staged"}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setStagedNewBeatFile(null);
+                            setNewBeatAudioUrl("");
+                            setNewBeatAudioName("");
+                          }}
+                          className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-[#1A1A1A] hover:bg-zinc-800 text-[#888888] hover:text-white transition-all cursor-pointer shrink-0"
+                        >
+                          Change File
+                        </button>
+                      </div>
+
+                      <div className="pt-1">
+                        <AudioWaveformPlayer
+                          id="profile-new-beat-preview"
+                          title={newBeatTitle || "Preview"}
+                          artist={producer.nickname}
+                          audioUrl={newBeatAudioUrl}
+                          duration={newBeatDuration}
+                          waveformPeaks={newBeatWaveformPeaks}
+                          compact={true}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between text-[11px] text-zinc-400 pt-1 border-t border-[#1c1c1c]">
+                        <span>Format: Transcoding to 192kbps Opus</span>
+                        {stagedNewBeatFile && (
+                          <span>{(stagedNewBeatFile.size / (1024 * 1024)).toFixed(1)} MB source</span>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <label
+                      onDragOver={handleNewBeatDragOver}
+                      onDragEnter={handleNewBeatDragOver}
+                      onDragLeave={handleNewBeatDragLeave}
+                      onDrop={handleNewBeatDrop}
+                      className={`min-h-[220px] rounded-2xl border-2 border-dashed p-6 flex flex-col items-center justify-center text-center gap-3 transition-all cursor-pointer ${
+                        isDraggingNewBeat
+                          ? "border-[#7B61FF] bg-[#7B61FF]/10 scale-[1.01]"
+                          : "border-[#333333] hover:border-[#555555] bg-[#121212]/80 hover:bg-[#121212]"
                       }`}
-                    />
-                  </button>
+                    >
+                      <div className="w-12 h-12 rounded-full bg-[#7B61FF]/15 flex items-center justify-center text-[#7B61FF]">
+                        <Upload className="w-6 h-6" />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs sm:text-sm font-bold text-white">
+                          Drag & drop your beat audio file here
+                        </p>
+                        <p className="text-[11px] text-[#888888]">
+                          or <span className="text-[#7B61FF] underline underline-offset-2">browse files</span> from your device
+                        </p>
+                      </div>
+                      <p className="text-[10px] text-[#666666] font-medium max-w-xs">
+                        Supports WAV, MP3, FLAC, AIFF up to 250 MB • Automatically converted to pristine 192kbps Opus
+                      </p>
+                      <input
+                        type="file"
+                        accept="audio/*"
+                        onChange={(e) => handleAudioUpload(e, true)}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
                 </div>
+
               </div>
 
-              {/* Preset Standard Tags Selector */}
-              <StandardTagSelector
-                selectedTags={newBeatTags}
-                onChange={setNewBeatTags}
-              />
-
-              {/* Actions */}
-              <div className="flex items-center justify-end gap-2.5 pt-3">
+              {/* Actions Footer */}
+              <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-[#252525]">
                 <button
                   type="button"
-                  onClick={() => setIsAddModalOpen(false)}
+                  onClick={() => {
+                    setIsAddModalOpen(false);
+                    setStagedNewBeatFile(null);
+                    setNewBeatAudioUrl("");
+                    setNewBeatAudioName("");
+                  }}
                   className="px-5 py-2.5 rounded-xl bg-[#121212] hover:bg-[#222222] text-zinc-300 text-xs font-bold transition-all cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={isUploadingBeatAudio || !newBeatAudioUrl || !newBeatTitle.trim()}
+                  disabled={isUploadingBeatAudio || (!stagedNewBeatFile && !newBeatAudioUrl) || !newBeatTitle.trim()}
                   className="px-6 py-2.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-2"
                 >
                   {isUploadingBeatAudio ? (
                     <>
                       <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Uploading audio...</span>
+                      <span>Transcoding & Uploading...</span>
                     </>
                   ) : (
-                    <span>Add Beat</span>
+                    <>
+                      <Plus className="w-4 h-4" />
+                      <span>Add Beat to Showcase</span>
+                    </>
                   )}
                 </button>
               </div>

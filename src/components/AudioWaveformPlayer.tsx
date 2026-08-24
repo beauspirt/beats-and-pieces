@@ -220,6 +220,13 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = React.mem
     const maxAmplitude = Math.floor(pixelHeight * 0.46);
     const totalSlices = peaks.length;
 
+    // Normalize peak scale so stored waveforms and decoded waveforms have identical amplitude from frame 1
+    let maxPeak = 1;
+    for (let i = 0; i < totalSlices; i++) {
+      if (peaks[i] > maxPeak) maxPeak = peaks[i];
+    }
+    const scaleFactor = maxPeak > 0 && maxPeak < 85 ? (95 / maxPeak) : 1;
+
     // Unplayed buffer
     if (!offscreenUnplayedRef.current) offscreenUnplayedRef.current = document.createElement("canvas");
     const offUnplayed = offscreenUnplayedRef.current;
@@ -230,7 +237,8 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = React.mem
     ctxU.fillStyle = isLight ? "#D4D4D8" : "#262626";
     for (let px = 0; px < pixelWidth; px++) {
       const sliceIdx = Math.min(totalSlices - 1, Math.floor((px / Math.max(1, pixelWidth - 1)) * (totalSlices - 1)));
-      const peakVal = peaks[sliceIdx] || 10;
+      const rawVal = peaks[sliceIdx] || 10;
+      const peakVal = Math.min(98, Math.max(3, Math.round(rawVal * scaleFactor)));
       const peakHeight = Math.max(1, Math.round((peakVal / 100) * maxAmplitude));
       ctxU.fillRect(px, centerY - peakHeight, 1, peakHeight * 2);
     }
@@ -245,7 +253,8 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = React.mem
     ctxP.fillStyle = isLight ? "#7B61FF" : "#FFFFFF";
     for (let px = 0; px < pixelWidth; px++) {
       const sliceIdx = Math.min(totalSlices - 1, Math.floor((px / Math.max(1, pixelWidth - 1)) * (totalSlices - 1)));
-      const peakVal = peaks[sliceIdx] || 10;
+      const rawVal = peaks[sliceIdx] || 10;
+      const peakVal = Math.min(98, Math.max(3, Math.round(rawVal * scaleFactor)));
       const peakHeight = Math.max(1, Math.round((peakVal / 100) * maxAmplitude));
       ctxP.fillRect(px, centerY - peakHeight, 1, peakHeight * 2);
     }

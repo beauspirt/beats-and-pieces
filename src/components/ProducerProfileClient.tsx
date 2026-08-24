@@ -46,7 +46,11 @@ function StandardTagSelector({
     if (selectedTags.includes(tag)) {
       onChange(selectedTags.filter((t) => t !== tag));
     } else {
-      onChange([...selectedTags, tag]);
+      if (selectedTags.length >= 5) {
+        alert("Maximum of 5 tags allowed per beat.");
+        return;
+      }
+      onChange([...selectedTags, tag].slice(0, 5));
     }
   };
 
@@ -63,7 +67,10 @@ function StandardTagSelector({
   return (
     <div ref={containerRef} className="space-y-2 relative">
       <div className="flex items-center justify-between">
-        <label className="text-xs font-semibold text-[#D1D1D1]">Genres & Tags</label>
+        <div className="flex items-center gap-2">
+          <label className="text-xs font-semibold text-[#D1D1D1]">Genres & Tags</label>
+          <span className="text-[10px] text-zinc-500 font-medium">({selectedTags.length}/5 max)</span>
+        </div>
         {selectedTags.length > 0 && (
           <button
             type="button"

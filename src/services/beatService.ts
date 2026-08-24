@@ -205,39 +205,66 @@ export const beatService = {
   },
 
   updateBeat(id: string, updates: Partial<DiscoveryBeat>): DiscoveryBeat | null {
+    const all = this.getAllDiscoveryBeats();
+    const existing = all.find((b) => b.id === id);
+    if (!existing) return null;
+
+    const safeTags = updates.tags !== undefined
+      ? (Array.isArray(updates.tags) ? updates.tags.slice(0, 5) : [])
+      : (existing.tags || []).slice(0, 5);
+
+    const mergedBeat: DiscoveryBeat = {
+      ...existing,
+      ...updates,
+      tags: safeTags,
+    };
+
     if (typeof window !== "undefined") {
       const custom = loadCustomBeats();
       const customIndex = custom.findIndex((b) => b.id === id);
       if (customIndex !== -1) {
-        custom[customIndex] = { ...custom[customIndex], ...updates };
-        saveCustomBeats(custom);
+        custom[customIndex] = mergedBeat;
       } else {
-        const overrides = loadBeatOverrides();
-        overrides[id] = { ...(overrides[id] || {}), ...updates };
-        try {
-          localStorage.setItem(STORAGE_KEY_BEAT_OVERRIDES, JSON.stringify(overrides));
-        } catch {}
+        custom.unshift(mergedBeat);
       }
+      saveCustomBeats(custom);
       notifyBeatsUpdated();
     }
 
-    // Async write to Supabase
-    supabase.from("beats").update({
-      title: updates.title,
-      bpm: updates.bpm,
-      price_tag: updates.priceTag,
-      genres: updates.genres,
-      tags: updates.tags,
-      audio_url: updates.audioUrl,
-    }).eq("id", id).then(
-      ({ error }) => {
-        // if (error) console.warn("Supabase beat update failed:", error.message);
+    // Async upsert to Supabase public.beats so changes are authoritative for all users
+    supabase.from("beats").upsert({
+      id: mergedBeat.id,
+      title: mergedBeat.title,
+      producer_id: mergedBeat.beatmaker.id,
+      audio_url: mergedBeat.audioUrl,
+      duration: mergedBeat.duration || 120,
+      waveform: mergedBeat.waveform || [],
+      bpm: mergedBeat.bpm,
+      price_tag: mergedBeat.priceTag || "Not For Sale",
+      genres: mergedBeat.genres || [],
+      tags: safeTags,
+      flames: mergedBeat.flames || 0,
+      battle_source: mergedBeat.battleSource,
+      tier: mergedBeat.tier || 4,
+      rank: mergedBeat.rank,
+      created_at: mergedBeat.createdAt || new Date().toISOString(),
+    }).then(
+      () => {
+        notifyBeatsUpdated();
       },
       () => {}
     );
 
-    const all = this.getAllDiscoveryBeats();
-    return all.find((b) => b.id === id) || null;
+    // If this is a battle submission, also sync to submissions table
+    if (id.startsWith("sub-")) {
+      const rawSubId = id.replace(/^sub-/, "");
+      supabase.from("submissions").update({
+        bpm: mergedBeat.bpm,
+        beat_title: mergedBeat.title,
+      }).or(`id.eq.${id},id.eq.${rawSubId}`).then(() => {}, () => {});
+    }
+
+    return mergedBeat;
   },
 
   deleteBeat(id: string): boolean {

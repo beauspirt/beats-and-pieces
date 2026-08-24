@@ -51,7 +51,7 @@ export default function VaultPage() {
         <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3">
           <h3
             onClick={() => setActiveModalItem(item)}
-            className="text-xl font-bold text-white leading-snug cursor-pointer"
+            className="text-2xl font-bold text-white leading-snug cursor-pointer"
           >
             {item.title}
           </h3>
@@ -107,7 +107,7 @@ export default function VaultPage() {
       
       {/* Breakdowns Section */}
       <section className="space-y-4">
-        <h2 className="text-xl font-bold text-white flex items-center gap-2">
+        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
           Track Breakdowns
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -117,7 +117,7 @@ export default function VaultPage() {
 
       {/* Live Sets Section */}
       <section className="space-y-4">
-        <h2 className="text-xl font-bold text-white flex items-center gap-2">
+        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
           Live Sets
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

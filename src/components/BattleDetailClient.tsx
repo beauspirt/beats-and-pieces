@@ -854,7 +854,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
               
               {/* 1. Rules (Directly on website background) */}
               <div className="space-y-3.5">
-                <h3 className="text-xl font-bold text-white">
+                <h3 className="text-2xl font-bold text-white">
                   Rules
                 </h3>
 
@@ -877,7 +877,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
               {battle.samples && battle.samples.length > 0 && (
                 <div className="space-y-3.5">
                   <div className="flex items-center justify-between gap-3">
-                    <h3 className="text-xl font-bold text-white">
+                    <h3 className="text-2xl font-bold text-white">
                       Sample(s)
                     </h3>
 
@@ -952,7 +952,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             {/* Right Column: Submit Your Entry Container (Reduces in size when submitted or staged) */}
             <div className={`lg:col-span-6 bg-[#181818] rounded-3xl p-5 sm:p-7 space-y-4 flex flex-col ${(myEntry || stagedBeat) ? "h-auto" : "h-full justify-between"}`}>
               <div className="space-y-4 flex-1 flex flex-col">
-                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <h3 className="text-2xl font-bold text-white flex items-center gap-2">
                   <Upload className="w-5 h-5 text-[#FF5E3A]" />
                   <span>Submit your entry</span>
                 </h3>
@@ -1135,7 +1135,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                           </div>
                         </div>
                       ) : (
-                        <p className="text-white font-bold text-xl truncate">{myEntry.title}</p>
+                        <p className="text-white font-bold text-2xl truncate">{myEntry.title}</p>
                       )}
                     </div>
 
@@ -1166,7 +1166,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
           
           {/* Anti-Bias Info (Directly on website background) */}
           <div className="space-y-1">
-            <h3 className="text-xl font-bold text-white tracking-tight">
+            <h3 className="text-2xl font-bold text-white tracking-tight">
               Public Rating Phase
             </h3>
             <p className="text-xs text-[#888888]">
@@ -1278,7 +1278,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                   className="bg-[#181818] rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl relative cursor-default"
                 >
                   <div className="space-y-2">
-                    <h3 className="text-xl font-bold text-[#FF5E3A] flex items-center gap-2">
+                    <h3 className="text-2xl font-bold text-[#FF5E3A] flex items-center gap-2">
                       <span>More Ratings Required</span>
                     </h3>
                     <p className="text-xs text-[#D1D1D1] leading-relaxed">
@@ -1322,7 +1322,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                   className="bg-[#181818] rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default"
                 >
                   <div className="space-y-2">
-                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                    <h3 className="text-2xl font-bold text-white flex items-center gap-2">
                       <ShieldCheck className="w-5 h-5 text-[#7B61FF]" />
                       <span>Submit & Lock Your Ratings</span>
                     </h3>
@@ -1376,7 +1376,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             {/* Left Column: Title, Subtitle, Action Button */}
             <div className="lg:col-span-7 space-y-4 flex flex-col justify-between h-full">
               <div className="space-y-2">
-                <h3 className="text-xl font-bold text-white tracking-tight">
+                <h3 className="text-2xl font-bold text-white tracking-tight">
                   {isUserJudge ? "Jury Evaluation Portal" : "Jury Evaluation"}
                 </h3>
 
@@ -1619,7 +1619,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                             )}
                             <Link
                               href={`/${sub.userId || "guest"}`}
-                              className="text-xl font-bold text-white hover:text-[#7B61FF] transition-colors leading-snug"
+                              className="text-2xl font-bold text-white hover:text-[#7B61FF] transition-colors leading-snug"
                             >
                               {sub.beatmakerTag || "Producer"}
                             </Link>

@@ -46,7 +46,7 @@ export const HostGuard: React.FC<{ children: React.ReactNode }> = ({ children })
           </div>
 
           <div className="space-y-2">
-            <h1 className="text-xl font-bold text-white tracking-tight">
+            <h1 className="text-2xl font-bold text-white tracking-tight">
               Host Panel Access Restricted
             </h1>
             <p className="text-xs text-zinc-400 leading-relaxed">

@@ -429,7 +429,7 @@ export default function AdminBattlesManagerPage() {
               className="bg-[#181818] rounded-2xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto cursor-default"
             >
               <div className="flex items-center justify-between pb-2">
-                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <h3 className="text-2xl font-bold text-white flex items-center gap-2">
                   <Trophy className="w-5 h-5 text-brand" />
                   <span>Edit Battle #{editingBattle.number}</span>
                 </h3>

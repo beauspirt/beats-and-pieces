@@ -165,7 +165,7 @@ export default function AdminReleasesManagerPage() {
                 className="bg-[#181818] rounded-2xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto cursor-default"
               >
                 <div className="flex items-center justify-between pb-2">
-                  <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                  <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                     <Edit3 className="w-5 h-5 text-brand" />
                     <span>Edit Release Details</span>
                   </h2>

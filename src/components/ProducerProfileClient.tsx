@@ -1058,7 +1058,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h2 className="text-xl font-bold text-white">Beats</h2>
+            <h2 className="text-2xl font-bold text-white">Beats</h2>
           </div>
           
           {isProfileOwner && (
@@ -1303,7 +1303,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       {producerVaultItems.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-white">
+            <h2 className="text-2xl font-bold text-white">
               Featured In Vault
             </h2>
             <Link
@@ -1361,7 +1361,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
             >
             <div className="flex items-center justify-between pb-1">
               <div className="space-y-0.5">
-                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <h3 className="text-2xl font-bold text-white flex items-center gap-2">
                   <Pencil className="w-4 h-4 text-[#7B61FF]" />
                   <span>Edit Beat Details</span>
                 </h3>

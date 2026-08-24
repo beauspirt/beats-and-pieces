@@ -34,7 +34,7 @@ export const AdminGuard: React.FC<{ children: React.ReactNode }> = ({ children }
         </div>
 
         <div className="space-y-2 max-w-md">
-          <h2 className="text-xl font-bold text-white">Admin Access Restricted</h2>
+          <h2 className="text-2xl font-bold text-white">Admin Access Restricted</h2>
           <p className="text-xs text-zinc-400 leading-relaxed">
             The Admin Control Center is restricted to authorized platform administrators (<strong>Nerub / adrian.hrihor@gmail.com</strong>).
           </p>

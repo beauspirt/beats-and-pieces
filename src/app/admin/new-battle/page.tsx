@@ -280,7 +280,7 @@ export default function NewBattlePage() {
         
           {/* CONTAINER: DETAILS */}
           <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 space-y-6">
-            <h2 className="text-xl font-bold text-white">Details</h2>
+            <h2 className="text-2xl font-bold text-white">Details</h2>
 
             {/* Title */}
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">

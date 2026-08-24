@@ -86,7 +86,7 @@ export default function NewReleasePage() {
           
           {/* CONTAINER 1: DETAILS */}
           <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 space-y-6">
-            <h2 className="text-xl font-bold text-white">Details</h2>
+            <h2 className="text-2xl font-bold text-white">Details</h2>
 
             {/* Title */}
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
@@ -166,7 +166,7 @@ export default function NewReleasePage() {
 
           {/* CONTAINER 2: STREAMING LINKS */}
           <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 space-y-5">
-            <h2 className="text-xl font-bold text-white">Streaming Links</h2>
+            <h2 className="text-2xl font-bold text-white">Streaming Links</h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
               <label className="sm:col-span-3 text-xs font-bold text-[#D1D1D1]">Spotify</label>

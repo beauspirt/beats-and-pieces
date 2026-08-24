@@ -60,7 +60,7 @@ export default function BattlesPage() {
       {activeBattle && (
         <section className="space-y-4">
           <div className="flex items-center justify-between h-9">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2.5">
+            <h2 className="text-2xl font-bold text-white flex items-center gap-2.5">
               <span className="w-2.5 h-2.5 rounded-full bg-[#FF5E3A] animate-pulse" />
               <span>Active Battle</span>
             </h2>
@@ -128,7 +128,7 @@ export default function BattlesPage() {
       {additionalActive.length > 0 && (
         <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2.5">
+            <h2 className="text-2xl font-bold text-white flex items-center gap-2.5">
               <span className="w-2.5 h-2.5 rounded-full bg-brand animate-pulse" />
               <span>Other Ongoing Battles</span>
             </h2>
@@ -190,7 +190,7 @@ export default function BattlesPage() {
       {/* SECTION 2: BATTLES ARCHIVE */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-white">Battles Archive</h2>
+          <h2 className="text-2xl font-bold text-white">Battles Archive</h2>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

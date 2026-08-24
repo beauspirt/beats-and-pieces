@@ -43,7 +43,7 @@ export default function AdminDashboardPage() {
           </div>
 
           <div>
-            <h2 className="text-xl font-bold text-white group-hover:text-brand transition-colors">
+            <h2 className="text-2xl font-bold text-white group-hover:text-brand transition-colors">
               Create New Battle
             </h2>
             <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
@@ -62,7 +62,7 @@ export default function AdminDashboardPage() {
           </div>
 
           <div>
-            <h2 className="text-xl font-bold text-white group-hover:text-amber-400 transition-colors">
+            <h2 className="text-2xl font-bold text-white group-hover:text-amber-400 transition-colors">
               Edit Battle(s)
             </h2>
             <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
@@ -81,7 +81,7 @@ export default function AdminDashboardPage() {
           </div>
 
           <div>
-            <h2 className="text-xl font-bold text-white group-hover:text-purple-400 transition-colors">
+            <h2 className="text-2xl font-bold text-white group-hover:text-purple-400 transition-colors">
               Create New Release
             </h2>
             <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
@@ -100,7 +100,7 @@ export default function AdminDashboardPage() {
           </div>
 
           <div>
-            <h2 className="text-xl font-bold text-white group-hover:text-indigo-400 transition-colors">
+            <h2 className="text-2xl font-bold text-white group-hover:text-indigo-400 transition-colors">
               Edit Release(s)
             </h2>
             <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
@@ -125,7 +125,7 @@ export default function AdminDashboardPage() {
           </div>
 
           <div>
-            <h2 className="text-xl font-bold text-white group-hover:text-[#FF5E3A] transition-colors">
+            <h2 className="text-2xl font-bold text-white group-hover:text-[#FF5E3A] transition-colors">
               Voting Anomaly & Moderation
             </h2>
             <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
@@ -142,7 +142,7 @@ export default function AdminDashboardPage() {
           </div>
 
           <div>
-            <h2 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors">
+            <h2 className="text-2xl font-bold text-white group-hover:text-blue-400 transition-colors">
               Users & Discord Roles
             </h2>
             <p className="text-xs text-zinc-400 mt-1 leading-relaxed">

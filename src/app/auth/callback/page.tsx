@@ -95,7 +95,7 @@ export default function AuthCallbackPage() {
       {status === "loading" && (
         <div className="space-y-4 animate-in fade-in duration-200">
           <Loader2 className="w-10 h-10 text-brand animate-spin mx-auto" />
-          <h2 className="text-xl font-bold text-white">Verifying Google Account...</h2>
+          <h2 className="text-2xl font-bold text-white">Verifying Google Account...</h2>
           <p className="text-xs text-zinc-400">Authenticating and synchronizing your user profile.</p>
         </div>
       )}
@@ -105,7 +105,7 @@ export default function AuthCallbackPage() {
           <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center">
             <CheckCircle2 className="w-6 h-6" />
           </div>
-          <h2 className="text-xl font-bold text-white">Signed in successfully!</h2>
+          <h2 className="text-2xl font-bold text-white">Signed in successfully!</h2>
           <p className="text-xs text-zinc-400">Redirecting to your dashboard...</p>
         </div>
       )}
@@ -115,7 +115,7 @@ export default function AuthCallbackPage() {
           <div className="w-12 h-12 rounded-full bg-red-500/20 text-red-400 mx-auto flex items-center justify-center">
             <ShieldAlert className="w-6 h-6" />
           </div>
-          <h2 className="text-xl font-bold text-white">Sign-In Failed</h2>
+          <h2 className="text-2xl font-bold text-white">Sign-In Failed</h2>
           <p className="text-xs text-zinc-400 leading-relaxed">{errorMessage}</p>
           <button
             onClick={() => router.push("/signin")}

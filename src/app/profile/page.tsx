@@ -182,7 +182,7 @@ function ProfileContent() {
         
         {/* CONTAINER 1: DETAILS */}
         <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 space-y-5 shadow-lg">
-          <h2 className="text-xl font-bold text-white">Details</h2>
+          <h2 className="text-2xl font-bold text-white">Details</h2>
 
           {/* Profile Picture Upload */}
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
@@ -310,7 +310,7 @@ function ProfileContent() {
 
         {/* CONTAINER 2: SOCIALS */}
         <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 space-y-6 shadow-lg">
-          <h2 className="text-xl font-bold text-white">Socials</h2>
+          <h2 className="text-2xl font-bold text-white">Socials</h2>
 
           {SOCIAL_PLATFORMS.map(({ key, label }) => {
             const url = links[key] || "";

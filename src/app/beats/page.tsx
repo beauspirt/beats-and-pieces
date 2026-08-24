@@ -461,7 +461,7 @@ export default function BeatsDiscoveryPage() {
                 className="bg-[#181818] rounded-2xl p-4 sm:p-5 space-y-3.5 sm:space-y-4 shadow-md"
               >
                 {/* Row 1: Header (Title, Producer, Avatar, Badges, Meta) */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
                   
                   {/* Left: Beat Title + Producer Avatar/Tag + Badges */}
                   <div className="flex items-center gap-3.5 min-w-0 flex-1">
@@ -479,8 +479,8 @@ export default function BeatsDiscoveryPage() {
 
                     <div className="min-w-0 flex-1">
                       {/* Title & Badges */}
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-bold text-white text-lg leading-snug">
+                      <div className="flex flex-wrap items-center gap-2 min-w-0">
+                        <h3 className="font-bold text-white text-lg leading-snug break-words [overflow-wrap:anywhere]">
                           {beat.title}
                         </h3>
 

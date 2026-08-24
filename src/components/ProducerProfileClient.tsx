@@ -1112,14 +1112,14 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                 className="bg-[#181818] rounded-2xl p-4 sm:p-5 space-y-3 shadow-md group relative"
               >
                 {/* Row 1: Header (Title, Rank Badge, Meta, Edit Action) */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
                   
                   {/* Left: Beat Title + Quick Link Badge + Rank Badge */}
                   <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                    <div className="min-w-0 flex-1 truncate">
+                    <div className="min-w-0 flex-1">
                       {/* Title & Desktop Inline Badges */}
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-bold text-white text-lg leading-snug">
+                      <div className="flex flex-wrap items-center gap-2 min-w-0">
+                        <h3 className="font-bold text-white text-lg leading-snug break-words [overflow-wrap:anywhere]">
                           {beat.title}
                         </h3>
 

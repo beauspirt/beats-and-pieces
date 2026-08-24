@@ -186,7 +186,7 @@ export default function BeatsDiscoveryPage() {
               placeholder="Search by title, producer, or tags..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#181818] rounded-2xl pl-11 pr-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+              className="w-full bg-[#181818] rounded-3xl pl-11 pr-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
             />
             <Search className="w-4 h-4 text-zinc-500 absolute left-4 top-1/2 -translate-y-1/2" />
           </div>
@@ -197,7 +197,7 @@ export default function BeatsDiscoveryPage() {
             <button
               type="button"
               onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
-              className={`w-11 h-11 sm:w-auto sm:h-auto sm:px-4 sm:py-3 rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${
+              className={`w-11 h-11 sm:w-auto sm:h-auto sm:px-4 sm:py-3 rounded-3xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${
                 showOnlyFavorites
                   ? "bg-amber-500/20 text-amber-300 shadow-sm"
                   : "bg-[#181818] hover:bg-[#202020] text-zinc-400 hover:text-white"
@@ -213,7 +213,7 @@ export default function BeatsDiscoveryPage() {
             <button
               type="button"
               onClick={() => setShowFilters(!showFilters)}
-              className={`w-11 h-11 sm:w-auto sm:h-auto sm:px-4 sm:py-3 rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0 relative ${
+              className={`w-11 h-11 sm:w-auto sm:h-auto sm:px-4 sm:py-3 rounded-3xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0 relative ${
                 showFilters || activeFiltersCount > 0
                   ? "bg-[#7B61FF] text-white"
                   : "bg-[#181818] hover:bg-[#202020] text-zinc-400 hover:text-white"
@@ -239,7 +239,7 @@ export default function BeatsDiscoveryPage() {
                   e.stopPropagation();
                   setIsSortOpen((prev) => !prev);
                 }}
-                className="w-full h-11 sm:h-auto flex items-center justify-between sm:justify-center gap-1.5 sm:gap-2 bg-[#181818] hover:bg-[#202020] rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 text-xs text-white font-bold transition-all cursor-pointer"
+                className="w-full h-11 sm:h-auto flex items-center justify-between sm:justify-center gap-1.5 sm:gap-2 bg-[#181818] hover:bg-[#202020] rounded-3xl px-3 sm:px-4 py-2.5 sm:py-3 text-xs text-white font-bold transition-all cursor-pointer"
               >
                 <div className="flex items-center gap-1.5 min-w-0">
                   <SlidersHorizontal className="w-4 h-4 text-zinc-400 shrink-0" />
@@ -251,7 +251,7 @@ export default function BeatsDiscoveryPage() {
               {isSortOpen && (
                 <div
                   onClick={(e) => e.stopPropagation()}
-                  className="absolute right-0 mt-2 w-44 bg-[#181818] rounded-2xl shadow-2xl p-2 z-[100] space-y-1 animate-in fade-in slide-in-from-top-2 duration-150"
+                  className="absolute right-0 mt-2 w-44 bg-[#181818] rounded-3xl shadow-2xl p-2 z-[100] space-y-1 animate-in fade-in slide-in-from-top-2 duration-150"
                 >
                   {(["recent", "rating"] as const).map((key) => {
                     const isSelected = sortBy === key;
@@ -265,7 +265,7 @@ export default function BeatsDiscoveryPage() {
                           setSortBy(key);
                           setIsSortOpen(false);
                         }}
-                        className={`w-full text-left px-3.5 py-2.5 rounded-2xl text-xs font-bold flex items-center justify-between transition-colors cursor-pointer ${
+                        className={`w-full text-left px-3.5 py-2.5 rounded-3xl text-xs font-bold flex items-center justify-between transition-colors cursor-pointer ${
                           isSelected
                             ? "bg-[#7B61FF] text-white"
                             : "text-zinc-300 hover:bg-[#222222] hover:text-white"
@@ -283,7 +283,7 @@ export default function BeatsDiscoveryPage() {
             {/* Upload Beat Button */}
             <Link
               href={currentUser?.id ? `/${currentUser.id}` : "/profile"}
-              className="shrink-0 h-11 sm:h-auto inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 rounded-2xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer text-center"
+              className="shrink-0 h-11 sm:h-auto inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 rounded-3xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer text-center"
             >
               <Upload className="w-4 h-4 shrink-0" />
               <span className="whitespace-nowrap">Upload</span>
@@ -323,7 +323,7 @@ export default function BeatsDiscoveryPage() {
 
         {/* Expandable Filter Drawer */}
         {showFilters && (
-          <div className="bg-[#181818] rounded-2xl p-5 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="bg-[#181818] rounded-3xl p-5 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
                 Tags
@@ -351,7 +351,7 @@ export default function BeatsDiscoveryPage() {
                       key={genre}
                       type="button"
                       onClick={() => handleTagToggle(genre)}
-                      className={`px-3 py-1.5 rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                      className={`px-3 py-1.5 rounded-3xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                         isSelected
                           ? "bg-[#7B61FF] text-white shadow-sm"
                           : "bg-[#121212] text-zinc-400 hover:text-white"
@@ -376,7 +376,7 @@ export default function BeatsDiscoveryPage() {
                   onClick={() =>
                     setSelectedSaleFilter((prev) => (prev === "for_sale" ? "all" : "for_sale"))
                   }
-                  className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-3.5 py-2 rounded-3xl text-xs font-bold transition-all cursor-pointer ${
                     selectedSaleFilter === "for_sale"
                       ? "bg-[#7B61FF] text-white shadow-sm"
                       : "bg-[#121212] text-zinc-400 hover:text-white"
@@ -389,7 +389,7 @@ export default function BeatsDiscoveryPage() {
                   onClick={() =>
                     setSelectedSaleFilter((prev) => (prev === "not_for_sale" ? "all" : "not_for_sale"))
                   }
-                  className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-3.5 py-2 rounded-3xl text-xs font-bold transition-all cursor-pointer ${
                     selectedSaleFilter === "not_for_sale"
                       ? "bg-[#7B61FF] text-white shadow-sm"
                       : "bg-[#121212] text-zinc-400 hover:text-white"
@@ -406,7 +406,7 @@ export default function BeatsDiscoveryPage() {
       {/* Beats Feed List */}
       <div className="space-y-4">
         {visibleBeats.length === 0 ? (
-          <div className="bg-[#181818] rounded-2xl p-10 sm:p-14 text-center space-y-3">
+          <div className="bg-[#181818] rounded-3xl p-10 sm:p-14 text-center space-y-3">
             {showOnlyFavorites ? (
               <div className="space-y-3 max-w-sm mx-auto animate-in fade-in duration-200">
                 <div className="w-12 h-12 rounded-full bg-amber-500/15 text-amber-400 flex items-center justify-center mx-auto">
@@ -422,7 +422,7 @@ export default function BeatsDiscoveryPage() {
                   <button
                     type="button"
                     onClick={() => setShowOnlyFavorites(false)}
-                    className="px-5 py-2.5 rounded-2xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer inline-flex items-center gap-1.5"
+                    className="px-5 py-2.5 rounded-3xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer inline-flex items-center gap-1.5"
                   >
                     <span>Explore Beats</span>
                   </button>
@@ -458,7 +458,7 @@ export default function BeatsDiscoveryPage() {
             return (
               <div
                 key={beat.id}
-                className="bg-[#181818] rounded-2xl p-4 sm:p-5 space-y-3.5 sm:space-y-4 shadow-md"
+                className="bg-[#181818] rounded-3xl p-4 sm:p-5 space-y-3.5 sm:space-y-4 shadow-md"
               >
                 {/* Row 1: Header (Title, Producer, Avatar, Badges, Meta) */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
@@ -503,7 +503,7 @@ export default function BeatsDiscoveryPage() {
                         {match && (
                           <Link
                             href={`/battles/battle-${match[1]}`}
-                            className="px-2 py-0.5 rounded-2xl bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-xs font-bold shrink-0 transition-all inline-flex items-center gap-1"
+                            className="px-2 py-0.5 rounded-3xl bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-xs font-bold shrink-0 transition-all inline-flex items-center gap-1"
                             title={`View ${beat.battleSource || `Beat Battle #${match[1]}`}`}
                           >
                             <span>BB#{match[1]}</span>
@@ -526,7 +526,7 @@ export default function BeatsDiscoveryPage() {
                   <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 flex-wrap sm:flex-nowrap select-none">
                     {/* BPM */}
                     {beat.bpm ? (
-                      <span className="text-xs font-bold px-2.5 py-1 rounded-2xl bg-[#121212] text-[#888888] select-none">
+                      <span className="text-xs font-bold px-2.5 py-1 rounded-3xl bg-[#121212] text-[#888888] select-none">
                         {beat.bpm} BPM
                       </span>
                     ) : null}
@@ -564,7 +564,7 @@ export default function BeatsDiscoveryPage() {
                     <button
                       type="button"
                       onClick={() => toggleFavorite(beat.id)}
-                      className="p-2 rounded-2xl bg-[#121212] hover:bg-[#202020] transition-colors text-[#888888] hover:text-amber-400 cursor-pointer ml-auto sm:ml-0 select-none"
+                      className="p-2 rounded-3xl bg-[#121212] hover:bg-[#202020] transition-colors text-[#888888] hover:text-amber-400 cursor-pointer ml-auto sm:ml-0 select-none"
                       title={beat.isFavorite ? "Remove from favorites" : "Add to favorites"}
                     >
                       <Star
@@ -642,7 +642,7 @@ export default function BeatsDiscoveryPage() {
           <button
             type="button"
             onClick={() => setVisibleCount((prev) => prev + 15)}
-            className="px-8 py-3.5 rounded-2xl bg-[#181818] hover:bg-[#222222] text-white text-lg font-bold transition-all shadow-md active:scale-95 flex items-center gap-2 cursor-pointer"
+            className="px-8 py-3.5 rounded-3xl bg-[#181818] hover:bg-[#222222] text-white text-lg font-bold transition-all shadow-md active:scale-95 flex items-center gap-2 cursor-pointer"
           >
             <span>Load More Beats (+15)</span>
             <ChevronDown className="w-4 h-4" />

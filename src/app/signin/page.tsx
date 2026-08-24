@@ -84,7 +84,7 @@ function SignInContent() {
 
       {/* Auth Error Banner */}
       {authError && (
-        <div className="w-full max-w-sm mb-6 p-4 rounded-2xl bg-red-500/10 text-red-400 text-xs text-left flex items-start gap-3 animate-in shake">
+        <div className="w-full max-w-sm mb-6 p-4 rounded-3xl bg-red-500/10 text-red-400 text-xs text-left flex items-start gap-3 animate-in shake">
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <p className="leading-relaxed">{authError}</p>
         </div>
@@ -95,7 +95,7 @@ function SignInContent() {
         <button
           onClick={handleGoogleClick}
           disabled={isAuthenticating}
-          className="w-full py-3.5 px-6 rounded-2xl bg-white hover:bg-zinc-100 text-black text-xs font-bold transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
+          className="w-full py-3.5 px-6 rounded-3xl bg-white hover:bg-zinc-100 text-black text-xs font-bold transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
         >
           {isAuthenticating ? (
             <Loader2 className="w-4 h-4 animate-spin text-black" />

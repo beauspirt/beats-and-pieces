@@ -36,9 +36,9 @@ export default function AdminDashboardPage() {
         {/* Option 1: Create New Battle */}
         <Link
           href="/admin/new-battle"
-          className="bg-surface-card rounded-2xl p-6 hover:bg-surface-hover transition-all space-y-4 group shadow-md"
+          className="bg-surface-card rounded-3xl p-6 hover:bg-surface-hover transition-all space-y-4 group shadow-md"
         >
-          <div className="w-12 h-12 rounded-2xl bg-brand/10 flex items-center justify-center text-brand group-hover:scale-110 transition-transform">
+          <div className="w-12 h-12 rounded-3xl bg-brand/10 flex items-center justify-center text-brand group-hover:scale-110 transition-transform">
             <Trophy className="w-6 h-6" />
           </div>
 
@@ -55,9 +55,9 @@ export default function AdminDashboardPage() {
         {/* Option 2: Edit Existing Battles */}
         <Link
           href="/admin/battles"
-          className="bg-surface-card rounded-2xl p-6 hover:bg-surface-hover transition-all space-y-4 group shadow-md"
+          className="bg-surface-card rounded-3xl p-6 hover:bg-surface-hover transition-all space-y-4 group shadow-md"
         >
-          <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+          <div className="w-12 h-12 rounded-3xl bg-amber-500/10 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
             <Layers className="w-6 h-6" />
           </div>
 
@@ -74,9 +74,9 @@ export default function AdminDashboardPage() {
         {/* Option 3: Create New Release */}
         <Link
           href="/admin/new-release"
-          className="bg-surface-card rounded-2xl p-6 hover:bg-surface-hover transition-all space-y-4 group shadow-md"
+          className="bg-surface-card rounded-3xl p-6 hover:bg-surface-hover transition-all space-y-4 group shadow-md"
         >
-          <div className="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+          <div className="w-12 h-12 rounded-3xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
             <Disc className="w-6 h-6" />
           </div>
 
@@ -93,9 +93,9 @@ export default function AdminDashboardPage() {
         {/* Option 4: Edit Releases */}
         <Link
           href="/admin/releases"
-          className="bg-surface-card rounded-2xl p-6 hover:bg-surface-hover transition-all space-y-4 group shadow-md"
+          className="bg-surface-card rounded-3xl p-6 hover:bg-surface-hover transition-all space-y-4 group shadow-md"
         >
-          <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+          <div className="w-12 h-12 rounded-3xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
             <FileEdit className="w-6 h-6" />
           </div>
 
@@ -112,7 +112,7 @@ export default function AdminDashboardPage() {
         {/* Option 5: Voting Anomaly & Anti-Fraud Moderation */}
         <Link
           href="/admin/moderation"
-          className="bg-surface-card rounded-2xl p-6 hover:bg-surface-hover transition-all space-y-4 group relative shadow-md"
+          className="bg-surface-card rounded-3xl p-6 hover:bg-surface-hover transition-all space-y-4 group relative shadow-md"
         >
           {pendingFlagsCount > 0 && (
             <span className="absolute top-6 right-6 px-2.5 py-1 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-mono font-bold">
@@ -120,7 +120,7 @@ export default function AdminDashboardPage() {
             </span>
           )}
 
-          <div className="w-12 h-12 rounded-2xl bg-[#FF5E3A]/10 flex items-center justify-center text-[#FF5E3A] group-hover:scale-110 transition-transform">
+          <div className="w-12 h-12 rounded-3xl bg-[#FF5E3A]/10 flex items-center justify-center text-[#FF5E3A] group-hover:scale-110 transition-transform">
             <AlertTriangle className="w-6 h-6" />
           </div>
 
@@ -135,9 +135,9 @@ export default function AdminDashboardPage() {
         </Link>
 
         {/* Option 6: User & Role Permissions */}
-        <div className="bg-surface-card rounded-2xl p-6 hover:bg-surface-hover transition-all space-y-4 group cursor-pointer shadow-md"
+        <div className="bg-surface-card rounded-3xl p-6 hover:bg-surface-hover transition-all space-y-4 group cursor-pointer shadow-md"
              onClick={() => alert("Role management dashboard.")}>
-          <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+          <div className="w-12 h-12 rounded-3xl bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
             <Users className="w-6 h-6" />
           </div>
 
@@ -154,7 +154,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* QUICK SWITCHER FOR TESTING & DEMO SHOWCASE (ADMIN ONLY) */}
-      <div className="bg-surface-card rounded-2xl p-6 space-y-4 shadow-xl">
+      <div className="bg-surface-card rounded-3xl p-6 space-y-4 shadow-xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <UserCheck className="w-5 h-5 text-brand" />
@@ -179,7 +179,7 @@ export default function AdminDashboardPage() {
                 loginWithUser(id);
                 router.push("/profile");
               }}
-              className="p-3 rounded-2xl bg-[#121212] hover:bg-[#202020] text-left transition-all group cursor-pointer"
+              className="p-3 rounded-3xl bg-[#121212] hover:bg-[#202020] text-left transition-all group cursor-pointer"
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-white group-hover:text-brand transition-colors truncate">

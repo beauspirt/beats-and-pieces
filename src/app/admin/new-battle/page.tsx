@@ -279,7 +279,7 @@ export default function NewBattlePage() {
         <form onSubmit={handleSubmit} className="space-y-6">
         
           {/* CONTAINER: DETAILS */}
-          <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 space-y-6">
+          <div className="bg-[#181818] rounded-3xl p-6 sm:p-8 space-y-6">
             <h2 className="text-2xl font-bold text-white">Details</h2>
 
             {/* Title */}
@@ -293,7 +293,7 @@ export default function NewBattlePage() {
                   placeholder="e.g. Beat Battle #9"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full bg-[#121212] rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+                  className="w-full bg-[#121212] rounded-3xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
                   required
                 />
               </div>
@@ -305,8 +305,8 @@ export default function NewBattlePage() {
                 Cover Art
               </label>
               <div className="sm:col-span-9">
-                <div className="flex items-center gap-4 bg-[#121212] p-3 rounded-2xl">
-                  <div className="w-16 h-16 rounded-2xl overflow-hidden relative bg-[#181818] shrink-0 flex items-center justify-center text-zinc-600 shadow-md">
+                <div className="flex items-center gap-4 bg-[#121212] p-3 rounded-3xl">
+                  <div className="w-16 h-16 rounded-3xl overflow-hidden relative bg-[#181818] shrink-0 flex items-center justify-center text-zinc-600 shadow-md">
                     {coverImage ? (
                       <Image
                         src={coverImage}
@@ -322,7 +322,7 @@ export default function NewBattlePage() {
                     <span className="text-xs text-[#777777]">
                       {coverImage ? "Custom image selected" : "No artwork selected (square format recommended)"}
                     </span>
-                    <label className="px-4 py-2 rounded-2xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-white cursor-pointer transition-colors shrink-0">
+                    <label className="px-4 py-2 rounded-3xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-white cursor-pointer transition-colors shrink-0">
                       Browse File
                       <input type="file" accept="image/*" onChange={handleImageFileChange} className="hidden" />
                     </label>
@@ -345,7 +345,7 @@ export default function NewBattlePage() {
                   {hosts.map((host, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-2xl bg-[#121212] text-xs font-bold text-white shadow-sm"
+                      className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-3xl bg-[#121212] text-xs font-bold text-white shadow-sm"
                     >
                       <div className="flex items-center gap-1.5">
                         <span className="font-bold">{host.name}</span>
@@ -363,7 +363,7 @@ export default function NewBattlePage() {
                 </div>
 
                 {showAddHost ? (
-                  <div className="bg-[#121212] p-3.5 rounded-2xl space-y-2.5 animate-in fade-in">
+                  <div className="bg-[#121212] p-3.5 rounded-3xl space-y-2.5 animate-in fade-in">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <input
                         type="text"
@@ -376,7 +376,7 @@ export default function NewBattlePage() {
                             handleAddHost();
                           }
                         }}
-                        className="bg-[#181818] rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+                        className="bg-[#181818] rounded-3xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
                         autoFocus
                       />
                       <input
@@ -390,7 +390,7 @@ export default function NewBattlePage() {
                             handleAddHost();
                           }
                         }}
-                        className="bg-[#181818] rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+                        className="bg-[#181818] rounded-3xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
                       />
                     </div>
                     <div className="flex items-center justify-end gap-2 pt-1">
@@ -405,7 +405,7 @@ export default function NewBattlePage() {
                         type="button"
                         onClick={handleAddHost}
                         disabled={!hostNameInput.trim()}
-                        className="px-4 py-1.5 rounded-2xl bg-[#7B61FF] hover:bg-[#684DE6] text-xs text-white font-bold cursor-pointer disabled:opacity-50"
+                        className="px-4 py-1.5 rounded-3xl bg-[#7B61FF] hover:bg-[#684DE6] text-xs text-white font-bold cursor-pointer disabled:opacity-50"
                       >
                         Set Host
                       </button>
@@ -415,7 +415,7 @@ export default function NewBattlePage() {
                   <button
                     type="button"
                     onClick={() => setShowAddHost(true)}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-[#121212] hover:bg-[#202020] text-xs text-[#D1D1D1] font-bold transition-all cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-3xl bg-[#121212] hover:bg-[#202020] text-xs text-[#D1D1D1] font-bold transition-all cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5 text-[#7B61FF]" />
                     <span>{hosts.length > 0 ? "Change Host" : "Assign Host"}</span>
@@ -438,7 +438,7 @@ export default function NewBattlePage() {
                   {judges.map((judge, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-2xl bg-[#121212] text-xs font-bold text-white shadow-sm"
+                      className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-3xl bg-[#121212] text-xs font-bold text-white shadow-sm"
                     >
                       <div className="flex items-center gap-1.5">
                         <span className="font-bold">{judge.name}</span>
@@ -456,7 +456,7 @@ export default function NewBattlePage() {
                 </div>
 
                 {showAddJudge ? (
-                  <div className="bg-[#121212] p-3.5 rounded-2xl space-y-2.5 animate-in fade-in">
+                  <div className="bg-[#121212] p-3.5 rounded-3xl space-y-2.5 animate-in fade-in">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <input
                         type="text"
@@ -469,7 +469,7 @@ export default function NewBattlePage() {
                             handleAddJudge();
                           }
                         }}
-                        className="bg-[#181818] rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+                        className="bg-[#181818] rounded-3xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
                         autoFocus
                       />
                       <input
@@ -483,7 +483,7 @@ export default function NewBattlePage() {
                             handleAddJudge();
                           }
                         }}
-                        className="bg-[#181818] rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+                        className="bg-[#181818] rounded-3xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
                       />
                     </div>
                     <div className="flex items-center justify-end gap-2 pt-1">
@@ -498,7 +498,7 @@ export default function NewBattlePage() {
                         type="button"
                         onClick={handleAddJudge}
                         disabled={!judgeNameInput.trim()}
-                        className="px-4 py-1.5 rounded-2xl bg-[#7B61FF] hover:bg-[#684DE6] text-xs text-white font-bold cursor-pointer disabled:opacity-50"
+                        className="px-4 py-1.5 rounded-3xl bg-[#7B61FF] hover:bg-[#684DE6] text-xs text-white font-bold cursor-pointer disabled:opacity-50"
                       >
                         Assign Judge
                       </button>
@@ -508,7 +508,7 @@ export default function NewBattlePage() {
                   <button
                     type="button"
                     onClick={() => setShowAddJudge(true)}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-[#121212] hover:bg-[#202020] text-xs text-[#D1D1D1] font-bold transition-all cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-3xl bg-[#121212] hover:bg-[#202020] text-xs text-[#D1D1D1] font-bold transition-all cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5 text-[#7B61FF]" />
                     <span>Add Judge</span>
@@ -528,7 +528,7 @@ export default function NewBattlePage() {
                   placeholder="Enter battle rules, theme, and sample guidelines..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full bg-[#121212] rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF] resize-none leading-relaxed"
+                  className="w-full bg-[#121212] rounded-3xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF] resize-none leading-relaxed"
                 />
               </div>
             </div>
@@ -543,7 +543,7 @@ export default function NewBattlePage() {
               </div>
               <div className="sm:col-span-9 space-y-2.5">
                 {/* Default Rules */}
-                <div className="bg-[#121212] p-3.5 rounded-2xl space-y-1.5 text-xs text-zinc-400">
+                <div className="bg-[#121212] p-3.5 rounded-3xl space-y-1.5 text-xs text-zinc-400">
                   <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider block mb-1">
                     Standard Default Rules:
                   </span>
@@ -557,7 +557,7 @@ export default function NewBattlePage() {
                 {extraRules.map((rule, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between gap-3 pl-3.5 pr-2 py-2 rounded-2xl bg-[#121212] text-xs text-white"
+                    className="flex items-center justify-between gap-3 pl-3.5 pr-2 py-2 rounded-3xl bg-[#121212] text-xs text-white"
                   >
                     <span>{idx + 5}. {rule}</span>
                     <button
@@ -583,13 +583,13 @@ export default function NewBattlePage() {
                           handleAddRule();
                         }
                       }}
-                      className="flex-1 bg-[#121212] rounded-2xl px-3.5 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+                      className="flex-1 bg-[#121212] rounded-3xl px-3.5 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
                       autoFocus
                     />
                     <button
                       type="button"
                       onClick={handleAddRule}
-                      className="px-3.5 py-2 rounded-2xl bg-[#7B61FF] hover:bg-[#684DE6] text-xs text-white font-bold cursor-pointer"
+                      className="px-3.5 py-2 rounded-3xl bg-[#7B61FF] hover:bg-[#684DE6] text-xs text-white font-bold cursor-pointer"
                     >
                       Add
                     </button>
@@ -605,7 +605,7 @@ export default function NewBattlePage() {
                   <button
                     type="button"
                     onClick={() => setShowAddRule(true)}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-[#121212] hover:bg-[#202020] text-xs text-[#D1D1D1] font-bold transition-all cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-3xl bg-[#121212] hover:bg-[#202020] text-xs text-[#D1D1D1] font-bold transition-all cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5 text-[#7B61FF]" />
                     <span>Add Extra Rule</span>
@@ -629,10 +629,10 @@ export default function NewBattlePage() {
                     {samples.map((sample) => (
                       <div
                         key={sample.id}
-                        className="bg-[#121212] p-3 rounded-2xl flex items-center justify-between gap-3 text-xs"
+                        className="bg-[#121212] p-3 rounded-3xl flex items-center justify-between gap-3 text-xs"
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <div className="w-7 h-7 rounded-2xl bg-[#7B61FF]/10 text-[#7B61FF] flex items-center justify-center shrink-0">
+                          <div className="w-7 h-7 rounded-3xl bg-[#7B61FF]/10 text-[#7B61FF] flex items-center justify-center shrink-0">
                             <Music className="w-3.5 h-3.5" />
                           </div>
                           <input
@@ -656,7 +656,7 @@ export default function NewBattlePage() {
                 )}
 
                 <div>
-                  <label className={`px-4 py-2 rounded-2xl text-xs font-bold text-white transition-colors inline-flex items-center gap-2 ${
+                  <label className={`px-4 py-2 rounded-3xl text-xs font-bold text-white transition-colors inline-flex items-center gap-2 ${
                     isUploadingSamples ? "bg-[#333333] cursor-not-allowed opacity-75" : "bg-[#222222] hover:bg-[#2A2A2A] cursor-pointer"
                   }`}>
                     <Music className="w-3.5 h-3.5 text-[#7B61FF]" />
@@ -684,7 +684,7 @@ export default function NewBattlePage() {
                   type="datetime-local"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full bg-[#121212] rounded-2xl px-4 py-2.5 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+                  className="w-full bg-[#121212] rounded-3xl px-4 py-2.5 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
                 />
               </div>
             </div>
@@ -698,7 +698,7 @@ export default function NewBattlePage() {
                   type="datetime-local"
                   value={submissionDeadline}
                   onChange={(e) => setSubmissionDeadline(e.target.value)}
-                  className="w-full bg-[#121212] rounded-2xl px-4 py-2.5 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+                  className="w-full bg-[#121212] rounded-3xl px-4 py-2.5 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
                 />
               </div>
             </div>
@@ -712,7 +712,7 @@ export default function NewBattlePage() {
                   type="datetime-local"
                   value={ratingDeadline}
                   onChange={(e) => setRatingDeadline(e.target.value)}
-                  className="w-full bg-[#121212] rounded-2xl px-4 py-2.5 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+                  className="w-full bg-[#121212] rounded-3xl px-4 py-2.5 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
                 />
               </div>
             </div>
@@ -733,7 +733,7 @@ export default function NewBattlePage() {
             <button
               type="submit"
               disabled={isUploadingSamples}
-              className="px-10 py-3 rounded-2xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-lg active:scale-95 ml-auto cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-10 py-3 rounded-3xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-lg active:scale-95 ml-auto cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isUploadingSamples ? "Uploading Samples..." : isSaved ? "Battle Created ✓" : "Create Battle"}
             </button>

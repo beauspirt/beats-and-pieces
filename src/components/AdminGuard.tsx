@@ -29,7 +29,7 @@ export const AdminGuard: React.FC<{ children: React.ReactNode }> = ({ children }
   if (!isLoggedIn || user?.role !== "admin") {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4 space-y-5 animate-in fade-in duration-200">
-        <div className="w-16 h-16 rounded-2xl bg-[#FF5E3A]/10 text-[#FF5E3A] flex items-center justify-center">
+        <div className="w-16 h-16 rounded-3xl bg-[#FF5E3A]/10 text-[#FF5E3A] flex items-center justify-center">
           <ShieldAlert className="w-8 h-8" />
         </div>
 
@@ -48,14 +48,14 @@ export const AdminGuard: React.FC<{ children: React.ReactNode }> = ({ children }
         <div className="flex items-center gap-3 pt-2">
           <Link
             href="/battles"
-            className="px-5 py-2.5 rounded-2xl bg-[#202020] hover:bg-[#282828] text-xs font-bold text-zinc-300 transition-colors flex items-center gap-2"
+            className="px-5 py-2.5 rounded-3xl bg-[#202020] hover:bg-[#282828] text-xs font-bold text-zinc-300 transition-colors flex items-center gap-2"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Back to Battles</span>
           </Link>
           <Link
             href="/signin"
-            className="px-6 py-2.5 rounded-2xl bg-brand hover:bg-brand/90 text-xs font-bold text-white transition-all shadow-md active:scale-95"
+            className="px-6 py-2.5 rounded-3xl bg-brand hover:bg-brand/90 text-xs font-bold text-white transition-all shadow-md active:scale-95"
           >
             Sign in as Admin
           </Link>

@@ -31,7 +31,7 @@ export default function VaultPage() {
     return (
       <div
         key={item.id}
-        className="bg-[#181818] rounded-2xl overflow-hidden flex flex-col justify-between group hover:bg-[#1f1f1f] transition-colors duration-200 shadow-lg"
+        className="bg-[#181818] rounded-3xl overflow-hidden flex flex-col justify-between group hover:bg-[#1f1f1f] transition-colors duration-200 shadow-lg"
       >
         {/* Thumbnail Preview Area */}
         <div
@@ -91,7 +91,7 @@ export default function VaultPage() {
               href={item.youtubeUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-1.5 rounded-2xl bg-[#222222] hover:bg-[#2c2c2c] text-zinc-400 hover:text-white text-xs transition-colors inline-flex items-center gap-1 shrink-0"
+              className="p-1.5 rounded-3xl bg-[#222222] hover:bg-[#2c2c2c] text-zinc-400 hover:text-white text-xs transition-colors inline-flex items-center gap-1 shrink-0"
               title="Watch on YouTube"
             >
               <ExternalLink className="w-3.5 h-3.5" />
@@ -134,7 +134,7 @@ export default function VaultPage() {
           >
             <div
               onClick={(e) => e.stopPropagation()}
-              className="bg-[#181818] rounded-2xl max-w-4xl w-full overflow-hidden shadow-2xl space-y-4 p-4 sm:p-6 relative cursor-default"
+              className="bg-[#181818] rounded-3xl max-w-4xl w-full overflow-hidden shadow-2xl space-y-4 p-4 sm:p-6 relative cursor-default"
             >
               {/* Modal Close Button */}
               <div className="flex items-center justify-end">
@@ -147,7 +147,7 @@ export default function VaultPage() {
               </div>
 
               {/* Embedded 16:9 YouTube Player */}
-              <div className="w-full aspect-video rounded-2xl overflow-hidden bg-black relative shadow-inner">
+              <div className="w-full aspect-video rounded-3xl overflow-hidden bg-black relative shadow-inner">
                 <iframe
                   src={`https://www.youtube.com/embed/${activeModalItem.youtubeId}?autoplay=1`}
                   title={activeModalItem.title}
@@ -163,7 +163,7 @@ export default function VaultPage() {
                   href={activeModalItem.youtubeUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2 rounded-2xl bg-[#222222] hover:bg-[#2c2c2c] text-white font-bold flex items-center gap-2 shrink-0 transition-colors"
+                  className="px-4 py-2 rounded-3xl bg-[#222222] hover:bg-[#2c2c2c] text-white font-bold flex items-center gap-2 shrink-0 transition-colors"
                 >
                   <span>Watch on YouTube</span>
                   <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />

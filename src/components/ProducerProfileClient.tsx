@@ -87,7 +87,7 @@ function StandardTagSelector({
           {selectedTags.map((tag) => (
             <span
               key={tag}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-2xl bg-[#7B61FF]/15 text-xs text-[#A78BFA]"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-3xl bg-[#7B61FF]/15 text-xs text-[#A78BFA]"
             >
               <span>{tag}</span>
               <button
@@ -113,7 +113,7 @@ function StandardTagSelector({
             setIsDropdownOpen(true);
           }}
           placeholder={selectedTags.length === 0 ? "Search or select tags (e.g. Trap, Lo-Fi, Soulful)..." : "Add more tags from list..."}
-          className="w-full bg-[#121212] rounded-2xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#7B61FF] transition-all"
+          className="w-full bg-[#121212] rounded-3xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#7B61FF] transition-all"
         />
         {search && (
           <button
@@ -128,7 +128,7 @@ function StandardTagSelector({
 
       {/* Dropdown Options List */}
       {isDropdownOpen && (
-        <div className="p-3 bg-[#121212] rounded-2xl max-h-48 overflow-y-auto space-y-1.5 shadow-2xl z-20">
+        <div className="p-3 bg-[#121212] rounded-3xl max-h-48 overflow-y-auto space-y-1.5 shadow-2xl z-20">
           <div className="flex flex-wrap gap-1.5">
             {filteredOptions.map((tag) => {
               const isSelected = selectedTags.includes(tag);
@@ -137,7 +137,7 @@ function StandardTagSelector({
                   key={tag}
                   type="button"
                   onClick={() => toggleTag(tag)}
-                  className={`px-3 py-1.5 rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 rounded-3xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                     isSelected
                       ? "bg-[#7B61FF] text-white shadow-sm"
                       : "bg-[#1f1f1f] text-zinc-300 hover:bg-[#2a2a2a] hover:text-white"
@@ -1023,7 +1023,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                     </button>
 
                     {emailCopiedTooltip && (
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-1.5 bg-[#222222] text-white text-xs font-bold rounded-2xl shadow-2xl whitespace-nowrap animate-in fade-in zoom-in-95 duration-150 border border-white/10 z-50 flex items-center gap-1.5 pointer-events-none">
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-1.5 bg-[#222222] text-white text-xs font-bold rounded-3xl shadow-2xl whitespace-nowrap animate-in fade-in zoom-in-95 duration-150 border border-white/10 z-50 flex items-center gap-1.5 pointer-events-none">
                         <Check className="w-3.5 h-3.5 text-emerald-400" />
                         <span>E-mail copied to clipboard!</span>
                         <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#222222]" />
@@ -1040,7 +1040,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
             <div className="shrink-0 w-full md:w-auto self-start">
               <button
                 onClick={handleShareProfile}
-                className="w-full md:w-auto px-5 py-3 rounded-2xl bg-[#121212] hover:bg-[#202020] text-zinc-300 hover:text-white text-xs font-bold transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full md:w-auto px-5 py-3 rounded-3xl bg-[#121212] hover:bg-[#202020] text-zinc-300 hover:text-white text-xs font-bold transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
               >
                 {copiedShareLink ? (
                   <>
@@ -1082,7 +1082,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                 setIsAddModalOpen(true);
               }}
               disabled={isAtBeatLimit}
-              className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5 ${
+              className={`px-4 py-2 rounded-3xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5 ${
                 isAtBeatLimit
                   ? "bg-[#222222] text-zinc-500 cursor-not-allowed"
                   : "bg-[#7B61FF] hover:bg-[#684DE6] text-white active:scale-95 cursor-pointer"
@@ -1097,8 +1097,8 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
         {/* Max Upload Limit Notice */}
         {isProfileOwner && isAtBeatLimit && (
-          <div className="bg-[#1C1A24] rounded-2xl p-4 flex items-center gap-3.5 text-xs text-zinc-300 animate-in fade-in duration-200">
-            <div className="w-8 h-8 rounded-2xl bg-[#7B61FF]/15 flex items-center justify-center shrink-0 text-[#7B61FF]">
+          <div className="bg-[#1C1A24] rounded-3xl p-4 flex items-center gap-3.5 text-xs text-zinc-300 animate-in fade-in duration-200">
+            <div className="w-8 h-8 rounded-3xl bg-[#7B61FF]/15 flex items-center justify-center shrink-0 text-[#7B61FF]">
               <Music className="w-4 h-4" />
             </div>
             <div className="flex-1 min-w-0">
@@ -1115,7 +1115,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
             {prioritizedBeats.map((beat) => (
               <div
                 key={beat.id}
-                className="bg-[#181818] rounded-2xl p-4 sm:p-5 space-y-3 shadow-md group relative"
+                className="bg-[#181818] rounded-3xl p-4 sm:p-5 space-y-3 shadow-md group relative"
               >
                 {/* Row 1: Header (Title, Rank Badge, Meta, Edit Action) */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
@@ -1157,7 +1157,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                             return (
                               <Link
                                 href={battleUrl}
-                                className="px-2 py-0.5 rounded-2xl bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-xs font-bold shrink-0 transition-all inline-flex items-center gap-1"
+                                className="px-2 py-0.5 rounded-3xl bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-xs font-bold shrink-0 transition-all inline-flex items-center gap-1"
                                 title={`View ${beat.battleSource || `Beat Battle #${match[1]}`}`}
                               >
                                 <span>{battleLabel}</span>
@@ -1197,7 +1197,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                             {match && (
                               <Link
                                 href={`/battles/battle-${match[1]}`}
-                                className="px-2 py-0.5 rounded-2xl bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-xs font-bold shrink-0 transition-all inline-flex items-center gap-1 select-none"
+                                className="px-2 py-0.5 rounded-3xl bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-xs font-bold shrink-0 transition-all inline-flex items-center gap-1 select-none"
                                 title={`View ${beat.battleSource || `Beat Battle #${match[1]}`}`}
                               >
                                 <span>BB#{match[1]}</span>
@@ -1213,7 +1213,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                   {/* Right: BPM, Price Tag, Flames, Edit Button */}
                   <div className="flex items-center gap-3 shrink-0 self-end sm:self-center select-none">
                     {beat.bpm ? (
-                      <span className="text-xs font-bold px-2.5 py-1 rounded-2xl bg-[#121212] text-[#888888] select-none">
+                      <span className="text-xs font-bold px-2.5 py-1 rounded-3xl bg-[#121212] text-[#888888] select-none">
                         {beat.bpm} BPM
                       </span>
                     ) : null}
@@ -1250,7 +1250,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                     {isProfileOwner && (
                       <button
                         onClick={() => handleOpenEditModal(beat)}
-                        className="p-2 rounded-2xl bg-[#121212] hover:bg-[#222222] text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                        className="p-2 rounded-3xl bg-[#121212] hover:bg-[#222222] text-zinc-400 hover:text-white transition-colors cursor-pointer"
                         title="Edit beat details"
                       >
                         <Pencil className="w-3.5 h-3.5" />
@@ -1296,7 +1296,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
             ))}
           </div>
         ) : (
-          <div className="bg-[#181818] rounded-2xl p-8 text-center space-y-2">
+          <div className="bg-[#181818] rounded-3xl p-8 text-center space-y-2">
             <p className="text-zinc-400 text-sm">
               This producer hasn&apos;t submitted any beats yet.
             </p>
@@ -1324,9 +1324,9 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
               <div
                 key={item.id}
                 onClick={() => setActiveVaultModalItem(item)}
-                className="bg-[#181818] hover:bg-[#222222] p-4 rounded-2xl flex items-center gap-4 transition-colors group shadow-md cursor-pointer select-none"
+                className="bg-[#181818] hover:bg-[#222222] p-4 rounded-3xl flex items-center gap-4 transition-colors group shadow-md cursor-pointer select-none"
               >
-                <div className="w-24 h-16 rounded-2xl overflow-hidden relative shrink-0 bg-[#121212]">
+                <div className="w-24 h-16 rounded-3xl overflow-hidden relative shrink-0 bg-[#121212]">
                   {item.youtubeId ? (
                     <Image
                       src={`https://img.youtube.com/vi/${item.youtubeId}/hqdefault.jpg`}
@@ -1362,7 +1362,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
             <div
               onMouseDown={(e) => e.stopPropagation()}
               onClick={(e) => e.stopPropagation()}
-              className="bg-[#181818] rounded-2xl max-w-4xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default max-h-[90vh] overflow-y-auto no-scrollbar"
+              className="bg-[#181818] rounded-3xl max-w-4xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default max-h-[90vh] overflow-y-auto no-scrollbar"
             >
               {/* Header Title & Close Button */}
               <div className="flex items-center justify-between pb-1">
@@ -1403,7 +1403,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                           setEditingBeat({ ...editingBeat, title: e.target.value })
                         }
                         placeholder="e.g. Midnight Heat"
-                        className={`w-full bg-[#121212] rounded-2xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none transition-all ${
+                        className={`w-full bg-[#121212] rounded-3xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none transition-all ${
                           editingBeat.isBattleSubmission
                             ? "opacity-60 cursor-not-allowed"
                             : "focus:ring-1 focus:ring-[#7B61FF]"
@@ -1427,7 +1427,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                         onChange={(e) =>
                           setEditingBeat({ ...editingBeat, bpm: e.target.value === "" ? "" : Number(e.target.value) })
                         }
-                        className="w-full bg-[#121212] rounded-2xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#7B61FF] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all"
+                        className="w-full bg-[#121212] rounded-3xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#7B61FF] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all"
                       />
                     </div>
 
@@ -1436,11 +1436,11 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                       <label className="text-xs font-bold text-white">
                         Availability
                       </label>
-                      <div className="grid grid-cols-2 gap-1.5 bg-[#121212] p-1.5 rounded-2xl h-[48px] items-center">
+                      <div className="grid grid-cols-2 gap-1.5 bg-[#121212] p-1.5 rounded-3xl h-[48px] items-center">
                         <button
                           type="button"
                           onClick={() => setEditingBeat({ ...editingBeat, isForSale: true })}
-                          className={`h-full rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
+                          className={`h-full rounded-3xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
                             editingBeat.isForSale
                               ? "bg-[#7B61FF] text-white shadow-sm"
                               : "text-zinc-400 hover:text-white hover:bg-white/5"
@@ -1451,7 +1451,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                         <button
                           type="button"
                           onClick={() => setEditingBeat({ ...editingBeat, isForSale: false })}
-                          className={`h-full rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
+                          className={`h-full rounded-3xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
                             !editingBeat.isForSale
                               ? "bg-[#7B61FF] text-white shadow-sm"
                               : "text-zinc-400 hover:text-white hover:bg-white/5"
@@ -1484,21 +1484,21 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                     </label>
 
                     {isUploadingBeatAudio ? (
-                      <div className="bg-[#121212] p-6 rounded-2xl min-h-[220px] flex flex-col items-center justify-center text-center gap-3 border-2 border-dashed border-[#7B61FF]/40">
+                      <div className="bg-[#121212] p-6 rounded-3xl min-h-[220px] flex flex-col items-center justify-center text-center gap-3 border-2 border-dashed border-[#7B61FF]/40">
                         <div className="w-8 h-8 border-2 border-[#7B61FF] border-t-transparent rounded-full animate-spin" />
                         <p className="text-lg font-bold text-white">
                           Uploading...
                         </p>
                       </div>
                     ) : (
-                      <div className="bg-[#121212] p-5 rounded-2xl space-y-4">
+                      <div className="bg-[#121212] p-5 rounded-3xl space-y-4">
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-2 text-white text-lg font-bold truncate">
                             <Music className="w-4 h-4 text-[#7B61FF] shrink-0" />
                             <span className="truncate">{editingBeat.audioUrl.split("/").pop() || "Audio File"}</span>
                           </div>
                           {!editingBeat.isBattleSubmission && (
-                            <label className="text-xs font-bold px-3.5 py-1.5 rounded-2xl bg-[#1C1C1C] hover:bg-[#252525] text-zinc-300 hover:text-white transition-all cursor-pointer shrink-0">
+                            <label className="text-xs font-bold px-3.5 py-1.5 rounded-3xl bg-[#1C1C1C] hover:bg-[#252525] text-zinc-300 hover:text-white transition-all cursor-pointer shrink-0">
                               <span>Replace</span>
                               <input
                                 type="file"
@@ -1526,7 +1526,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
                     {/* Battle submission notice if applicable */}
                     {editingBeat.isBattleSubmission && (
-                      <div className="p-3.5 rounded-2xl bg-amber-500/10 text-amber-300 text-xs flex items-start gap-2.5 leading-relaxed mt-3">
+                      <div className="p-3.5 rounded-3xl bg-amber-500/10 text-amber-300 text-xs flex items-start gap-2.5 leading-relaxed mt-3">
                         <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                         <p>
                           This beat is part of a historical battle archive ({((editingBeat.battleSource || "Beat Battle").replace(/\s*\([^)]*\)/g, "")).trim()}). The <strong>Beat Title</strong> and <strong>Audio Master</strong> cannot be changed or deleted to preserve competition records.
@@ -1543,7 +1543,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                     <button
                       type="button"
                       onClick={() => handleDeleteBeat(editingBeat.id)}
-                      className="px-6 py-3 rounded-2xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap shadow-sm"
+                      className="px-6 py-3 rounded-3xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap shadow-sm"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       <span>Delete Beat</span>
@@ -1555,7 +1555,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                   <button
                     type="submit"
                     disabled={isUploadingBeatAudio || !editingBeat.title.trim()}
-                    className="px-8 py-3 rounded-2xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 flex items-center justify-center whitespace-nowrap ml-auto"
+                    className="px-8 py-3 rounded-3xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 flex items-center justify-center whitespace-nowrap ml-auto"
                   >
                     Save Changes
                   </button>
@@ -1582,7 +1582,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
             <div
               onMouseDown={(e) => e.stopPropagation()}
               onClick={(e) => e.stopPropagation()}
-              className="bg-[#181818] rounded-2xl max-w-4xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default max-h-[90vh] overflow-y-auto no-scrollbar"
+              className="bg-[#181818] rounded-3xl max-w-4xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default max-h-[90vh] overflow-y-auto no-scrollbar"
             >
               {/* Header Title & Close Button */}
               <div className="flex items-center justify-between pb-1">
@@ -1619,7 +1619,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                         value={newBeatTitle}
                         onChange={(e) => setNewBeatTitle(e.target.value)}
                         placeholder="e.g. Midnight Heat"
-                        className="w-full bg-[#121212] rounded-2xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#7B61FF] transition-all"
+                        className="w-full bg-[#121212] rounded-3xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#7B61FF] transition-all"
                         required
                       />
                       <p className="text-xs text-[#888888]">
@@ -1639,7 +1639,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                         onChange={(e) =>
                           setNewBeatBpm(e.target.value === "" ? "" : Number(e.target.value))
                         }
-                        className="w-full bg-[#121212] rounded-2xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#7B61FF] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all"
+                        className="w-full bg-[#121212] rounded-3xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#7B61FF] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all"
                       />
                     </div>
 
@@ -1648,11 +1648,11 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                       <label className="text-xs font-bold text-white">
                         Availability
                       </label>
-                      <div className="grid grid-cols-2 gap-1.5 bg-[#121212] p-1.5 rounded-2xl h-[48px] items-center">
+                      <div className="grid grid-cols-2 gap-1.5 bg-[#121212] p-1.5 rounded-3xl h-[48px] items-center">
                         <button
                           type="button"
                           onClick={() => setNewBeatIsForSale(true)}
-                          className={`h-full rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
+                          className={`h-full rounded-3xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
                             newBeatIsForSale
                               ? "bg-[#7B61FF] text-white shadow-sm"
                               : "text-zinc-400 hover:text-white hover:bg-white/5"
@@ -1663,7 +1663,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                         <button
                           type="button"
                           onClick={() => setNewBeatIsForSale(false)}
-                          className={`h-full rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
+                          className={`h-full rounded-3xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
                             !newBeatIsForSale
                               ? "bg-[#7B61FF] text-white shadow-sm"
                               : "text-zinc-400 hover:text-white hover:bg-white/5"
@@ -1689,14 +1689,14 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                     </label>
 
                     {isUploadingBeatAudio ? (
-                      <div className="bg-[#121212] p-6 rounded-2xl min-h-[220px] flex flex-col items-center justify-center text-center gap-3 border-2 border-dashed border-[#7B61FF]/40">
+                      <div className="bg-[#121212] p-6 rounded-3xl min-h-[220px] flex flex-col items-center justify-center text-center gap-3 border-2 border-dashed border-[#7B61FF]/40">
                         <div className="w-8 h-8 border-2 border-[#7B61FF] border-t-transparent rounded-full animate-spin" />
                         <p className="text-lg font-bold text-white">
                           Uploading...
                         </p>
                       </div>
                     ) : stagedNewBeatFile || newBeatAudioUrl ? (
-                      <div className="bg-[#121212] p-5 rounded-2xl space-y-4">
+                      <div className="bg-[#121212] p-5 rounded-3xl space-y-4">
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-2 text-white text-lg font-bold truncate">
                             <Music className="w-4 h-4 text-[#7B61FF] shrink-0" />
@@ -1713,7 +1713,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                               setNewBeatWaveformPeaks([]);
                               setNewBeatDuration(0);
                             }}
-                            className="text-xs font-bold px-3.5 py-1.5 rounded-2xl bg-[#1C1C1C] hover:bg-red-500/20 text-zinc-300 hover:text-red-400 transition-all cursor-pointer shrink-0"
+                            className="text-xs font-bold px-3.5 py-1.5 rounded-3xl bg-[#1C1C1C] hover:bg-red-500/20 text-zinc-300 hover:text-red-400 transition-all cursor-pointer shrink-0"
                           >
                             Remove
                           </button>
@@ -1737,7 +1737,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                         onDragEnter={handleNewBeatDragOver}
                         onDragLeave={handleNewBeatDragLeave}
                         onDrop={handleNewBeatDrop}
-                        className={`min-h-[220px] rounded-2xl p-7 flex flex-col items-center justify-center text-center gap-3 transition-all cursor-pointer border-2 border-dashed border-[#7B61FF] ${
+                        className={`min-h-[220px] rounded-3xl p-7 flex flex-col items-center justify-center text-center gap-3 transition-all cursor-pointer border-2 border-dashed border-[#7B61FF] ${
                           isDraggingNewBeat
                             ? "bg-[#7B61FF]/15 border-solid scale-[1.01]"
                             : "bg-[#121212]/70 hover:bg-[#121212]"
@@ -1771,7 +1771,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                   <button
                     type="submit"
                     disabled={isUploadingBeatAudio || (!stagedNewBeatFile && !newBeatAudioUrl) || !newBeatTitle.trim()}
-                    className="px-8 py-3 rounded-2xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                    className="px-8 py-3 rounded-3xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-2"
                   >
                     {isUploadingBeatAudio ? (
                       <>
@@ -1793,7 +1793,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       {/* Floating Save Toast Pop-up Notification */}
       <ClientPortal>
         {saveToastMessage && (
-          <div className="fixed bottom-6 right-6 z-[210] bg-[#181818] text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300 backdrop-blur-md">
+          <div className="fixed bottom-6 right-6 z-[210] bg-[#181818] text-white px-5 py-3.5 rounded-3xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300 backdrop-blur-md">
             <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
               <CheckCircle2 className="w-4 h-4" />
             </div>
@@ -1814,7 +1814,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
           >
             <div
               onClick={(e) => e.stopPropagation()}
-              className="bg-[#181818] rounded-2xl max-w-4xl w-full overflow-hidden shadow-2xl space-y-4 p-4 sm:p-6 relative cursor-default"
+              className="bg-[#181818] rounded-3xl max-w-4xl w-full overflow-hidden shadow-2xl space-y-4 p-4 sm:p-6 relative cursor-default"
             >
               {/* Modal Close Button */}
               <div className="flex items-center justify-end">
@@ -1827,7 +1827,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
               </div>
 
               {/* Embedded 16:9 YouTube Player */}
-              <div className="w-full aspect-video rounded-2xl overflow-hidden bg-black relative shadow-inner">
+              <div className="w-full aspect-video rounded-3xl overflow-hidden bg-black relative shadow-inner">
                 <iframe
                   src={`https://www.youtube.com/embed/${activeVaultModalItem.youtubeId}?autoplay=1`}
                   title={activeVaultModalItem.title}
@@ -1843,7 +1843,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                   href={activeVaultModalItem.youtubeUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2 rounded-2xl bg-[#222222] hover:bg-[#2c2c2c] text-white font-bold flex items-center gap-2 shrink-0 transition-colors"
+                  className="px-4 py-2 rounded-3xl bg-[#222222] hover:bg-[#2c2c2c] text-white font-bold flex items-center gap-2 shrink-0 transition-colors"
                 >
                   <span>Watch on YouTube</span>
                   <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />

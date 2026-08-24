@@ -99,7 +99,7 @@ export default function AdminReleasesManagerPage() {
 
           <Link
             href="/admin/new-release"
-            className="px-5 py-2.5 rounded-2xl bg-brand hover:bg-brand/90 text-xs font-bold text-white transition-all shadow-md active:scale-95 flex items-center gap-2 self-start sm:self-auto"
+            className="px-5 py-2.5 rounded-3xl bg-brand hover:bg-brand/90 text-xs font-bold text-white transition-all shadow-md active:scale-95 flex items-center gap-2 self-start sm:self-auto"
           >
             <Plus className="w-4 h-4" />
             <span>Create New Release</span>
@@ -111,10 +111,10 @@ export default function AdminReleasesManagerPage() {
           {releases.map((release) => (
             <div
               key={release.id}
-              className="bg-surface-card rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg hover:bg-surface-hover transition-all"
+              className="bg-surface-card rounded-3xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg hover:bg-surface-hover transition-all"
             >
               <div className="flex items-center gap-4 min-w-0">
-                <div className="w-14 h-14 rounded-2xl overflow-hidden relative shrink-0 bg-[#121212] shadow-md">
+                <div className="w-14 h-14 rounded-3xl overflow-hidden relative shrink-0 bg-[#121212] shadow-md">
                   <Image
                     src={release.coverImage}
                     alt={release.title}
@@ -137,14 +137,14 @@ export default function AdminReleasesManagerPage() {
               <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
                 <button
                   onClick={() => handleEditClick(release)}
-                  className="px-4 py-2 rounded-2xl bg-[#222222] hover:bg-brand hover:text-white text-xs font-bold text-zinc-300 transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2 rounded-3xl bg-[#222222] hover:bg-brand hover:text-white text-xs font-bold text-zinc-300 transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   <Edit3 className="w-3.5 h-3.5" />
                   <span>Edit</span>
                 </button>
                 <Link
                   href="/releases"
-                  className="px-4 py-2 rounded-2xl bg-[#181818] hover:bg-[#252525] text-xs font-bold text-zinc-400 hover:text-white transition-all"
+                  className="px-4 py-2 rounded-3xl bg-[#181818] hover:bg-[#252525] text-xs font-bold text-zinc-400 hover:text-white transition-all"
                 >
                   View Public
                 </Link>
@@ -162,7 +162,7 @@ export default function AdminReleasesManagerPage() {
             >
               <div
                 onClick={(e) => e.stopPropagation()}
-                className="bg-[#181818] rounded-2xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto cursor-default"
+                className="bg-[#181818] rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto cursor-default"
               >
                 <div className="flex items-center justify-between pb-2">
                   <h2 className="text-2xl font-bold text-white flex items-center gap-2">
@@ -185,7 +185,7 @@ export default function AdminReleasesManagerPage() {
                       type="text"
                       value={editingRelease.title}
                       onChange={(e) => setEditingRelease({ ...editingRelease, title: e.target.value })}
-                      className="w-full bg-[#121212] rounded-2xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                      className="w-full bg-[#121212] rounded-3xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
                       required
                     />
                   </div>
@@ -193,8 +193,8 @@ export default function AdminReleasesManagerPage() {
                   {/* Cover Art Upload */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-zinc-300">Cover Art</label>
-                    <div className="flex items-center gap-4 bg-[#121212] p-3 rounded-2xl">
-                      <div className="w-16 h-16 rounded-2xl overflow-hidden relative bg-[#181818] shrink-0 shadow-md">
+                    <div className="flex items-center gap-4 bg-[#121212] p-3 rounded-3xl">
+                      <div className="w-16 h-16 rounded-3xl overflow-hidden relative bg-[#181818] shrink-0 shadow-md">
                         <Image
                           src={editingRelease.coverImage}
                           alt="Cover Preview"
@@ -204,7 +204,7 @@ export default function AdminReleasesManagerPage() {
                       </div>
                       <div className="flex items-center justify-between flex-1">
                         <span className="text-xs text-zinc-400">Change square cover artwork</span>
-                        <label className="px-4 py-2 rounded-2xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-white cursor-pointer transition-colors shrink-0">
+                        <label className="px-4 py-2 rounded-3xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-white cursor-pointer transition-colors shrink-0">
                           Browse File
                           <input type="file" accept="image/*" onChange={handleCoverFileChange} className="hidden" />
                         </label>
@@ -219,7 +219,7 @@ export default function AdminReleasesManagerPage() {
                       rows={4}
                       value={editingRelease.description}
                       onChange={(e) => setEditingRelease({ ...editingRelease, description: e.target.value })}
-                      className="w-full bg-[#121212] rounded-2xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand resize-none"
+                      className="w-full bg-[#121212] rounded-3xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand resize-none"
                     />
                   </div>
 
@@ -230,12 +230,12 @@ export default function AdminReleasesManagerPage() {
                       type="date"
                       value={editingRelease.releaseDate ? editingRelease.releaseDate.slice(0, 10) : ""}
                       onChange={(e) => setEditingRelease({ ...editingRelease, releaseDate: e.target.value })}
-                      className="w-full bg-[#121212] rounded-2xl px-4 py-2.5 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                      className="w-full bg-[#121212] rounded-3xl px-4 py-2.5 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-brand"
                     />
                   </div>
 
                   {/* Streaming Links */}
-                  <div className="space-y-3 bg-[#121212] p-4 rounded-2xl">
+                  <div className="space-y-3 bg-[#121212] p-4 rounded-3xl">
                     <label className="font-bold text-white uppercase tracking-wider text-xs block">
                       Streaming Links
                     </label>
@@ -247,7 +247,7 @@ export default function AdminReleasesManagerPage() {
                           type="url"
                           value={editingRelease.spotifyUrl || ""}
                           onChange={(e) => setEditingRelease({ ...editingRelease, spotifyUrl: e.target.value })}
-                          className="w-full bg-[#181818] rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                          className="w-full bg-[#181818] rounded-3xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
                         />
                       </div>
 
@@ -257,7 +257,7 @@ export default function AdminReleasesManagerPage() {
                           type="url"
                           value={editingRelease.appleMusicUrl || ""}
                           onChange={(e) => setEditingRelease({ ...editingRelease, appleMusicUrl: e.target.value })}
-                          className="w-full bg-[#181818] rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                          className="w-full bg-[#181818] rounded-3xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
                         />
                       </div>
 
@@ -267,7 +267,7 @@ export default function AdminReleasesManagerPage() {
                           type="url"
                           value={editingRelease.youtubeUrl || ""}
                           onChange={(e) => setEditingRelease({ ...editingRelease, youtubeUrl: e.target.value })}
-                          className="w-full bg-[#181818] rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                          className="w-full bg-[#181818] rounded-3xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
                         />
                       </div>
 
@@ -277,7 +277,7 @@ export default function AdminReleasesManagerPage() {
                           type="url"
                           value={editingRelease.bandcampUrl || ""}
                           onChange={(e) => setEditingRelease({ ...editingRelease, bandcampUrl: e.target.value })}
-                          className="w-full bg-[#181818] rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                          className="w-full bg-[#181818] rounded-3xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
                         />
                       </div>
 
@@ -287,7 +287,7 @@ export default function AdminReleasesManagerPage() {
                           type="url"
                           value={editingRelease.soundcloudUrl || ""}
                           onChange={(e) => setEditingRelease({ ...editingRelease, soundcloudUrl: e.target.value })}
-                          className="w-full bg-[#181818] rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                          className="w-full bg-[#181818] rounded-3xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
                         />
                       </div>
                     </div>
@@ -298,13 +298,13 @@ export default function AdminReleasesManagerPage() {
                     <button
                       type="button"
                       onClick={() => setEditingRelease(null)}
-                      className="px-5 py-2.5 rounded-2xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                      className="px-5 py-2.5 rounded-3xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-zinc-400 hover:text-white transition-colors cursor-pointer"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="px-7 py-2.5 rounded-2xl bg-brand hover:bg-brand/90 text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
+                      className="px-7 py-2.5 rounded-3xl bg-brand hover:bg-brand/90 text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
                     >
                       {isSaved ? "Saved ✓" : "Save Changes"}
                     </button>

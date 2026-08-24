@@ -111,7 +111,7 @@ export default function AuthCallbackPage() {
       )}
 
       {status === "error" && (
-        <div className="space-y-4 max-w-md bg-[#181818] rounded-2xl p-6 shadow-xl animate-in fade-in duration-200">
+        <div className="space-y-4 max-w-md bg-[#181818] rounded-3xl p-6 shadow-xl animate-in fade-in duration-200">
           <div className="w-12 h-12 rounded-full bg-red-500/20 text-red-400 mx-auto flex items-center justify-center">
             <ShieldAlert className="w-6 h-6" />
           </div>
@@ -119,7 +119,7 @@ export default function AuthCallbackPage() {
           <p className="text-xs text-zinc-400 leading-relaxed">{errorMessage}</p>
           <button
             onClick={() => router.push("/signin")}
-            className="px-6 py-2.5 rounded-2xl bg-brand text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer mt-2"
+            className="px-6 py-2.5 rounded-3xl bg-brand text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer mt-2"
           >
             Try Again
           </button>

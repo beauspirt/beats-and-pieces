@@ -347,7 +347,7 @@ export default function AdminBattlesManagerPage() {
 
           <Link
             href="/admin/new-battle"
-            className="px-5 py-2.5 rounded-2xl bg-brand hover:bg-brand/90 text-xs font-bold text-white transition-all shadow-md active:scale-95 flex items-center gap-2 self-start sm:self-auto"
+            className="px-5 py-2.5 rounded-3xl bg-brand hover:bg-brand/90 text-xs font-bold text-white transition-all shadow-md active:scale-95 flex items-center gap-2 self-start sm:self-auto"
           >
             <Plus className="w-4 h-4" />
             <span>Create New Battle</span>
@@ -359,10 +359,10 @@ export default function AdminBattlesManagerPage() {
           {battles.map((battle) => (
             <div
               key={battle.id}
-              className="bg-surface-card rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg hover:bg-surface-hover transition-all"
+              className="bg-surface-card rounded-3xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg hover:bg-surface-hover transition-all"
             >
               <div className="flex items-center gap-4 min-w-0">
-                <div className="w-14 h-14 rounded-2xl overflow-hidden relative shrink-0 bg-[#121212] shadow-md">
+                <div className="w-14 h-14 rounded-3xl overflow-hidden relative shrink-0 bg-[#121212] shadow-md">
                   <Image
                     src={battle.coverImage}
                     alt={battle.title}
@@ -401,14 +401,14 @@ export default function AdminBattlesManagerPage() {
               <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
                 <button
                   onClick={() => handleEditClick(battle)}
-                  className="px-4 py-2 rounded-2xl bg-[#222222] hover:bg-brand hover:text-white text-xs font-bold text-zinc-300 transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2 rounded-3xl bg-[#222222] hover:bg-brand hover:text-white text-xs font-bold text-zinc-300 transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   <Edit3 className="w-3.5 h-3.5" />
                   <span>Edit</span>
                 </button>
                 <Link
                   href={`/battles/${battle.id}`}
-                  className="px-4 py-2 rounded-2xl bg-[#181818] hover:bg-[#252525] text-xs font-bold text-zinc-400 hover:text-white transition-all"
+                  className="px-4 py-2 rounded-3xl bg-[#181818] hover:bg-[#252525] text-xs font-bold text-zinc-400 hover:text-white transition-all"
                 >
                   View Public
                 </Link>
@@ -426,7 +426,7 @@ export default function AdminBattlesManagerPage() {
             >
             <div
               onClick={(e) => e.stopPropagation()}
-              className="bg-[#181818] rounded-2xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto cursor-default"
+              className="bg-[#181818] rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto cursor-default"
             >
               <div className="flex items-center justify-between pb-2">
                 <h3 className="text-2xl font-bold text-white flex items-center gap-2">
@@ -450,7 +450,7 @@ export default function AdminBattlesManagerPage() {
                     type="text"
                     value={editingBattle.title}
                     onChange={(e) => setEditingBattle({ ...editingBattle, title: e.target.value })}
-                    className="w-full bg-[#121212] rounded-2xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                    className="w-full bg-[#121212] rounded-3xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
                   />
                 </div>
 
@@ -463,7 +463,7 @@ export default function AdminBattlesManagerPage() {
                         key={phase}
                         type="button"
                         onClick={() => setEditingBattle({ ...editingBattle, phase })}
-                        className={`py-2 px-3 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                        className={`py-2 px-3 rounded-3xl text-xs font-bold transition-all cursor-pointer ${
                           editingBattle.phase === phase
                             ? "bg-brand text-white shadow-md"
                             : "bg-[#121212] text-zinc-400 hover:text-white"
@@ -485,7 +485,7 @@ export default function AdminBattlesManagerPage() {
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-zinc-300">Cover Artwork</label>
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-2xl overflow-hidden bg-[#121212] relative shrink-0">
+                    <div className="w-16 h-16 rounded-3xl overflow-hidden bg-[#121212] relative shrink-0">
                       <Image
                         src={editingBattle.coverImage}
                         alt="Cover"
@@ -494,7 +494,7 @@ export default function AdminBattlesManagerPage() {
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="px-4 py-2 rounded-2xl bg-[#121212] hover:bg-[#202020] text-xs font-bold text-zinc-300 cursor-pointer inline-flex items-center gap-2 transition-colors">
+                      <label className="px-4 py-2 rounded-3xl bg-[#121212] hover:bg-[#202020] text-xs font-bold text-zinc-300 cursor-pointer inline-flex items-center gap-2 transition-colors">
                         <Upload className="w-3.5 h-3.5 text-brand" />
                         <span>Upload New Cover</span>
                         <input type="file" accept="image/*" onChange={handleCoverFileChange} className="hidden" />
@@ -514,7 +514,7 @@ export default function AdminBattlesManagerPage() {
                     {hostEntries.map((host, idx) => (
                       <div
                         key={idx}
-                        className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-2xl bg-[#121212] text-xs font-bold text-white shadow-sm"
+                        className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-3xl bg-[#121212] text-xs font-bold text-white shadow-sm"
                       >
                         <div className="flex items-center gap-1.5">
                           <span className="font-bold">{host.name}</span>
@@ -532,7 +532,7 @@ export default function AdminBattlesManagerPage() {
                   </div>
 
                   {showAddHost ? (
-                    <div className="bg-[#121212] p-3.5 rounded-2xl space-y-2.5 animate-in fade-in">
+                    <div className="bg-[#121212] p-3.5 rounded-3xl space-y-2.5 animate-in fade-in">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <input
                           type="text"
@@ -545,7 +545,7 @@ export default function AdminBattlesManagerPage() {
                               handleAddHost();
                             }
                           }}
-                          className="bg-[#181818] rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                          className="bg-[#181818] rounded-3xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
                           autoFocus
                         />
                         <input
@@ -559,7 +559,7 @@ export default function AdminBattlesManagerPage() {
                               handleAddHost();
                             }
                           }}
-                          className="bg-[#181818] rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                          className="bg-[#181818] rounded-3xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
                         />
                       </div>
                       <div className="flex items-center justify-end gap-2 pt-1">
@@ -574,7 +574,7 @@ export default function AdminBattlesManagerPage() {
                           type="button"
                           onClick={handleAddHost}
                           disabled={!hostNameInput.trim()}
-                          className="px-4 py-1.5 rounded-2xl bg-brand hover:bg-brand/90 text-xs text-white font-bold cursor-pointer disabled:opacity-50"
+                          className="px-4 py-1.5 rounded-3xl bg-brand hover:bg-brand/90 text-xs text-white font-bold cursor-pointer disabled:opacity-50"
                         >
                           Set Host
                         </button>
@@ -584,7 +584,7 @@ export default function AdminBattlesManagerPage() {
                     <button
                       type="button"
                       onClick={() => setShowAddHost(true)}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-[#121212] hover:bg-[#202020] text-xs text-[#D1D1D1] font-bold transition-all cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-3xl bg-[#121212] hover:bg-[#202020] text-xs text-[#D1D1D1] font-bold transition-all cursor-pointer"
                     >
                       <Plus className="w-3.5 h-3.5 text-brand" />
                       <span>{hostEntries.length > 0 ? "Change Host" : "Assign Host"}</span>
@@ -603,7 +603,7 @@ export default function AdminBattlesManagerPage() {
                     {judgeEntries.map((judge, idx) => (
                       <div
                         key={idx}
-                        className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-2xl bg-[#121212] text-xs font-bold text-white shadow-sm"
+                        className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-3xl bg-[#121212] text-xs font-bold text-white shadow-sm"
                       >
                         <div className="flex items-center gap-1.5">
                           <span className="font-bold">{judge.name}</span>
@@ -621,7 +621,7 @@ export default function AdminBattlesManagerPage() {
                   </div>
 
                   {showAddJudge ? (
-                    <div className="bg-[#121212] p-3.5 rounded-2xl space-y-2.5 animate-in fade-in">
+                    <div className="bg-[#121212] p-3.5 rounded-3xl space-y-2.5 animate-in fade-in">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <input
                           type="text"
@@ -634,7 +634,7 @@ export default function AdminBattlesManagerPage() {
                               handleAddJudge();
                             }
                           }}
-                          className="bg-[#181818] rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                          className="bg-[#181818] rounded-3xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
                           autoFocus
                         />
                         <input
@@ -648,7 +648,7 @@ export default function AdminBattlesManagerPage() {
                               handleAddJudge();
                             }
                           }}
-                          className="bg-[#181818] rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                          className="bg-[#181818] rounded-3xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
                         />
                       </div>
                       <div className="flex items-center justify-end gap-2 pt-1">
@@ -663,7 +663,7 @@ export default function AdminBattlesManagerPage() {
                           type="button"
                           onClick={handleAddJudge}
                           disabled={!judgeNameInput.trim()}
-                          className="px-4 py-1.5 rounded-2xl bg-brand hover:bg-brand/90 text-xs text-white font-bold cursor-pointer disabled:opacity-50"
+                          className="px-4 py-1.5 rounded-3xl bg-brand hover:bg-brand/90 text-xs text-white font-bold cursor-pointer disabled:opacity-50"
                         >
                           Assign Judge
                         </button>
@@ -673,7 +673,7 @@ export default function AdminBattlesManagerPage() {
                     <button
                       type="button"
                       onClick={() => setShowAddJudge(true)}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-[#121212] hover:bg-[#202020] text-xs text-[#D1D1D1] font-bold transition-all cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-3xl bg-[#121212] hover:bg-[#202020] text-xs text-[#D1D1D1] font-bold transition-all cursor-pointer"
                     >
                       <Plus className="w-3.5 h-3.5 text-brand" />
                       <span>Add Judge</span>
@@ -688,7 +688,7 @@ export default function AdminBattlesManagerPage() {
                     rows={3}
                     value={editingBattle.description}
                     onChange={(e) => setEditingBattle({ ...editingBattle, description: e.target.value })}
-                    className="w-full bg-[#121212] rounded-2xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand resize-none"
+                    className="w-full bg-[#121212] rounded-3xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand resize-none"
                   />
                 </div>
 
@@ -699,7 +699,7 @@ export default function AdminBattlesManagerPage() {
                     <span className="text-xs text-zinc-500">Default + Custom battle rules</span>
                   </div>
 
-                  <div className="bg-[#121212] p-3.5 rounded-2xl space-y-1.5 text-xs text-zinc-400">
+                  <div className="bg-[#121212] p-3.5 rounded-3xl space-y-1.5 text-xs text-zinc-400">
                     <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider block mb-1">
                       Standard Default Rules:
                     </span>
@@ -718,7 +718,7 @@ export default function AdminBattlesManagerPage() {
                       {extraRules.map((rule, idx) => (
                         <div
                           key={idx}
-                          className="flex items-center justify-between gap-2 p-2.5 rounded-2xl bg-[#121212] text-xs text-white"
+                          className="flex items-center justify-between gap-2 p-2.5 rounded-3xl bg-[#121212] text-xs text-white"
                         >
                           <span>{idx + 5}. {rule.replace(/^\d+\.\s*/, "")}</span>
                           <button
@@ -734,7 +734,7 @@ export default function AdminBattlesManagerPage() {
                   )}
 
                   {showAddRule ? (
-                    <div className="bg-[#121212] p-3 rounded-2xl space-y-2">
+                    <div className="bg-[#121212] p-3 rounded-3xl space-y-2">
                       <input
                         type="text"
                         placeholder="e.g. Must feature an 808 sub-bassline"
@@ -746,7 +746,7 @@ export default function AdminBattlesManagerPage() {
                             handleAddRule();
                           }
                         }}
-                        className="w-full bg-[#181818] rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                        className="w-full bg-[#181818] rounded-3xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand"
                         autoFocus
                       />
                       <div className="flex items-center justify-end gap-2">
@@ -761,7 +761,7 @@ export default function AdminBattlesManagerPage() {
                           type="button"
                           onClick={handleAddRule}
                           disabled={!newRuleInput.trim()}
-                          className="px-3.5 py-1.5 rounded-2xl bg-brand hover:bg-brand/90 text-xs text-white font-bold cursor-pointer disabled:opacity-50"
+                          className="px-3.5 py-1.5 rounded-3xl bg-brand hover:bg-brand/90 text-xs text-white font-bold cursor-pointer disabled:opacity-50"
                         >
                           Add Rule
                         </button>
@@ -771,7 +771,7 @@ export default function AdminBattlesManagerPage() {
                     <button
                       type="button"
                       onClick={() => setShowAddRule(true)}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-[#121212] hover:bg-[#202020] text-xs text-[#D1D1D1] font-bold transition-all cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-3xl bg-[#121212] hover:bg-[#202020] text-xs text-[#D1D1D1] font-bold transition-all cursor-pointer"
                     >
                       <Plus className="w-3.5 h-3.5 text-brand" />
                       <span>Add Extra Rule</span>
@@ -780,7 +780,7 @@ export default function AdminBattlesManagerPage() {
                 </div>
 
                 {/* Sample(s) Management (Upload file only, clean row without audio player) */}
-                <div className="space-y-3 bg-[#121212] p-4 rounded-2xl">
+                <div className="space-y-3 bg-[#121212] p-4 rounded-3xl">
                   <div className="flex items-center justify-between">
                     <label className="font-bold text-white uppercase tracking-wider text-xs">
                       Sample(s)
@@ -795,10 +795,10 @@ export default function AdminBattlesManagerPage() {
                       {samples.map((sample) => (
                         <div
                           key={sample.id}
-                          className="bg-[#181818] p-3 rounded-2xl flex items-center justify-between gap-3 text-xs"
+                          className="bg-[#181818] p-3 rounded-3xl flex items-center justify-between gap-3 text-xs"
                         >
                           <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <div className="w-7 h-7 rounded-2xl bg-brand/10 text-brand flex items-center justify-center shrink-0">
+                            <div className="w-7 h-7 rounded-3xl bg-brand/10 text-brand flex items-center justify-center shrink-0">
                               <Music className="w-3.5 h-3.5" />
                             </div>
                             <input
@@ -822,7 +822,7 @@ export default function AdminBattlesManagerPage() {
                   )}
 
                   <div>
-                    <label className={`px-4 py-2 rounded-2xl text-xs font-bold text-white transition-colors inline-flex items-center gap-2 ${
+                    <label className={`px-4 py-2 rounded-3xl text-xs font-bold text-white transition-colors inline-flex items-center gap-2 ${
                       isUploadingSamples ? "bg-[#333333] cursor-not-allowed opacity-75" : "bg-[#222222] hover:bg-[#2A2A2A] cursor-pointer"
                     }`}>
                       <Music className="w-3.5 h-3.5 text-brand" />
@@ -840,7 +840,7 @@ export default function AdminBattlesManagerPage() {
                 </div>
 
                 {/* Timeline Deadlines */}
-                <div className="bg-[#121212] p-4 rounded-2xl space-y-3">
+                <div className="bg-[#121212] p-4 rounded-3xl space-y-3">
                   <div className="flex items-center justify-between">
                     <label className="font-bold text-white uppercase tracking-wider text-xs">
                       Timeline & Deadlines
@@ -862,7 +862,7 @@ export default function AdminBattlesManagerPage() {
                             submissionStartsAt: e.target.value ? new Date(e.target.value).toISOString() : "",
                           })
                         }
-                        className="w-full bg-[#181818] rounded-2xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                        className="w-full bg-[#181818] rounded-3xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-brand"
                       />
                     </div>
 
@@ -877,7 +877,7 @@ export default function AdminBattlesManagerPage() {
                             submissionEndsAt: e.target.value ? new Date(e.target.value).toISOString() : "",
                           })
                         }
-                        className="w-full bg-[#181818] rounded-2xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                        className="w-full bg-[#181818] rounded-3xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-brand"
                       />
                     </div>
 
@@ -892,7 +892,7 @@ export default function AdminBattlesManagerPage() {
                             ratingEndsAt: e.target.value ? new Date(e.target.value).toISOString() : "",
                           })
                         }
-                        className="w-full bg-[#181818] rounded-2xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-brand"
+                        className="w-full bg-[#181818] rounded-3xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-brand"
                       />
                     </div>
                   </div>
@@ -903,7 +903,7 @@ export default function AdminBattlesManagerPage() {
                   <button
                     type="button"
                     onClick={() => setShowDeleteConfirm(true)}
-                    className="px-4 py-2.5 rounded-2xl bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                    className="px-4 py-2.5 rounded-3xl bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     <span>Delete Battle</span>
@@ -913,14 +913,14 @@ export default function AdminBattlesManagerPage() {
                     <button
                       type="button"
                       onClick={() => setEditingBattle(null)}
-                      className="px-5 py-2.5 rounded-2xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                      className="px-5 py-2.5 rounded-3xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-zinc-400 hover:text-white transition-colors cursor-pointer"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={isUploadingSamples}
-                      className="px-7 py-2.5 rounded-2xl bg-brand hover:bg-brand/90 text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-7 py-2.5 rounded-3xl bg-brand hover:bg-brand/90 text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isUploadingSamples ? "Uploading Samples..." : isSaved ? "Saved ✓" : "Save Changes"}
                     </button>
@@ -941,10 +941,10 @@ export default function AdminBattlesManagerPage() {
           >
             <div
               onClick={(e) => e.stopPropagation()}
-              className="bg-[#181818] rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl relative text-left cursor-default"
+              className="bg-[#181818] rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl relative text-left cursor-default"
             >
               <div className="flex items-center gap-3 text-red-400">
-                <div className="w-10 h-10 rounded-2xl bg-red-500/10 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-3xl bg-red-500/10 flex items-center justify-center shrink-0">
                   <Trash2 className="w-5 h-5" />
                 </div>
                 <div>
@@ -957,14 +957,14 @@ export default function AdminBattlesManagerPage() {
                 <button
                   type="button"
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="px-4 py-2 rounded-2xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-zinc-300 transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-3xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-zinc-300 transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={handleDeleteBattle}
-                  className="px-5 py-2 rounded-2xl bg-red-600 hover:bg-red-700 text-xs font-bold text-white transition-all shadow-md cursor-pointer"
+                  className="px-5 py-2 rounded-3xl bg-red-600 hover:bg-red-700 text-xs font-bold text-white transition-all shadow-md cursor-pointer"
                 >
                   Confirm Delete
                 </button>

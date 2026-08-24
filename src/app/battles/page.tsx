@@ -68,10 +68,10 @@ export default function BattlesPage() {
 
           <Link
             href={`/battles/${activeBattle.id}`}
-            className="bg-[#181818] rounded-2xl p-5 sm:p-7 flex flex-col md:flex-row gap-7 items-start hover:bg-[#1A1A1A] transition-all shadow-xl block cursor-pointer group relative overflow-hidden"
+            className="bg-[#181818] rounded-3xl p-5 sm:p-7 flex flex-col md:flex-row gap-7 items-start hover:bg-[#1A1A1A] transition-all shadow-xl block cursor-pointer group relative overflow-hidden"
           >
             {/* Cover Art Thumbnail (Responsive Square) */}
-            <div className="w-full sm:max-w-[320px] aspect-square rounded-2xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl mx-auto md:mx-0">
+            <div className="w-full sm:max-w-[320px] aspect-square rounded-3xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl mx-auto md:mx-0">
               <Image
                 src={activeBattle.coverImage || "/covers/default-battle.png"}
                 alt={activeBattle.title}
@@ -139,9 +139,9 @@ export default function BattlesPage() {
               <Link
                 key={battle.id}
                 href={`/battles/${battle.id}`}
-                className="bg-[#181818] rounded-2xl p-5 sm:p-5 hover:bg-[#1C1C1C] transition-all flex flex-col group shadow-lg space-y-3.5 border border-brand/20"
+                className="bg-[#181818] rounded-3xl p-5 sm:p-5 hover:bg-[#1C1C1C] transition-all flex flex-col group shadow-lg space-y-3.5 border border-brand/20"
               >
-                <div className="w-full aspect-square relative rounded-2xl overflow-hidden bg-[#121212] shrink-0">
+                <div className="w-full aspect-square relative rounded-3xl overflow-hidden bg-[#121212] shrink-0">
                   <Image
                     src={battle.coverImage || "/covers/default-battle.png"}
                     alt={battle.title}
@@ -203,10 +203,10 @@ export default function BattlesPage() {
               <Link
                 key={battle.id}
                 href={`/battles/${battle.id}`}
-                className="bg-[#181818] rounded-2xl p-5 sm:p-5 hover:bg-[#1C1C1C] transition-all flex flex-col group shadow-lg space-y-3.5"
+                className="bg-[#181818] rounded-3xl p-5 sm:p-5 hover:bg-[#1C1C1C] transition-all flex flex-col group shadow-lg space-y-3.5"
               >
                 {/* Compact Square Card Cover Art */}
-                <div className="w-full aspect-square relative rounded-2xl overflow-hidden bg-[#121212] shrink-0">
+                <div className="w-full aspect-square relative rounded-3xl overflow-hidden bg-[#121212] shrink-0">
                   <Image
                     src={battle.coverImage || "/covers/default-battle.png"}
                     alt={battle.title}

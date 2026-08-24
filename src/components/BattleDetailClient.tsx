@@ -768,13 +768,13 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
           </Link>
 
           {/* Battle Phases Timeline Indicator (Read-only status, no click/mock jumping) */}
-          <div className="flex items-center gap-1 bg-[#181818] p-1 rounded-2xl select-none overflow-x-auto no-scrollbar max-w-[200px] sm:max-w-none">
+          <div className="flex items-center gap-1 bg-[#181818] p-1 rounded-3xl select-none overflow-x-auto no-scrollbar max-w-[200px] sm:max-w-none">
             {phasesList.map((p) => {
               const isCurrent = battle.phase === p.key;
               return (
                 <div
                   key={p.key}
-                  className={`px-2.5 sm:px-3 py-1 rounded-2xl text-xs font-bold transition-all flex items-center gap-1 sm:gap-1.5 shrink-0 ${
+                  className={`px-2.5 sm:px-3 py-1 rounded-3xl text-xs font-bold transition-all flex items-center gap-1 sm:gap-1.5 shrink-0 ${
                     isCurrent
                       ? "bg-[#7B61FF] text-white shadow-md"
                       : "text-[#555555] opacity-50 cursor-default hidden sm:flex"
@@ -791,10 +791,10 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
         </div>
 
         {/* Hero Header */}
-        <div className="bg-[#181818] rounded-2xl p-5 sm:p-7 flex flex-col md:flex-row gap-7 items-start relative overflow-hidden shadow-xl">
+        <div className="bg-[#181818] rounded-3xl p-5 sm:p-7 flex flex-col md:flex-row gap-7 items-start relative overflow-hidden shadow-xl">
           
           {/* Cover Art Thumbnail (Responsive Square) */}
-          <div className="w-full sm:max-w-[320px] aspect-square rounded-2xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl mx-auto md:mx-0">
+          <div className="w-full sm:max-w-[320px] aspect-square rounded-3xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl mx-auto md:mx-0">
             <Image
               src={battle.coverImage}
               alt={battle.title}
@@ -866,7 +866,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                     "Use at least 1 of the samples (if) provided.",
                     ...(battle.rules || []).map((r) => r.replace(/^\d+\.\s*/, "")),
                   ].map((rule, idx) => (
-                    <div key={idx} className="bg-[#181818] p-3.5 rounded-2xl">
+                    <div key={idx} className="bg-[#181818] p-3.5 rounded-3xl">
                       <p className="text-xs text-[#D1D1D1]">{idx + 1}. {rule}</p>
                     </div>
                   ))}
@@ -885,7 +885,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                       type="button"
                       onClick={downloadSamples}
                       disabled={isDownloadingSamples}
-                      className="px-4 py-2 rounded-2xl bg-[#7B61FF] hover:bg-[#684DE6] text-white font-bold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all w-fit shrink-0 cursor-pointer disabled:opacity-60"
+                      className="px-4 py-2 rounded-3xl bg-[#7B61FF] hover:bg-[#684DE6] text-white font-bold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all w-fit shrink-0 cursor-pointer disabled:opacity-60"
                     >
                       {isDownloadingSamples ? (
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -904,7 +904,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                       return (
                         <div
                           key={sample.id}
-                          className="relative overflow-hidden rounded-2xl p-3 sm:p-3.5 flex items-center justify-between gap-3 transition-all bg-[#181818] border-0"
+                          className="relative overflow-hidden rounded-3xl p-3 sm:p-3.5 flex items-center justify-between gap-3 transition-all bg-[#181818] border-0"
                         >
                           {/* Live playback progress fill overlay */}
                           {isPlaying && (
@@ -950,7 +950,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             </div>
 
             {/* Right Column: Submit Your Entry Container (Reduces in size when submitted or staged) */}
-            <div className={`lg:col-span-6 bg-[#181818] rounded-2xl p-5 sm:p-7 space-y-4 flex flex-col ${(myEntry || stagedBeat) ? "h-auto" : "h-full justify-between"}`}>
+            <div className={`lg:col-span-6 bg-[#181818] rounded-3xl p-5 sm:p-7 space-y-4 flex flex-col ${(myEntry || stagedBeat) ? "h-auto" : "h-full justify-between"}`}>
               <div className="space-y-4 flex-1 flex flex-col">
                 <h3 className="text-2xl font-bold text-white flex items-center gap-2">
                   <Upload className="w-5 h-5 text-[#FF5E3A]" />
@@ -958,7 +958,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                 </h3>
 
                 {isUserJudge ? (
-                  <div className="flex-1 min-h-[260px] rounded-2xl p-6 bg-[#121212]/70 flex flex-col items-center justify-center text-center gap-3">
+                  <div className="flex-1 min-h-[260px] rounded-3xl p-6 bg-[#121212]/70 flex flex-col items-center justify-center text-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-[#7B61FF]/15 flex items-center justify-center text-[#7B61FF]">
                       <Star className="w-6 h-6 fill-current" />
                     </div>
@@ -970,7 +970,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                     </div>
                   </div>
                 ) : !myEntry && stagedBeat ? (
-                  <div className="bg-[#121212] p-5 sm:p-7 rounded-2xl space-y-5">
+                  <div className="bg-[#121212] p-5 sm:p-7 rounded-3xl space-y-5">
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2 text-[#7B61FF] text-lg font-bold">
                         <Upload className="w-4 h-4" />
@@ -979,7 +979,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
                       <button
                         onClick={() => setStagedBeat(null)}
-                        className="text-xs font-bold px-3 py-1.5 rounded-2xl bg-[#1A1A1A] hover:bg-zinc-800 text-[#888888] hover:text-white transition-all cursor-pointer"
+                        className="text-xs font-bold px-3 py-1.5 rounded-3xl bg-[#1A1A1A] hover:bg-zinc-800 text-[#888888] hover:text-white transition-all cursor-pointer"
                       >
                         Change File
                       </button>
@@ -995,7 +995,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                         value={stagedBeat.title}
                         onChange={(e) => setStagedBeat({ ...stagedBeat, title: e.target.value })}
                         placeholder="Enter your beat title..."
-                        className="w-full px-4 py-3 rounded-2xl bg-[#1A1A1A] border border-[#333333] focus:border-[#7B61FF] text-white text-sm outline-none transition-all"
+                        className="w-full px-4 py-3 rounded-3xl bg-[#1A1A1A] border border-[#333333] focus:border-[#7B61FF] text-white text-sm outline-none transition-all"
                         autoFocus
                       />
                       <p className="text-xs text-[#888888]">
@@ -1018,7 +1018,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                     <button
                       onClick={handleConfirmSubmitStagedEntry}
                       disabled={isUploading || !stagedBeat.title.trim()}
-                      className="w-full py-3.5 rounded-2xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold shadow-xl active:scale-98 transition-all disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+                      className="w-full py-3.5 rounded-3xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold shadow-xl active:scale-98 transition-all disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
                     >
                       {isUploading ? (
                         <>
@@ -1039,7 +1039,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                     onDragEnter={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
-                    className={`flex-1 min-h-[300px] rounded-2xl p-8 flex flex-col items-center justify-center gap-4 cursor-pointer transition-all group ${
+                    className={`flex-1 min-h-[300px] rounded-3xl p-8 flex flex-col items-center justify-center gap-4 cursor-pointer transition-all group ${
                       isDraggingOver
                         ? "bg-[#7B61FF]/15 border-2 border-solid border-[#7B61FF] scale-[1.01]"
                         : "bg-[#121212]/70 hover:bg-[#121212] border-2 border-dashed border-[#7B61FF]"
@@ -1076,7 +1076,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                     onDragEnter={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
-                    className={`bg-[#121212] p-5 sm:p-7 rounded-2xl space-y-5 transition-all ${
+                    className={`bg-[#121212] p-5 sm:p-7 rounded-3xl space-y-5 transition-all ${
                       isDraggingOver ? "ring-2 ring-[#7B61FF] bg-[#7B61FF]/10" : ""
                     }`}
                   >
@@ -1092,7 +1092,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                             <button
                               onClick={handleStartEditTitle}
                               disabled={isUploading}
-                              className="text-xs font-bold px-3.5 py-1.5 rounded-2xl bg-[#1A1A1A] hover:bg-[#7B61FF] text-white transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
+                              className="text-xs font-bold px-3.5 py-1.5 rounded-3xl bg-[#1A1A1A] hover:bg-[#7B61FF] text-white transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
                             >
                               <Pencil className="w-3.5 h-3.5" />
                               <span>Edit Title</span>
@@ -1102,7 +1102,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                           <button
                             onClick={handleRemoveMyEntry}
                             disabled={isUploading}
-                            className="text-xs font-bold px-3 py-1.5 rounded-2xl bg-[#1A1A1A] hover:bg-red-500/20 text-[#888888] hover:text-red-400 transition-all cursor-pointer disabled:opacity-50"
+                            className="text-xs font-bold px-3 py-1.5 rounded-3xl bg-[#1A1A1A] hover:bg-red-500/20 text-[#888888] hover:text-red-400 transition-all cursor-pointer disabled:opacity-50"
                           >
                             {isUploading ? "Removing..." : "Remove"}
                           </button>
@@ -1115,20 +1115,20 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                             type="text"
                             value={editingMyEntryTitle}
                             onChange={(e) => setEditingMyEntryTitle(e.target.value)}
-                            className="w-full px-3.5 py-2 rounded-2xl bg-[#1A1A1A] border border-[#333333] focus:border-[#7B61FF] text-white text-sm outline-none"
+                            className="w-full px-3.5 py-2 rounded-3xl bg-[#1A1A1A] border border-[#333333] focus:border-[#7B61FF] text-white text-sm outline-none"
                             autoFocus
                           />
                           <div className="flex items-center gap-2">
                             <button
                               onClick={handleSaveEditedTitle}
                               disabled={!editingMyEntryTitle.trim() || isUploading}
-                              className="px-4 py-1.5 rounded-2xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all disabled:opacity-50 cursor-pointer"
+                              className="px-4 py-1.5 rounded-3xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all disabled:opacity-50 cursor-pointer"
                             >
                               Save
                             </button>
                             <button
                               onClick={() => setIsEditingMyEntryTitle(false)}
-                              className="px-3 py-1.5 rounded-2xl bg-[#1A1A1A] hover:bg-zinc-800 text-zinc-400 hover:text-white text-xs font-bold transition-all cursor-pointer"
+                              className="px-3 py-1.5 rounded-3xl bg-[#1A1A1A] hover:bg-zinc-800 text-zinc-400 hover:text-white text-xs font-bold transition-all cursor-pointer"
                             >
                               Cancel
                             </button>
@@ -1175,7 +1175,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
           </div>
 
           {blindTracks.length === 0 ? (
-            <div className="bg-[#181818] rounded-2xl p-8 text-center space-y-2">
+            <div className="bg-[#181818] rounded-3xl p-8 text-center space-y-2">
               <p className="text-white text-lg font-bold">No Submissions Yet</p>
               <p className="text-xs text-[#888888]">
                 No beats have been submitted for this battle yet. When beats are entered, they will appear here anonymized for fair public rating.
@@ -1190,7 +1190,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                 return (
                   <div
                     key={track.id}
-                    className={`bg-[#181818] rounded-2xl p-4 sm:p-5 ${
+                    className={`bg-[#181818] rounded-3xl p-4 sm:p-5 ${
                       unlocked ? "" : "opacity-40"
                     }`}
                   >
@@ -1244,13 +1244,13 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             <div className="flex flex-col items-center justify-center gap-3 pt-6 pb-6">
               {isRatingsSubmitted ? (
                 <div className="flex items-center gap-3 flex-wrap justify-center">
-                  <div className="flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-emerald-500/15 text-emerald-300 text-lg font-bold shadow-lg">
+                  <div className="flex items-center gap-2.5 px-6 py-3.5 rounded-3xl bg-emerald-500/15 text-emerald-300 text-lg font-bold shadow-lg">
                     <CheckCircle2 className="w-5 h-5 text-emerald-400" />
                     <span>Ratings Submitted & Locked ✓</span>
                   </div>
                   <button
                     onClick={handleUnlockRatings}
-                    className="px-5 py-3.5 rounded-2xl bg-[#202020] hover:bg-[#282828] text-[#D1D1D1] hover:text-white text-xs font-bold transition-all cursor-pointer active:scale-95 shadow-sm"
+                    className="px-5 py-3.5 rounded-3xl bg-[#202020] hover:bg-[#282828] text-[#D1D1D1] hover:text-white text-xs font-bold transition-all cursor-pointer active:scale-95 shadow-sm"
                   >
                     Unlock & Edit Ratings
                   </button>
@@ -1258,7 +1258,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
               ) : (
                 <button
                   onClick={handleClickSubmitRatings}
-                  className="px-8 py-3.5 rounded-2xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold shadow-xl transition-all active:scale-95 cursor-pointer"
+                  className="px-8 py-3.5 rounded-3xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold shadow-xl transition-all active:scale-95 cursor-pointer"
                 >
                   <span>Submit Ratings</span>
                 </button>
@@ -1275,7 +1275,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
               >
                 <div 
                   onClick={(e) => e.stopPropagation()}
-                  className="bg-[#181818] rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl relative cursor-default"
+                  className="bg-[#181818] rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl relative cursor-default"
                 >
                   <div className="space-y-2">
                     <h3 className="text-2xl font-bold text-[#FF5E3A] flex items-center gap-2">
@@ -1286,7 +1286,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                     </p>
                   </div>
 
-                  <div className="bg-[#121212] p-4 rounded-2xl space-y-1.5 text-xs text-[#A0A0A0]">
+                  <div className="bg-[#121212] p-4 rounded-3xl space-y-1.5 text-xs text-[#A0A0A0]">
                     <div className="flex items-center justify-between">
                       <span>Beats Rated So Far:</span>
                       <strong className="text-white">{currentVotesCount} / {totalEntries}</strong>
@@ -1300,7 +1300,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                   <div className="flex justify-end pt-2">
                     <button
                       onClick={() => setSubmitError(null)}
-                      className="px-6 py-2.5 rounded-2xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
+                      className="px-6 py-2.5 rounded-3xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
                     >
                       Got it, continue rating
                     </button>
@@ -1319,7 +1319,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
               >
                 <div 
                   onClick={(e) => e.stopPropagation()}
-                  className="bg-[#181818] rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default"
+                  className="bg-[#181818] rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default"
                 >
                   <div className="space-y-2">
                     <h3 className="text-2xl font-bold text-white flex items-center gap-2">
@@ -1331,7 +1331,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                     </p>
                   </div>
 
-                  <div className="bg-[#121212] p-4 rounded-2xl space-y-1.5 text-xs text-[#A0A0A0]">
+                  <div className="bg-[#121212] p-4 rounded-3xl space-y-1.5 text-xs text-[#A0A0A0]">
                     <div className="flex items-center justify-between">
                       <span>Total Beats Rated:</span>
                       <strong className="text-white">{currentVotesCount} / {totalEntries}</strong>
@@ -1345,13 +1345,13 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                   <div className="flex items-center justify-end gap-3 pt-2">
                     <button
                       onClick={() => setShowSubmitWarningModal(false)}
-                      className="px-5 py-2.5 rounded-2xl bg-[#121212] hover:bg-[#202020] text-zinc-300 text-xs font-bold transition-all cursor-pointer"
+                      className="px-5 py-2.5 rounded-3xl bg-[#121212] hover:bg-[#202020] text-zinc-300 text-xs font-bold transition-all cursor-pointer"
                     >
                       Keep Editing
                     </button>
                     <button
                       onClick={handleConfirmSubmitRatings}
-                      className="px-6 py-2.5 rounded-2xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer flex items-center gap-2"
+                      className="px-6 py-2.5 rounded-3xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer flex items-center gap-2"
                     >
                       <span>Confirm & Lock Ratings</span>
                     </button>
@@ -1391,12 +1391,12 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                 <div className="pt-2">
                   {isJurySubmitted ? (
                     <div className="flex items-center gap-3 flex-wrap">
-                      <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-500/15 text-emerald-300 font-bold text-xs shadow-sm">
+                      <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-3xl bg-emerald-500/15 text-emerald-300 font-bold text-xs shadow-sm">
                         Scores Submitted ✓
                       </div>
                       <button
                         onClick={handleUnlockJuryBallot}
-                        className="px-4 py-2.5 rounded-2xl bg-[#202020] hover:bg-[#282828] text-[#D1D1D1] hover:text-white text-xs font-bold transition-all cursor-pointer active:scale-95 shadow-sm"
+                        className="px-4 py-2.5 rounded-3xl bg-[#202020] hover:bg-[#282828] text-[#D1D1D1] hover:text-white text-xs font-bold transition-all cursor-pointer active:scale-95 shadow-sm"
                       >
                         Unlock & Edit Scores
                       </button>
@@ -1404,7 +1404,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                   ) : (
                     <button
                       onClick={handlePublishJuryBallot}
-                      className="px-7 py-3 rounded-2xl bg-[#7B61FF] hover:bg-[#684DE6] text-white font-bold text-xs shadow-lg active:scale-95 transition-all cursor-pointer"
+                      className="px-7 py-3 rounded-3xl bg-[#7B61FF] hover:bg-[#684DE6] text-white font-bold text-xs shadow-lg active:scale-95 transition-all cursor-pointer"
                     >
                       Submit Scores
                     </button>
@@ -1428,7 +1428,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
               ).length;
 
               return (
-                <div className="lg:col-span-5 bg-[#181818] p-4 sm:p-5 rounded-2xl space-y-3 shadow-lg">
+                <div className="lg:col-span-5 bg-[#181818] p-4 sm:p-5 rounded-3xl space-y-3 shadow-lg">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-white">Assigned Judges</span>
                     <span className="text-xs text-zinc-400 font-mono">
@@ -1451,7 +1451,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                       );
 
                       return (
-                        <div key={j.email || j.name} className="bg-[#121212] p-3 rounded-2xl flex items-center justify-between">
+                        <div key={j.email || j.name} className="bg-[#121212] p-3 rounded-3xl flex items-center justify-between">
                           <div className="flex items-center gap-2.5">
                             <span className={`w-2 h-2 rounded-full ${isDone ? "bg-emerald-500" : "bg-[#FF5E3A] animate-pulse"}`} />
                             <span className="text-xs font-bold text-white">
@@ -1473,7 +1473,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
           {/* Anonymized Top Finalists list (triaged from Phase 2 public rating) */}
           {finalistSubmissions.length === 0 ? (
-            <div className="bg-[#181818] rounded-2xl p-8 text-center space-y-2">
+            <div className="bg-[#181818] rounded-3xl p-8 text-center space-y-2">
               <p className="text-white text-lg font-bold">No Finalists Yet</p>
               <p className="text-xs text-[#888888]">
                 There are currently no finalist submissions to evaluate for this battle.
@@ -1489,7 +1489,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                 return (
                   <div
                     key={sub.id}
-                    className="bg-[#181818] rounded-2xl p-4 sm:p-5 space-y-3.5"
+                    className="bg-[#181818] rounded-3xl p-4 sm:p-5 space-y-3.5"
                   >
                     <div className="flex items-center justify-between gap-4">
                       <div>
@@ -1512,7 +1512,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                     {isUserJudge && (
                       <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 pt-1 items-center">
                         {/* Score Slider */}
-                        <div className="md:col-span-5 flex items-center gap-3 bg-[#121212] px-4 py-2.5 rounded-2xl">
+                        <div className="md:col-span-5 flex items-center gap-3 bg-[#121212] px-4 py-2.5 rounded-3xl">
                           <span className="text-xs text-[#888888] font-bold shrink-0">Score:</span>
                           <input
                             type="range"
@@ -1522,7 +1522,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                             disabled={isJurySubmitted}
                             value={typeof scoreVal === "number" || (typeof scoreVal === "string" && scoreVal !== "") ? Number(scoreVal) : 0}
                             onChange={(e) => handleJuryScoreChange(sub.id, parseFloat(e.target.value).toFixed(2))}
-                            className={`w-full h-2 bg-[#252525] rounded-2xl appearance-none accent-[#7B61FF] ${isJurySubmitted ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
+                            className={`w-full h-2 bg-[#252525] rounded-3xl appearance-none accent-[#7B61FF] ${isJurySubmitted ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
                           />
                           <div className="flex items-center gap-1 text-[#7B61FF] shrink-0">
                             <Star className="w-3.5 h-3.5 fill-current" />
@@ -1540,7 +1540,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                             placeholder={isJurySubmitted ? "Feedback submitted and locked" : "Leave feedback note for the beatmaker (optional)"}
                             value={feedbackVal}
                             onChange={(e) => handleJuryFeedbackChange(sub.id, e.target.value)}
-                            className={`w-full bg-[#121212] rounded-2xl px-4 py-2.5 text-xs text-white placeholder-[#555555] focus:outline-none ${isJurySubmitted ? "opacity-70 cursor-not-allowed" : ""}`}
+                            className={`w-full bg-[#121212] rounded-3xl px-4 py-2.5 text-xs text-white placeholder-[#555555] focus:outline-none ${isJurySubmitted ? "opacity-70 cursor-not-allowed" : ""}`}
                           />
                         </div>
                       </div>
@@ -1562,7 +1562,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
           
           {/* Leaderboard Cards */}
           {submissions.length === 0 ? (
-            <div className="bg-[#181818] rounded-2xl p-8 text-center space-y-2">
+            <div className="bg-[#181818] rounded-3xl p-8 text-center space-y-2">
               <p className="text-white text-lg font-bold">No Results Recorded</p>
               <p className="text-xs text-[#888888]">
                 No submissions or rankings have been published for this battle yet.
@@ -1587,7 +1587,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                   return (
                     <div
                       key={sub.id}
-                      className="bg-[#181818] rounded-2xl p-4 sm:p-5 space-y-3.5"
+                      className="bg-[#181818] rounded-3xl p-4 sm:p-5 space-y-3.5"
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         
@@ -1629,7 +1629,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                         {/* Leaderboard Score: Strict Jury Score Average */}
                         <div className="flex items-center gap-3 shrink-0 text-xs font-bold flex-wrap">
                           {hasJury && (
-                            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-[#7B61FF]/15 text-[#7B61FF] font-bold text-xs shadow-sm" title="Jury Score Average">
+                            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-3xl bg-[#7B61FF]/15 text-[#7B61FF] font-bold text-xs shadow-sm" title="Jury Score Average">
                               <Star className="w-4 h-4 fill-current text-[#7B61FF]" />
                               <span>{Number(sub.juryScore).toFixed(2)}</span>
                               <span className="text-xs text-[#A0A0A0]">Jury Avg</span>
@@ -1684,7 +1684,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                             {finalFeedbacks.map((f, fIdx) => (
                               <div
                                 key={fIdx}
-                                className="bg-[#121212] px-4 py-2.5 rounded-2xl text-xs text-[#D1D1D1] italic"
+                                className="bg-[#121212] px-4 py-2.5 rounded-3xl text-xs text-[#D1D1D1] italic"
                               >
                                 "{f.feedback}" - <span className="text-[#888888] not-italic font-bold">{f.judgeName}</span>
                               </div>
@@ -1700,7 +1700,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
           {/* YouTube Live Jury Evaluation Session Embed below Leaderboard */}
           {battle.youtubeVodUrl && battle.youtubeVodUrl.trim() && (
-            <div className="w-full aspect-video rounded-2xl overflow-hidden bg-[#121212] shadow-2xl">
+            <div className="w-full aspect-video rounded-3xl overflow-hidden bg-[#121212] shadow-2xl">
               <iframe
                 src={
                   battle.youtubeVodUrl.includes("watch?v=")

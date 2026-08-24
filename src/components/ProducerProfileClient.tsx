@@ -14,6 +14,7 @@ import { DiscoveryBeat, JudgeFeedbackItem, UserProfile, STANDARD_BEAT_TAGS, Vaul
 import { producerService, battleService, beatService, storageService, vaultService } from "@/services";
 import { normalizeUrl } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { 
   Flame, Trophy, Mail, ExternalLink, 
   CheckCircle2, Copy, MapPin, Calendar, Star, Award, Globe,
@@ -310,6 +311,9 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
   const [isUploadingBeatAudio, setIsUploadingBeatAudio] = useState(false);
 
   const [saveToastMessage, setSaveToastMessage] = useState<string | null>(null);
+
+  // Lock page scrolling when any modal is open
+  useBodyScrollLock(Boolean(editingBeat || isAddModalOpen || showContactModal || activeVaultModalItem));
 
   const backdropMouseDownRef = useRef<EventTarget | null>(null);
 

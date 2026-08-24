@@ -21,6 +21,7 @@ import confetti from "canvas-confetti";
 import { BattlePhase, Competition, BattleSubmission } from "@/lib/types";
 import { useAudioPlayer } from "@/lib/audio-context";
 import { useAuth } from "@/lib/auth-context";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 
 // Deterministic pseudo-random seeded shuffle (Mulberry32 PRNG)
 function seededShuffle<T>(array: T[], seedStr: string): T[] {
@@ -584,6 +585,9 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   const [showSubmitWarningModal, setShowSubmitWarningModal] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [lastSavedTime, setLastSavedTime] = useState<string | null>(null);
+
+  // Lock page scrolling when any modal is open
+  useBodyScrollLock(Boolean(submitError || showSubmitWarningModal));
 
   // Close modals on Escape key
   useEffect(() => {

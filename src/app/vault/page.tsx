@@ -7,9 +7,13 @@ import { ExternalLink } from "lucide-react";
 import { vaultService } from "@/services/vaultService";
 import { producerService } from "@/services/producerService";
 import { VaultItem } from "@/lib/types";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 
 export default function VaultPage() {
   const [activeModalItem, setActiveModalItem] = useState<VaultItem | null>(null);
+
+  // Lock page scrolling when vault video modal is open
+  useBodyScrollLock(Boolean(activeModalItem));
 
   const breakdowns = vaultService.getItemsByCategory("breakdowns");
   const liveSets = vaultService.getItemsByCategory("live-sets");

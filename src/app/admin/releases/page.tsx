@@ -8,11 +8,15 @@ import { AdminGuard } from "@/components/AdminGuard";
 import { releaseService, storageService } from "@/services";
 import { Release } from "@/lib/types";
 import { normalizeUrl } from "@/lib/utils";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 
 export default function AdminReleasesManagerPage() {
   const [releases, setReleases] = useState<Release[]>([]);
   const [editingRelease, setEditingRelease] = useState<Release | null>(null);
   const [isSaved, setIsSaved] = useState(false);
+
+  // Lock page scrolling when edit release modal is open
+  useBodyScrollLock(Boolean(editingRelease));
 
   useEffect(() => {
     setReleases(releaseService.getAllReleases());

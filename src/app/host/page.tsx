@@ -8,6 +8,7 @@ import { HostGuard } from "@/components/HostGuard";
 import { battleService, producerService } from "@/services";
 import { useAuth } from "@/lib/auth-context";
 import { Competition, BattlePhase, BattleSample } from "@/lib/types";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 
 interface PersonEntry {
   name: string;
@@ -29,6 +30,9 @@ export default function HostPanelPage() {
   const [samples, setSamples] = useState<BattleSample[]>([]);
 
   const [isSaved, setIsSaved] = useState(false);
+
+  // Lock page scrolling when edit battle modal is open
+  useBodyScrollLock(Boolean(editingBattle));
 
   useEffect(() => {
     if (user) {

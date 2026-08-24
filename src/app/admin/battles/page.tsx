@@ -7,6 +7,7 @@ import { ArrowLeft, Edit3, Plus, Check, X, Trophy, Calendar, Users, Music, Trash
 import { AdminGuard } from "@/components/AdminGuard";
 import { battleService, producerService, storageService } from "@/services";
 import { Competition, BattlePhase, BattleSample } from "@/lib/types";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 
 interface PersonEntry {
   name: string;
@@ -41,6 +42,9 @@ export default function AdminBattlesManagerPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const [isSaved, setIsSaved] = useState(false);
+
+  // Lock page scrolling when any modal is open
+  useBodyScrollLock(Boolean(editingBattle || showDeleteConfirm));
 
   useEffect(() => {
     const refresh = () => setBattles(battleService.getAllCompetitions());

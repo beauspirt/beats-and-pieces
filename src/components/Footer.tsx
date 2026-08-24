@@ -19,7 +19,7 @@ export const Footer: React.FC = () => {
             href="https://www.discord.gg/DJRwTDM7Dr"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-[#5865F2] transition-colors"
+            className="p-2 -m-2 inline-flex items-center justify-center hover:text-[#5865F2] transition-colors"
             aria-label="Discord Server"
           >
             <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -32,7 +32,7 @@ export const Footer: React.FC = () => {
             href="https://www.instagram.com/beatsandpieces.ro"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-[#E4405F] transition-colors"
+            className="p-2 -m-2 inline-flex items-center justify-center hover:text-[#E4405F] transition-colors"
             aria-label="Instagram Page"
           >
             <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -45,7 +45,7 @@ export const Footer: React.FC = () => {
             href="https://www.youtube.com/@beatsandpieces_ro"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-[#FF0000] transition-colors"
+            className="p-2 -m-2 inline-flex items-center justify-center hover:text-[#FF0000] transition-colors"
             aria-label="YouTube Channel"
           >
             <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -58,7 +58,7 @@ export const Footer: React.FC = () => {
             href="https://beatsandpiecesro.bandcamp.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-[#1DA0C3] transition-colors"
+            className="p-2 -m-2 inline-flex items-center justify-center hover:text-[#1DA0C3] transition-colors"
             aria-label="Bandcamp Page"
           >
             <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -71,7 +71,7 @@ export const Footer: React.FC = () => {
             href="https://www.facebook.com/beatsandpieces.ro"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-[#1877F2] transition-colors"
+            className="p-2 -m-2 inline-flex items-center justify-center hover:text-[#1877F2] transition-colors"
             aria-label="Facebook Page"
           >
             <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -84,7 +84,7 @@ export const Footer: React.FC = () => {
             href="https://www.patreon.com/beatsandpieces"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-[#FF424D] transition-colors"
+            className="p-2 -m-2 inline-flex items-center justify-center hover:text-[#FF424D] transition-colors"
             aria-label="Patreon Page"
           >
             <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">

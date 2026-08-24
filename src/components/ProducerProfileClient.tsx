@@ -974,7 +974,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
             {/* Clickable Social Icons (Including Email at end if not hidden) */}
             {((Boolean(producer.email) && !producer.hideEmail) || activeLinks.length > 0) && (
-              <div className="flex flex-wrap items-center gap-3.5 pt-1">
+              <div className="flex flex-wrap items-center gap-5 pt-1 text-[#888888]">
                 {activeLinks.map(([platform, url]) => {
                   const IconComponent = SocialIcons[platform.toLowerCase()] || SocialIcons.website;
                   const hoverColorClasses: Record<string, string> = {
@@ -996,10 +996,10 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                       href={formattedUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`text-zinc-400 ${hoverColor} transition-colors duration-200 active:scale-95 inline-flex items-center justify-center`}
+                      className={`p-2 -m-2 inline-flex items-center justify-center text-[#888888] ${hoverColor} transition-colors duration-200 active:scale-95 cursor-pointer`}
                       title={`${platform.charAt(0).toUpperCase() + platform.slice(1)}: ${url}`}
                     >
-                      <IconComponent className="w-5 h-5" />
+                      <IconComponent className="w-4 h-4" />
                     </a>
                   );
                 })}
@@ -1010,11 +1010,11 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                     <button
                       type="button"
                       onClick={handleCopyEmail}
-                      className="text-zinc-400 hover:text-[#7B61FF] transition-colors duration-200 active:scale-95 inline-flex items-center justify-center cursor-pointer"
+                      className="p-2 -m-2 inline-flex items-center justify-center text-[#888888] hover:text-[#7B61FF] transition-colors duration-200 active:scale-95 cursor-pointer"
                       title={`Copy email (${producer.email})`}
                       aria-label="Copy Email"
                     >
-                      <Mail className="w-5 h-5" />
+                      <Mail className="w-4 h-4" />
                     </button>
 
                     {emailCopiedTooltip && (

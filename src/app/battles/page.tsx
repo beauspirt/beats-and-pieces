@@ -167,7 +167,7 @@ export default function BattlesPage() {
                       </span>
                     </div>
 
-                    <h3 className="font-bold text-sm text-white leading-snug">
+                    <h3 className="text-lg font-bold text-white leading-snug">
                       {battle.title}
                     </h3>
 
@@ -227,7 +227,7 @@ export default function BattlesPage() {
                       </span>
                     </div>
 
-                    <h3 className="font-bold text-sm text-white leading-snug">
+                    <h3 className="text-lg font-bold text-white leading-snug">
                       {battle.title}
                     </h3>
 

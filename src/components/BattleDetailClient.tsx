@@ -963,7 +963,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                       <Star className="w-6 h-6 fill-current" />
                     </div>
                     <div className="space-y-1">
-                      <p className="text-sm font-bold text-white">Assigned as Judge</p>
+                      <p className="text-lg font-bold text-white">Assigned as Judge</p>
                       <p className="text-xs text-[#888888] max-w-sm">
                         You are assigned as an official judge for this battle and cannot submit an entry. You will evaluate the finalists in Phase 03.
                       </p>
@@ -972,7 +972,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                 ) : !myEntry && stagedBeat ? (
                   <div className="bg-[#121212] p-5 sm:p-7 rounded-2xl space-y-5">
                     <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2 text-[#7B61FF] font-bold text-sm">
+                      <div className="flex items-center gap-2 text-[#7B61FF] text-lg font-bold">
                         <Upload className="w-4 h-4" />
                         <span>Confirm Beat Details</span>
                       </div>
@@ -1018,7 +1018,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                     <button
                       onClick={handleConfirmSubmitStagedEntry}
                       disabled={isUploading || !stagedBeat.title.trim()}
-                      className="w-full py-3.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white font-bold text-sm shadow-xl active:scale-98 transition-all disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+                      className="w-full py-3.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold shadow-xl active:scale-98 transition-all disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
                     >
                       {isUploading ? (
                         <>
@@ -1060,7 +1060,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                       )}
                     </div>
                     <div className="text-center space-y-1">
-                      <p className="text-sm font-bold text-white">
+                      <p className="text-lg font-bold text-white">
                         {isUploading ? "Loading audio..." : "Drag & drop your beat audio file here"}
                       </p>
                       {!isUploading && (
@@ -1082,7 +1082,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                   >
                     <div className="space-y-4">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+                        <div className="flex items-center gap-2 text-emerald-400 text-lg font-bold">
                           <CheckCircle2 className="w-4 h-4" />
                           <span>Submission Received</span>
                         </div>
@@ -1176,7 +1176,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
           {blindTracks.length === 0 ? (
             <div className="bg-[#181818] rounded-2xl p-8 text-center space-y-2">
-              <p className="text-white font-bold text-sm">No Submissions Yet</p>
+              <p className="text-white text-lg font-bold">No Submissions Yet</p>
               <p className="text-xs text-[#888888]">
                 No beats have been submitted for this battle yet. When beats are entered, they will appear here anonymized for fair public rating.
               </p>
@@ -1198,7 +1198,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                       <div className="space-y-3.5">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <span className="font-bold text-white text-sm">{track.placeholder}</span>
+                            <span className="font-bold text-white text-lg">{track.placeholder}</span>
                           </div>
 
                           {/* 5 Flames Only */}
@@ -1244,7 +1244,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             <div className="flex flex-col items-center justify-center gap-3 pt-6 pb-6">
               {isRatingsSubmitted ? (
                 <div className="flex items-center gap-3 flex-wrap justify-center">
-                  <div className="flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-emerald-500/15 text-emerald-300 font-bold text-sm shadow-lg">
+                  <div className="flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-emerald-500/15 text-emerald-300 text-lg font-bold shadow-lg">
                     <CheckCircle2 className="w-5 h-5 text-emerald-400" />
                     <span>Ratings Submitted & Locked ✓</span>
                   </div>
@@ -1258,7 +1258,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
               ) : (
                 <button
                   onClick={handleClickSubmitRatings}
-                  className="px-8 py-3.5 rounded-2xl bg-[#7B61FF] hover:bg-[#684DE6] text-white font-bold text-sm shadow-xl transition-all active:scale-95 cursor-pointer"
+                  className="px-8 py-3.5 rounded-2xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold shadow-xl transition-all active:scale-95 cursor-pointer"
                 >
                   <span>Submit Ratings</span>
                 </button>
@@ -1474,7 +1474,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
           {/* Anonymized Top Finalists list (triaged from Phase 2 public rating) */}
           {finalistSubmissions.length === 0 ? (
             <div className="bg-[#181818] rounded-2xl p-8 text-center space-y-2">
-              <p className="text-white font-bold text-sm">No Finalists Yet</p>
+              <p className="text-white text-lg font-bold">No Finalists Yet</p>
               <p className="text-xs text-[#888888]">
                 There are currently no finalist submissions to evaluate for this battle.
               </p>
@@ -1493,7 +1493,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                   >
                     <div className="flex items-center justify-between gap-4">
                       <div>
-                        <h4 className="font-bold text-white text-sm">{blindTitle}</h4>
+                        <h4 className="font-bold text-white text-lg">{blindTitle}</h4>
                       </div>
                     </div>
 
@@ -1563,7 +1563,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
           {/* Leaderboard Cards */}
           {submissions.length === 0 ? (
             <div className="bg-[#181818] rounded-2xl p-8 text-center space-y-2">
-              <p className="text-white font-bold text-sm">No Results Recorded</p>
+              <p className="text-white text-lg font-bold">No Results Recorded</p>
               <p className="text-xs text-[#888888]">
                 No submissions or rankings have been published for this battle yet.
               </p>

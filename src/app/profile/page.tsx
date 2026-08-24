@@ -152,7 +152,7 @@ function ProfileContent() {
         <div className="bg-brand/10 rounded-2xl p-6 space-y-3 animate-in fade-in duration-300 shadow-md">
           <div className="flex items-center gap-2.5">
             <Sparkles className="w-5 h-5 text-brand" />
-            <h2 className="text-sm font-bold text-white uppercase tracking-wider">
+            <h2 className="text-lg font-bold text-white uppercase tracking-wider">
               Complete Your User Profile
             </h2>
           </div>

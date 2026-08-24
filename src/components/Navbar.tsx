@@ -104,7 +104,7 @@ export const Navbar: React.FC = () => {
                     href={link.href}
                     className={`text-sm transition-colors ${
                       isActive
-                        ? "text-white font-bold"
+                        ? "text-white"
                         : "text-[#9E9E9E] hover:text-white"
                     }`}
                   >
@@ -130,7 +130,7 @@ export const Navbar: React.FC = () => {
             {mounted && currentUser?.role === "admin" && (
               <Link
                 href="/admin"
-                className={`hidden sm:flex text-sm font-bold transition-colors items-center gap-1.5 ${
+                className={`hidden sm:flex text-xs font-bold transition-colors items-center gap-1.5 ${
                   pathname.startsWith("/admin")
                     ? "text-[#FF8A65]"
                     : "text-[#D1D1D1] hover:text-white"
@@ -144,7 +144,7 @@ export const Navbar: React.FC = () => {
             {mounted && currentUser?.role !== "admin" && isHost && (
               <Link
                 href="/host"
-                className={`hidden sm:flex text-sm font-bold transition-colors items-center gap-1.5 ${
+                className={`hidden sm:flex text-xs font-bold transition-colors items-center gap-1.5 ${
                   pathname.startsWith("/host")
                     ? "text-[#FF8A65]"
                     : "text-[#D1D1D1] hover:text-white"
@@ -174,7 +174,7 @@ export const Navbar: React.FC = () => {
                   {showProfileMenu && (
                     <div className="absolute right-0 mt-3 w-52 bg-[#181818] rounded-xl shadow-2xl py-1 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
                       <div className="px-4 py-2.5">
-                        <p className="text-sm font-bold text-white truncate">{currentUser.nickname}</p>
+                        <p className="text-lg font-bold text-white truncate">{currentUser.nickname}</p>
                         <p className="text-xs text-[#888888] truncate">{currentUser.email}</p>
                       </div>
 

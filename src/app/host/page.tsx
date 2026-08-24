@@ -265,7 +265,7 @@ export default function HostPanelPage() {
 
                   <div className="space-y-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-sm font-bold text-white truncate">{battle.title}</h3>
+                      <h3 className="text-lg font-bold text-white truncate">{battle.title}</h3>
                       <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
                         battle.phase === "completed"
                           ? "bg-zinc-800 text-zinc-400"

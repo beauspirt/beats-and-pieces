@@ -61,7 +61,7 @@ export const FlameRating: React.FC<FlameRatingProps> = React.memo(({
       </div>
 
       {showValue && (
-        <span className="text-sm font-bold text-[#FF5E3A] ml-1 font-sans tabular-nums">
+        <span className="text-lg font-bold text-[#FF5E3A] ml-1 font-sans tabular-nums">
           {value > 0 ? value.toFixed(2) : "-"}
         </span>
       )}

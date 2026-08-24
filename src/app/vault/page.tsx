@@ -51,7 +51,7 @@ export default function VaultPage() {
         <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3">
           <h3
             onClick={() => setActiveModalItem(item)}
-            className="text-sm font-bold text-white leading-snug cursor-pointer"
+            className="text-lg font-bold text-white leading-snug cursor-pointer"
           >
             {item.title}
           </h3>

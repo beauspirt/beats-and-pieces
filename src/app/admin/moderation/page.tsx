@@ -62,13 +62,13 @@ export default function VotingModerationPage() {
         <div className="flex items-center gap-3">
           <div className="bg-surface-card rounded-xl px-4 py-2 text-center shadow-sm">
             <span className="text-xs text-zinc-500 uppercase font-mono block">Pending</span>
-            <span className="text-sm font-bold text-[#FF5E3A] font-mono">
+            <span className="text-lg font-bold text-[#FF5E3A] font-mono">
               {flags.filter((f) => f.status === "pending").length}
             </span>
           </div>
           <div className="bg-surface-card rounded-xl px-4 py-2 text-center shadow-sm">
             <span className="text-xs text-zinc-500 uppercase font-mono block">Discarded</span>
-            <span className="text-sm font-bold text-zinc-400 font-mono">
+            <span className="text-lg font-bold text-zinc-400 font-mono">
               {flags.filter((f) => f.status === "discarded").length}
             </span>
           </div>

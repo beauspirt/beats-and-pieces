@@ -1120,7 +1120,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                     <div className="min-w-0 flex-1 truncate">
                       {/* Title & Desktop Inline Badges */}
                       <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-bold text-white text-sm leading-snug">
+                        <h3 className="font-bold text-white text-lg leading-snug">
                           {beat.title}
                         </h3>
 
@@ -1335,7 +1335,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                   <span className="text-xs font-bold uppercase tracking-wider text-[#7B61FF] block">
                     {item.category === "breakdowns" ? "Beat Breakdown" : "Live Set"}
                   </span>
-                  <h4 className="text-sm font-bold text-white truncate">
+                  <h4 className="text-lg font-bold text-white truncate">
                     {item.title}
                   </h4>
                 </div>
@@ -1632,14 +1632,14 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                     {isUploadingBeatAudio ? (
                       <div className="bg-[#121212] p-6 rounded-2xl min-h-[220px] flex flex-col items-center justify-center text-center gap-3 border-2 border-dashed border-[#7B61FF]/40">
                         <div className="w-8 h-8 border-2 border-[#7B61FF] border-t-transparent rounded-full animate-spin" />
-                        <p className="text-sm font-bold text-white">
+                        <p className="text-lg font-bold text-white">
                           Uploading...
                         </p>
                       </div>
                     ) : stagedNewBeatFile || newBeatAudioUrl ? (
                       <div className="bg-[#121212] p-5 rounded-2xl space-y-4">
                         <div className="flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-2 text-white font-bold text-sm truncate">
+                          <div className="flex items-center gap-2 text-white text-lg font-bold truncate">
                             <Music className="w-4 h-4 text-[#7B61FF] shrink-0" />
                             <span className="truncate">{newBeatAudioName || "Audio Staged"}</span>
                           </div>
@@ -1688,7 +1688,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                           <Upload className="w-6 h-6" />
                         </div>
                         <div className="space-y-1">
-                          <p className="text-sm font-bold text-white">
+                          <p className="text-lg font-bold text-white">
                             Drag & drop your beat audio file here
                           </p>
                           <p className="text-xs text-zinc-400">
@@ -1712,7 +1712,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                   <button
                     type="submit"
                     disabled={isUploadingBeatAudio || (!stagedNewBeatFile && !newBeatAudioUrl) || !newBeatTitle.trim()}
-                    className="px-8 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-sm font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                    className="px-8 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-2"
                   >
                     {isUploadingBeatAudio ? (
                       <>

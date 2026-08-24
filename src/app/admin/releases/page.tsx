@@ -124,7 +124,7 @@ export default function AdminReleasesManagerPage() {
                 </div>
 
                 <div className="space-y-1 min-w-0">
-                  <h3 className="text-sm font-bold text-white truncate">{release.title}</h3>
+                  <h3 className="text-lg font-bold text-white truncate">{release.title}</h3>
                   <p className="text-xs text-zinc-400">
                     Release Date: {release.releaseDate ? new Date(release.releaseDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "N/A"}
                   </p>

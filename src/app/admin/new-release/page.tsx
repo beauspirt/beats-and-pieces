@@ -234,7 +234,7 @@ export default function NewReleasePage() {
           <div className="text-right pt-2">
             <button
               type="submit"
-              className="px-10 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-sm font-bold transition-all shadow-lg active:scale-95 ml-auto cursor-pointer"
+              className="px-10 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-lg active:scale-95 ml-auto cursor-pointer"
             >
               {isSaved ? "Saved ✓" : "Create Release"}
             </button>

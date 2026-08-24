@@ -733,7 +733,7 @@ export default function NewBattlePage() {
             <button
               type="submit"
               disabled={isUploadingSamples}
-              className="px-10 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-sm font-bold transition-all shadow-lg active:scale-95 ml-auto cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-10 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-lg active:scale-95 ml-auto cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isUploadingSamples ? "Uploading Samples..." : isSaved ? "Battle Created ✓" : "Create Battle"}
             </button>

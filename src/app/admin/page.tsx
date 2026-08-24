@@ -158,7 +158,7 @@ export default function AdminDashboardPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <UserCheck className="w-5 h-5 text-brand" />
-            <h2 className="text-sm font-bold text-white uppercase tracking-wider">
+            <h2 className="text-lg font-bold text-white uppercase tracking-wider">
               Account Switcher (Testing & Demo Showcase)
             </h2>
           </div>

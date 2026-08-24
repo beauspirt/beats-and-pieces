@@ -412,7 +412,7 @@ export default function BeatsDiscoveryPage() {
                 <div className="w-12 h-12 rounded-full bg-amber-500/15 text-amber-400 flex items-center justify-center mx-auto">
                   <Star className="w-5 h-5 fill-amber-400" />
                 </div>
-                <p className="text-white font-bold text-sm">
+                <p className="text-white text-lg font-bold">
                   You have no beats added to your favorites.
                 </p>
                 <p className="text-xs text-zinc-400">
@@ -480,7 +480,7 @@ export default function BeatsDiscoveryPage() {
                     <div className="min-w-0 flex-1">
                       {/* Title & Badges */}
                       <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-bold text-white text-sm leading-snug">
+                        <h3 className="font-bold text-white text-lg leading-snug">
                           {beat.title}
                         </h3>
 
@@ -642,7 +642,7 @@ export default function BeatsDiscoveryPage() {
           <button
             type="button"
             onClick={() => setVisibleCount((prev) => prev + 15)}
-            className="px-8 py-3.5 rounded-xl bg-[#181818] hover:bg-[#222222] text-white text-sm font-bold transition-all shadow-md active:scale-95 flex items-center gap-2 cursor-pointer"
+            className="px-8 py-3.5 rounded-xl bg-[#181818] hover:bg-[#222222] text-white text-lg font-bold transition-all shadow-md active:scale-95 flex items-center gap-2 cursor-pointer"
           >
             <span>Load More Beats (+15)</span>
             <ChevronDown className="w-4 h-4" />

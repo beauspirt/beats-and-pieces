@@ -10,7 +10,7 @@ import { beatService } from "@/services/beatService";
 import { producerService } from "@/services/producerService";
 import { JudgeFeedbackTicker } from "@/components/JudgeFeedbackTicker";
 import { useAuth } from "@/lib/auth-context";
-import { Search, Filter, SlidersHorizontal, ArrowDown, ArrowUp, Star, Flame, ChevronDown, Upload, Check } from "lucide-react";
+import { Search, Filter, SlidersHorizontal, Star, Flame, ChevronDown, Upload, Check } from "lucide-react";
 
 export default function BeatsDiscoveryPage() {
   const { user: currentUser } = useAuth();
@@ -19,8 +19,7 @@ export default function BeatsDiscoveryPage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedSaleFilter, setSelectedSaleFilter] = useState<"all" | "for_sale" | "not_for_sale">("all");
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
-  const [sortBy, setSortBy] = useState<"recent" | "rating" | "bpm">("recent");
-  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
+  const [sortBy, setSortBy] = useState<"recent" | "rating">("recent");
   const [showFilters, setShowFilters] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
   const sortMenuRef = useRef<HTMLDivElement | null>(null);
@@ -72,7 +71,7 @@ export default function BeatsDiscoveryPage() {
   // Reset pagination when search or filters change
   useEffect(() => {
     setVisibleCount(15);
-  }, [searchQuery, selectedTags, selectedSaleFilter, showOnlyFavorites, sortBy, sortOrder]);
+  }, [searchQuery, selectedTags, selectedSaleFilter, showOnlyFavorites, sortBy]);
 
   const toggleFavorite = (beatId: string) => {
     setBeats((prev) => {
@@ -123,15 +122,14 @@ export default function BeatsDiscoveryPage() {
         return matchesQuery && matchesTags && matchesSale && matchesFav;
       })
       .sort((a, b) => {
-        let diff = 0;
         if (sortBy === "recent") {
           const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
           const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-          diff = timeB - timeA;
-          if (diff === 0) {
-            diff = (b.id || "").localeCompare(a.id || "");
-          }
-        } else if (sortBy === "rating") {
+          const diff = timeB - timeA;
+          if (diff !== 0) return diff;
+          return (b.id || "").localeCompare(a.id || "");
+        }
+        if (sortBy === "rating") {
           const scoreA = (typeof a.flames === "number" && a.flames > 0) 
             ? a.flames 
             : ((typeof a.juryScore === "number" && a.juryScore > 0) 
@@ -142,22 +140,13 @@ export default function BeatsDiscoveryPage() {
             : ((typeof b.juryScore === "number" && b.juryScore > 0) 
                 ? b.juryScore 
                 : (b.rank === 1 ? 5 : b.rank === 2 ? 4 : b.rank === 3 ? 3 : 0));
-          diff = scoreB - scoreA;
-          if (diff === 0) {
-            diff = (b.id || "").localeCompare(a.id || "");
-          }
-        } else if (sortBy === "bpm") {
-          const bpmA = typeof a.bpm === "number" ? a.bpm : 0;
-          const bpmB = typeof b.bpm === "number" ? b.bpm : 0;
-          diff = bpmB - bpmA;
-          if (diff === 0) {
-            diff = (b.id || "").localeCompare(a.id || "");
-          }
+          const diff = scoreB - scoreA;
+          if (diff !== 0) return diff;
+          return (b.id || "").localeCompare(a.id || "");
         }
-
-        return sortOrder === "asc" ? -diff : diff;
+        return 0;
       });
-  }, [beats, searchQuery, selectedTags, selectedSaleFilter, showOnlyFavorites, sortBy, sortOrder]);
+  }, [beats, searchQuery, selectedTags, selectedSaleFilter, showOnlyFavorites, sortBy]);
 
   const activeFiltersCount =
     selectedTags.length +
@@ -173,10 +162,9 @@ export default function BeatsDiscoveryPage() {
   );
   const visibleBeats = filteredBeats.slice(0, visibleCount);
 
-  const sortLabelMap: Record<"recent" | "rating" | "bpm", string> = {
-    recent: "Newest First",
+  const sortLabelMap: Record<"recent" | "rating", string> = {
+    recent: "Most Recent",
     rating: "Top Rated",
-    bpm: "Tempo (BPM)",
   };
 
   return (
@@ -198,7 +186,7 @@ export default function BeatsDiscoveryPage() {
             <Search className="w-4 h-4 text-zinc-500 absolute left-4 top-1/2 -translate-y-1/2" />
           </div>
 
-          {/* Quick Action Controls Row: Favorites + Filter + Directional Order Toggle + Sort Criteria Dropdown + Upload Beat Button */}
+          {/* Quick Action Controls Row: Favorites + Filter + Sort Criteria Dropdown + Upload Beat Button */}
           <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 sm:gap-3 w-full lg:w-auto">
             {/* Favorites Filter Button */}
             <button
@@ -233,21 +221,6 @@ export default function BeatsDiscoveryPage() {
               )}
             </button>
 
-            {/* Directional Order Toggle Button (Left of Sort): ArrowDown for Descending, ArrowUp for Ascending */}
-            <button
-              type="button"
-              onClick={() => setSortOrder((prev) => (prev === "desc" ? "asc" : "desc"))}
-              className="p-2.5 sm:p-3 rounded-xl bg-[#181818] hover:bg-[#202020] text-zinc-300 hover:text-white transition-all cursor-pointer flex items-center justify-center shrink-0"
-              title={sortOrder === "desc" ? "Order: Descending (High / Newest first). Click to switch to Ascending (Low / Oldest first)." : "Order: Ascending (Low / Oldest first). Click to switch to Descending (High / Newest first)."}
-              aria-label={sortOrder === "desc" ? "Sort descending" : "Sort ascending"}
-            >
-              {sortOrder === "desc" ? (
-                <ArrowDown className="w-4 h-4 text-[#7B61FF]" />
-              ) : (
-                <ArrowUp className="w-4 h-4 text-[#7B61FF]" />
-              )}
-            </button>
-
             {/* Redesigned Sleek Sort Dropdown (SlidersHorizontal icon + borderless menu) */}
             <div className="relative flex-1 sm:flex-initial" ref={sortMenuRef}>
               <button
@@ -263,8 +236,8 @@ export default function BeatsDiscoveryPage() {
               </button>
 
               {isSortOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-[#181818] rounded-2xl shadow-2xl p-2 z-40 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
-                  {(["recent", "rating", "bpm"] as const).map((key) => {
+                <div className="absolute right-0 mt-2 w-44 bg-[#181818] rounded-2xl shadow-2xl p-2 z-40 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                  {(["recent", "rating"] as const).map((key) => {
                     const isSelected = sortBy === key;
                     return (
                       <button

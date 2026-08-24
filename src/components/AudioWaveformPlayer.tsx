@@ -434,6 +434,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = React.mem
     : effectiveDuration;
 
   const handlePlayToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
     if (isThisTrackPlaying) {
       pauseTrack();
@@ -575,6 +576,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = React.mem
   };
 
   const handleDownload = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
     if (audioUrl) {
       const link = document.createElement("a");
@@ -593,6 +595,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = React.mem
     >
       {/* Play / Pause Toggle Button */}
       <button
+        type="button"
         onClick={handlePlayToggle}
         aria-label={isThisTrackPlaying ? "Pause" : "Play"}
         className={`shrink-0 rounded-full flex items-center justify-center transition-all cursor-pointer shadow-md ${
@@ -641,6 +644,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = React.mem
         {/* Optional Download Button in Top Right */}
         {showDownload && (
           <button
+            type="button"
             onClick={handleDownload}
             aria-label="Download audio file"
             className="absolute top-1 right-1 p-1.5 rounded-lg bg-[#1C1C1C] text-[#888888] hover:text-white hover:bg-[#252525] transition-colors"

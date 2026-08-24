@@ -1619,14 +1619,9 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                   {isUploadingBeatAudio ? (
                     <div className="bg-[#121212] p-6 rounded-2xl min-h-[220px] flex flex-col items-center justify-center text-center gap-3 border-2 border-dashed border-[#7B61FF]/40">
                       <div className="w-8 h-8 border-2 border-[#7B61FF] border-t-transparent rounded-full animate-spin" />
-                      <div className="space-y-1">
-                        <p className="text-sm font-bold text-white">
-                          Transcoding to Opus & Uploading...
-                        </p>
-                        <p className="text-xs text-zinc-400">
-                          Optimizing audio for studio playback
-                        </p>
-                      </div>
+                      <p className="text-sm font-bold text-white">
+                        Uploading...
+                      </p>
                     </div>
                   ) : stagedNewBeatFile || newBeatAudioUrl ? (
                     <div className="bg-[#121212] p-5 rounded-2xl space-y-4">
@@ -1637,18 +1632,22 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                         </div>
                         <button
                           type="button"
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
                             setStagedNewBeatFile(null);
                             setNewBeatAudioUrl("");
                             setNewBeatAudioName("");
+                            setNewBeatWaveformPeaks([]);
+                            setNewBeatDuration(0);
                           }}
-                          className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-[#1C1C1C] hover:bg-zinc-800 text-zinc-300 hover:text-white transition-all cursor-pointer shrink-0"
+                          className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-[#1C1C1C] hover:bg-red-500/20 text-zinc-300 hover:text-red-400 transition-all cursor-pointer shrink-0"
                         >
-                          Change File
+                          Remove
                         </button>
                       </div>
 
-                      <div className="pt-1">
+                      <div className="pt-1" onClick={(e) => e.stopPropagation()}>
                         <AudioWaveformPlayer
                           id="profile-new-beat-preview"
                           title={newBeatTitle || "Preview"}
@@ -1717,7 +1716,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                   {isUploadingBeatAudio ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Transcoding & Uploading...</span>
+                      <span>Uploading...</span>
                     </>
                   ) : (
                     <span>Finish</span>

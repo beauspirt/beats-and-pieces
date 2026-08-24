@@ -7,6 +7,7 @@ import { X, ShieldCheck, Sparkles, CheckCircle2, Camera } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { producerService, storageService } from "@/services";
 import { useRouter, useSearchParams } from "next/navigation";
+import { ClientPortal } from "@/components/ClientPortal";
 
 import { normalizeUrl } from "@/lib/utils";
 
@@ -162,17 +163,19 @@ function ProfileContent() {
         </div>
       )}
 
-      {/* Floating Save Toast Notification */}
+      {/* Floating Save Toast Notification in Portal to prevent layout shift */}
       {saveSuccess && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#181818] text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300 backdrop-blur-md">
-          <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-            <CheckCircle2 className="w-4 h-4" />
+        <ClientPortal>
+          <div className="fixed bottom-6 right-6 z-50 bg-[#181818] text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300 backdrop-blur-md">
+            <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-white">Profile Saved</p>
+              <p className="text-[11px] text-zinc-400">Profile details saved successfully!</p>
+            </div>
           </div>
-          <div>
-            <p className="text-xs font-bold text-white">Profile Saved</p>
-            <p className="text-[11px] text-zinc-400">Profile details saved successfully!</p>
-          </div>
-        </div>
+        </ClientPortal>
       )}
 
       <form onSubmit={(e) => { e.preventDefault(); if (profile) saveProfileData(profile, links); }} className="space-y-4">

@@ -68,33 +68,31 @@ export const Navbar: React.FC = () => {
   const navLinks = [
     { href: "/battles", label: "Battles" },
     { href: "/beats", label: "Beats" },
-    { href: "/vault", label: "Vault" },
     { href: "/releases", label: "Releases" },
+    { href: "/vault", label: "Vault" },
   ];
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full bg-[#121212]/90 backdrop-blur-md border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <header className="fixed top-0 inset-x-0 z-40 bg-[#0A0A0A] sm:bg-[#0A0A0A]/90 backdrop-blur-none sm:backdrop-blur-[8px]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 sm:h-24 py-4 sm:py-5 flex items-center justify-between">
           
-          {/* Left: Brand Logo & Wordmark */}
-          <div className="flex items-center gap-8">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-8 h-8 rounded-full bg-brand flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
-                <span className="font-black text-base tracking-tighter leading-none">B</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="font-extrabold text-sm tracking-tight text-white group-hover:text-brand transition-colors">
-                  BEATS & PIECES
-                </span>
-                <span className="text-[10px] text-zinc-400 font-medium -mt-1 tracking-wider uppercase">
-                  Beat Battle Platform
-                </span>
-              </div>
+          {/* Left: Brand Logo & Desktop Nav */}
+          <div className="flex items-center gap-8 lg:gap-12">
+            {/* Authentic Beats & Pieces Logo */}
+            <Link href="/battles" className="flex items-center group select-none shrink-0">
+              <Image
+                src="/logo.png"
+                alt="Beats & Pieces"
+                width={120}
+                height={36}
+                className="h-7 sm:h-8 w-auto object-contain group-hover:opacity-90 transition-opacity"
+                priority
+              />
             </Link>
 
-            {/* Desktop Nav Links */}
-            <nav className="hidden md:flex items-center space-x-1">
+            {/* Desktop Navigation Links */}
+            <nav className="hidden md:flex items-center gap-7 lg:gap-9">
               {navLinks.map((link) => {
                 const isActive =
                   link.href === "/battles"
@@ -104,10 +102,10 @@ export const Navbar: React.FC = () => {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                    className={`text-[15px] font-medium transition-colors ${
                       isActive
-                        ? "text-white bg-white/5"
-                        : "text-zinc-400 hover:text-white hover:bg-white/5"
+                        ? "text-white font-semibold"
+                        : "text-[#9E9E9E] hover:text-white"
                     }`}
                   >
                     {link.label}
@@ -117,13 +115,13 @@ export const Navbar: React.FC = () => {
             </nav>
           </div>
 
-          {/* Right: Actions */}
-          <div className="flex items-center gap-3">
-            {/* Mobile Menu Trigger */}
+          {/* Right Actions: Mobile Hamburger (Left) + Admin/Host/Avatar (Right) */}
+          <div className="flex items-center gap-3 sm:gap-6">
+            {/* Mobile Hamburger Toggle Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 focus:outline-none cursor-pointer"
-              aria-label="Toggle Navigation Menu"
+              className="md:hidden p-2.5 rounded-xl bg-[#181818] hover:bg-[#222222] text-zinc-300 hover:text-white transition-colors cursor-pointer focus:outline-none"
+              aria-label="Toggle navigation menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>

@@ -908,7 +908,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     <div className="w-full space-y-12 animate-in fade-in duration-300">
       
       {/* SECTION 1: PRODUCER HERO / IDENTITY */}
-      <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-xl">
+      <div className="relative">
         <div className="flex flex-col md:flex-row items-start md:items-center gap-6 sm:gap-8">
           
           {/* Avatar */}

@@ -105,14 +105,6 @@ export default function VaultPage() {
   return (
     <div className="space-y-10 animate-in fade-in duration-300">
       
-      {/* Page Header */}
-      <div className="space-y-1">
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white">The Vault</h1>
-        <p className="text-sm text-zinc-400">
-          Exclusive track breakdowns, live sets, and studio archives from the community.
-        </p>
-      </div>
-
       {/* Breakdowns Section */}
       <section className="space-y-4">
         <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">

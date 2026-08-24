@@ -194,7 +194,7 @@ export default function BattlesPage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {pastBattles.map((battle) => {
+          {pastBattles.map((battle, index) => {
             const battleSubs = battleService.getSubmissionsByBattleId(battle.id);
             const topSub = battleSubs.find((s) => s.rank === 1) || battleSubs[0];
             const resolvedWinner = (battle.winner && battle.winner !== "TBD") ? battle.winner : (topSub?.beatmakerTag || "TBD");
@@ -211,6 +211,8 @@ export default function BattlesPage() {
                     src={battle.coverImage || "/covers/default-battle.png"}
                     alt={battle.title}
                     fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    priority={index < 4}
                     className="object-cover"
                   />
                 </div>

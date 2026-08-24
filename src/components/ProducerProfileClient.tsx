@@ -68,14 +68,14 @@ function StandardTagSelector({
     <div ref={containerRef} className="space-y-2 relative">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <label className="text-xs font-semibold text-[#D1D1D1]">Genres & Tags</label>
-          <span className="text-[10px] text-zinc-500 font-medium">({selectedTags.length}/5 max)</span>
+          <label className="text-sm font-semibold text-white">Genres & Tags</label>
+          <span className="text-xs text-zinc-500 font-medium">({selectedTags.length}/5 max)</span>
         </div>
         {selectedTags.length > 0 && (
           <button
             type="button"
             onClick={() => onChange([])}
-            className="text-[11px] text-zinc-500 hover:text-red-400 transition-colors cursor-pointer"
+            className="text-xs text-zinc-400 hover:text-red-400 transition-colors cursor-pointer"
           >
             Clear all
           </button>
@@ -114,7 +114,7 @@ function StandardTagSelector({
             setIsDropdownOpen(true);
           }}
           placeholder={selectedTags.length === 0 ? "Search or select tags (e.g. Trap, Lo-Fi, Soulful)..." : "Add more tags from list..."}
-          className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+          className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#7B61FF] transition-all"
         />
         {search && (
           <button
@@ -129,7 +129,7 @@ function StandardTagSelector({
 
       {/* Dropdown Options List */}
       {isDropdownOpen && (
-        <div className="p-2.5 bg-[#141414] rounded-xl max-h-48 overflow-y-auto space-y-1.5 shadow-2xl z-20">
+        <div className="p-3 bg-[#121212] rounded-xl max-h-48 overflow-y-auto space-y-1.5 shadow-2xl z-20">
           <div className="flex flex-wrap gap-1.5">
             {filteredOptions.map((tag) => {
               const isSelected = selectedTags.includes(tag);
@@ -1430,19 +1430,14 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
           <div
             onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
-            className="bg-[#181818] rounded-3xl max-w-4xl w-full p-5 sm:p-7 space-y-5 shadow-2xl relative cursor-default max-h-[90vh] overflow-y-auto no-scrollbar border border-[#262626]"
+            className="bg-[#181818] rounded-3xl max-w-4xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative cursor-default max-h-[90vh] overflow-y-auto no-scrollbar"
           >
             {/* Header */}
-            <div className="flex items-center justify-between pb-1 border-b border-[#252525]">
-              <div className="space-y-0.5">
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <Upload className="w-5 h-5 text-[#7B61FF]" />
-                  <span>Add Beat to Showcase</span>
-                </h3>
-                <p className="text-xs text-[#888888]">
-                  Upload and publish a beat to your producer showcase and public portfolio.
-                </p>
-              </div>
+            <div className="flex items-center justify-between pb-1">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2.5">
+                <Upload className="w-5 h-5 text-[#7B61FF]" />
+                <span>Add Beat to Showcase</span>
+              </h3>
               <button
                 onClick={() => {
                   setIsAddModalOpen(false);
@@ -1450,20 +1445,20 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                   setNewBeatAudioUrl("");
                   setNewBeatAudioName("");
                 }}
-                className="w-8 h-8 rounded-full bg-[#121212] text-zinc-400 hover:text-white flex items-center justify-center text-sm cursor-pointer transition-colors"
+                className="w-8 h-8 rounded-full bg-[#121212] hover:bg-[#222222] text-zinc-400 hover:text-white flex items-center justify-center text-sm cursor-pointer transition-colors"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleCreateBeat} className="space-y-5">
+            <form onSubmit={handleCreateBeat} className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                 
                 {/* Left Column: Metadata Fields */}
                 <div className="lg:col-span-6 space-y-4">
                   {/* Beat Title */}
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-white flex items-center gap-1">
                       <span>Beat Title</span>
                       <span className="text-[#FF5E3A]">*</span>
                     </label>
@@ -1473,36 +1468,33 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                       value={newBeatTitle}
                       onChange={(e) => setNewBeatTitle(e.target.value)}
                       placeholder="e.g. Midnight Soul Flip"
-                      className="w-full bg-[#121212] rounded-xl px-4 py-3 text-xs text-white placeholder-zinc-600 border border-[#2a2a2a] focus:border-[#7B61FF] focus:outline-none transition-colors"
+                      className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#7B61FF] transition-all"
                     />
-                    <p className="text-[11px] text-[#888888] font-normal">
-                      Give your beat a catchy, recognizable title.
-                    </p>
                   </div>
 
                   {/* BPM & Availability Toggle (2 Columns) */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     {/* BPM */}
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-white uppercase tracking-wider">
-                        BPM <span className="text-zinc-500 font-normal normal-case">(Optional)</span>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-white">
+                        BPM <span className="text-zinc-500 font-normal">(Optional)</span>
                       </label>
                       <input
                         type="number"
                         placeholder="e.g. 140"
                         value={newBeatBpm}
                         onChange={(e) => setNewBeatBpm(e.target.value === "" ? "" : Number(e.target.value))}
-                        className="w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs text-white placeholder-zinc-600 border border-[#2a2a2a] focus:border-[#7B61FF] focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-colors"
+                        className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#7B61FF] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all"
                       />
                     </div>
 
-                    {/* For Sale Toggle */}
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-white uppercase tracking-wider">
+                    {/* Availability Toggle */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-white">
                         Availability
                       </label>
-                      <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-[#121212] border border-[#2a2a2a] h-[40px]">
-                        <span className="text-[11px] font-semibold text-zinc-300">
+                      <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-[#121212] h-[48px]">
+                        <span className="text-sm font-medium text-zinc-300">
                           {newBeatIsForSale ? "For Sale" : "Not For Sale"}
                         </span>
                         <button
@@ -1530,21 +1522,16 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                 </div>
 
                 {/* Right Column: Audio Drag & Drop & Live Preview */}
-                <div className="lg:col-span-6 space-y-3">
-                  <label className="text-xs font-bold text-white uppercase tracking-wider flex items-center justify-between">
-                    <span className="flex items-center gap-1">
-                      <span>Audio File</span>
-                      <span className="text-[#FF5E3A]">*</span>
-                    </span>
-                    <span className="text-[10px] text-[#7B61FF] font-semibold lowercase">
-                      auto-converts to 192kbps opus
-                    </span>
+                <div className="lg:col-span-6 space-y-2">
+                  <label className="text-sm font-semibold text-white flex items-center gap-1">
+                    <span>Audio File</span>
+                    <span className="text-[#FF5E3A]">*</span>
                   </label>
 
                   {stagedNewBeatFile || newBeatAudioUrl ? (
-                    <div className="bg-[#121212] p-4 sm:p-5 rounded-2xl border border-[#2a2a2a] space-y-4">
+                    <div className="bg-[#121212] p-5 rounded-2xl space-y-4">
                       <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-2 text-white font-bold text-xs truncate">
+                        <div className="flex items-center gap-2 text-white font-semibold text-sm truncate">
                           <Music className="w-4 h-4 text-[#7B61FF] shrink-0" />
                           <span className="truncate">{newBeatAudioName || "Audio Staged"}</span>
                         </div>
@@ -1555,7 +1542,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                             setNewBeatAudioUrl("");
                             setNewBeatAudioName("");
                           }}
-                          className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-[#1A1A1A] hover:bg-zinc-800 text-[#888888] hover:text-white transition-all cursor-pointer shrink-0"
+                          className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-[#1C1C1C] hover:bg-zinc-800 text-zinc-300 hover:text-white transition-all cursor-pointer shrink-0"
                         >
                           Change File
                         </button>
@@ -1572,13 +1559,6 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                           compact={true}
                         />
                       </div>
-
-                      <div className="flex items-center justify-between text-[11px] text-zinc-400 pt-1 border-t border-[#1c1c1c]">
-                        <span>Format: Transcoding to 192kbps Opus</span>
-                        {stagedNewBeatFile && (
-                          <span>{(stagedNewBeatFile.size / (1024 * 1024)).toFixed(1)} MB source</span>
-                        )}
-                      </div>
                     </div>
                   ) : (
                     <label
@@ -1586,26 +1566,23 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                       onDragEnter={handleNewBeatDragOver}
                       onDragLeave={handleNewBeatDragLeave}
                       onDrop={handleNewBeatDrop}
-                      className={`min-h-[220px] rounded-2xl border-2 border-dashed p-6 flex flex-col items-center justify-center text-center gap-3 transition-all cursor-pointer ${
+                      className={`min-h-[220px] rounded-2xl p-7 flex flex-col items-center justify-center text-center gap-3 transition-all cursor-pointer ${
                         isDraggingNewBeat
-                          ? "border-[#7B61FF] bg-[#7B61FF]/10 scale-[1.01]"
-                          : "border-[#333333] hover:border-[#555555] bg-[#121212]/80 hover:bg-[#121212]"
+                          ? "bg-[#7B61FF]/15 scale-[1.01]"
+                          : "bg-[#121212] hover:bg-[#151515]"
                       }`}
                     >
                       <div className="w-12 h-12 rounded-full bg-[#7B61FF]/15 flex items-center justify-center text-[#7B61FF]">
                         <Upload className="w-6 h-6" />
                       </div>
                       <div className="space-y-1">
-                        <p className="text-xs sm:text-sm font-bold text-white">
+                        <p className="text-sm sm:text-base font-bold text-white">
                           Drag & drop your beat audio file here
                         </p>
-                        <p className="text-[11px] text-[#888888]">
-                          or <span className="text-[#7B61FF] underline underline-offset-2">browse files</span> from your device
+                        <p className="text-xs text-zinc-400">
+                          or <span className="text-[#7B61FF] font-medium underline underline-offset-2">browse files</span> from your device
                         </p>
                       </div>
-                      <p className="text-[10px] text-[#666666] font-medium max-w-xs">
-                        Supports WAV, MP3, FLAC, AIFF up to 250 MB • Automatically converted to pristine 192kbps Opus
-                      </p>
                       <input
                         type="file"
                         accept="audio/*"
@@ -1619,7 +1596,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
               </div>
 
               {/* Actions Footer */}
-              <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-[#252525]">
+              <div className="flex items-center justify-end gap-3 pt-3">
                 <button
                   type="button"
                   onClick={() => {
@@ -1628,18 +1605,18 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                     setNewBeatAudioUrl("");
                     setNewBeatAudioName("");
                   }}
-                  className="px-5 py-2.5 rounded-xl bg-[#121212] hover:bg-[#222222] text-zinc-300 text-xs font-bold transition-all cursor-pointer"
+                  className="px-5 py-3 rounded-xl bg-[#121212] hover:bg-[#202020] text-zinc-300 text-sm font-semibold transition-all cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isUploadingBeatAudio || (!stagedNewBeatFile && !newBeatAudioUrl) || !newBeatTitle.trim()}
-                  className="px-6 py-2.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                  className="px-6 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-sm font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-2"
                 >
                   {isUploadingBeatAudio ? (
                     <>
-                      <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       <span>Transcoding & Uploading...</span>
                     </>
                   ) : (

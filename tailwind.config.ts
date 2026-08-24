@@ -36,8 +36,8 @@ const config: Config = {
         }
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "sans-serif"],
-        heading: ["var(--font-space-grotesk)", "sans-serif"],
+        sans: ["var(--font-inter)", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+        heading: ["var(--font-inter)", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
       },
     },
   },

@@ -71,46 +71,15 @@ function ProfileContent() {
     );
   }
 
-  const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && profile) {
-      const { url } = await storageService.uploadImage(file, "avatars");
-      if (url) {
-        setProfile((prev) => prev ? { ...prev, avatarUrl: url } : null);
-      } else {
-        const reader = new FileReader();
-        reader.onload = (uploadEvent) => {
-          const res = uploadEvent.target?.result;
-          if (res) {
-            setProfile((prev) => prev ? { ...prev, avatarUrl: res as string } : null);
-          }
-        };
-        reader.readAsDataURL(file);
-      }
-    }
-  };
-
-  const handleToggleHideEmail = () => {
-    if (!profile) return;
-    const newHideEmail = !profile.hideEmail;
-    setProfile((prev) => prev ? { ...prev, hideEmail: newHideEmail } : null);
-    const updated = producerService.updateProducer(profile.id, {
-      ...profile,
-      hideEmail: newHideEmail,
-    });
-    if (updated) {
-      updateUser(updated);
-    }
-  };
-
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const saveProfileData = (
+    updatedProfile: UserProfile,
+    currentLinks: Record<string, string>
+  ) => {
     const normalizedFormLinks: Record<string, string> = {};
     const sanitizedSaveLinks: Record<string, string> = {};
 
     SOCIAL_PLATFORMS.forEach(({ key }) => {
-      const val = links[key]?.trim() || "";
+      const val = currentLinks[key]?.trim() || "";
       if (val) {
         const normalized = normalizeUrl(val);
         normalizedFormLinks[key] = normalized;
@@ -122,34 +91,55 @@ function ProfileContent() {
 
     setLinks(normalizedFormLinks);
 
-    const updated = producerService.updateProducer(profile.id, {
-      nickname: profile.nickname.trim(),
-      avatarUrl: profile.avatarUrl || "/avatars/default-avatar.png",
-      bio: profile.bio || "",
-      location: profile.location || "",
-      hideEmail: Boolean(profile.hideEmail),
+    const updated = producerService.updateProducer(updatedProfile.id, {
+      ...updatedProfile,
+      nickname: updatedProfile.nickname.trim() || updatedProfile.nickname,
+      avatarUrl: updatedProfile.avatarUrl || "/avatars/default-avatar.png",
+      bio: updatedProfile.bio || "",
+      location: updatedProfile.location || "",
+      hideEmail: Boolean(updatedProfile.hideEmail),
       links: sanitizedSaveLinks,
       isClaimed: true,
-      claimedAt: profile.claimedAt || new Date().toISOString(),
+      claimedAt: updatedProfile.claimedAt || new Date().toISOString(),
     });
 
     if (updated) {
       setProfile(updated);
       updateUser(updated);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 2000);
     }
-    setSaveSuccess(true);
+  };
 
-    const pendingRedirect = typeof window !== "undefined" ? localStorage.getItem("bnp_redirect_url") : null;
-    if (pendingRedirect && pendingRedirect !== "/profile" && pendingRedirect !== "/signin") {
-      try {
-        localStorage.removeItem("bnp_redirect_url");
-      } catch {}
-      setTimeout(() => {
-        router.push(pendingRedirect);
-      }, 1000);
-    } else {
-      setTimeout(() => setSaveSuccess(false), 2500);
+  const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && profile) {
+      const { url } = await storageService.uploadImage(file, "avatars");
+      if (url) {
+        const updated = { ...profile, avatarUrl: url };
+        setProfile(updated);
+        saveProfileData(updated, links);
+      } else {
+        const reader = new FileReader();
+        reader.onload = (uploadEvent) => {
+          const res = uploadEvent.target?.result;
+          if (res) {
+            const updated = { ...profile, avatarUrl: res as string };
+            setProfile(updated);
+            saveProfileData(updated, links);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
     }
+  };
+
+  const handleToggleHideEmail = () => {
+    if (!profile) return;
+    const newHideEmail = !profile.hideEmail;
+    const updated = { ...profile, hideEmail: newHideEmail };
+    setProfile(updated);
+    saveProfileData(updated, links);
   };
 
   const showOnboardingBanner = isOnboarding || !profile.isClaimed;
@@ -199,7 +189,7 @@ function ProfileContent() {
         </div>
       )}
 
-      <form onSubmit={handleSave} className="space-y-4">
+      <form onSubmit={(e) => { e.preventDefault(); if (profile) saveProfileData(profile, links); }} className="space-y-4">
         
         {/* CONTAINER 1: DETAILS */}
         <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 space-y-5 shadow-lg">
@@ -246,6 +236,7 @@ function ProfileContent() {
                 type="text"
                 value={profile.nickname}
                 onChange={(e) => setProfile({ ...profile, nickname: e.target.value })}
+                onBlur={() => profile && saveProfileData(profile, links)}
                 className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
                 required
               />
@@ -262,6 +253,7 @@ function ProfileContent() {
                 type="text"
                 value={profile.location || ""}
                 onChange={(e) => setProfile({ ...profile, location: e.target.value })}
+                onBlur={() => profile && saveProfileData(profile, links)}
                 className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
               />
             </div>
@@ -277,6 +269,7 @@ function ProfileContent() {
                 rows={3}
                 value={profile.bio || ""}
                 onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+                onBlur={() => profile && saveProfileData(profile, links)}
                 className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF] resize-none leading-relaxed"
               />
             </div>
@@ -347,13 +340,18 @@ function ProfileContent() {
                     onChange={(e) =>
                       setLinks((prev) => ({ ...prev, [key]: e.target.value }))
                     }
+                    onBlur={() => profile && saveProfileData(profile, links)}
                     className="w-full bg-[#121212] rounded-xl pl-4 pr-10 py-3 text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
                   />
                   {url && (
                     <button
                       type="button"
                       tabIndex={-1}
-                      onClick={() => setLinks((prev) => ({ ...prev, [key]: "" }))}
+                      onClick={() => {
+                        const newLinks = { ...links, [key]: "" };
+                        setLinks(newLinks);
+                        if (profile) saveProfileData(profile, newLinks);
+                      }}
                       className="absolute right-3 text-[#777777] hover:text-white transition-colors cursor-pointer"
                       title="Clear field"
                     >
@@ -365,16 +363,6 @@ function ProfileContent() {
             );
           })}
 
-        </div>
-
-        {/* Bottom Actions */}
-        <div className="text-right pt-2">
-          <button
-            type="submit"
-            className="w-full sm:w-auto px-10 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-sm font-bold transition-all shadow-lg active:scale-95 sm:ml-auto cursor-pointer flex items-center justify-center"
-          >
-            {saveSuccess ? "Saved ✓" : "Save Profile"}
-          </button>
         </div>
 
       </form>

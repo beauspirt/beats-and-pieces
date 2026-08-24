@@ -187,50 +187,54 @@ export default function BeatsDiscoveryPage() {
           </div>
 
           {/* Quick Action Controls Row: Favorites + Filter + Sort Criteria Dropdown + Upload Beat Button */}
-          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 sm:gap-3 w-full lg:w-auto">
+          <div className="flex items-center gap-2 sm:gap-3 w-full lg:w-auto overflow-x-auto no-scrollbar shrink-0">
             {/* Favorites Filter Button */}
             <button
               type="button"
               onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
-              className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer truncate ${
+              className={`p-2.5 sm:px-4 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${
                 showOnlyFavorites
                   ? "bg-amber-500/20 text-amber-300 shadow-sm"
                   : "bg-[#181818] hover:bg-[#202020] text-zinc-400 hover:text-white"
               }`}
+              title={showOnlyFavorites ? "Show all beats" : "Show only favorites"}
+              aria-label="Favorites"
             >
-              <Star className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${showOnlyFavorites ? "fill-amber-400 text-amber-400" : ""}`} />
-              <span className="truncate">Favorites</span>
+              <Star className={`w-4 h-4 shrink-0 ${showOnlyFavorites ? "fill-amber-400 text-amber-400" : ""}`} />
+              <span className="hidden sm:inline">Favorites</span>
             </button>
 
             {/* Filter Toggle Button */}
             <button
               type="button"
               onClick={() => setShowFilters(!showFilters)}
-              className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer truncate ${
+              className={`p-2.5 sm:px-4 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${
                 showFilters || activeFiltersCount > 0
                   ? "bg-[#7B61FF] text-white"
                   : "bg-[#181818] hover:bg-[#202020] text-zinc-400 hover:text-white"
               }`}
+              title="Toggle filters"
+              aria-label="Filter"
             >
-              <Filter className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-              <span className="truncate">Filter</span>
+              <Filter className="w-4 h-4 shrink-0" />
+              <span className="hidden sm:inline">Filter</span>
               {activeFiltersCount > 0 && (
-                <span className="w-4.5 h-4.5 rounded-full bg-white text-[#7B61FF] text-[10px] font-bold flex items-center justify-center ml-0.5 shrink-0">
+                <span className="w-4 h-4 rounded-full bg-white text-[#7B61FF] text-[10px] font-bold flex items-center justify-center shrink-0">
                   {activeFiltersCount}
                 </span>
               )}
             </button>
 
             {/* Redesigned Sleek Sort Dropdown (SlidersHorizontal icon + borderless menu) */}
-            <div className="relative flex-1 sm:flex-initial" ref={sortMenuRef}>
+            <div className="relative shrink-0" ref={sortMenuRef}>
               <button
                 type="button"
                 onClick={() => setIsSortOpen(!isSortOpen)}
-                className="w-full flex items-center justify-between sm:justify-center gap-2 bg-[#181818] hover:bg-[#202020] rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white font-semibold transition-all cursor-pointer"
+                className="flex items-center justify-between gap-1.5 sm:gap-2 bg-[#181818] hover:bg-[#202020] rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white font-semibold transition-all cursor-pointer"
               >
-                <div className="flex items-center gap-1.5 truncate">
+                <div className="flex items-center gap-1.5">
                   <SlidersHorizontal className="w-3.5 h-3.5 text-[#7B61FF] shrink-0" />
-                  <span className="truncate">{sortLabelMap[sortBy]}</span>
+                  <span className="whitespace-nowrap">{sortLabelMap[sortBy]}</span>
                 </div>
                 <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 shrink-0 ${isSortOpen ? "rotate-180" : ""}`} />
               </button>
@@ -265,10 +269,11 @@ export default function BeatsDiscoveryPage() {
             {/* Upload Beat Button (Far Right) */}
             <Link
               href={currentUser?.id ? `/${currentUser.id}` : "/profile"}
-              className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 cursor-pointer shrink-0"
+              className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 cursor-pointer shrink-0"
             >
               <Upload className="w-4 h-4" />
-              <span className="whitespace-nowrap">Upload Beat</span>
+              <span className="hidden xs:inline sm:inline whitespace-nowrap">Upload Beat</span>
+              <span className="xs:hidden sm:hidden whitespace-nowrap">Upload</span>
             </Link>
 
           </div>

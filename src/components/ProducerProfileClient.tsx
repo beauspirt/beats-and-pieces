@@ -1495,27 +1495,36 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
               />
 
               {/* Modal Actions */}
-              <div className="flex items-center justify-between gap-3 pt-3">
+              <div className="pt-3">
                 {!editingBeat.isBattleSubmission ? (
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteBeat(editingBeat.id)}
-                    className="px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>Delete Beat</span>
-                  </button>
+                  <div className="grid grid-cols-2 gap-3 w-full">
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteBeat(editingBeat.id)}
+                      className="w-full py-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap shadow-sm"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Delete Beat</span>
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isUploadingBeatAudio || !editingBeat.title.trim()}
+                      className="w-full py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 flex items-center justify-center whitespace-nowrap"
+                    >
+                      Save Changes
+                    </button>
+                  </div>
                 ) : (
-                  <div />
+                  <div className="flex justify-end">
+                    <button
+                      type="submit"
+                      disabled={isUploadingBeatAudio || !editingBeat.title.trim()}
+                      className="w-full sm:w-auto px-8 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 flex items-center justify-center whitespace-nowrap"
+                    >
+                      Save Changes
+                    </button>
+                  </div>
                 )}
-
-                <button
-                  type="submit"
-                  disabled={isUploadingBeatAudio || !editingBeat.title.trim()}
-                  className="px-6 py-2.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 text-center whitespace-nowrap ml-auto"
-                >
-                  Save Changes
-                </button>
               </div>
             </form>
           </div>

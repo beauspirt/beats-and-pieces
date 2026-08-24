@@ -230,7 +230,7 @@ export default function HostPanelPage() {
         
         {/* Header */}
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-white flex items-center gap-3">
             <Disc className="w-7 h-7 text-[#FF8A65]" />
             <span>Host Control Panel</span>
           </h1>

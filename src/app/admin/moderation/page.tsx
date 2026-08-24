@@ -49,7 +49,7 @@ export default function VotingModerationPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6">
         <div>
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-white flex items-center gap-3">
             <ShieldAlert className="w-8 h-8 text-[#FF5E3A]" />
             <span>Voting Anomaly & Moderation</span>
           </h1>

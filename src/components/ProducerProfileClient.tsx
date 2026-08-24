@@ -925,7 +925,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
           {/* Producer Info & Bio */}
           <div className="flex-1 space-y-3">
             <div className="flex flex-wrap items-center gap-2.5">
-              <h1 className="text-3xl font-bold text-white tracking-tight">
+              <h1 className="text-2xl font-bold text-white tracking-tight">
                 {producer.nickname}
               </h1>
 

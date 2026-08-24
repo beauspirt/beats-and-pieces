@@ -61,7 +61,7 @@ export default function ReleasesPage() {
           {/* Release Metadata */}
           <div className="flex-1 w-full flex flex-col justify-between space-y-4 pt-1">
             <div className="space-y-2.5 w-full">
-              <h2 className="text-3xl font-bold text-white tracking-tight">
+              <h2 className="text-2xl font-bold text-white tracking-tight">
                 {release.title}
               </h2>
 

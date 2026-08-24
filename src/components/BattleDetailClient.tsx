@@ -807,7 +807,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
         {/* Meta Info (identical natural flow and position to battles listing page) */}
         <div className="flex-1 w-full min-w-0 space-y-3.5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <h1 className="text-3xl font-bold text-white tracking-tight leading-tight">
+            <h1 className="text-2xl font-bold text-white tracking-tight leading-tight">
               {battle.title}
             </h1>
             <span className="px-3.5 py-1.5 rounded-full bg-[#121212] text-xs text-[#A0A0A0] shrink-0 self-start sm:self-center">

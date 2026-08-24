@@ -88,7 +88,7 @@ export default function AdminReleasesManagerPage() {
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Back to Admin Panel</span>
             </Link>
-            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-white flex items-center gap-3">
               <Disc className="w-7 h-7 text-brand" />
               <span>Edit Release(s)</span>
             </h1>

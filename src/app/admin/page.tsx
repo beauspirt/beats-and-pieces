@@ -20,7 +20,7 @@ export default function AdminDashboardPage() {
       {/* Header */}
       <div className="pb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white tracking-tight flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
             <Shield className="w-7 h-7 text-brand" />
             <span>Admin Control Center</span>
           </h1>

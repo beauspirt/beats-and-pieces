@@ -84,7 +84,7 @@ export default function BattlesPage() {
             {/* Info */}
             <div className="flex-1 w-full min-w-0 space-y-3.5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <h1 className="text-3xl font-bold text-white tracking-tight leading-tight">
+                <h1 className="text-2xl font-bold text-white tracking-tight leading-tight">
                   {activeBattle.title}
                 </h1>
                 <div className="flex items-center gap-2 shrink-0 self-start sm:self-center flex-wrap">

@@ -103,11 +103,11 @@ export default function HostPanelPage() {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    const MAX_FILE_SIZE = 50 * 1024 * 1024;
+    const MAX_FILE_SIZE = 250 * 1024 * 1024;
     const oversized = Array.from(files).find((f) => f.size > MAX_FILE_SIZE);
     if (oversized) {
       const sizeMB = (oversized.size / (1024 * 1024)).toFixed(1);
-      alert(`Sample file "${oversized.name}" is too large (${sizeMB} MB). Maximum allowed upload size is 50 MB per file.`);
+      alert(`Sample file "${oversized.name}" is too large (${sizeMB} MB). Maximum source audio size is 250 MB per file.`);
       e.target.value = "";
       return;
     }

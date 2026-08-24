@@ -391,10 +391,10 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       return;
     }
 
-    const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB Supabase bucket limit
+    const MAX_FILE_SIZE = 250 * 1024 * 1024; // 250MB limit (compressed automatically to ~2-3MB Opus)
     if (file.size > MAX_FILE_SIZE) {
       const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
-      alert(`File is too large (${sizeMB} MB). The maximum allowed upload size is 50 MB. Please export as MP3 (320kbps) or 16-bit WAV under 50 MB.`);
+      alert(`File is too large (${sizeMB} MB). Maximum source audio size is 250 MB.`);
       return;
     }
 

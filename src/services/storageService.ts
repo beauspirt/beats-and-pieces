@@ -1,19 +1,40 @@
 import { supabase } from "@/lib/supabase";
+import { optimizeAndConvertToOpus } from "@/lib/audioConverter";
+
+export interface AudioUploadResponse {
+  url: string | null;
+  error: string | null;
+  duration?: number;
+  waveformPeaks?: number[];
+  isOpusConverted?: boolean;
+}
 
 export const storageService = {
   /**
-   * Upload an audio file (MP3, WAV, Opus) to Supabase Storage 'audio' bucket.
-   * Returns the public CDN URL of the uploaded audio file.
+   * Upload an audio file with automatic client-side Opus compression.
+   * Transcodes uncompressed/large WAV/FLAC files to studio-grade Opus (192kbps)
+   * before uploading to the Supabase Storage 'audio' bucket.
    */
   async uploadAudio(
     file: File | Blob,
     folder: "submissions" | "beats" | "samples" = "submissions",
-    customName?: string
-  ): Promise<{ url: string | null; error: string | null }> {
+    customName?: string,
+    onProgress?: (percent: number) => void
+  ): Promise<AudioUploadResponse> {
     try {
-      const extension = file instanceof File && file.name.includes(".")
-        ? file.name.split(".").pop()?.toLowerCase() || "mp3"
-        : "mp3";
+      // Automatic Opus optimization & waveform extraction
+      const {
+        file: processedFile,
+        duration,
+        waveformPeaks,
+        isConverted,
+      } = await optimizeAndConvertToOpus(file, onProgress);
+
+      const extension = isConverted
+        ? "opus"
+        : (processedFile instanceof File && processedFile.name.includes(".")
+            ? processedFile.name.split(".").pop()?.toLowerCase() || "mp3"
+            : "mp3");
 
       const cleanFilename = customName
         ? `${customName}.${extension}`
@@ -21,27 +42,44 @@ export const storageService = {
 
       const filePath = `${folder}/${cleanFilename}`;
 
+      const contentType = isConverted
+        ? "audio/ogg; codecs=opus"
+        : (processedFile.type || "audio/mpeg");
+
       const { data, error } = await supabase.storage
         .from("audio")
-        .upload(filePath, file, {
+        .upload(filePath, processedFile, {
           cacheControl: "3600",
           upsert: true,
-          contentType: file.type || "audio/mpeg",
+          contentType,
         });
 
       if (error) {
-        // console.warn("Supabase Audio Upload failed:", error.message);
-        return { url: null, error: error.message };
+        return {
+          url: null,
+          error: error.message,
+          duration,
+          waveformPeaks,
+          isOpusConverted: isConverted,
+        };
       }
 
       const { data: publicData } = supabase.storage
         .from("audio")
         .getPublicUrl(data.path);
 
-      return { url: publicData.publicUrl, error: null };
+      return {
+        url: publicData.publicUrl,
+        error: null,
+        duration,
+        waveformPeaks,
+        isOpusConverted: isConverted,
+      };
     } catch (err: unknown) {
-      // console.error("storageService.uploadAudio error:", err);
-      return { url: null, error: err instanceof Error ? err.message : String(err) || "Failed to upload audio" };
+      return {
+        url: null,
+        error: err instanceof Error ? err.message : String(err) || "Failed to upload audio",
+      };
     }
   },
 

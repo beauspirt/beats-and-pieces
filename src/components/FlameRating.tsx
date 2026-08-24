@@ -52,9 +52,9 @@ export const FlameRating: React.FC<FlameRatingProps> = React.memo(({
                 className={`${iconSizes[size]} transition-all duration-150 ${
                   isFilled
                     ? "text-[#FF5E3A] fill-[#FF5E3A] drop-shadow-[0_1px_2px_rgba(255,94,58,0.2)]"
-                    : "fill-[#262626] text-[#262626] stroke-none hover:fill-[#383838]"
+                    : "fill-[#262626] text-[#262626] hover:fill-[#383838] hover:text-[#383838]"
                 }`}
-                strokeWidth={isFilled ? 1.5 : 0}
+                strokeWidth={2}
               />
             </button>
           );

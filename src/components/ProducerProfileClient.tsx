@@ -81,19 +81,19 @@ function StandardTagSelector({
         )}
       </div>
 
-      {/* Selected Tags Pill Box */}
+      {/* Currently Selected Tags Pills Strip */}
       {selectedTags.length > 0 && (
         <div className="flex flex-wrap gap-1.5 pb-1">
           {selectedTags.map((tag) => (
             <span
               key={tag}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-3xl bg-[#7B61FF]/15 text-xs text-[#A78BFA]"
+              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#7B61FF]/15 text-xs text-[#A78BFA] font-bold leading-none select-none"
             >
               <span>{tag}</span>
               <button
                 type="button"
                 onClick={() => toggleTag(tag)}
-                className="text-zinc-400 hover:text-white transition-colors cursor-pointer text-xs"
+                className="text-zinc-400 hover:text-white transition-colors cursor-pointer text-xs inline-flex items-center justify-center"
               >
                 ✕
               </button>
@@ -137,7 +137,7 @@ function StandardTagSelector({
                   key={tag}
                   type="button"
                   onClick={() => toggleTag(tag)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer inline-flex items-center justify-center gap-1.5 leading-none ${
                     isSelected
                       ? "bg-[#7B61FF] text-white shadow-sm"
                       : "bg-[#1f1f1f] text-zinc-300 hover:bg-[#2a2a2a] hover:text-white"
@@ -1280,7 +1280,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                     {beat.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="px-3 py-1 rounded-full bg-[#121212] text-[#888888] text-xs select-none"
+                        className="px-3.5 py-1.5 rounded-full bg-[#121212] text-[#888888] text-xs font-bold select-none inline-flex items-center justify-center text-center leading-none"
                       >
                         {tag}
                       </span>

@@ -299,13 +299,13 @@ export default function BeatsDiscoveryPage() {
             {selectedTags.map((tag) => (
               <span
                 key={tag}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#7B61FF]/15 text-[#A78BFA] text-xs font-bold"
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#7B61FF]/15 text-[#A78BFA] text-xs font-bold leading-none select-none"
               >
                 <span>{tag}</span>
                 <button
                   type="button"
                   onClick={() => handleTagToggle(tag)}
-                  className="text-zinc-400 hover:text-white cursor-pointer"
+                  className="text-zinc-400 hover:text-white cursor-pointer inline-flex items-center justify-center"
                 >
                   ✕
                 </button>
@@ -351,7 +351,7 @@ export default function BeatsDiscoveryPage() {
                       key={genre}
                       type="button"
                       onClick={() => handleTagToggle(genre)}
-                      className={`px-3 py-1.5 rounded-3xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                      className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer inline-flex items-center justify-center gap-1.5 leading-none ${
                         isSelected
                           ? "bg-[#7B61FF] text-white shadow-sm"
                           : "bg-[#121212] text-zinc-400 hover:text-white"
@@ -376,7 +376,7 @@ export default function BeatsDiscoveryPage() {
                   onClick={() =>
                     setSelectedSaleFilter((prev) => (prev === "for_sale" ? "all" : "for_sale"))
                   }
-                  className={`px-3.5 py-2 rounded-3xl text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer inline-flex items-center justify-center text-center leading-none ${
                     selectedSaleFilter === "for_sale"
                       ? "bg-[#7B61FF] text-white shadow-sm"
                       : "bg-[#121212] text-zinc-400 hover:text-white"
@@ -389,7 +389,7 @@ export default function BeatsDiscoveryPage() {
                   onClick={() =>
                     setSelectedSaleFilter((prev) => (prev === "not_for_sale" ? "all" : "not_for_sale"))
                   }
-                  className={`px-3.5 py-2 rounded-3xl text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer inline-flex items-center justify-center text-center leading-none ${
                     selectedSaleFilter === "not_for_sale"
                       ? "bg-[#7B61FF] text-white shadow-sm"
                       : "bg-[#121212] text-zinc-400 hover:text-white"
@@ -598,7 +598,7 @@ export default function BeatsDiscoveryPage() {
                         key={g}
                         type="button"
                         onClick={() => handleTagToggle(g)}
-                        className={`px-2.5 py-1 rounded-full text-xs font-bold transition-colors cursor-pointer select-none ${
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer select-none inline-flex items-center justify-center text-center leading-none ${
                           selectedTags.includes(g)
                             ? "bg-[#7B61FF] text-white"
                             : "bg-[#121212] text-[#888888] hover:text-white hover:bg-[#202020]"
@@ -613,7 +613,7 @@ export default function BeatsDiscoveryPage() {
                         key={t}
                         type="button"
                         onClick={() => handleTagToggle(t)}
-                        className={`px-2.5 py-1 rounded-full text-xs font-bold transition-colors cursor-pointer select-none ${
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer select-none inline-flex items-center justify-center text-center leading-none ${
                           selectedTags.includes(t)
                             ? "bg-[#7B61FF] text-white"
                             : "bg-[#121212] text-[#777777] hover:text-white hover:bg-[#202020]"

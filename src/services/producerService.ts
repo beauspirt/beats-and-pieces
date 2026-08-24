@@ -139,7 +139,7 @@ export const producerService = {
             id: p.id,
             nickname: p.nickname,
             email: p.email,
-            hideEmail: p.hide_email ?? p.hideEmail ?? false,
+            hideEmail: p.hide_email !== undefined && p.hide_email !== null ? Boolean(p.hide_email) : (custom[p.id]?.hideEmail ?? false),
             avatarUrl: p.avatar_url,
             bio: p.bio || "",
             location: p.location || "",

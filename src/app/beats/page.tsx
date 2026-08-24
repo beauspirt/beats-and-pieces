@@ -242,7 +242,7 @@ export default function BeatsDiscoveryPage() {
                 className="w-full h-11 sm:h-auto flex items-center justify-between sm:justify-center gap-1.5 sm:gap-2 bg-[#181818] hover:bg-[#202020] rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white font-semibold transition-all cursor-pointer"
               >
                 <div className="flex items-center gap-1.5 min-w-0">
-                  <SlidersHorizontal className="w-3.5 h-3.5 text-[#7B61FF] shrink-0" />
+                  <SlidersHorizontal className="w-4 h-4 text-zinc-400 shrink-0" />
                   <span className="truncate whitespace-nowrap">{sortLabelMap[sortBy]}</span>
                 </div>
                 <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 shrink-0 ${isSortOpen ? "rotate-180" : ""}`} />

@@ -247,7 +247,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     };
   }, [producerId]);
 
-  const [copiedEmail, setCopiedEmail] = useState(false);
+  const [emailCopiedTooltip, setEmailCopiedTooltip] = useState(false);
   const [activeVaultModalItem, setActiveVaultModalItem] = useState<VaultItem | null>(null);
   const [beatsVersion, setBeatsVersion] = useState(0);
 
@@ -889,10 +889,9 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
         document.execCommand("copy");
         document.body.removeChild(textArea);
       }
-      showToast("Email copied to clipboard!");
-    } catch {
-      showToast("Email copied to clipboard!");
-    }
+    } catch {}
+    setEmailCopiedTooltip(true);
+    setTimeout(() => setEmailCopiedTooltip(false), 2000);
   };
 
   const activeLinks = useMemo(() => {
@@ -973,22 +972,9 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
               </span>
             </div>
 
-            {/* Clickable Social Icons (Including Email at beginning if not hidden) */}
+            {/* Clickable Social Icons (Including Email at end if not hidden) */}
             {((Boolean(producer.email) && !producer.hideEmail) || activeLinks.length > 0) && (
               <div className="flex flex-wrap items-center gap-3.5 pt-1">
-                {/* Email Icon at the beginning */}
-                {Boolean(producer.email) && !producer.hideEmail && (
-                  <button
-                    type="button"
-                    onClick={handleCopyEmail}
-                    className="text-zinc-400 hover:text-[#7B61FF] transition-colors duration-200 active:scale-95 inline-flex items-center justify-center cursor-pointer"
-                    title={`Copy email (${producer.email})`}
-                    aria-label="Copy Email"
-                  >
-                    <Mail className="w-5 h-5" />
-                  </button>
-                )}
-
                 {activeLinks.map(([platform, url]) => {
                   const IconComponent = SocialIcons[platform.toLowerCase()] || SocialIcons.website;
                   const hoverColorClasses: Record<string, string> = {
@@ -1017,6 +1003,29 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                     </a>
                   );
                 })}
+
+                {/* Email Icon at the end */}
+                {Boolean(producer.email) && !producer.hideEmail && (
+                  <div className="relative inline-flex items-center">
+                    <button
+                      type="button"
+                      onClick={handleCopyEmail}
+                      className="text-zinc-400 hover:text-[#7B61FF] transition-colors duration-200 active:scale-95 inline-flex items-center justify-center cursor-pointer"
+                      title={`Copy email (${producer.email})`}
+                      aria-label="Copy Email"
+                    >
+                      <Mail className="w-5 h-5" />
+                    </button>
+
+                    {emailCopiedTooltip && (
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-1.5 bg-[#222222] text-white text-xs font-semibold rounded-xl shadow-2xl whitespace-nowrap animate-in fade-in zoom-in-95 duration-150 border border-white/10 z-50 flex items-center gap-1.5 pointer-events-none">
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>E-mail copied to clipboard!</span>
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#222222]" />
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>

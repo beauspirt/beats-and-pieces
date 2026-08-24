@@ -90,6 +90,19 @@ function ProfileContent() {
     }
   };
 
+  const handleToggleHideEmail = () => {
+    if (!profile) return;
+    const newHideEmail = !profile.hideEmail;
+    setProfile((prev) => prev ? { ...prev, hideEmail: newHideEmail } : null);
+    const updated = producerService.updateProducer(profile.id, {
+      ...profile,
+      hideEmail: newHideEmail,
+    });
+    if (updated) {
+      updateUser(updated);
+    }
+  };
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -293,17 +306,10 @@ function ProfileContent() {
 
               {/* Option to hide e-mail from public profile */}
               <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-[#121212]">
-                <div className="space-y-0.5">
-                  <span className="text-xs font-semibold text-white block">Hide email from public profile</span>
-                  <span className="text-[11px] text-zinc-400 block">
-                    {profile.hideEmail
-                      ? "Hidden (email icon will not be shown on your public page)"
-                      : "Visible (visitors can copy your email on your public page)"}
-                  </span>
-                </div>
+                <span className="text-xs font-semibold text-white block">Hide email from public profile</span>
                 <button
                   type="button"
-                  onClick={() => setProfile({ ...profile, hideEmail: !profile.hideEmail })}
+                  onClick={handleToggleHideEmail}
                   className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full p-0.5 transition-colors duration-200 ease-in-out focus:outline-none ${
                     profile.hideEmail ? "bg-[#7B61FF]" : "bg-[#282828]"
                   }`}

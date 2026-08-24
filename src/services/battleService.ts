@@ -69,11 +69,7 @@ function loadCustomBattles(): Competition[] {
       if (stored) {
         const parsed: Competition[] = JSON.parse(stored);
         const deletedIds = new Set(loadDeletedBattles());
-        return parsed.filter((b) => 
-          !deletedIds.has(b.id) && 
-          !b.id.toLowerCase().includes("test") && 
-          !b.title.toLowerCase().includes("test battle")
-        );
+        return parsed.filter((b) => !deletedIds.has(b.id));
       }
     } catch {}
   }
@@ -135,11 +131,7 @@ export const battleService = {
     }
 
     return list
-      .filter((b) => 
-        !deletedIds.has(b.id) &&
-        !b.id.toLowerCase().includes("test") &&
-        !b.title.toLowerCase().includes("test battle")
-      )
+      .filter((b) => !deletedIds.has(b.id))
       .map((b) => ({
         ...b,
         phase: calculateBattlePhase(b),

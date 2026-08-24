@@ -181,7 +181,7 @@ export const battleService = {
     try {
       // 1. Sync Battles
       const { data: dbBattles, error: bErr } = await supabase.from("battles").select("*");
-      if (!bErr && dbBattles && dbBattles.length > 0) {
+      if (!bErr && dbBattles) {
         const mapped: Competition[] = dbBattles.map((b) => ({
           id: b.id,
           number: b.number,
@@ -209,20 +209,9 @@ export const battleService = {
           winner: b.winner,
         }));
 
-        // Clean up deleted list for any active server battles
-        const currentDeleted = loadDeletedBattles();
-        const serverIds = new Set(mapped.map((b) => b.id));
-        const prunedDeleted = currentDeleted.filter((id) => !serverIds.has(id));
-        saveDeletedBattles(prunedDeleted);
-
-        // Merge with any local custom battles not yet synced to Supabase
-        const currentCustom = loadCustomBattles();
-        const unsyncedCustom = currentCustom.filter((b) => !serverIds.has(b.id) && !prunedDeleted.includes(b.id));
-        const mergedCustom = [...mapped, ...unsyncedCustom];
-
-        saveCustomBattles(mergedCustom);
-        customBattlesList = mergedCustom;
-        competitionsList = mergedCustom;
+        saveCustomBattles(mapped);
+        customBattlesList = mapped;
+        competitionsList = mapped;
         notifyBattlesUpdated();
       }
 

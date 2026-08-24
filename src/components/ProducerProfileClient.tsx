@@ -229,10 +229,11 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       setBeatsVersion((v) => v + 1);
     };
 
-    // 1. Sync latest producers and beats from Supabase
+    // 1. Sync latest producers, beats, and battles from Supabase
     Promise.all([
       producerService.syncFromSupabase(),
       beatService.syncFromSupabase(),
+      battleService.syncFromSupabase(),
     ]).then(refresh);
 
     // 2. Listen to real-time local updates and storage changes

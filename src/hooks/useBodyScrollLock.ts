@@ -1,18 +1,23 @@
 import { useEffect } from "react";
 
 /**
- * Custom hook to lock body scroll when a modal or overlay is open.
- * Restores original body overflow when closed or unmounted.
+ * Custom hook to lock document & body scroll when a modal or overlay is open.
+ * Restores original overflow when closed or unmounted.
  */
 export function useBodyScrollLock(isLocked: boolean): void {
   useEffect(() => {
     if (typeof window === "undefined" || !isLocked) return;
 
-    const originalOverflow = document.body.style.overflow;
+    const originalBodyOverflow = document.body.style.overflow;
+    const originalHtmlOverflow = document.documentElement.style.overflow;
+
+    // Lock both root html and body so neither container can scroll
+    document.documentElement.style.overflow = "hidden";
     document.body.style.overflow = "hidden";
 
     return () => {
-      document.body.style.overflow = originalOverflow || "";
+      document.documentElement.style.overflow = originalHtmlOverflow || "";
+      document.body.style.overflow = originalBodyOverflow || "";
     };
   }, [isLocked]);
 }

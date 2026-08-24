@@ -215,4 +215,24 @@ html.light input[type="range"] {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  /* Responsive Battle Hero Cover Art - Exactly Matches Archive Grid Card Artwork */
+  .battle-hero-cover {
+    width: 100%;
+  }
+  @media (min-width: 640px) {
+    .battle-hero-cover {
+      width: calc((100% - 48px) / 2);
+    }
+  }
+  @media (min-width: 768px) {
+    .battle-hero-cover {
+      width: calc((100% - 96px) / 3);
+    }
+  }
+  @media (min-width: 1024px) {
+    .battle-hero-cover {
+      width: calc(25% - 36px);
+    }
+  }
 }

@@ -8,6 +8,7 @@ import { AudioWaveformPlayer } from "@/components/AudioWaveformPlayer";
 import { DiscoveryBeat } from "@/lib/types";
 import { beatService } from "@/services/beatService";
 import { producerService } from "@/services/producerService";
+import { JudgeFeedbackTicker } from "@/components/JudgeFeedbackTicker";
 import { Search, Filter, ArrowUpDown, Star, Flame, ChevronDown } from "lucide-react";
 
 export default function BeatsDiscoveryPage() {
@@ -485,6 +486,11 @@ export default function BeatsDiscoveryPage() {
                     ))}
                   </div>
                 ) : null}
+
+                {/* Row 4: Judge Feedback Ticker */}
+                {beat.juryFeedbacks && beat.juryFeedbacks.length > 0 && (
+                  <JudgeFeedbackTicker feedbacks={beat.juryFeedbacks} />
+                )}
 
               </div>
             );

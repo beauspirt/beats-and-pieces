@@ -68,28 +68,53 @@ export default function NewBattlePage() {
     }
   };
 
+  const [isUploadingSamples, setIsUploadingSamples] = useState(false);
+
   const handleSampleFilesUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    const newSamples: BattleSample[] = [];
-    for (let idx = 0; idx < files.length; idx++) {
-      const file = files[idx];
-      const sampleId = `s-${Date.now()}-${idx}`;
-      const sampleTitle = file.name.replace(/\.[^/.]+$/, "");
-      const cleanSlug = sampleTitle.toLowerCase().replace(/[^a-z0-9_-]/g, "_");
-      const { url } = await storageService.uploadAudio(file, "samples", `${cleanSlug}-${Date.now()}-${idx}`);
-      const sampleUrl = url || URL.createObjectURL(file);
+    setIsUploadingSamples(true);
+    try {
+      const fileList = Array.from(files);
+      const uploadPromises = fileList.map(async (file, idx) => {
+        const sampleId = `s-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 6)}`;
+        const sampleTitle = file.name.replace(/\.[^/.]+$/, "");
+        const cleanSlug = sampleTitle.toLowerCase().replace(/[^a-z0-9_-]/g, "_") || "sample";
+        
+        let realDuration = 90;
+        try {
+          const arrayBuf = await file.arrayBuffer();
+          const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+          if (AudioCtx) {
+            const ctx = new AudioCtx();
+            const decoded = await ctx.decodeAudioData(arrayBuf.slice(0));
+            realDuration = Math.round(decoded.duration);
+            ctx.close();
+          }
+        } catch {}
 
-      newSamples.push({
-        id: sampleId,
-        title: sampleTitle,
-        audioUrl: sampleUrl,
-        duration: 90,
+        const { url, error } = await storageService.uploadAudio(file, "samples", `${cleanSlug}-${Date.now()}-${idx}`);
+        if (!url) {
+          throw new Error(error || `Failed to upload sample "${file.name}"`);
+        }
+
+        return {
+          id: sampleId,
+          title: sampleTitle,
+          audioUrl: url,
+          duration: realDuration,
+        };
       });
-    }
 
-    setSamples((prev) => [...prev, ...newSamples]);
+      const uploadedSamples = await Promise.all(uploadPromises);
+      setSamples((prev) => [...prev, ...uploadedSamples]);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Failed to upload audio samples. Please try again.");
+    } finally {
+      setIsUploadingSamples(false);
+      e.target.value = "";
+    }
   };
 
   const handleRemoveSample = (sampleId: string) => {
@@ -622,12 +647,15 @@ export default function NewBattlePage() {
                 )}
 
                 <div>
-                  <label className="px-4 py-2 rounded-xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-white cursor-pointer transition-colors inline-flex items-center gap-2">
+                  <label className={`px-4 py-2 rounded-xl text-xs font-bold text-white transition-colors inline-flex items-center gap-2 ${
+                    isUploadingSamples ? "bg-[#333333] cursor-not-allowed opacity-75" : "bg-[#222222] hover:bg-[#2A2A2A] cursor-pointer"
+                  }`}>
                     <Music className="w-3.5 h-3.5 text-[#7B61FF]" />
-                    <span>Upload Audio Sample(s)</span>
+                    <span>{isUploadingSamples ? "Uploading Sample(s)..." : "Upload Audio Sample(s)"}</span>
                     <input
                       type="file"
                       multiple
+                      disabled={isUploadingSamples}
                       accept="audio/mp3,audio/wav,audio/*"
                       onChange={handleSampleFilesUpload}
                       className="hidden"
@@ -695,9 +723,10 @@ export default function NewBattlePage() {
           <div className="text-right pt-2">
             <button
               type="submit"
-              className="px-10 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-sm font-bold transition-all shadow-lg active:scale-95 ml-auto cursor-pointer"
+              disabled={isUploadingSamples}
+              className="px-10 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-sm font-bold transition-all shadow-lg active:scale-95 ml-auto cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSaved ? "Battle Created ✓" : "Create Battle"}
+              {isUploadingSamples ? "Uploading Samples..." : isSaved ? "Battle Created ✓" : "Create Battle"}
             </button>
           </div>
 

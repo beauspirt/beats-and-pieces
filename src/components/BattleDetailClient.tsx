@@ -208,27 +208,17 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     waveformPeaks?: number[];
     bpm?: number;
     submittedAt: string;
-  } | null>(() => {
-    if (currentUser) {
-      const existing = submissions.find((s) => s.userId === currentUser.id);
-      if (existing) {
-        return {
-          id: existing.id,
-          title: existing.beatTitle,
-          audioUrl: existing.audioUrl,
-          duration: existing.duration || 120,
-          waveformPeaks: existing.waveform,
-          bpm: existing.bpm,
-          submittedAt: existing.submittedAt,
-        };
-      }
-    }
-    return null;
-  });
+  } | null>(null);
 
+  // Restore current user's existing submission for Phase 1
   useEffect(() => {
     if (currentUser) {
-      const existing = submissions.find((s) => s.userId === currentUser.id);
+      const cleanName = currentUser.nickname.toLowerCase().trim();
+      const existing = submissions.find(
+        (s) =>
+          (s.userId && s.userId.toLowerCase().trim() === currentUser.id.toLowerCase().trim()) ||
+          (s.beatmakerTag && s.beatmakerTag.toLowerCase().trim() === cleanName)
+      );
       if (existing) {
         setMyEntry({
           id: existing.id,
@@ -239,6 +229,8 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
           bpm: existing.bpm,
           submittedAt: existing.submittedAt,
         });
+      } else {
+        setMyEntry(null);
       }
     }
   }, [currentUser, submissions]);
@@ -247,18 +239,42 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [isRatingsSubmitted, setIsRatingsSubmitted] = useState<boolean>(false);
 
-  // Sync user's existing ratings from database on mount / auth change
+  // Unique visitor seed for device-level guest randomizer
+  const [visitorSeed, setVisitorSeed] = useState<string>("guest");
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      let stored = localStorage.getItem("bnp_visitor_id");
+      if (!stored) {
+        stored = `vis_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+        try {
+          localStorage.setItem("bnp_visitor_id", stored);
+        } catch {}
+      }
+      setVisitorSeed(stored);
+    }
+  }, []);
+
+  // Sync user's existing ratings from database and local draft on mount / auth change
+  useEffect(() => {
+    const uId = currentUser?.id || visitorSeed;
+    let draftRatings: Record<string, number> = {};
+    try {
+      const stored = localStorage.getItem(`bnp_draft_ratings_${battle.id}_${uId}`);
+      if (stored) draftRatings = JSON.parse(stored);
+    } catch {}
+
     if (!currentUser?.id) {
-      setRatings({});
+      setRatings(draftRatings);
       setIsRatingsSubmitted(false);
       return;
     }
+
     battleService.getUserRatingsForBattle(battle.id, currentUser.id).then(({ ratings: userRatings, isSubmitted }) => {
-      setRatings(userRatings);
+      const merged = { ...draftRatings, ...userRatings };
+      setRatings(merged);
       setIsRatingsSubmitted(isSubmitted);
     });
-  }, [battle.id, currentUser?.id]);
+  }, [battle.id, currentUser?.id, visitorSeed]);
 
   // Phase 3: Clean Single-Score Jury evaluation state (slider 0.00 to 5.00)
   const [juryScores, setJuryScores] = useState<Record<string, string>>({});
@@ -273,7 +289,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   const isBallotQualified = totalEntries > 0 && currentVotesCount >= requiredVotes;
 
   // Deterministic user-seeded randomized queue for Phase 2 public rating
-  const userSeed = `${currentUser?.id || currentUser?.email || "guest"}_${battle.id}`;
+  const userSeed = `${currentUser?.id || currentUser?.email || visitorSeed}_${battle.id}`;
   const shuffledSubmissions = React.useMemo(() => {
     return seededShuffle(submissions, userSeed);
   }, [submissions, userSeed]);
@@ -305,6 +321,16 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     const cleanEmail = currentUser.email.toLowerCase().trim();
     const cleanId = currentUser.id.toLowerCase().trim();
 
+    const uId = currentUser.id;
+    let draftScores: Record<string, string> = {};
+    let draftFeedback: Record<string, string> = {};
+    try {
+      const s = localStorage.getItem(`bnp_draft_jury_scores_${battle.id}_${uId}`);
+      if (s) draftScores = JSON.parse(s);
+      const f = localStorage.getItem(`bnp_draft_jury_feedback_${battle.id}_${uId}`);
+      if (f) draftFeedback = JSON.parse(f);
+    } catch {}
+
     const loadedScores: Record<string, string> = {};
     const loadedFeedbacks: Record<string, string> = {};
     let scoredFinalistsCount = 0;
@@ -327,12 +353,8 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       }
     });
 
-    if (Object.keys(loadedScores).length > 0) {
-      setJuryScores((prev) => ({ ...loadedScores, ...prev }));
-    }
-    if (Object.keys(loadedFeedbacks).length > 0) {
-      setJuryFeedback((prev) => ({ ...loadedFeedbacks, ...prev }));
-    }
+    setJuryScores((prev) => ({ ...draftScores, ...loadedScores, ...prev }));
+    setJuryFeedback((prev) => ({ ...draftFeedback, ...loadedFeedbacks, ...prev }));
 
     // Only submitted if every finalist has a submitted score in the database
     const isSubmitted = finalistSubmissions.length > 0 && scoredFinalistsCount === finalistSubmissions.length;
@@ -617,12 +639,37 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     const updated = { ...ratings, [trackId]: flames };
     setRatings(updated);
     setLastSavedTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+    const uId = currentUser?.id || visitorSeed;
+    try {
+      localStorage.setItem(`bnp_draft_ratings_${battle.id}_${uId}`, JSON.stringify(updated));
+    } catch {}
     if (currentUser?.id) {
-      try {
-        localStorage.setItem(`bnp_ratings_${battle.id}_${currentUser.id}`, JSON.stringify(updated));
-      } catch {}
       await battleService.voteSubmission(trackId, battle.id, currentUser.id, flames);
     }
+  };
+
+  const handleJuryScoreChange = (subId: string, val: string) => {
+    if (isJurySubmitted) return;
+    setJuryScores((prev) => {
+      const updated = { ...prev, [subId]: val };
+      const uId = currentUser?.id || "judge";
+      try {
+        localStorage.setItem(`bnp_draft_jury_scores_${battle.id}_${uId}`, JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
+
+  const handleJuryFeedbackChange = (subId: string, val: string) => {
+    if (isJurySubmitted) return;
+    setJuryFeedback((prev) => {
+      const updated = { ...prev, [subId]: val };
+      const uId = currentUser?.id || "judge";
+      try {
+        localStorage.setItem(`bnp_draft_jury_feedback_${battle.id}_${uId}`, JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
   };
 
   const handleClickSubmitRatings = () => {
@@ -1458,11 +1505,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                             step="0.05"
                             disabled={isJurySubmitted}
                             value={typeof scoreVal === "number" || (typeof scoreVal === "string" && scoreVal !== "") ? Number(scoreVal) : 0}
-                            onChange={(e) => {
-                              if (isJurySubmitted) return;
-                              const val = parseFloat(e.target.value).toFixed(2);
-                              setJuryScores((prev) => ({ ...prev, [sub.id]: val }));
-                            }}
+                            onChange={(e) => handleJuryScoreChange(sub.id, parseFloat(e.target.value).toFixed(2))}
                             className={`w-full h-2 bg-[#252525] rounded-lg appearance-none accent-[#7B61FF] ${isJurySubmitted ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
                           />
                           <div className="flex items-center gap-1 text-[#7B61FF] shrink-0">
@@ -1480,10 +1523,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                             disabled={isJurySubmitted}
                             placeholder={isJurySubmitted ? "Feedback submitted and locked" : "Leave feedback note for the beatmaker (optional)"}
                             value={feedbackVal}
-                            onChange={(e) => {
-                              if (isJurySubmitted) return;
-                              setJuryFeedback((prev) => ({ ...prev, [sub.id]: e.target.value }));
-                            }}
+                            onChange={(e) => handleJuryFeedbackChange(sub.id, e.target.value)}
                             className={`w-full bg-[#121212] rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white placeholder-[#555555] focus:outline-none ${isJurySubmitted ? "opacity-70 cursor-not-allowed" : ""}`}
                           />
                         </div>

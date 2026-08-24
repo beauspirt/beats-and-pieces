@@ -106,6 +106,7 @@ export const beatService = {
             tags: [],
             flames: typeof sub.flameRating === "number" && sub.flameRating >= 1 ? Math.min(5.0, Math.max(1.0, sub.flameRating)) : undefined,
             juryScore: typeof sub.juryScore === "number" && !isNaN(sub.juryScore) ? Number(sub.juryScore) : undefined,
+            juryFeedbacks: sub.juryFeedbacks || [],
             battleSource: b.title,
             tier: sub.rank === 1 ? 1 : sub.rank === 2 ? 2 : sub.rank === 3 ? 3 : 4,
             rank: sub.rank,

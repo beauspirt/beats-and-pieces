@@ -15,6 +15,7 @@ import { producerService, battleService, beatService, storageService, vaultServi
 import { normalizeUrl } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
+import { JudgeFeedbackTicker } from "@/components/JudgeFeedbackTicker";
 import { 
   Flame, Trophy, Mail, ExternalLink, 
   CheckCircle2, Copy, MapPin, Calendar, Star, Award, Globe,
@@ -147,66 +148,6 @@ function StandardTagSelector({
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-/**
- * 5-Second Auto-Cycling Judge Feedback Component
- */
-function JudgeFeedbackTicker({
-  feedbacks,
-}: {
-  feedbacks: JudgeFeedbackItem[];
-}) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    if (!feedbacks || feedbacks.length <= 1) return;
-
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % feedbacks.length);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [feedbacks]);
-
-  if (!feedbacks || feedbacks.length === 0) return null;
-
-  const current = feedbacks[currentIndex] || feedbacks[0];
-
-  return (
-    <div className="pt-2.5 mt-2.5">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-        <div className="flex-1 flex items-baseline gap-2 min-w-0 transition-all duration-300">
-          <span className="font-semibold text-[#7B61FF] shrink-0">
-            {current.judgeName}:
-          </span>
-          <span className="text-[#C4C4C4] italic truncate sm:whitespace-normal">
-            &ldquo;{current.feedback}&rdquo;
-          </span>
-        </div>
-
-        {feedbacks.length > 1 && (
-          <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
-            {feedbacks.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentIndex(i)}
-                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                  i === currentIndex
-                    ? "bg-[#7B61FF] scale-125"
-                    : "bg-[#444444] hover:bg-[#666666]"
-                }`}
-                title={`Feedback from ${feedbacks[i].judgeName}`}
-              />
-            ))}
-            <span className="text-[10px] text-[#666666] ml-1">
-              {currentIndex + 1}/{feedbacks.length}
-            </span>
-          </div>
-        )}
-      </div>
     </div>
   );
 }
@@ -1115,9 +1056,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
                 {/* Row 4: Judge Feedback Loop / Ticker */}
                 {beat.juryFeedbacksList && beat.juryFeedbacksList.length > 0 && (
-                  <div className="bg-[#121212] rounded-xl px-4 py-2.5">
-                    <JudgeFeedbackTicker feedbacks={beat.juryFeedbacksList} />
-                  </div>
+                  <JudgeFeedbackTicker feedbacks={beat.juryFeedbacksList} />
                 )}
               </div>
             ))}

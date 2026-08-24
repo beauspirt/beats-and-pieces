@@ -2,9 +2,8 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { UserProfile } from "@/lib/types";
-import { X, ShieldCheck, ExternalLink, Sparkles, CheckCircle2, Camera } from "lucide-react";
+import { X, ShieldCheck, Sparkles, CheckCircle2, Camera } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { producerService, storageService } from "@/services";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -146,19 +145,6 @@ function ProfileContent() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-4 animate-in fade-in duration-300 py-4">
-      
-      {/* Profile Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2">
-        <h1 className="text-2xl sm:text-3xl font-black text-white">User Profile</h1>
-
-        <Link
-          href={`/${profile.id}`}
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-[#7B61FF] hover:bg-[#684DE6] text-xs font-bold text-white transition-all shadow-md active:scale-95 group"
-        >
-          <span>View Public Profile</span>
-          <ExternalLink className="w-3.5 h-3.5 text-white/80 group-hover:text-white transition-colors" />
-        </Link>
-      </div>
 
       {/* First-Time Login Onboarding Prompt */}
       {showOnboardingBanner && (

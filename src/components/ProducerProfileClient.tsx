@@ -909,7 +909,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       
       {/* SECTION 1: PRODUCER HERO / IDENTITY */}
       <div className="relative">
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-6 sm:gap-8">
+        <div className="flex flex-col md:flex-row items-start md:items-start justify-between gap-6 sm:gap-8">
           
           {/* Avatar */}
           <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden relative shrink-0 bg-[#121212] shadow-inner">
@@ -1030,25 +1030,27 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
             )}
           </div>
 
-          {/* Action Button: Share Profile */}
-          <div className="shrink-0 w-full md:w-auto self-start md:self-center">
-            <button
-              onClick={handleShareProfile}
-              className="w-full md:w-auto px-5 py-3 rounded-xl bg-[#121212] hover:bg-[#202020] text-zinc-300 hover:text-white text-xs sm:text-sm font-semibold transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
-            >
-              {copiedShareLink ? (
-                <>
-                  <Check className="w-4 h-4 text-emerald-400" />
-                  <span className="text-emerald-400">Link Copied!</span>
-                </>
-              ) : (
-                <>
-                  <Share2 className="w-4 h-4 text-zinc-400" />
-                  <span>Share Profile</span>
-                </>
-              )}
-            </button>
-          </div>
+          {/* Action Button: Share Your Page (Only visible for users visiting their own page) */}
+          {isProfileOwner && (
+            <div className="shrink-0 w-full md:w-auto self-start">
+              <button
+                onClick={handleShareProfile}
+                className="w-full md:w-auto px-5 py-3 rounded-xl bg-[#121212] hover:bg-[#202020] text-zinc-300 hover:text-white text-xs sm:text-sm font-semibold transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {copiedShareLink ? (
+                  <>
+                    <Check className="w-4 h-4 text-emerald-400" />
+                    <span className="text-emerald-400">Link Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Share2 className="w-4 h-4 text-zinc-400" />
+                    <span>Share Your Page</span>
+                  </>
+                )}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

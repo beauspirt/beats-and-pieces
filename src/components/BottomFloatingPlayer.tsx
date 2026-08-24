@@ -242,7 +242,7 @@ export const BottomFloatingPlayer: React.FC = React.memo(() => {
         {/* LEFT COLUMN: Track Info (Cover, Title, Clickable Artist) */}
         <div className="flex items-center gap-3 min-w-0 flex-1 sm:flex-initial sm:w-1/3 sm:max-w-[280px]">
           {/* Artwork Thumbnail */}
-          <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-3xl overflow-hidden bg-[#242424] relative shrink-0 shadow-md flex items-center justify-center">
+          <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl overflow-hidden bg-[#242424] relative shrink-0 shadow-md flex items-center justify-center">
             {activeTrackCover ? (
               <Image
                 src={activeTrackCover}

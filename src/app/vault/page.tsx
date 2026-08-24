@@ -147,7 +147,7 @@ export default function VaultPage() {
               </div>
 
               {/* Embedded 16:9 YouTube Player */}
-              <div className="w-full aspect-video rounded-3xl overflow-hidden bg-black relative shadow-inner">
+              <div className="w-full aspect-video rounded-xl overflow-hidden bg-black relative shadow-inner">
                 <iframe
                   src={`https://www.youtube.com/embed/${activeModalItem.youtubeId}?autoplay=1`}
                   title={activeModalItem.title}

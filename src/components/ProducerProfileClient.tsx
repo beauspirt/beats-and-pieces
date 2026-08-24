@@ -128,7 +128,7 @@ function StandardTagSelector({
 
       {/* Dropdown Options List */}
       {isDropdownOpen && (
-        <div className="p-3 bg-[#121212] rounded-3xl max-h-48 overflow-y-auto space-y-1.5 shadow-2xl z-20">
+        <div className="p-2 bg-[#121212] rounded-2xl max-h-48 overflow-y-auto space-y-1 shadow-2xl z-20">
           <div className="flex flex-wrap gap-1.5">
             {filteredOptions.map((tag) => {
               const isSelected = selectedTags.includes(tag);
@@ -1326,7 +1326,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                 onClick={() => setActiveVaultModalItem(item)}
                 className="bg-[#181818] hover:bg-[#222222] p-4 rounded-3xl flex items-center gap-4 transition-colors group shadow-md cursor-pointer select-none"
               >
-                <div className="w-24 h-16 rounded-3xl overflow-hidden relative shrink-0 bg-[#121212]">
+                <div className="w-24 h-16 rounded-xl overflow-hidden relative shrink-0 bg-[#121212]">
                   {item.youtubeId ? (
                     <Image
                       src={`https://img.youtube.com/vi/${item.youtubeId}/hqdefault.jpg`}
@@ -1436,11 +1436,11 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                       <label className="text-xs font-bold text-white">
                         Availability
                       </label>
-                      <div className="grid grid-cols-2 gap-1.5 bg-[#121212] p-1.5 rounded-3xl h-[48px] items-center">
+                      <div className="grid grid-cols-2 gap-1.5 bg-[#121212] p-1.5 rounded-2xl h-[48px] items-center">
                         <button
                           type="button"
                           onClick={() => setEditingBeat({ ...editingBeat, isForSale: true })}
-                          className={`h-full rounded-3xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
+                          className={`h-full rounded-[10px] text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
                             editingBeat.isForSale
                               ? "bg-[#7B61FF] text-white shadow-sm"
                               : "text-zinc-400 hover:text-white hover:bg-white/5"
@@ -1451,7 +1451,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                         <button
                           type="button"
                           onClick={() => setEditingBeat({ ...editingBeat, isForSale: false })}
-                          className={`h-full rounded-3xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
+                          className={`h-full rounded-[10px] text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
                             !editingBeat.isForSale
                               ? "bg-[#7B61FF] text-white shadow-sm"
                               : "text-zinc-400 hover:text-white hover:bg-white/5"
@@ -1498,7 +1498,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                             <span className="truncate">{editingBeat.audioUrl.split("/").pop() || "Audio File"}</span>
                           </div>
                           {!editingBeat.isBattleSubmission && (
-                            <label className="text-xs font-bold px-3.5 py-1.5 rounded-3xl bg-[#1C1C1C] hover:bg-[#252525] text-zinc-300 hover:text-white transition-all cursor-pointer shrink-0">
+                            <label className="text-xs font-bold px-3.5 py-1.5 rounded-[10px] bg-[#1C1C1C] hover:bg-[#252525] text-zinc-300 hover:text-white transition-all cursor-pointer shrink-0">
                               <span>Replace</span>
                               <input
                                 type="file"
@@ -1648,11 +1648,11 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                       <label className="text-xs font-bold text-white">
                         Availability
                       </label>
-                      <div className="grid grid-cols-2 gap-1.5 bg-[#121212] p-1.5 rounded-3xl h-[48px] items-center">
+                      <div className="grid grid-cols-2 gap-1.5 bg-[#121212] p-1.5 rounded-2xl h-[48px] items-center">
                         <button
                           type="button"
                           onClick={() => setNewBeatIsForSale(true)}
-                          className={`h-full rounded-3xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
+                          className={`h-full rounded-[10px] text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
                             newBeatIsForSale
                               ? "bg-[#7B61FF] text-white shadow-sm"
                               : "text-zinc-400 hover:text-white hover:bg-white/5"
@@ -1663,7 +1663,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                         <button
                           type="button"
                           onClick={() => setNewBeatIsForSale(false)}
-                          className={`h-full rounded-3xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
+                          className={`h-full rounded-[10px] text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
                             !newBeatIsForSale
                               ? "bg-[#7B61FF] text-white shadow-sm"
                               : "text-zinc-400 hover:text-white hover:bg-white/5"
@@ -1713,7 +1713,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                               setNewBeatWaveformPeaks([]);
                               setNewBeatDuration(0);
                             }}
-                            className="text-xs font-bold px-3.5 py-1.5 rounded-3xl bg-[#1C1C1C] hover:bg-red-500/20 text-zinc-300 hover:text-red-400 transition-all cursor-pointer shrink-0"
+                            className="text-xs font-bold px-3.5 py-1.5 rounded-[10px] bg-[#1C1C1C] hover:bg-red-500/20 text-zinc-300 hover:text-red-400 transition-all cursor-pointer shrink-0"
                           >
                             Remove
                           </button>
@@ -1827,7 +1827,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
               </div>
 
               {/* Embedded 16:9 YouTube Player */}
-              <div className="w-full aspect-video rounded-3xl overflow-hidden bg-black relative shadow-inner">
+              <div className="w-full aspect-video rounded-xl overflow-hidden bg-black relative shadow-inner">
                 <iframe
                   src={`https://www.youtube.com/embed/${activeVaultModalItem.youtubeId}?autoplay=1`}
                   title={activeVaultModalItem.title}

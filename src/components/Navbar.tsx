@@ -172,7 +172,7 @@ export const Navbar: React.FC = () => {
                   </button>
 
                   {showProfileMenu && (
-                    <div className="absolute right-0 mt-3 w-52 bg-[#181818] rounded-3xl shadow-2xl py-1 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                    <div className="absolute right-0 mt-3 w-52 bg-[#181818] rounded-2xl shadow-2xl p-1.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
                       <div className="px-4 py-2.5">
                         <p className="text-lg font-bold text-white truncate">{currentUser.nickname}</p>
                         <p className="text-xs text-[#888888] truncate">{currentUser.email}</p>

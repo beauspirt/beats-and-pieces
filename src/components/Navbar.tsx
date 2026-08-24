@@ -172,7 +172,7 @@ export const Navbar: React.FC = () => {
               <div className="relative" ref={profileMenuRef}>
                 <button
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
-                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden relative flex items-center justify-center focus:outline-none cursor-pointer ring-1 ring-white/10 hover:ring-[#7B61FF] transition-all"
+                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden relative flex items-center justify-center focus:outline-none cursor-pointer ring-1 ring-white/10 hover:opacity-85 transition-opacity"
                   aria-label="Open profile menu"
                 >
                   <Image

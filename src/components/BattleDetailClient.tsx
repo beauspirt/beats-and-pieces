@@ -1060,8 +1060,13 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                     </div>
                     <div className="text-center space-y-1">
                       <p className="text-sm sm:text-base font-bold text-white">
-                        {isUploading ? "Loading audio..." : "Click to select or drag your entry here"}
+                        {isUploading ? "Loading audio..." : "Drag & drop your beat audio file here"}
                       </p>
+                      {!isUploading && (
+                        <p className="text-xs text-zinc-400">
+                          or <span className="text-[#7B61FF] font-medium underline underline-offset-2">browse files</span> from your device
+                        </p>
+                      )}
                     </div>
                   </label>
                 ) : (

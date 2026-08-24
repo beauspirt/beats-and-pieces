@@ -1566,10 +1566,10 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                       onDragEnter={handleNewBeatDragOver}
                       onDragLeave={handleNewBeatDragLeave}
                       onDrop={handleNewBeatDrop}
-                      className={`min-h-[220px] rounded-2xl p-7 flex flex-col items-center justify-center text-center gap-3 transition-all cursor-pointer ${
+                      className={`min-h-[220px] rounded-2xl p-7 flex flex-col items-center justify-center text-center gap-3 transition-all cursor-pointer border-2 border-dashed border-[#7B61FF] ${
                         isDraggingNewBeat
-                          ? "bg-[#7B61FF]/15 scale-[1.01]"
-                          : "bg-[#121212] hover:bg-[#151515]"
+                          ? "bg-[#7B61FF]/15 border-solid scale-[1.01]"
+                          : "bg-[#121212]/70 hover:bg-[#121212]"
                       }`}
                     >
                       <div className="w-12 h-12 rounded-full bg-[#7B61FF]/15 flex items-center justify-center text-[#7B61FF]">

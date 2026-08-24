@@ -76,7 +76,7 @@ export default function NewReleasePage() {
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Back to Admin Panel</span>
           </Link>
-          <h1 className="text-3xl font-black text-white flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
             <Disc className="w-7 h-7 text-brand" />
             <span>Create a New Release</span>
           </h1>
@@ -86,11 +86,11 @@ export default function NewReleasePage() {
           
           {/* CONTAINER 1: DETAILS */}
           <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 space-y-6">
-            <h2 className="text-lg font-bold text-white">Details</h2>
+            <h2 className="text-xl font-bold text-white">Details</h2>
 
             {/* Title */}
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-              <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">
+              <label className="sm:col-span-3 text-xs font-bold text-[#D1D1D1]">
                 Title
               </label>
               <div className="sm:col-span-9">
@@ -107,7 +107,7 @@ export default function NewReleasePage() {
 
             {/* Cover Art Upload */}
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-              <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">
+              <label className="sm:col-span-3 text-xs font-bold text-[#D1D1D1]">
                 Cover Art
               </label>
               <div className="sm:col-span-9">
@@ -133,7 +133,7 @@ export default function NewReleasePage() {
 
             {/* Description */}
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-start">
-              <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1] pt-2">
+              <label className="sm:col-span-3 text-xs font-bold text-[#D1D1D1] pt-2">
                 Description
               </label>
               <div className="sm:col-span-9">
@@ -149,7 +149,7 @@ export default function NewReleasePage() {
 
             {/* Release Date */}
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-              <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">
+              <label className="sm:col-span-3 text-xs font-bold text-[#D1D1D1]">
                 Release Date
               </label>
               <div className="sm:col-span-9">
@@ -166,10 +166,10 @@ export default function NewReleasePage() {
 
           {/* CONTAINER 2: STREAMING LINKS */}
           <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 space-y-5">
-            <h2 className="text-lg font-bold text-white">Streaming Links</h2>
+            <h2 className="text-xl font-bold text-white">Streaming Links</h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-              <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">Spotify</label>
+              <label className="sm:col-span-3 text-xs font-bold text-[#D1D1D1]">Spotify</label>
               <div className="sm:col-span-9">
                 <input
                   type="url"
@@ -181,7 +181,7 @@ export default function NewReleasePage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-              <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">Apple Music</label>
+              <label className="sm:col-span-3 text-xs font-bold text-[#D1D1D1]">Apple Music</label>
               <div className="sm:col-span-9">
                 <input
                   type="url"
@@ -193,7 +193,7 @@ export default function NewReleasePage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-              <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">YouTube</label>
+              <label className="sm:col-span-3 text-xs font-bold text-[#D1D1D1]">YouTube</label>
               <div className="sm:col-span-9">
                 <input
                   type="url"
@@ -205,7 +205,7 @@ export default function NewReleasePage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-              <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">Bandcamp</label>
+              <label className="sm:col-span-3 text-xs font-bold text-[#D1D1D1]">Bandcamp</label>
               <div className="sm:col-span-9">
                 <input
                   type="url"
@@ -217,7 +217,7 @@ export default function NewReleasePage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-              <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">SoundCloud</label>
+              <label className="sm:col-span-3 text-xs font-bold text-[#D1D1D1]">SoundCloud</label>
               <div className="sm:col-span-9">
                 <input
                   type="url"

@@ -257,7 +257,7 @@ export const BottomFloatingPlayer: React.FC = React.memo(() => {
 
           {/* Title & Artist Stack */}
           <div className="min-w-0 flex-1">
-            <h4 className="text-xs sm:text-sm font-semibold text-white truncate leading-tight" title={activeTrackTitle || ""}>
+            <h4 className="text-xs font-bold text-white truncate leading-tight" title={activeTrackTitle || ""}>
               {activeTrackTitle || "Playing Beat"}
             </h4>
 
@@ -265,12 +265,12 @@ export const BottomFloatingPlayer: React.FC = React.memo(() => {
             {activeTrackArtistId ? (
               <Link
                 href={`/${activeTrackArtistId}`}
-                className="text-[11px] sm:text-xs text-[#B3B3B3] hover:text-white hover:underline transition-colors block truncate mt-0.5 sm:mt-1 font-medium"
+                className="text-xs text-[#B3B3B3] hover:text-white hover:underline transition-colors block truncate mt-0.5 sm:mt-1"
               >
                 {activeTrackArtist || "Producer"}
               </Link>
             ) : (
-              <span className="text-[11px] sm:text-xs text-[#888888] block truncate mt-0.5 sm:mt-1">
+              <span className="text-xs text-[#888888] block truncate mt-0.5 sm:mt-1">
                 {activeTrackArtist || "Community Track"}
               </span>
             )}
@@ -297,7 +297,7 @@ export const BottomFloatingPlayer: React.FC = React.memo(() => {
 
           {/* Scrubber Row: Time + Track + Duration */}
           <div className="flex items-center gap-2.5 w-full">
-            <span className="text-[11px] font-sans tabular-nums text-[#A7A7A7] select-none w-9 text-right shrink-0">
+            <span className="text-xs font-sans tabular-nums text-[#A7A7A7] select-none w-9 text-right shrink-0">
               {formatTime(currentDisplayTime)}
             </span>
 
@@ -334,7 +334,7 @@ export const BottomFloatingPlayer: React.FC = React.memo(() => {
               </div>
             </div>
 
-            <span className="text-[11px] font-sans tabular-nums text-[#A7A7A7] select-none w-9 text-left shrink-0">
+            <span className="text-xs font-sans tabular-nums text-[#A7A7A7] select-none w-9 text-left shrink-0">
               {formatTime(duration)}
             </span>
           </div>
@@ -383,7 +383,7 @@ export const BottomFloatingPlayer: React.FC = React.memo(() => {
                 />
               </div>
 
-              <span className="text-[11px] font-sans tabular-nums text-zinc-400 min-w-[28px] text-right">
+              <span className="text-xs font-sans tabular-nums text-zinc-400 min-w-[28px] text-right">
                 {Math.round(currentVolumePercent * 100)}%
               </span>
             </div>

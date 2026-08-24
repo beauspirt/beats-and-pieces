@@ -49,7 +49,7 @@ export default function VotingModerationPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6">
         <div>
-          <h1 className="text-3xl font-black text-white flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
             <ShieldAlert className="w-8 h-8 text-[#FF5E3A]" />
             <span>Voting Anomaly & Moderation</span>
           </h1>
@@ -62,13 +62,13 @@ export default function VotingModerationPage() {
         <div className="flex items-center gap-3">
           <div className="bg-surface-card rounded-xl px-4 py-2 text-center shadow-sm">
             <span className="text-xs text-zinc-500 uppercase font-mono block">Pending</span>
-            <span className="text-base font-black text-[#FF5E3A] font-mono">
+            <span className="text-sm font-bold text-[#FF5E3A] font-mono">
               {flags.filter((f) => f.status === "pending").length}
             </span>
           </div>
           <div className="bg-surface-card rounded-xl px-4 py-2 text-center shadow-sm">
             <span className="text-xs text-zinc-500 uppercase font-mono block">Discarded</span>
-            <span className="text-base font-black text-zinc-400 font-mono">
+            <span className="text-sm font-bold text-zinc-400 font-mono">
               {flags.filter((f) => f.status === "discarded").length}
             </span>
           </div>
@@ -97,7 +97,7 @@ export default function VotingModerationPage() {
         {filteredFlags.length === 0 ? (
           <div className="bg-surface-card rounded-2xl p-12 text-center text-zinc-400 shadow-md">
             <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto mb-2" />
-            <p className="text-sm font-semibold text-white">All clear!</p>
+            <p className="text-sm text-white">All clear!</p>
             <p className="text-xs text-zinc-500 mt-1">No flagged anomalies in this category.</p>
           </div>
         ) : (
@@ -135,7 +135,7 @@ export default function VotingModerationPage() {
                 <div className="bg-surface-subtle rounded-xl p-4 space-y-2">
                   <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
                     <div>
-                      <span className="text-zinc-500 font-medium">Voter: </span>
+                      <span className="text-zinc-500">Voter: </span>
                       <strong className="text-white">{flag.voterNickname}</strong>
                       <span className="text-zinc-500 ml-1">({flag.voterEmail})</span>
                     </div>

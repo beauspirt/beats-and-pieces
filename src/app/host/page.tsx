@@ -230,7 +230,7 @@ export default function HostPanelPage() {
         
         {/* Header */}
         <div className="space-y-2">
-          <h1 className="text-3xl font-black text-white flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
             <Disc className="w-7 h-7 text-[#FF8A65]" />
             <span>Host Control Panel</span>
           </h1>
@@ -266,7 +266,7 @@ export default function HostPanelPage() {
                   <div className="space-y-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="text-sm font-bold text-white truncate">{battle.title}</h3>
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
                         battle.phase === "completed"
                           ? "bg-zinc-800 text-zinc-400"
                           : "bg-[#FF8A65]/20 text-[#FF8A65]"
@@ -293,14 +293,14 @@ export default function HostPanelPage() {
                 <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
                   <button
                     onClick={() => handleEditClick(battle)}
-                    className="px-4 py-2 rounded-xl bg-[#222222] hover:bg-[#FF8A65] hover:text-white text-xs font-semibold text-zinc-300 transition-all flex items-center gap-1.5 cursor-pointer"
+                    className="px-4 py-2 rounded-xl bg-[#222222] hover:bg-[#FF8A65] hover:text-white text-xs font-bold text-zinc-300 transition-all flex items-center gap-1.5 cursor-pointer"
                   >
                     <Edit3 className="w-3.5 h-3.5" />
                     <span>Edit Battle</span>
                   </button>
                   <Link
                     href={`/battles/${battle.id}`}
-                    className="px-4 py-2 rounded-xl bg-[#181818] hover:bg-[#252525] text-xs font-semibold text-zinc-400 hover:text-white transition-all"
+                    className="px-4 py-2 rounded-xl bg-[#181818] hover:bg-[#252525] text-xs font-bold text-zinc-400 hover:text-white transition-all"
                   >
                     View Public
                   </Link>
@@ -337,7 +337,7 @@ export default function HostPanelPage() {
                 <form onSubmit={handleSave} className="space-y-5 text-left text-xs">
                   {/* Title */}
                   <div className="space-y-1.5">
-                    <label className="font-semibold text-zinc-300">Battle Title</label>
+                    <label className="text-xs font-bold text-zinc-300">Battle Title</label>
                     <input
                       type="text"
                       value={editingBattle.title}
@@ -349,7 +349,7 @@ export default function HostPanelPage() {
 
                   {/* Cover Art Upload */}
                   <div className="space-y-1.5">
-                    <label className="font-semibold text-zinc-300">Cover Art</label>
+                    <label className="text-xs font-bold text-zinc-300">Cover Art</label>
                     <div className="flex items-center gap-4 bg-[#121212] p-3 rounded-xl">
                       <div className="w-16 h-16 rounded-xl overflow-hidden relative bg-[#181818] shrink-0 flex items-center justify-center text-zinc-600 shadow-md">
                         {editingBattle.coverImage ? (
@@ -376,19 +376,19 @@ export default function HostPanelPage() {
                 {/* Judged by */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="font-semibold text-zinc-300">Judges</label>
-                    <span className="text-[10px] text-zinc-500">Google accounts unlock Jury Portal</span>
+                    <label className="text-xs font-bold text-zinc-300">Judges</label>
+                    <span className="text-xs text-zinc-500">Google accounts unlock Jury Portal</span>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2">
                     {judgeEntries.map((judge, idx) => (
                       <div
                         key={idx}
-                        className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-xl bg-[#121212] text-xs font-medium text-white shadow-sm"
+                        className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-xl bg-[#121212] text-xs font-bold text-white shadow-sm"
                       >
                         <div className="flex items-center gap-1.5">
                           <span className="font-bold">{judge.name}</span>
-                          <span className="text-[10px] text-zinc-400 font-mono">({judge.email})</span>
+                          <span className="text-xs text-zinc-400 font-mono">({judge.email})</span>
                         </div>
                         <button
                           type="button"
@@ -442,7 +442,7 @@ export default function HostPanelPage() {
                     <button
                       type="button"
                       onClick={() => setShowAddJudge(true)}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#121212] hover:bg-[#202020] text-xs text-[#D1D1D1] font-semibold transition-all cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#121212] hover:bg-[#202020] text-xs text-[#D1D1D1] font-bold transition-all cursor-pointer"
                     >
                       <Plus className="w-3.5 h-3.5 text-[#FF8A65]" />
                       <span>Add Judge</span>
@@ -452,7 +452,7 @@ export default function HostPanelPage() {
 
                 {/* Description */}
                 <div className="space-y-1.5">
-                  <label className="font-semibold text-zinc-300">Description</label>
+                  <label className="text-xs font-bold text-zinc-300">Description</label>
                   <textarea
                     rows={3}
                     value={editingBattle.description}
@@ -463,9 +463,9 @@ export default function HostPanelPage() {
 
                 {/* Rules */}
                 <div className="space-y-2">
-                  <label className="font-semibold text-zinc-300 block">Rules</label>
+                  <label className="text-xs font-bold text-zinc-300 block">Rules</label>
                   <div className="bg-[#121212] p-3.5 rounded-xl space-y-1.5 text-xs text-zinc-400">
-                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block mb-1">
+                    <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider block mb-1">
                       Standard Default Rules:
                     </span>
                     <p>1. Maximum 1 entry per producer.</p>
@@ -478,10 +478,10 @@ export default function HostPanelPage() {
                 {/* Sample(s) Management (Upload file only, clean row without audio player) */}
                 <div className="space-y-3 bg-[#121212] p-4 rounded-xl">
                   <div className="flex items-center justify-between">
-                    <label className="font-bold text-white uppercase tracking-wider text-[11px]">
+                    <label className="font-bold text-white uppercase tracking-wider text-xs">
                       Sample(s)
                     </label>
-                    <span className="text-[10px] text-zinc-400">
+                    <span className="text-xs text-zinc-400">
                       Audio files competitors must flip
                     </span>
                   </div>
@@ -501,7 +501,7 @@ export default function HostPanelPage() {
                               type="text"
                               value={sample.title}
                               onChange={(e) => handleUpdateSampleTitle(sample.id, e.target.value)}
-                              className="bg-transparent text-xs text-white font-medium focus:outline-none focus:ring-1 focus:ring-[#FF8A65] rounded px-1.5 py-0.5 w-full"
+                              className="bg-transparent text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#FF8A65] rounded px-1.5 py-0.5 w-full"
                             />
                           </div>
 
@@ -538,17 +538,17 @@ export default function HostPanelPage() {
                 {/* Timeline Deadlines */}
                 <div className="bg-[#121212] p-4 rounded-xl space-y-3">
                   <div className="flex items-center justify-between">
-                    <label className="font-bold text-white uppercase tracking-wider text-[11px]">
+                    <label className="font-bold text-white uppercase tracking-wider text-xs">
                       Timeline & Deadlines
                     </label>
-                    <span className="text-[10px] text-zinc-400">
+                    <span className="text-xs text-zinc-400">
                       Active phase is automatically calculated from dates
                     </span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="space-y-1">
-                      <label className="text-[11px] text-zinc-400">Start Date</label>
+                      <label className="text-xs text-zinc-400">Start Date</label>
                       <input
                         type="datetime-local"
                         value={editingBattle.submissionStartsAt ? editingBattle.submissionStartsAt.slice(0, 16) : ""}
@@ -563,7 +563,7 @@ export default function HostPanelPage() {
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[11px] text-zinc-400">Submission Deadline</label>
+                      <label className="text-xs text-zinc-400">Submission Deadline</label>
                       <input
                         type="datetime-local"
                         value={editingBattle.submissionEndsAt ? editingBattle.submissionEndsAt.slice(0, 16) : ""}
@@ -578,7 +578,7 @@ export default function HostPanelPage() {
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[11px] text-zinc-400">Rating Deadline</label>
+                      <label className="text-xs text-zinc-400">Rating Deadline</label>
                       <input
                         type="datetime-local"
                         value={editingBattle.ratingEndsAt ? editingBattle.ratingEndsAt.slice(0, 16) : ""}
@@ -599,7 +599,7 @@ export default function HostPanelPage() {
                   <button
                     type="button"
                     onClick={() => setEditingBattle(null)}
-                    className="px-5 py-2.5 rounded-xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-semibold text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                    className="px-5 py-2.5 rounded-xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-zinc-400 hover:text-white transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>

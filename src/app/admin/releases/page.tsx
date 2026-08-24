@@ -88,7 +88,7 @@ export default function AdminReleasesManagerPage() {
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Back to Admin Panel</span>
             </Link>
-            <h1 className="text-3xl font-black text-white flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
               <Disc className="w-7 h-7 text-brand" />
               <span>Edit Release(s)</span>
             </h1>
@@ -128,7 +128,7 @@ export default function AdminReleasesManagerPage() {
                   <p className="text-xs text-zinc-400">
                     Release Date: {release.releaseDate ? new Date(release.releaseDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "N/A"}
                   </p>
-                  <p className="text-[11px] text-zinc-500 line-clamp-1">
+                  <p className="text-xs text-zinc-500 line-clamp-1">
                     {release.description}
                   </p>
                 </div>
@@ -137,14 +137,14 @@ export default function AdminReleasesManagerPage() {
               <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
                 <button
                   onClick={() => handleEditClick(release)}
-                  className="px-4 py-2 rounded-xl bg-[#222222] hover:bg-brand hover:text-white text-xs font-semibold text-zinc-300 transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-[#222222] hover:bg-brand hover:text-white text-xs font-bold text-zinc-300 transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   <Edit3 className="w-3.5 h-3.5" />
                   <span>Edit</span>
                 </button>
                 <Link
                   href="/releases"
-                  className="px-4 py-2 rounded-xl bg-[#181818] hover:bg-[#252525] text-xs font-semibold text-zinc-400 hover:text-white transition-all"
+                  className="px-4 py-2 rounded-xl bg-[#181818] hover:bg-[#252525] text-xs font-bold text-zinc-400 hover:text-white transition-all"
                 >
                   View Public
                 </Link>
@@ -180,7 +180,7 @@ export default function AdminReleasesManagerPage() {
                 <form onSubmit={handleSave} className="space-y-5 text-left text-xs">
                   {/* Title */}
                   <div className="space-y-1.5">
-                    <label className="font-semibold text-zinc-300">Release Title</label>
+                    <label className="text-xs font-bold text-zinc-300">Release Title</label>
                     <input
                       type="text"
                       value={editingRelease.title}
@@ -192,7 +192,7 @@ export default function AdminReleasesManagerPage() {
 
                   {/* Cover Art Upload */}
                   <div className="space-y-1.5">
-                    <label className="font-semibold text-zinc-300">Cover Art</label>
+                    <label className="text-xs font-bold text-zinc-300">Cover Art</label>
                     <div className="flex items-center gap-4 bg-[#121212] p-3 rounded-xl">
                       <div className="w-16 h-16 rounded-xl overflow-hidden relative bg-[#181818] shrink-0 shadow-md">
                         <Image
@@ -214,7 +214,7 @@ export default function AdminReleasesManagerPage() {
 
                   {/* Description */}
                   <div className="space-y-1.5">
-                    <label className="font-semibold text-zinc-300">Description</label>
+                    <label className="text-xs font-bold text-zinc-300">Description</label>
                     <textarea
                       rows={4}
                       value={editingRelease.description}
@@ -225,7 +225,7 @@ export default function AdminReleasesManagerPage() {
 
                   {/* Release Date */}
                   <div className="space-y-1.5">
-                    <label className="font-semibold text-zinc-300">Release Date</label>
+                    <label className="text-xs font-bold text-zinc-300">Release Date</label>
                     <input
                       type="date"
                       value={editingRelease.releaseDate ? editingRelease.releaseDate.slice(0, 10) : ""}
@@ -236,13 +236,13 @@ export default function AdminReleasesManagerPage() {
 
                   {/* Streaming Links */}
                   <div className="space-y-3 bg-[#121212] p-4 rounded-xl">
-                    <label className="font-bold text-white uppercase tracking-wider text-[11px] block">
+                    <label className="font-bold text-white uppercase tracking-wider text-xs block">
                       Streaming Links
                     </label>
 
                     <div className="space-y-2">
                       <div>
-                        <label className="text-[11px] text-zinc-400 block mb-1">Spotify</label>
+                        <label className="text-xs text-zinc-400 block mb-1">Spotify</label>
                         <input
                           type="url"
                           value={editingRelease.spotifyUrl || ""}
@@ -252,7 +252,7 @@ export default function AdminReleasesManagerPage() {
                       </div>
 
                       <div>
-                        <label className="text-[11px] text-zinc-400 block mb-1">Apple Music</label>
+                        <label className="text-xs text-zinc-400 block mb-1">Apple Music</label>
                         <input
                           type="url"
                           value={editingRelease.appleMusicUrl || ""}
@@ -262,7 +262,7 @@ export default function AdminReleasesManagerPage() {
                       </div>
 
                       <div>
-                        <label className="text-[11px] text-zinc-400 block mb-1">YouTube</label>
+                        <label className="text-xs text-zinc-400 block mb-1">YouTube</label>
                         <input
                           type="url"
                           value={editingRelease.youtubeUrl || ""}
@@ -272,7 +272,7 @@ export default function AdminReleasesManagerPage() {
                       </div>
 
                       <div>
-                        <label className="text-[11px] text-zinc-400 block mb-1">Bandcamp</label>
+                        <label className="text-xs text-zinc-400 block mb-1">Bandcamp</label>
                         <input
                           type="url"
                           value={editingRelease.bandcampUrl || ""}
@@ -282,7 +282,7 @@ export default function AdminReleasesManagerPage() {
                       </div>
 
                       <div>
-                        <label className="text-[11px] text-zinc-400 block mb-1">SoundCloud</label>
+                        <label className="text-xs text-zinc-400 block mb-1">SoundCloud</label>
                         <input
                           type="url"
                           value={editingRelease.soundcloudUrl || ""}
@@ -298,7 +298,7 @@ export default function AdminReleasesManagerPage() {
                     <button
                       type="button"
                       onClick={() => setEditingRelease(null)}
-                      className="px-5 py-2.5 rounded-xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-semibold text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                      className="px-5 py-2.5 rounded-xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-zinc-400 hover:text-white transition-colors cursor-pointer"
                     >
                       Cancel
                     </button>

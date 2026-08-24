@@ -102,9 +102,9 @@ export const Navbar: React.FC = () => {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`text-[15px] font-medium transition-colors ${
+                    className={`text-sm transition-colors ${
                       isActive
-                        ? "text-white font-semibold"
+                        ? "text-white font-bold"
                         : "text-[#9E9E9E] hover:text-white"
                     }`}
                   >
@@ -130,7 +130,7 @@ export const Navbar: React.FC = () => {
             {mounted && currentUser?.role === "admin" && (
               <Link
                 href="/admin"
-                className={`hidden sm:flex text-[14px] font-semibold transition-colors items-center gap-1.5 ${
+                className={`hidden sm:flex text-sm font-bold transition-colors items-center gap-1.5 ${
                   pathname.startsWith("/admin")
                     ? "text-[#FF8A65]"
                     : "text-[#D1D1D1] hover:text-white"
@@ -144,7 +144,7 @@ export const Navbar: React.FC = () => {
             {mounted && currentUser?.role !== "admin" && isHost && (
               <Link
                 href="/host"
-                className={`hidden sm:flex text-[14px] font-semibold transition-colors items-center gap-1.5 ${
+                className={`hidden sm:flex text-sm font-bold transition-colors items-center gap-1.5 ${
                   pathname.startsWith("/host")
                     ? "text-[#FF8A65]"
                     : "text-[#D1D1D1] hover:text-white"
@@ -223,7 +223,7 @@ export const Navbar: React.FC = () => {
               ) : (
                 <Link
                   href={pathname && pathname !== "/signin" && pathname !== "/auth/callback" ? `/signin?redirect=${encodeURIComponent(pathname)}` : "/signin"}
-                  className="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs sm:text-sm font-semibold transition-all shadow-md active:scale-95 flex items-center gap-1.5"
+                  className="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 flex items-center gap-1.5"
                 >
                   <span>Log in</span>
                 </Link>
@@ -249,7 +249,7 @@ export const Navbar: React.FC = () => {
                     key={link.href}
                     href={link.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`px-4 py-3 rounded-xl text-sm font-semibold transition-all flex items-center justify-between ${
+                    className={`px-4 py-3 rounded-xl text-sm transition-all flex items-center justify-between ${
                       isActive
                         ? "bg-[#7B61FF] text-white shadow-md"
                         : "text-zinc-300 hover:bg-[#1f1f1f] hover:text-white"

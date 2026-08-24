@@ -273,18 +273,18 @@ export default function NewBattlePage() {
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Back to Admin Panel</span>
           </Link>
-          <h1 className="text-3xl font-black text-white">Create a New Battle</h1>
+          <h1 className="text-3xl font-bold text-white">Create a New Battle</h1>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
         
           {/* CONTAINER: DETAILS */}
           <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 space-y-6">
-            <h2 className="text-lg font-bold text-white">Details</h2>
+            <h2 className="text-xl font-bold text-white">Details</h2>
 
             {/* Title */}
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-              <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">
+              <label className="sm:col-span-3 text-xs font-bold text-[#D1D1D1]">
                 Title
               </label>
               <div className="sm:col-span-9">
@@ -301,7 +301,7 @@ export default function NewBattlePage() {
 
             {/* Cover Image Upload */}
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-              <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">
+              <label className="sm:col-span-3 text-xs font-bold text-[#D1D1D1]">
                 Cover Art
               </label>
               <div className="sm:col-span-9">
@@ -334,10 +334,10 @@ export default function NewBattlePage() {
             {/* Host */}
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-start">
               <div className="sm:col-span-3 pt-2">
-                <label className="text-sm font-semibold text-[#D1D1D1] block">
+                <label className="text-xs font-bold text-[#D1D1D1] block">
                   Host
                 </label>
-                <span className="text-[11px] text-[#888888] block">Google accounts unlock Host Panel</span>
+                <span className="text-xs text-[#888888] block">Google accounts unlock Host Panel</span>
               </div>
 
               <div className="sm:col-span-9 space-y-2.5">
@@ -345,11 +345,11 @@ export default function NewBattlePage() {
                   {hosts.map((host, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-xl bg-[#121212] text-xs font-medium text-white shadow-sm"
+                      className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-xl bg-[#121212] text-xs font-bold text-white shadow-sm"
                     >
                       <div className="flex items-center gap-1.5">
                         <span className="font-bold">{host.name}</span>
-                        <span className="text-[10px] text-zinc-400 font-mono">({host.email})</span>
+                        <span className="text-xs text-zinc-400 font-mono">({host.email})</span>
                       </div>
                       <button
                         type="button"
@@ -415,7 +415,7 @@ export default function NewBattlePage() {
                   <button
                     type="button"
                     onClick={() => setShowAddHost(true)}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#121212] hover:bg-[#202020] text-xs text-[#D1D1D1] font-semibold transition-all cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#121212] hover:bg-[#202020] text-xs text-[#D1D1D1] font-bold transition-all cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5 text-[#7B61FF]" />
                     <span>{hosts.length > 0 ? "Change Host" : "Assign Host"}</span>
@@ -427,10 +427,10 @@ export default function NewBattlePage() {
             {/* Judged by */}
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-start">
               <div className="sm:col-span-3 pt-2">
-                <label className="text-sm font-semibold text-[#D1D1D1] block">
+                <label className="text-xs font-bold text-[#D1D1D1] block">
                   Judges
                 </label>
-                <span className="text-[11px] text-[#888888] block">Google accounts unlock Jury Portal</span>
+                <span className="text-xs text-[#888888] block">Google accounts unlock Jury Portal</span>
               </div>
 
               <div className="sm:col-span-9 space-y-2.5">
@@ -438,11 +438,11 @@ export default function NewBattlePage() {
                   {judges.map((judge, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-xl bg-[#121212] text-xs font-medium text-white shadow-sm"
+                      className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-xl bg-[#121212] text-xs font-bold text-white shadow-sm"
                     >
                       <div className="flex items-center gap-1.5">
                         <span className="font-bold">{judge.name}</span>
-                        <span className="text-[10px] text-zinc-400 font-mono">({judge.email})</span>
+                        <span className="text-xs text-zinc-400 font-mono">({judge.email})</span>
                       </div>
                       <button
                         type="button"
@@ -508,7 +508,7 @@ export default function NewBattlePage() {
                   <button
                     type="button"
                     onClick={() => setShowAddJudge(true)}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#121212] hover:bg-[#202020] text-xs text-[#D1D1D1] font-semibold transition-all cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#121212] hover:bg-[#202020] text-xs text-[#D1D1D1] font-bold transition-all cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5 text-[#7B61FF]" />
                     <span>Add Judge</span>
@@ -519,7 +519,7 @@ export default function NewBattlePage() {
 
             {/* Description */}
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-start">
-              <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1] pt-2">
+              <label className="sm:col-span-3 text-xs font-bold text-[#D1D1D1] pt-2">
                 Description
               </label>
               <div className="sm:col-span-9">
@@ -536,15 +536,15 @@ export default function NewBattlePage() {
             {/* Rules */}
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-start">
               <div className="sm:col-span-3 pt-1.5">
-                <label className="text-sm font-semibold text-[#D1D1D1] block">
+                <label className="text-xs font-bold text-[#D1D1D1] block">
                   Rules
                 </label>
-                <span className="text-[11px] text-[#888888] block">Default & extra rules</span>
+                <span className="text-xs text-[#888888] block">Default & extra rules</span>
               </div>
               <div className="sm:col-span-9 space-y-2.5">
                 {/* Default Rules */}
                 <div className="bg-[#121212] p-3.5 rounded-xl space-y-1.5 text-xs text-zinc-400">
-                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block mb-1">
+                  <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider block mb-1">
                     Standard Default Rules:
                   </span>
                   <p>1. Maximum 1 entry per producer.</p>
@@ -605,7 +605,7 @@ export default function NewBattlePage() {
                   <button
                     type="button"
                     onClick={() => setShowAddRule(true)}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#121212] hover:bg-[#202020] text-xs text-[#D1D1D1] font-semibold transition-all cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#121212] hover:bg-[#202020] text-xs text-[#D1D1D1] font-bold transition-all cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5 text-[#7B61FF]" />
                     <span>Add Extra Rule</span>
@@ -617,10 +617,10 @@ export default function NewBattlePage() {
             {/* Sample(s) Management (Upload file only, clean row without audio player) */}
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-start">
               <div className="sm:col-span-3 pt-2">
-                <label className="text-sm font-semibold text-[#D1D1D1] block">
+                <label className="text-xs font-bold text-[#D1D1D1] block">
                   Sample(s)
                 </label>
-                <span className="text-[11px] text-[#888888] block">Audio samples for competitors to flip</span>
+                <span className="text-xs text-[#888888] block">Audio samples for competitors to flip</span>
               </div>
 
               <div className="sm:col-span-9 space-y-3">
@@ -639,7 +639,7 @@ export default function NewBattlePage() {
                             type="text"
                             value={sample.title}
                             onChange={(e) => handleUpdateSampleTitle(sample.id, e.target.value)}
-                            className="bg-transparent text-xs text-white font-medium focus:outline-none focus:ring-1 focus:ring-[#7B61FF] rounded px-1.5 py-0.5 w-full"
+                            className="bg-transparent text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF] rounded px-1.5 py-0.5 w-full"
                           />
                         </div>
 
@@ -676,7 +676,7 @@ export default function NewBattlePage() {
 
             {/* Timeline Dates */}
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-              <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">
+              <label className="sm:col-span-3 text-xs font-bold text-[#D1D1D1]">
                 Start Date
               </label>
               <div className="sm:col-span-9">
@@ -690,7 +690,7 @@ export default function NewBattlePage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-              <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">
+              <label className="sm:col-span-3 text-xs font-bold text-[#D1D1D1]">
                 Submission Deadline
               </label>
               <div className="sm:col-span-9">
@@ -704,7 +704,7 @@ export default function NewBattlePage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-              <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">
+              <label className="sm:col-span-3 text-xs font-bold text-[#D1D1D1]">
                 Rating Deadline
               </label>
               <div className="sm:col-span-9">
@@ -718,7 +718,7 @@ export default function NewBattlePage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-              <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">
+              <label className="sm:col-span-3 text-xs font-bold text-[#D1D1D1]">
                 Judging Phase
               </label>
               <div className="sm:col-span-9 text-xs text-[#888888]">

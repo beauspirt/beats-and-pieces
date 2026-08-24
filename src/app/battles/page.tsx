@@ -60,7 +60,7 @@ export default function BattlesPage() {
       {activeBattle && (
         <section className="space-y-4">
           <div className="flex items-center justify-between h-9">
-            <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2.5">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2.5">
               <span className="w-2.5 h-2.5 rounded-full bg-[#FF5E3A] animate-pulse" />
               <span>Active Battle</span>
             </h2>
@@ -84,11 +84,11 @@ export default function BattlesPage() {
             {/* Info */}
             <div className="flex-1 w-full min-w-0 space-y-3.5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight leading-tight">
+                <h1 className="text-3xl font-bold text-white tracking-tight leading-tight">
                   {activeBattle.title}
                 </h1>
                 <div className="flex items-center gap-2 shrink-0 self-start sm:self-center flex-wrap">
-                  <span className="px-3.5 py-1.5 rounded-full bg-[#7B61FF] text-xs sm:text-sm font-semibold text-white shadow-sm inline-flex items-center justify-center text-center leading-none">
+                  <span className="px-3.5 py-1.5 rounded-full bg-[#7B61FF] text-xs font-bold text-white shadow-sm inline-flex items-center justify-center text-center leading-none">
                     {activeBattle.phase === "submission"
                       ? "Phase 1: Submissions Open"
                       : activeBattle.phase === "rating"
@@ -97,26 +97,26 @@ export default function BattlesPage() {
                       ? "Phase 3: Jury Evaluation"
                       : "Phase 4: Results"}
                   </span>
-                  <span className="px-3.5 py-1.5 rounded-full bg-[#121212] text-xs sm:text-sm text-[#A0A0A0] inline-flex items-center justify-center text-center leading-none">
+                  <span className="px-3.5 py-1.5 rounded-full bg-[#121212] text-xs text-[#A0A0A0] inline-flex items-center justify-center text-center leading-none">
                     {activeBattle.totalSubmissions} Total Entries
                   </span>
                 </div>
               </div>
 
-              <div className="space-y-1 text-sm sm:text-base text-[#A0A0A0]">
-                <p>Hosted by: <span className="text-white font-medium">{activeBattle.hosts?.[0] || "Nerub"}</span></p>
+              <div className="space-y-1 text-sm text-[#A0A0A0]">
+                <p>Hosted by: <span className="text-white">{activeBattle.hosts?.[0] || "Nerub"}</span></p>
                 {activeBattle.judges.length > 0 && (
-                  <p>Judged by: <span className="text-white font-medium">{activeBattle.judges.join(", ")}</span></p>
+                  <p>Judged by: <span className="text-white">{activeBattle.judges.join(", ")}</span></p>
                 )}
               </div>
 
               {activeBattle.description && (
-                <p className="text-sm sm:text-base text-[#D1D1D1] leading-relaxed">
+                <p className="text-sm text-[#D1D1D1] leading-relaxed">
                   {activeBattle.description}
                 </p>
               )}
 
-              <div className="text-xs sm:text-sm text-[#888888] pt-2">
+              <div className="text-xs text-[#888888] pt-2">
                 Submissions open • Enter your beat to participate
               </div>
             </div>
@@ -128,7 +128,7 @@ export default function BattlesPage() {
       {additionalActive.length > 0 && (
         <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2.5">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2.5">
               <span className="w-2.5 h-2.5 rounded-full bg-brand animate-pulse" />
               <span>Other Ongoing Battles</span>
             </h2>
@@ -153,7 +153,7 @@ export default function BattlesPage() {
                 <div className="flex-1 flex flex-col justify-between space-y-2.5">
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between text-xs text-[#888888]">
-                      <span className="px-2.5 py-1 rounded-full bg-brand/20 text-brand text-xs font-semibold">
+                      <span className="px-2.5 py-1 rounded-full bg-brand/20 text-brand text-xs font-bold">
                         {battle.phase === "submission"
                           ? "Phase 1"
                           : battle.phase === "rating"
@@ -162,12 +162,12 @@ export default function BattlesPage() {
                           ? "Phase 3"
                           : "Phase 4"}
                       </span>
-                      <span className="font-medium px-2.5 py-1 rounded-full bg-[#121212] text-[#A0A0A0] text-xs">
+                      <span className="px-2.5 py-1 rounded-full bg-[#121212] text-[#A0A0A0] text-xs">
                         {battle.totalSubmissions} Entries
                       </span>
                     </div>
 
-                    <h3 className="font-bold text-sm sm:text-base text-white leading-snug">
+                    <h3 className="font-bold text-sm text-white leading-snug">
                       {battle.title}
                     </h3>
 
@@ -176,7 +176,7 @@ export default function BattlesPage() {
                     </p>
                   </div>
 
-                  <div className="pt-2 flex items-center justify-between text-xs text-brand font-medium">
+                  <div className="pt-2 flex items-center justify-between text-xs text-brand">
                     <span>Enter Battle</span>
                     <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                   </div>
@@ -190,7 +190,7 @@ export default function BattlesPage() {
       {/* SECTION 2: BATTLES ARCHIVE */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl sm:text-2xl font-bold text-white">Battles Archive</h2>
+          <h2 className="text-xl font-bold text-white">Battles Archive</h2>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -222,12 +222,12 @@ export default function BattlesPage() {
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between text-xs text-[#888888]">
                       <span>{battle.endedAt ? new Date(battle.endedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }) : "Completed"}</span>
-                      <span className="font-medium px-2.5 py-1 rounded-full bg-[#121212] text-[#A0A0A0] text-xs inline-flex items-center justify-center text-center leading-none">
+                      <span className="px-2.5 py-1 rounded-full bg-[#121212] text-[#A0A0A0] text-xs inline-flex items-center justify-center text-center leading-none">
                         {battle.totalSubmissions} Entries
                       </span>
                     </div>
 
-                    <h3 className="font-bold text-sm sm:text-base text-white leading-snug">
+                    <h3 className="font-bold text-sm text-white leading-snug">
                       {battle.title}
                     </h3>
 

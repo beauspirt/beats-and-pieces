@@ -34,7 +34,7 @@ export function JudgeFeedbackTicker({
   return (
     <div className={`bg-[#121212] rounded-xl px-3.5 py-2 flex items-center justify-between gap-2 text-xs border border-white/[0.04] ${className}`}>
       <div className="flex-1 flex items-baseline gap-2 min-w-0 transition-all duration-300">
-        <span className="font-semibold text-[#7B61FF] shrink-0 text-xs">
+        <span className="font-bold text-[#7B61FF] shrink-0 text-xs">
           {current.judgeName || "Judge"}:
         </span>
         <span className="text-[#C4C4C4] italic truncate sm:whitespace-normal text-xs">
@@ -57,7 +57,7 @@ export function JudgeFeedbackTicker({
               title={`Feedback from ${validFeedbacks[i].judgeName}`}
             />
           ))}
-          <span className="text-[10px] text-[#666666] ml-1">
+          <span className="text-xs text-[#666666] ml-1">
             {currentIndex + 1}/{validFeedbacks.length}
           </span>
         </div>

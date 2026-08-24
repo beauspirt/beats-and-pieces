@@ -628,7 +628,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = React.mem
 
         {/* Bottom Right Corner Timecode Pillbox (Border-free, Inter font) */}
         <div className="absolute bottom-1 right-1 flex items-center pointer-events-none select-none z-10">
-          <div className="px-2 py-0.5 rounded-md bg-[#141414]/90 backdrop-blur-sm shadow-sm flex items-center gap-1 text-[11px] font-sans tabular-nums">
+          <div className="px-2 py-0.5 rounded-md bg-[#141414]/90 backdrop-blur-sm shadow-sm flex items-center gap-1 text-xs font-sans tabular-nums">
             {isThisTrackActive ? (
               <>
                 <span className="text-white font-bold">{formatTime(currentTime)}</span>
@@ -636,7 +636,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = React.mem
                 <span className="text-[#9E9E9E]">{formatTime(displayDuration)}</span>
               </>
             ) : (
-              <span className="text-[#888888] font-medium">{formatTime(displayDuration)}</span>
+              <span className="text-[#888888]">{formatTime(displayDuration)}</span>
             )}
           </div>
         </div>

@@ -197,7 +197,7 @@ export default function BeatsDiscoveryPage() {
             <button
               type="button"
               onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
-              className={`w-11 h-11 sm:w-auto sm:h-auto sm:px-4 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${
+              className={`w-11 h-11 sm:w-auto sm:h-auto sm:px-4 sm:py-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${
                 showOnlyFavorites
                   ? "bg-amber-500/20 text-amber-300 shadow-sm"
                   : "bg-[#181818] hover:bg-[#202020] text-zinc-400 hover:text-white"
@@ -213,7 +213,7 @@ export default function BeatsDiscoveryPage() {
             <button
               type="button"
               onClick={() => setShowFilters(!showFilters)}
-              className={`w-11 h-11 sm:w-auto sm:h-auto sm:px-4 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0 relative ${
+              className={`w-11 h-11 sm:w-auto sm:h-auto sm:px-4 sm:py-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0 relative ${
                 showFilters || activeFiltersCount > 0
                   ? "bg-[#7B61FF] text-white"
                   : "bg-[#181818] hover:bg-[#202020] text-zinc-400 hover:text-white"
@@ -224,7 +224,7 @@ export default function BeatsDiscoveryPage() {
               <Filter className="w-4 h-4 shrink-0" />
               <span className="hidden sm:inline">Filter</span>
               {activeFiltersCount > 0 && (
-                <span className="absolute -top-1 -right-1 sm:static w-4 h-4 rounded-full bg-white text-[#7B61FF] text-[10px] font-bold flex items-center justify-center shrink-0">
+                <span className="absolute -top-1 -right-1 sm:static w-4 h-4 rounded-full bg-white text-[#7B61FF] text-xs font-bold flex items-center justify-center shrink-0">
                   {activeFiltersCount}
                 </span>
               )}
@@ -239,7 +239,7 @@ export default function BeatsDiscoveryPage() {
                   e.stopPropagation();
                   setIsSortOpen((prev) => !prev);
                 }}
-                className="w-full h-11 sm:h-auto flex items-center justify-between sm:justify-center gap-1.5 sm:gap-2 bg-[#181818] hover:bg-[#202020] rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white font-semibold transition-all cursor-pointer"
+                className="w-full h-11 sm:h-auto flex items-center justify-between sm:justify-center gap-1.5 sm:gap-2 bg-[#181818] hover:bg-[#202020] rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-xs text-white font-bold transition-all cursor-pointer"
               >
                 <div className="flex items-center gap-1.5 min-w-0">
                   <SlidersHorizontal className="w-4 h-4 text-zinc-400 shrink-0" />
@@ -265,7 +265,7 @@ export default function BeatsDiscoveryPage() {
                           setSortBy(key);
                           setIsSortOpen(false);
                         }}
-                        className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
+                        className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center justify-between transition-colors cursor-pointer ${
                           isSelected
                             ? "bg-[#7B61FF] text-white"
                             : "text-zinc-300 hover:bg-[#222222] hover:text-white"
@@ -283,7 +283,7 @@ export default function BeatsDiscoveryPage() {
             {/* Upload Beat Button */}
             <Link
               href={currentUser?.id ? `/${currentUser.id}` : "/profile"}
-              className="shrink-0 h-11 sm:h-auto inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 cursor-pointer text-center"
+              className="shrink-0 h-11 sm:h-auto inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer text-center"
             >
               <Upload className="w-4 h-4 shrink-0" />
               <span className="whitespace-nowrap">Upload</span>
@@ -295,11 +295,11 @@ export default function BeatsDiscoveryPage() {
         {/* Selected Tags Pill Strip */}
         {selectedTags.length > 0 && (
           <div className="flex flex-wrap items-center gap-2 pt-1">
-            <span className="text-xs text-zinc-400 font-medium mr-1">Active Tags:</span>
+            <span className="text-xs text-zinc-400 mr-1">Active Tags:</span>
             {selectedTags.map((tag) => (
               <span
                 key={tag}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#7B61FF]/15 text-[#A78BFA] text-xs font-semibold"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#7B61FF]/15 text-[#A78BFA] text-xs font-bold"
               >
                 <span>{tag}</span>
                 <button
@@ -335,7 +335,7 @@ export default function BeatsDiscoveryPage() {
                   setSelectedSaleFilter("all");
                   setShowOnlyFavorites(false);
                 }}
-                className="text-xs text-[#7B61FF] hover:underline font-semibold cursor-pointer"
+                className="text-xs text-[#7B61FF] hover:underline font-bold cursor-pointer"
               >
                 Reset Filters
               </button>
@@ -351,14 +351,14 @@ export default function BeatsDiscoveryPage() {
                       key={genre}
                       type="button"
                       onClick={() => handleTagToggle(genre)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                         isSelected
                           ? "bg-[#7B61FF] text-white shadow-sm"
                           : "bg-[#121212] text-zinc-400 hover:text-white"
                       }`}
                     >
                       <span>{genre}</span>
-                      {isSelected && <span className="text-[10px] opacity-80">✕</span>}
+                      {isSelected && <span className="text-xs opacity-80">✕</span>}
                     </button>
                   );
                 })}
@@ -376,7 +376,7 @@ export default function BeatsDiscoveryPage() {
                   onClick={() =>
                     setSelectedSaleFilter((prev) => (prev === "for_sale" ? "all" : "for_sale"))
                   }
-                  className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     selectedSaleFilter === "for_sale"
                       ? "bg-[#7B61FF] text-white shadow-sm"
                       : "bg-[#121212] text-zinc-400 hover:text-white"
@@ -389,7 +389,7 @@ export default function BeatsDiscoveryPage() {
                   onClick={() =>
                     setSelectedSaleFilter((prev) => (prev === "not_for_sale" ? "all" : "not_for_sale"))
                   }
-                  className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     selectedSaleFilter === "not_for_sale"
                       ? "bg-[#7B61FF] text-white shadow-sm"
                       : "bg-[#121212] text-zinc-400 hover:text-white"
@@ -412,7 +412,7 @@ export default function BeatsDiscoveryPage() {
                 <div className="w-12 h-12 rounded-full bg-amber-500/15 text-amber-400 flex items-center justify-center mx-auto">
                   <Star className="w-5 h-5 fill-amber-400" />
                 </div>
-                <p className="text-white font-semibold text-base sm:text-lg">
+                <p className="text-white font-bold text-sm">
                   You have no beats added to your favorites.
                 </p>
                 <p className="text-xs text-zinc-400">
@@ -430,7 +430,7 @@ export default function BeatsDiscoveryPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                <p className="text-white font-semibold">No beats match your search criteria.</p>
+                <p className="text-white font-bold">No beats match your search criteria.</p>
                 <button
                   type="button"
                   onClick={() => {
@@ -439,7 +439,7 @@ export default function BeatsDiscoveryPage() {
                     setSelectedSaleFilter("all");
                     setShowOnlyFavorites(false);
                   }}
-                  className="text-xs text-[#7B61FF] hover:underline font-semibold cursor-pointer"
+                  className="text-xs text-[#7B61FF] hover:underline font-bold cursor-pointer"
                 >
                   Clear filters and search
                 </button>
@@ -480,22 +480,22 @@ export default function BeatsDiscoveryPage() {
                     <div className="min-w-0 flex-1">
                       {/* Title & Badges */}
                       <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-bold text-white text-base sm:text-lg leading-snug">
+                        <h3 className="font-bold text-white text-sm leading-snug">
                           {beat.title}
                         </h3>
 
                         {beat.rank === 1 && (
-                          <span className="h-5 sm:h-6 px-2.5 sm:px-3 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-[11px] sm:text-xs font-bold inline-flex items-center justify-center leading-none">
+                          <span className="h-5 sm:h-6 px-2.5 sm:px-3 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center leading-none">
                             1st Place
                           </span>
                         )}
                         {beat.rank === 2 && (
-                          <span className="h-5 sm:h-6 px-2.5 sm:px-3 rounded-full bg-[#1E232A] text-[#94A3B8] text-[11px] sm:text-xs font-bold inline-flex items-center justify-center leading-none">
+                          <span className="h-5 sm:h-6 px-2.5 sm:px-3 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-bold inline-flex items-center justify-center leading-none">
                             2nd Place
                           </span>
                         )}
                         {beat.rank === 3 && (
-                          <span className="h-5 sm:h-6 px-2.5 sm:px-3 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-[11px] sm:text-xs font-bold inline-flex items-center justify-center leading-none">
+                          <span className="h-5 sm:h-6 px-2.5 sm:px-3 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center leading-none">
                             3rd Place
                           </span>
                         )}
@@ -503,11 +503,11 @@ export default function BeatsDiscoveryPage() {
                         {match && (
                           <Link
                             href={`/battles/battle-${match[1]}`}
-                            className="px-2 py-0.5 rounded-md bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-[11px] font-bold shrink-0 transition-all inline-flex items-center gap-1"
+                            className="px-2 py-0.5 rounded-md bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-xs font-bold shrink-0 transition-all inline-flex items-center gap-1"
                             title={`View ${beat.battleSource || `Beat Battle #${match[1]}`}`}
                           >
                             <span>BB#{match[1]}</span>
-                            <span className="text-[9px]">↗</span>
+                            <span className="text-xs">↗</span>
                           </Link>
                         )}
                       </div>
@@ -515,7 +515,7 @@ export default function BeatsDiscoveryPage() {
                       {/* Beatmaker name */}
                       <Link
                         href={`/${beat.beatmaker.id}`}
-                        className="text-xs sm:text-sm text-[#7B61FF] hover:underline font-semibold block truncate mt-0.5"
+                        className="text-xs text-[#7B61FF] hover:underline font-bold block truncate mt-0.5"
                       >
                         {displayTag}
                       </Link>
@@ -526,7 +526,7 @@ export default function BeatsDiscoveryPage() {
                   <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 flex-wrap sm:flex-nowrap select-none">
                     {/* BPM */}
                     {beat.bpm ? (
-                      <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-[#121212] text-[#888888] select-none">
+                      <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-[#121212] text-[#888888] select-none">
                         {beat.bpm} BPM
                       </span>
                     ) : null}
@@ -546,7 +546,7 @@ export default function BeatsDiscoveryPage() {
 
                     {/* Jury Score Avg */}
                     {typeof beat.juryScore === "number" && beat.juryScore > 0 ? (
-                      <div className="flex items-center gap-1 text-xs sm:text-sm text-[#7B61FF] font-bold px-1.5 select-none" title="Jury Score Average">
+                      <div className="flex items-center gap-1 text-xs text-[#7B61FF] font-bold px-1.5 select-none" title="Jury Score Average">
                         <Star className="w-4 h-4 fill-current text-[#7B61FF]" />
                         <span>{beat.juryScore.toFixed(2)}</span>
                       </div>
@@ -554,7 +554,7 @@ export default function BeatsDiscoveryPage() {
 
                     {/* Community Flames (Public Rating Avg) */}
                     {typeof beat.flames === "number" && beat.flames >= 1 ? (
-                      <div className="flex items-center gap-1 text-xs sm:text-sm text-[#FF5E3A] font-bold px-1.5 select-none" title="Public Rating Average">
+                      <div className="flex items-center gap-1 text-xs text-[#FF5E3A] font-bold px-1.5 select-none" title="Public Rating Average">
                         <Flame className="w-4 h-4 fill-current" />
                         <span>{beat.flames.toFixed(2)}</span>
                       </div>
@@ -598,7 +598,7 @@ export default function BeatsDiscoveryPage() {
                         key={g}
                         type="button"
                         onClick={() => handleTagToggle(g)}
-                        className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors cursor-pointer select-none ${
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer select-none ${
                           selectedTags.includes(g)
                             ? "bg-[#7B61FF] text-white"
                             : "bg-[#121212] text-[#888888] hover:text-white hover:bg-[#202020]"
@@ -613,7 +613,7 @@ export default function BeatsDiscoveryPage() {
                         key={t}
                         type="button"
                         onClick={() => handleTagToggle(t)}
-                        className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer select-none ${
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer select-none ${
                           selectedTags.includes(t)
                             ? "bg-[#7B61FF] text-white"
                             : "bg-[#121212] text-[#777777] hover:text-white hover:bg-[#202020]"

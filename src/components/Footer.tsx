@@ -8,7 +8,7 @@ export const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
         
         {/* Left: Copyright */}
-        <div className="text-[#666666] text-xs sm:text-sm">
+        <div className="text-[#666666] text-xs">
           © Beats & Pieces, 2026
         </div>
 

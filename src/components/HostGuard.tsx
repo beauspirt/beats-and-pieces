@@ -65,7 +65,7 @@ export const HostGuard: React.FC<{ children: React.ReactNode }> = ({ children })
 
             <Link
               href="/"
-              className="w-full py-2.5 rounded-xl bg-[#202020] hover:bg-[#282828] text-zinc-400 hover:text-white text-xs font-medium transition-colors flex items-center justify-center gap-1.5"
+              className="w-full py-2.5 rounded-xl bg-[#202020] hover:bg-[#282828] text-zinc-400 hover:text-white text-xs transition-colors flex items-center justify-center gap-1.5"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Back to Home</span>

@@ -172,7 +172,7 @@ function ProfileContent() {
             </div>
             <div>
               <p className="text-xs font-bold text-white">Profile Saved</p>
-              <p className="text-[11px] text-zinc-400">Profile details saved successfully!</p>
+              <p className="text-xs text-zinc-400">Profile details saved successfully!</p>
             </div>
           </div>
         </ClientPortal>
@@ -182,11 +182,11 @@ function ProfileContent() {
         
         {/* CONTAINER 1: DETAILS */}
         <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 space-y-5 shadow-lg">
-          <h2 className="text-lg font-bold text-white">Details</h2>
+          <h2 className="text-xl font-bold text-white">Details</h2>
 
           {/* Profile Picture Upload */}
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-            <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">
+            <label className="sm:col-span-3 text-xs font-bold text-[#D1D1D1]">
               Profile Picture
             </label>
             <div className="sm:col-span-9 flex items-center gap-4">
@@ -217,7 +217,7 @@ function ProfileContent() {
 
           {/* Nickname */}
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-            <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">
+            <label className="sm:col-span-3 text-xs font-bold text-[#D1D1D1]">
               Nickname
             </label>
             <div className="sm:col-span-9">
@@ -234,7 +234,7 @@ function ProfileContent() {
 
           {/* Location */}
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-            <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">
+            <label className="sm:col-span-3 text-xs font-bold text-[#D1D1D1]">
               Location
             </label>
             <div className="sm:col-span-9">
@@ -250,7 +250,7 @@ function ProfileContent() {
 
           {/* Bio */}
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-start">
-            <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1] pt-2">
+            <label className="sm:col-span-3 text-xs font-bold text-[#D1D1D1] pt-2">
               Bio
             </label>
             <div className="sm:col-span-9">
@@ -266,7 +266,7 @@ function ProfileContent() {
 
           {/* Google E-mail */}
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-            <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">
+            <label className="sm:col-span-3 text-xs font-bold text-[#D1D1D1]">
               Google E-mail
             </label>
             <div className="sm:col-span-9 space-y-3">
@@ -280,7 +280,7 @@ function ProfileContent() {
                   </svg>
                   <span className="font-mono text-sm text-white select-all">{profile.email}</span>
                 </div>
-                <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full flex items-center gap-1.5 shrink-0 select-none">
+                <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full flex items-center gap-1.5 shrink-0 select-none">
                   <ShieldCheck className="w-3.5 h-3.5" />
                   <span>Google Auth</span>
                 </span>
@@ -288,7 +288,7 @@ function ProfileContent() {
 
               {/* Option to hide e-mail from public profile */}
               <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-[#121212]">
-                <span className="text-xs font-semibold text-white block">Hide email from public profile</span>
+                <span className="text-xs font-bold text-white block">Hide email from public profile</span>
                 <button
                   type="button"
                   onClick={handleToggleHideEmail}
@@ -310,7 +310,7 @@ function ProfileContent() {
 
         {/* CONTAINER 2: SOCIALS */}
         <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 space-y-6 shadow-lg">
-          <h2 className="text-lg font-bold text-white">Socials</h2>
+          <h2 className="text-xl font-bold text-white">Socials</h2>
 
           {SOCIAL_PLATFORMS.map(({ key, label }) => {
             const url = links[key] || "";
@@ -319,7 +319,7 @@ function ProfileContent() {
                 key={key}
                 className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center"
               >
-                <label className="sm:col-span-3 text-sm font-semibold text-[#D1D1D1]">
+                <label className="sm:col-span-3 text-xs font-bold text-[#D1D1D1]">
                   {label}
                 </label>
                 <div className="sm:col-span-9 relative flex items-center">

@@ -39,7 +39,7 @@ export const AdminGuard: React.FC<{ children: React.ReactNode }> = ({ children }
             The Admin Control Center is restricted to authorized platform administrators (<strong>Nerub / adrian.hrihor@gmail.com</strong>).
           </p>
           {user && (
-            <p className="text-[11px] text-zinc-500 font-mono">
+            <p className="text-xs text-zinc-500 font-mono">
               Currently logged in as: {user.nickname} ({user.email}) [{user.role}]
             </p>
           )}
@@ -48,7 +48,7 @@ export const AdminGuard: React.FC<{ children: React.ReactNode }> = ({ children }
         <div className="flex items-center gap-3 pt-2">
           <Link
             href="/battles"
-            className="px-5 py-2.5 rounded-xl bg-[#202020] hover:bg-[#282828] text-xs font-semibold text-zinc-300 transition-colors flex items-center gap-2"
+            className="px-5 py-2.5 rounded-xl bg-[#202020] hover:bg-[#282828] text-xs font-bold text-zinc-300 transition-colors flex items-center gap-2"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Back to Battles</span>

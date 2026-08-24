@@ -20,7 +20,7 @@ export default function AdminDashboardPage() {
       {/* Header */}
       <div className="pb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-white tracking-tight flex items-center gap-3">
             <Shield className="w-7 h-7 text-brand" />
             <span>Admin Control Center</span>
           </h1>
@@ -43,7 +43,7 @@ export default function AdminDashboardPage() {
           </div>
 
           <div>
-            <h2 className="text-lg font-bold text-white group-hover:text-brand transition-colors">
+            <h2 className="text-xl font-bold text-white group-hover:text-brand transition-colors">
               Create New Battle
             </h2>
             <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
@@ -62,7 +62,7 @@ export default function AdminDashboardPage() {
           </div>
 
           <div>
-            <h2 className="text-lg font-bold text-white group-hover:text-amber-400 transition-colors">
+            <h2 className="text-xl font-bold text-white group-hover:text-amber-400 transition-colors">
               Edit Battle(s)
             </h2>
             <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
@@ -81,7 +81,7 @@ export default function AdminDashboardPage() {
           </div>
 
           <div>
-            <h2 className="text-lg font-bold text-white group-hover:text-purple-400 transition-colors">
+            <h2 className="text-xl font-bold text-white group-hover:text-purple-400 transition-colors">
               Create New Release
             </h2>
             <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
@@ -100,7 +100,7 @@ export default function AdminDashboardPage() {
           </div>
 
           <div>
-            <h2 className="text-lg font-bold text-white group-hover:text-indigo-400 transition-colors">
+            <h2 className="text-xl font-bold text-white group-hover:text-indigo-400 transition-colors">
               Edit Release(s)
             </h2>
             <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
@@ -125,7 +125,7 @@ export default function AdminDashboardPage() {
           </div>
 
           <div>
-            <h2 className="text-lg font-bold text-white group-hover:text-[#FF5E3A] transition-colors">
+            <h2 className="text-xl font-bold text-white group-hover:text-[#FF5E3A] transition-colors">
               Voting Anomaly & Moderation
             </h2>
             <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
@@ -142,7 +142,7 @@ export default function AdminDashboardPage() {
           </div>
 
           <div>
-            <h2 className="text-lg font-bold text-white group-hover:text-blue-400 transition-colors">
+            <h2 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors">
               Users & Discord Roles
             </h2>
             <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
@@ -162,7 +162,7 @@ export default function AdminDashboardPage() {
               Account Switcher (Testing & Demo Showcase)
             </h2>
           </div>
-          <span className="text-[10px] text-zinc-500 font-mono">
+          <span className="text-xs text-zinc-500 font-mono">
             {Object.keys(sampleProducers).length} Accounts Available
           </span>
         </div>
@@ -187,7 +187,7 @@ export default function AdminDashboardPage() {
                 </span>
                 <ArrowRight className="w-3 h-3 text-zinc-600 group-hover:text-white group-hover:translate-x-0.5 transition-all shrink-0" />
               </div>
-              <span className="text-[10px] font-mono text-zinc-500 truncate block mt-0.5">
+              <span className="text-xs font-mono text-zinc-500 truncate block mt-0.5">
                 {prod.email}
               </span>
             </button>

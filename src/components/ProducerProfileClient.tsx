@@ -1587,7 +1587,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                         required
                       />
                       <p className="text-xs text-[#888888]">
-                        Enter only the track title — your producer name is displayed automatically.
+                        Enter only the track title - your producer name is displayed automatically.
                       </p>
                     </div>
 

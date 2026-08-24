@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
 import Image from "next/image";
 import { UserProfile } from "@/lib/types";
 import { X, ShieldCheck, Sparkles, CheckCircle2, Camera } from "lucide-react";
@@ -28,28 +28,7 @@ function ProfileContent() {
   const isOnboarding = searchParams.get("onboarding") === "true";
   const { user: activeUser, isLoading, updateUser } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
-
-  // Sync profile when active user changes
-  useEffect(() => {
-    if (!isLoading) {
-      if (!activeUser) {
-        router.push("/signin");
-      } else {
-        const fresh = producerService.getProducerById(activeUser.id) || activeUser;
-        setProfile(fresh);
-        setLinks({
-          instagram: fresh.links?.instagram || "",
-          facebook: fresh.links?.facebook || "",
-          youtube: fresh.links?.youtube || "",
-          spotify: fresh.links?.spotify || "",
-          bandcamp: fresh.links?.bandcamp || "",
-          soundcloud: fresh.links?.soundcloud || "",
-          beatstars: fresh.links?.beatstars || "",
-          website: fresh.links?.website || "",
-        });
-      }
-    }
-  }, [activeUser, isLoading, router]);
+  const isInitializedRef = useRef(false);
 
   const [links, setLinks] = useState<Record<string, string>>({
     instagram: "",
@@ -62,6 +41,30 @@ function ProfileContent() {
     website: "",
   });
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Initialize profile data once when user is ready
+  useEffect(() => {
+    if (!isLoading) {
+      if (!activeUser) {
+        router.push("/signin");
+      } else if (!isInitializedRef.current) {
+        const fresh = producerService.getProducerById(activeUser.id) || activeUser;
+        setProfile(fresh);
+        setLinks({
+          instagram: fresh.links?.instagram || "",
+          facebook: fresh.links?.facebook || "",
+          youtube: fresh.links?.youtube || "",
+          spotify: fresh.links?.spotify || "",
+          bandcamp: fresh.links?.bandcamp || "",
+          soundcloud: fresh.links?.soundcloud || "",
+          beatstars: fresh.links?.beatstars || "",
+          website: fresh.links?.website || "",
+        });
+        isInitializedRef.current = true;
+      }
+    }
+  }, [activeUser, isLoading, router]);
 
   if (isLoading || !profile) {
     return (
@@ -71,15 +74,16 @@ function ProfileContent() {
     );
   }
 
-  const saveProfileData = (
-    updatedProfile: UserProfile,
-    currentLinks: Record<string, string>
-  ) => {
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!profile || isSaving) return;
+    setIsSaving(true);
+
     const normalizedFormLinks: Record<string, string> = {};
     const sanitizedSaveLinks: Record<string, string> = {};
 
     SOCIAL_PLATFORMS.forEach(({ key }) => {
-      const val = currentLinks[key]?.trim() || "";
+      const val = links[key]?.trim() || "";
       if (val) {
         const normalized = normalizeUrl(val, key);
         normalizedFormLinks[key] = normalized;
@@ -91,16 +95,16 @@ function ProfileContent() {
 
     setLinks(normalizedFormLinks);
 
-    const updated = producerService.updateProducer(updatedProfile.id, {
-      ...updatedProfile,
-      nickname: updatedProfile.nickname.trim() || updatedProfile.nickname,
-      avatarUrl: updatedProfile.avatarUrl || "/avatars/default-avatar.png",
-      bio: updatedProfile.bio || "",
-      location: updatedProfile.location || "",
-      hideEmail: Boolean(updatedProfile.hideEmail),
+    const updated = producerService.updateProducer(profile.id, {
+      ...profile,
+      nickname: profile.nickname.trim() || profile.nickname,
+      avatarUrl: profile.avatarUrl || "/avatars/default-avatar.png",
+      bio: profile.bio || "",
+      location: profile.location || "",
+      hideEmail: Boolean(profile.hideEmail),
       links: sanitizedSaveLinks,
       isClaimed: true,
-      claimedAt: updatedProfile.claimedAt || new Date().toISOString(),
+      claimedAt: profile.claimedAt || new Date().toISOString(),
     });
 
     if (updated) {
@@ -109,6 +113,7 @@ function ProfileContent() {
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 2000);
     }
+    setIsSaving(false);
   };
 
   const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,17 +121,13 @@ function ProfileContent() {
     if (file && profile) {
       const { url } = await storageService.uploadImage(file, "avatars");
       if (url) {
-        const updated = { ...profile, avatarUrl: url };
-        setProfile(updated);
-        saveProfileData(updated, links);
+        setProfile({ ...profile, avatarUrl: url });
       } else {
         const reader = new FileReader();
         reader.onload = (uploadEvent) => {
           const res = uploadEvent.target?.result;
           if (res) {
-            const updated = { ...profile, avatarUrl: res as string };
-            setProfile(updated);
-            saveProfileData(updated, links);
+            setProfile({ ...profile, avatarUrl: res as string });
           }
         };
         reader.readAsDataURL(file);
@@ -136,10 +137,7 @@ function ProfileContent() {
 
   const handleToggleHideEmail = () => {
     if (!profile) return;
-    const newHideEmail = !profile.hideEmail;
-    const updated = { ...profile, hideEmail: newHideEmail };
-    setProfile(updated);
-    saveProfileData(updated, links);
+    setProfile({ ...profile, hideEmail: !profile.hideEmail });
   };
 
   const showOnboardingBanner = isOnboarding || !profile.isClaimed;
@@ -178,7 +176,7 @@ function ProfileContent() {
         </ClientPortal>
       )}
 
-      <form onSubmit={(e) => { e.preventDefault(); if (profile) saveProfileData(profile, links); }} className="space-y-4">
+      <form onSubmit={handleSave} className="space-y-4">
         
         {/* CONTAINER 1: DETAILS */}
         <div className="bg-[#181818] rounded-2xl p-6 sm:p-8 space-y-5 shadow-lg">
@@ -225,7 +223,6 @@ function ProfileContent() {
                 type="text"
                 value={profile.nickname}
                 onChange={(e) => setProfile({ ...profile, nickname: e.target.value })}
-                onBlur={() => profile && saveProfileData(profile, links)}
                 className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
                 required
               />
@@ -242,7 +239,6 @@ function ProfileContent() {
                 type="text"
                 value={profile.location || ""}
                 onChange={(e) => setProfile({ ...profile, location: e.target.value })}
-                onBlur={() => profile && saveProfileData(profile, links)}
                 className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
               />
             </div>
@@ -258,7 +254,6 @@ function ProfileContent() {
                 rows={3}
                 value={profile.bio || ""}
                 onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-                onBlur={() => profile && saveProfileData(profile, links)}
                 className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF] resize-none leading-relaxed"
               />
             </div>
@@ -329,7 +324,6 @@ function ProfileContent() {
                     onChange={(e) =>
                       setLinks((prev) => ({ ...prev, [key]: e.target.value }))
                     }
-                    onBlur={() => profile && saveProfileData(profile, links)}
                     className="w-full bg-[#121212] rounded-xl pl-4 pr-10 py-3 text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
                   />
                   {url && (
@@ -337,9 +331,7 @@ function ProfileContent() {
                       type="button"
                       tabIndex={-1}
                       onClick={() => {
-                        const newLinks = { ...links, [key]: "" };
-                        setLinks(newLinks);
-                        if (profile) saveProfileData(profile, newLinks);
+                        setLinks((prev) => ({ ...prev, [key]: "" }));
                       }}
                       className="absolute right-3 text-[#777777] hover:text-white transition-colors cursor-pointer"
                       title="Clear field"
@@ -352,6 +344,17 @@ function ProfileContent() {
             );
           })}
 
+        </div>
+
+        {/* BOTTOM RIGHT: SAVE CHANGES BUTTON */}
+        <div className="flex items-center justify-end pt-2 pb-6">
+          <button
+            type="submit"
+            disabled={isSaving}
+            className="px-8 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-lg active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-2"
+          >
+            <span>Save Changes</span>
+          </button>
         </div>
 
       </form>

@@ -29,7 +29,7 @@ export default function VotingModerationPage() {
       case "incomplete_votes":
         return { label: "Below Minimum Threshold", color: "text-amber-400 bg-amber-500/10" };
       default:
-        return { label: "Outlier Rating", color: "text-blue-400 bg-blue-500/10" };
+        return { label: "Outlier Rating", color: "text-zinc-300 bg-zinc-800" };
     }
   };
 

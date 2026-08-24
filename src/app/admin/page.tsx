@@ -95,12 +95,12 @@ export default function AdminDashboardPage() {
           href="/admin/releases"
           className="bg-surface-card rounded-3xl p-6 hover:bg-surface-hover transition-all space-y-4 group shadow-md"
         >
-          <div className="w-12 h-12 rounded-3xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+          <div className="w-12 h-12 rounded-3xl bg-[#7B61FF]/10 flex items-center justify-center text-[#7B61FF] group-hover:scale-110 transition-transform">
             <FileEdit className="w-6 h-6" />
           </div>
 
           <div>
-            <h2 className="text-2xl font-bold text-white group-hover:text-indigo-400 transition-colors">
+            <h2 className="text-2xl font-bold text-white group-hover:text-[#7B61FF] transition-colors">
               Edit Release(s)
             </h2>
             <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
@@ -137,12 +137,12 @@ export default function AdminDashboardPage() {
         {/* Option 6: User & Role Permissions */}
         <div className="bg-surface-card rounded-3xl p-6 hover:bg-surface-hover transition-all space-y-4 group cursor-pointer shadow-md"
              onClick={() => alert("Role management dashboard.")}>
-          <div className="w-12 h-12 rounded-3xl bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+          <div className="w-12 h-12 rounded-3xl bg-[#7B61FF]/10 flex items-center justify-center text-[#7B61FF] group-hover:scale-110 transition-transform">
             <Users className="w-6 h-6" />
           </div>
 
           <div>
-            <h2 className="text-2xl font-bold text-white group-hover:text-blue-400 transition-colors">
+            <h2 className="text-2xl font-bold text-white group-hover:text-[#7B61FF] transition-colors">
               Users & Discord Roles
             </h2>
             <p className="text-xs text-zinc-400 mt-1 leading-relaxed">

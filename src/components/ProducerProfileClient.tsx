@@ -87,7 +87,7 @@ function StandardTagSelector({
           {selectedTags.map((tag) => (
             <span
               key={tag}
-              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#7B61FF]/15 text-xs text-[#A78BFA] font-bold leading-none select-none"
+              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#7B61FF]/15 text-xs text-zinc-200 font-bold leading-none select-none"
             >
               <span>{tag}</span>
               <button
@@ -1157,7 +1157,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                             return (
                               <Link
                                 href={battleUrl}
-                                className="px-2.5 py-1 rounded-full bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-xs font-bold shrink-0 transition-all inline-flex items-center gap-1"
+                                className="px-2.5 py-1 rounded-full bg-[#7B61FF]/15 text-zinc-300 hover:bg-[#7B61FF]/25 hover:text-white text-xs font-bold shrink-0 transition-all inline-flex items-center gap-1"
                                 title={`View ${beat.battleSource || `Beat Battle #${match[1]}`}`}
                               >
                                 <span>{battleLabel}</span>
@@ -1197,7 +1197,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                             {match && (
                               <Link
                                 href={`/battles/battle-${match[1]}`}
-                                className="px-2.5 py-1 rounded-full bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-xs font-bold shrink-0 transition-all inline-flex items-center gap-1 select-none"
+                                className="px-2.5 py-1 rounded-full bg-[#7B61FF]/15 text-zinc-300 hover:bg-[#7B61FF]/25 hover:text-white text-xs font-bold shrink-0 transition-all inline-flex items-center gap-1 select-none"
                                 title={`View ${beat.battleSource || `Beat Battle #${match[1]}`}`}
                               >
                                 <span>BB#{match[1]}</span>
@@ -1223,7 +1223,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                         className={`px-3.5 py-1.5 rounded-full text-xs font-bold select-none inline-flex items-center justify-center text-center leading-none ${
                           beat.priceTag === "Not For Sale"
                             ? "bg-[#121212] text-[#666666]"
-                            : "bg-[#FF5E3A]/20 text-[#FF5E3A]"
+                            : "bg-emerald-500/20 text-emerald-400"
                         }`}
                       >
                         {beat.priceTag}

@@ -299,7 +299,7 @@ export default function BeatsDiscoveryPage() {
             {selectedTags.map((tag) => (
               <span
                 key={tag}
-                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#7B61FF]/15 text-[#A78BFA] text-xs font-bold leading-none select-none"
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#7B61FF]/15 text-zinc-200 text-xs font-bold leading-none select-none"
               >
                 <span>{tag}</span>
                 <button
@@ -378,7 +378,7 @@ export default function BeatsDiscoveryPage() {
                   }
                   className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer inline-flex items-center justify-center text-center leading-none ${
                     selectedSaleFilter === "for_sale"
-                      ? "bg-[#7B61FF] text-white shadow-sm"
+                      ? "bg-emerald-500/20 text-emerald-400 shadow-sm"
                       : "bg-[#121212] text-zinc-400 hover:text-white"
                   }`}
                 >
@@ -503,7 +503,7 @@ export default function BeatsDiscoveryPage() {
                         {match && (
                           <Link
                             href={`/battles/battle-${match[1]}`}
-                            className="px-2.5 py-1 rounded-full bg-[#7B61FF]/15 text-[#A78BFA] hover:bg-[#7B61FF]/25 hover:text-white text-xs font-bold shrink-0 transition-all inline-flex items-center gap-1"
+                            className="px-2.5 py-1 rounded-full bg-[#7B61FF]/15 text-zinc-300 hover:bg-[#7B61FF]/25 hover:text-white text-xs font-bold shrink-0 transition-all inline-flex items-center gap-1"
                             title={`View ${beat.battleSource || `Beat Battle #${match[1]}`}`}
                           >
                             <span>BB#{match[1]}</span>
@@ -537,7 +537,7 @@ export default function BeatsDiscoveryPage() {
                         className={`px-3.5 py-1.5 rounded-full text-xs font-bold select-none inline-flex items-center justify-center text-center leading-none ${
                           beat.priceTag === "Not For Sale"
                             ? "bg-[#121212] text-[#666666]"
-                            : "bg-[#FF5E3A]/20 text-[#FF5E3A]"
+                            : "bg-emerald-500/20 text-emerald-400"
                         }`}
                       >
                         {beat.priceTag}

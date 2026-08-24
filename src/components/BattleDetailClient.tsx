@@ -390,6 +390,14 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       alert("You are assigned as a judge for this battle and cannot submit an entry.");
       return;
     }
+
+    const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB Supabase bucket limit
+    if (file.size > MAX_FILE_SIZE) {
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+      alert(`File is too large (${sizeMB} MB). The maximum allowed upload size is 50 MB. Please export as MP3 (320kbps) or 16-bit WAV under 50 MB.`);
+      return;
+    }
+
     setIsUploading(true);
     try {
       const defaultTitle = file.name.replace(/\.[^/.]+$/, "");
@@ -446,13 +454,17 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       }
 
       // Upload to Supabase Storage
-      const { url } = await storageService.uploadAudio(
+      const { url, error: uploadErr } = await storageService.uploadAudio(
         stagedBeat.file,
         "submissions",
         `${battle.id}-${uploaderId}-${Date.now()}`
       );
 
-      const finalAudioUrl = url || stagedBeat.audioUrl;
+      if (!url) {
+        throw new Error(uploadErr || "Failed to upload audio to cloud storage. Please ensure your file is under 50 MB.");
+      }
+
+      const finalAudioUrl = url;
       if (stagedBeat.waveformPeaks && stagedBeat.waveformPeaks.length > 0) {
         globalWaveformCache.set(finalAudioUrl, {
           peaks: stagedBeat.waveformPeaks,

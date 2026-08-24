@@ -145,7 +145,7 @@ function ProfileContent() {
   const showOnboardingBanner = isOnboarding || !profile.isClaimed;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-4 animate-in fade-in duration-300 py-4">
+    <div className="max-w-4xl mx-auto space-y-4 animate-in fade-in duration-300">
 
       {/* First-Time Login Onboarding Prompt */}
       {showOnboardingBanner && (

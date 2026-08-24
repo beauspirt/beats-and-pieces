@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { sampleDiscoveryBeats } from "@/lib/mock-data";
@@ -9,19 +9,34 @@ import { DiscoveryBeat } from "@/lib/types";
 import { beatService } from "@/services/beatService";
 import { producerService } from "@/services/producerService";
 import { JudgeFeedbackTicker } from "@/components/JudgeFeedbackTicker";
-import { Search, Filter, ArrowUpDown, Star, Flame, ChevronDown } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
+import { Search, Filter, ArrowUpDown, Star, Flame, ChevronDown, Upload, X, Check } from "lucide-react";
 
 export default function BeatsDiscoveryPage() {
+  const { user: currentUser } = useAuth();
   const [beats, setBeats] = useState<DiscoveryBeat[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedGenre, setSelectedGenre] = useState<string>("all");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedSaleFilter, setSelectedSaleFilter] = useState<"all" | "for_sale" | "not_for_sale">("all");
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
-  const [sortBy, setSortBy] = useState<"recent" | "rating" | "bpm" | "title">("recent");
+  const [sortBy, setSortBy] = useState<"recent" | "rating" | "bpm">("recent");
   const [showFilters, setShowFilters] = useState(false);
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const sortMenuRef = useRef<HTMLDivElement | null>(null);
 
   // Pagination: 15 beats at a time
   const [visibleCount, setVisibleCount] = useState(15);
+
+  // Close sort menu on click outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (sortMenuRef.current && !sortMenuRef.current.contains(e.target as Node)) {
+        setIsSortOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Load fresh beats from beatService (including user custom beats) & favorites from localStorage
   useEffect(() => {
@@ -56,7 +71,7 @@ export default function BeatsDiscoveryPage() {
   // Reset pagination when search or filters change
   useEffect(() => {
     setVisibleCount(15);
-  }, [searchQuery, selectedGenre, selectedSaleFilter, showOnlyFavorites, sortBy]);
+  }, [searchQuery, selectedTags, selectedSaleFilter, showOnlyFavorites, sortBy]);
 
   const toggleFavorite = (beatId: string) => {
     setBeats((prev) => {
@@ -71,12 +86,10 @@ export default function BeatsDiscoveryPage() {
     });
   };
 
-  const handleTagClick = (genre: string) => {
-    if (selectedGenre === genre) {
-      setSelectedGenre("all");
-    } else {
-      setSelectedGenre(genre);
-    }
+  const handleTagToggle = (tag: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
   };
 
   const filteredBeats = useMemo(() => {
@@ -95,10 +108,9 @@ export default function BeatsDiscoveryPage() {
           tags.some((t) => (t || "").toLowerCase().includes(q)) ||
           genres.some((g) => (g || "").toLowerCase().includes(q));
 
-        const matchesGenre =
-          selectedGenre === "all" ||
-          genres.includes(selectedGenre) ||
-          tags.includes(selectedGenre);
+        const matchesTags =
+          selectedTags.length === 0 ||
+          selectedTags.some((tag) => tags.includes(tag) || genres.includes(tag));
 
         const matchesSale =
           selectedSaleFilter === "all" ||
@@ -107,7 +119,7 @@ export default function BeatsDiscoveryPage() {
 
         const matchesFav = !showOnlyFavorites || beat.isFavorite;
 
-        return matchesQuery && matchesGenre && matchesSale && matchesFav;
+        return matchesQuery && matchesTags && matchesSale && matchesFav;
       })
       .sort((a, b) => {
         if (sortBy === "recent") {
@@ -117,13 +129,12 @@ export default function BeatsDiscoveryPage() {
         }
         if (sortBy === "rating") return (b.flames || 0) - (a.flames || 0);
         if (sortBy === "bpm") return (a.bpm || 0) - (b.bpm || 0);
-        if (sortBy === "title") return (a.title || "").localeCompare(b.title || "");
         return 0;
       });
-  }, [beats, searchQuery, selectedGenre, selectedSaleFilter, showOnlyFavorites, sortBy]);
+  }, [beats, searchQuery, selectedTags, selectedSaleFilter, showOnlyFavorites, sortBy]);
 
   const activeFiltersCount =
-    (selectedGenre !== "all" ? 1 : 0) +
+    selectedTags.length +
     (selectedSaleFilter !== "all" ? 1 : 0);
 
   const allGenres = Array.from(
@@ -136,9 +147,35 @@ export default function BeatsDiscoveryPage() {
   );
   const visibleBeats = filteredBeats.slice(0, visibleCount);
 
+  const sortLabelMap: Record<"recent" | "rating" | "bpm", string> = {
+    recent: "Newest First",
+    rating: "Top Rated",
+    bpm: "BPM (Tempo)",
+  };
+
   return (
-    <div className="space-y-4 w-full animate-in fade-in duration-300">
+    <div className="space-y-5 w-full animate-in fade-in duration-300">
       
+      {/* Top Header & Upload Beat Action Row */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+            Beats
+          </h1>
+          <p className="text-xs sm:text-sm text-zinc-400">
+            Discover producer tracks, battle entries, and beats for sale
+          </p>
+        </div>
+
+        <Link
+          href={currentUser?.id ? `/producers/${currentUser.id}` : "/profile"}
+          className="inline-flex items-center gap-2 px-5 py-2.5 sm:py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 cursor-pointer shrink-0"
+        >
+          <Upload className="w-4 h-4" />
+          <span>Upload Beat</span>
+        </Link>
+      </div>
+
       {/* Search & Filter Bar */}
       <div className="space-y-3">
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3">
@@ -150,9 +187,9 @@ export default function BeatsDiscoveryPage() {
               placeholder="Search by title, producer, or tags..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#181818] rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder-[#666666] focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+              className="w-full bg-[#181818] rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
             />
-            <Search className="w-4 h-4 text-[#666666] absolute left-4 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-zinc-500 absolute left-4 top-1/2 -translate-y-1/2" />
           </div>
 
           {/* Quick Action Controls Row: Favorites + Filter + Sort in a single clean row */}
@@ -163,7 +200,7 @@ export default function BeatsDiscoveryPage() {
               className={`flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer truncate ${
                 showOnlyFavorites
                   ? "bg-amber-500/20 text-amber-300 shadow-sm"
-                  : "bg-[#181818] text-[#888888] hover:text-white"
+                  : "bg-[#181818] hover:bg-[#202020] text-zinc-400 hover:text-white"
               }`}
             >
               <Star className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${showOnlyFavorites ? "fill-amber-400 text-amber-400" : ""}`} />
@@ -176,7 +213,7 @@ export default function BeatsDiscoveryPage() {
               className={`flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer truncate ${
                 showFilters || activeFiltersCount > 0
                   ? "bg-[#7B61FF] text-white"
-                  : "bg-[#181818] text-[#888888] hover:text-white"
+                  : "bg-[#181818] hover:bg-[#202020] text-zinc-400 hover:text-white"
               }`}
             >
               <Filter className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
@@ -188,75 +225,140 @@ export default function BeatsDiscoveryPage() {
               )}
             </button>
 
-            {/* Sort Dropdown */}
-            <div className="flex items-center justify-center sm:justify-start bg-[#181818] rounded-xl px-2.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-[#888888] min-w-0">
-              <ArrowUpDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 text-[#666666] shrink-0" />
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="bg-transparent text-white font-semibold text-xs sm:text-sm focus:outline-none cursor-pointer pr-0.5 leading-none truncate max-w-full"
+            {/* Redesigned Sleek Sort Dropdown */}
+            <div className="relative" ref={sortMenuRef}>
+              <button
+                type="button"
+                onClick={() => setIsSortOpen(!isSortOpen)}
+                className="w-full flex items-center justify-between sm:justify-center gap-2 bg-[#181818] hover:bg-[#202020] rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white font-semibold transition-all cursor-pointer"
               >
-                <option value="recent" className="bg-[#181818] text-white">Recent</option>
-                <option value="rating" className="bg-[#181818] text-white">Rated</option>
-                <option value="bpm" className="bg-[#181818] text-white">BPM</option>
-                <option value="title" className="bg-[#181818] text-white">A-Z</option>
-              </select>
+                <div className="flex items-center gap-1.5 truncate">
+                  <ArrowUpDown className="w-3.5 h-3.5 text-[#7B61FF] shrink-0" />
+                  <span className="truncate">{sortLabelMap[sortBy]}</span>
+                </div>
+                <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 shrink-0 ${isSortOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {isSortOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-[#181818] rounded-2xl shadow-2xl p-2 z-40 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150 border border-white/5">
+                  {(["recent", "rating", "bpm"] as const).map((key) => {
+                    const isSelected = sortBy === key;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => {
+                          setSortBy(key);
+                          setIsSortOpen(false);
+                        }}
+                        className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
+                          isSelected
+                            ? "bg-[#7B61FF] text-white"
+                            : "text-zinc-300 hover:bg-[#222222] hover:text-white"
+                        }`}
+                      >
+                        <span>{sortLabelMap[key]}</span>
+                        {isSelected && <Check className="w-3.5 h-3.5" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
+
           </div>
         </div>
+
+        {/* Selected Tags Pill Strip */}
+        {selectedTags.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <span className="text-xs text-zinc-400 font-medium mr-1">Active Tags:</span>
+            {selectedTags.map((tag) => (
+              <span
+                key={tag}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#7B61FF]/15 text-[#A78BFA] text-xs font-semibold"
+              >
+                <span>{tag}</span>
+                <button
+                  type="button"
+                  onClick={() => handleTagToggle(tag)}
+                  className="text-zinc-400 hover:text-white cursor-pointer"
+                >
+                  ✕
+                </button>
+              </span>
+            ))}
+            <button
+              type="button"
+              onClick={() => setSelectedTags([])}
+              className="text-xs text-zinc-500 hover:text-red-400 underline underline-offset-2 ml-1 cursor-pointer transition-colors"
+            >
+              Clear all
+            </button>
+          </div>
+        )}
 
         {/* Expandable Filter Drawer */}
         {showFilters && (
           <div className="bg-[#181818] rounded-2xl p-5 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#888888] uppercase tracking-wider">
+              <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
                 Filter Catalogue
               </span>
               <button
                 onClick={() => {
-                  setSelectedGenre("all");
+                  setSelectedTags([]);
                   setSelectedSaleFilter("all");
                   setShowOnlyFavorites(false);
                 }}
-                className="text-xs text-[#7B61FF] hover:underline font-semibold"
+                className="text-xs text-[#7B61FF] hover:underline font-semibold cursor-pointer"
               >
                 Reset Filters
               </button>
             </div>
 
-            {/* Genre Filters */}
+            {/* Genre Filters with Multi-Select support */}
             <div className="space-y-2">
-              <span className="text-xs text-[#A0A0A0] block">Genre / Style</span>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-zinc-300 font-semibold block">Genre / Style (Select multiple)</span>
+                {selectedTags.length > 0 && (
+                  <span className="text-[11px] text-[#7B61FF] font-medium">{selectedTags.length} selected</span>
+                )}
+              </div>
               <div className="flex flex-wrap gap-2">
                 <button
-                  onClick={() => setSelectedGenre("all")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    selectedGenre === "all"
+                  onClick={() => setSelectedTags([])}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
+                    selectedTags.length === 0
                       ? "bg-[#7B61FF] text-white"
-                      : "bg-[#121212] text-[#888888] hover:text-white"
+                      : "bg-[#121212] text-zinc-400 hover:text-white"
                   }`}
                 >
                   All Genres
                 </button>
-                {allGenres.map((genre) => (
-                  <button
-                    key={genre}
-                    onClick={() => setSelectedGenre(genre)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                      selectedGenre === genre
-                        ? "bg-[#7B61FF] text-white"
-                        : "bg-[#121212] text-[#888888] hover:text-white"
-                    }`}
-                  >
-                    {genre}
-                  </button>
-                ))}
+                {allGenres.map((genre) => {
+                  const isSelected = selectedTags.includes(genre);
+                  return (
+                    <button
+                      key={genre}
+                      onClick={() => handleTagToggle(genre)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                        isSelected
+                          ? "bg-[#7B61FF] text-white shadow-sm"
+                          : "bg-[#121212] text-zinc-400 hover:text-white"
+                      }`}
+                    >
+                      <span>{genre}</span>
+                      {isSelected && <span className="text-[10px] opacity-80">✕</span>}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
             {/* Price Tag / Availability Filters */}
             <div className="space-y-2 pt-2 border-t border-[#222222]">
-              <span className="text-xs text-[#A0A0A0] block">Licensing / Price Status</span>
+              <span className="text-xs text-zinc-300 font-semibold block">Licensing / Price Status</span>
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setSelectedSaleFilter("all")}
@@ -302,11 +404,11 @@ export default function BeatsDiscoveryPage() {
             <button
               onClick={() => {
                 setSearchQuery("");
-                setSelectedGenre("all");
+                setSelectedTags([]);
                 setSelectedSaleFilter("all");
                 setShowOnlyFavorites(false);
               }}
-              className="text-xs text-[#7B61FF] hover:underline font-semibold"
+              className="text-xs text-[#7B61FF] hover:underline font-semibold cursor-pointer"
             >
               Clear filters and search
             </button>
@@ -460,9 +562,9 @@ export default function BeatsDiscoveryPage() {
                     {beat.genres?.map((g) => (
                       <button
                         key={g}
-                        onClick={() => handleTagClick(g)}
+                        onClick={() => handleTagToggle(g)}
                         className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors cursor-pointer select-none ${
-                          selectedGenre === g
+                          selectedTags.includes(g)
                             ? "bg-[#7B61FF] text-white"
                             : "bg-[#121212] text-[#888888] hover:text-white hover:bg-[#202020]"
                         }`}
@@ -474,9 +576,9 @@ export default function BeatsDiscoveryPage() {
                     {beat.tags.map((t) => (
                       <button
                         key={t}
-                        onClick={() => handleTagClick(t)}
+                        onClick={() => handleTagToggle(t)}
                         className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer select-none ${
-                          selectedGenre === t
+                          selectedTags.includes(t)
                             ? "bg-[#7B61FF] text-white"
                             : "bg-[#121212] text-[#777777] hover:text-white hover:bg-[#202020]"
                         }`}

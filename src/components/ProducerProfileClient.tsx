@@ -19,7 +19,8 @@ import { JudgeFeedbackTicker } from "@/components/JudgeFeedbackTicker";
 import { 
   Flame, Trophy, Mail, ExternalLink, 
   CheckCircle2, Copy, MapPin, Calendar, Star, Award, Globe,
-  Pencil, Plus, Lock, Trash2, AlertTriangle, Music, Sliders, X, Play, Upload
+  Pencil, Plus, Lock, Trash2, AlertTriangle, Music, Sliders, X, Play, Upload,
+  Share2, Check
 } from "lucide-react";
 
 /**
@@ -477,7 +478,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     });
   }, [producer, beatsVersion]);
 
-  const MAX_FREE_BEATS = 3;
+  const MAX_FREE_BEATS = 10;
   const customUploadedBeats = prioritizedBeats.filter(
     (b) =>
       !b.battleSource &&
@@ -854,6 +855,35 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     }
   };
 
+  const [copiedShareLink, setCopiedShareLink] = useState(false);
+
+  const handleShareProfile = async () => {
+    const profileUrl = typeof window !== "undefined" ? window.location.href : "";
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${producer.nickname} on Beats & Pieces`,
+          text: `Check out ${producer.nickname}'s producer showcase on Beats & Pieces!`,
+          url: profileUrl,
+        });
+        return;
+      } catch {
+        // User dismissed or share failed, fallback to clipboard
+      }
+    }
+
+    if (navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(profileUrl);
+        setCopiedShareLink(true);
+        showToast("Profile link copied to clipboard!");
+        setTimeout(() => setCopiedShareLink(false), 2500);
+      } catch {
+        // clipboard write error
+      }
+    }
+  };
+
   const activeLinks = useMemo(() => {
     return Object.entries(producer.links || {})
       .filter(([_, url]) => Boolean(url && url.trim()))
@@ -967,14 +997,31 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
             )}
           </div>
 
-          {/* Contact / Inquire Action Button */}
-          <div className="flex flex-col gap-3 shrink-0 w-full md:w-auto self-start md:self-center">
+          {/* Action Buttons: Contact / License & Share Profile */}
+          <div className="flex flex-col sm:flex-row md:flex-col gap-2.5 shrink-0 w-full md:w-auto self-start md:self-center">
             <button
               onClick={() => setShowContactModal(true)}
-              className="px-7 py-3.5 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+              className="px-6 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
             >
               <Mail className="w-4 h-4" />
               <span>Contact / License</span>
+            </button>
+
+            <button
+              onClick={handleShareProfile}
+              className="px-5 py-3 rounded-xl bg-[#121212] hover:bg-[#202020] text-zinc-300 hover:text-white text-xs sm:text-sm font-semibold transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+            >
+              {copiedShareLink ? (
+                <>
+                  <Check className="w-4 h-4 text-emerald-400" />
+                  <span className="text-emerald-400">Link Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-4 h-4 text-zinc-400" />
+                  <span>Share Profile</span>
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -1023,7 +1070,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
               <Music className="w-4 h-4" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-white">Maximum upload limit reached (3/3).</p>
+              <p className="font-semibold text-white">Maximum upload limit reached ({MAX_FREE_BEATS}/{MAX_FREE_BEATS}).</p>
               <p className="text-[#888888] mt-0.5">
                 To upload a new beat, you can remove an existing one. Unlocking more slots will be possible in future versions of the platform.
               </p>

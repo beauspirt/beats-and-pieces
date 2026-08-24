@@ -139,7 +139,7 @@ export default function BattlesPage() {
               <Link
                 key={battle.id}
                 href={`/battles/${battle.id}`}
-                className="bg-[#181818] rounded-2xl p-5 sm:p-5 hover:bg-[#1C1C1C] transition-all flex flex-col group shadow-lg space-y-3.5 border border-brand/20"
+                className="bg-[#181818] rounded-2xl p-5 sm:p-6 hover:bg-[#1C1C1C] transition-all flex flex-col group shadow-lg space-y-3.5 border border-brand/20"
               >
                 <div className="w-full aspect-square relative rounded-xl overflow-hidden bg-[#121212] shrink-0">
                   <Image
@@ -203,7 +203,7 @@ export default function BattlesPage() {
               <Link
                 key={battle.id}
                 href={`/battles/${battle.id}`}
-                className="bg-[#181818] rounded-2xl p-5 sm:p-5 hover:bg-[#1C1C1C] transition-all flex flex-col group shadow-lg space-y-3.5"
+                className="bg-[#181818] rounded-2xl p-5 sm:p-6 hover:bg-[#1C1C1C] transition-all flex flex-col group shadow-lg space-y-3.5"
               >
                 {/* Compact Square Card Cover Art */}
                 <div className="w-full aspect-square relative rounded-xl overflow-hidden bg-[#121212] shrink-0">

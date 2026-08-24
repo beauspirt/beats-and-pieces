@@ -70,8 +70,8 @@ export default function BattlesPage() {
             href={`/battles/${activeBattle.id}`}
             className="bg-[#181818] rounded-[28px] p-4 flex flex-col md:flex-row gap-6 items-start hover:bg-[#1A1A1A] transition-all shadow-xl block cursor-pointer group relative overflow-hidden"
           >
-            {/* Cover Art Thumbnail (Responsive Square) */}
-            <div className="w-full sm:max-w-[320px] aspect-square rounded-xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl mx-auto md:mx-0">
+            {/* Cover Art Thumbnail (Matches Archive Card Dimensions) */}
+            <div className="w-full sm:w-[260px] aspect-square rounded-xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl mx-auto md:mx-0">
               <Image
                 src={activeBattle.coverImage || "/covers/default-battle.png"}
                 alt={activeBattle.title}

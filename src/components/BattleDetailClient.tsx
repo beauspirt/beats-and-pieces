@@ -800,8 +800,8 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
         {/* Hero Header */}
         <div className="bg-[#181818] rounded-[28px] p-4 flex flex-col md:flex-row gap-6 items-start relative overflow-hidden shadow-xl">
           
-          {/* Cover Art Thumbnail (Responsive Square) */}
-          <div className="w-full sm:max-w-[320px] aspect-square rounded-xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl mx-auto md:mx-0">
+          {/* Cover Art Thumbnail (Matches Archive Card Dimensions) */}
+          <div className="w-full sm:w-[260px] aspect-square rounded-xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl mx-auto md:mx-0">
             <Image
               src={battle.coverImage || "/covers/default-battle.png"}
               alt={battle.title}

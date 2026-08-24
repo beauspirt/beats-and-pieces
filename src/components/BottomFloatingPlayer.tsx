@@ -79,6 +79,41 @@ export const BottomFloatingPlayer: React.FC = React.memo(() => {
     };
   }, [showMobileVolume]);
 
+  // Global Spacebar Play/Pause Shortcut when player is active
+  useEffect(() => {
+    if (!currentTrackId) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check if key is Space
+      if (e.code === "Space" || e.key === " " || e.keyCode === 32) {
+        const target = e.target as HTMLElement | null;
+
+        // Allow normal typing inside text inputs, textareas, and editable fields
+        if (target) {
+          const tagName = target.tagName.toLowerCase();
+          if (
+            tagName === "input" ||
+            tagName === "textarea" ||
+            tagName === "select" ||
+            target.isContentEditable
+          ) {
+            return;
+          }
+        }
+
+        // Prevent browser scrolling and prevent re-triggering focused buttons/links
+        e.preventDefault();
+        e.stopPropagation();
+        togglePlay();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown, { capture: true });
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown, { capture: true });
+    };
+  }, [currentTrackId, togglePlay]);
+
   if (!mounted || !currentTrackId) return null;
 
   const integerSeconds = Math.floor(currentTime);

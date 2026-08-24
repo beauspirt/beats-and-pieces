@@ -10,7 +10,7 @@ import { beatService } from "@/services/beatService";
 import { producerService } from "@/services/producerService";
 import { JudgeFeedbackTicker } from "@/components/JudgeFeedbackTicker";
 import { useAuth } from "@/lib/auth-context";
-import { Search, Filter, ArrowUpDown, ArrowDownUp, Star, Flame, ChevronDown, Upload, Check } from "lucide-react";
+import { Search, Filter, SlidersHorizontal, ArrowDown, ArrowUp, Star, Flame, ChevronDown, Upload, Check } from "lucide-react";
 
 export default function BeatsDiscoveryPage() {
   const { user: currentUser } = useAuth();
@@ -198,7 +198,7 @@ export default function BeatsDiscoveryPage() {
             <Search className="w-4 h-4 text-zinc-500 absolute left-4 top-1/2 -translate-y-1/2" />
           </div>
 
-          {/* Quick Action Controls Row: Favorites + Filter + Reverse Toggle + Sort Dropdown + Upload Beat Button */}
+          {/* Quick Action Controls Row: Favorites + Filter + Directional Order Toggle + Sort Criteria Dropdown + Upload Beat Button */}
           <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 sm:gap-3 w-full lg:w-auto">
             {/* Favorites Filter Button */}
             <button
@@ -233,18 +233,22 @@ export default function BeatsDiscoveryPage() {
               )}
             </button>
 
-            {/* Reverse Order Toggle Button (Left of Sort) */}
+            {/* Directional Order Toggle Button (Left of Sort): ArrowDown for Descending, ArrowUp for Ascending */}
             <button
               type="button"
               onClick={() => setSortOrder((prev) => (prev === "desc" ? "asc" : "desc"))}
               className="p-2.5 sm:p-3 rounded-xl bg-[#181818] hover:bg-[#202020] text-zinc-300 hover:text-white transition-all cursor-pointer flex items-center justify-center shrink-0"
-              title={sortOrder === "desc" ? "Order: Descending (Click for Ascending)" : "Order: Ascending (Click for Descending)"}
-              aria-label="Toggle sort order"
+              title={sortOrder === "desc" ? "Order: Descending (High / Newest first). Click to switch to Ascending (Low / Oldest first)." : "Order: Ascending (Low / Oldest first). Click to switch to Descending (High / Newest first)."}
+              aria-label={sortOrder === "desc" ? "Sort descending" : "Sort ascending"}
             >
-              <ArrowDownUp className={`w-4 h-4 text-[#7B61FF] transition-transform duration-200 ${sortOrder === "asc" ? "rotate-180" : ""}`} />
+              {sortOrder === "desc" ? (
+                <ArrowDown className="w-4 h-4 text-[#7B61FF]" />
+              ) : (
+                <ArrowUp className="w-4 h-4 text-[#7B61FF]" />
+              )}
             </button>
 
-            {/* Redesigned Sleek Sort Dropdown (Borderless) */}
+            {/* Redesigned Sleek Sort Dropdown (SlidersHorizontal icon + borderless menu) */}
             <div className="relative flex-1 sm:flex-initial" ref={sortMenuRef}>
               <button
                 type="button"
@@ -252,7 +256,7 @@ export default function BeatsDiscoveryPage() {
                 className="w-full flex items-center justify-between sm:justify-center gap-2 bg-[#181818] hover:bg-[#202020] rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white font-semibold transition-all cursor-pointer"
               >
                 <div className="flex items-center gap-1.5 truncate">
-                  <ArrowUpDown className="w-3.5 h-3.5 text-[#7B61FF] shrink-0" />
+                  <SlidersHorizontal className="w-3.5 h-3.5 text-[#7B61FF] shrink-0" />
                   <span className="truncate">{sortLabelMap[sortBy]}</span>
                 </div>
                 <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 shrink-0 ${isSortOpen ? "rotate-180" : ""}`} />

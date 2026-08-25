@@ -15,7 +15,7 @@ import { FlameRating } from "./FlameRating";
 import {
   ArrowLeft, Download, Upload, CheckCircle2,
   Lock, ShieldCheck, Flame, Star, Disc, Trophy, Award, Check, FileCheck, CassetteTape,
-  ExternalLink, Pencil, Play
+  ExternalLink, Pencil
 } from "lucide-react";
 import { BattlePhase, Competition, BattleSubmission } from "@/lib/types";
 import { useAudioPlayer } from "@/lib/audio-context";
@@ -44,6 +44,22 @@ function seededShuffle<T>(array: T[], seedStr: string): T[] {
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;
+}
+
+function getYouTubeId(url?: string): string | null {
+  if (!url) return null;
+  const trimmed = url.trim();
+  if (trimmed.includes("watch?v=")) {
+    return trimmed.split("watch?v=")[1].split("&")[0];
+  }
+  if (trimmed.includes("youtu.be/")) {
+    return trimmed.split("youtu.be/")[1].split("?")[0];
+  }
+  if (trimmed.includes("/embed/")) {
+    return trimmed.split("/embed/")[1].split("?")[0];
+  }
+  const parts = trimmed.split("/").pop();
+  return parts ? parts.split("?")[0] : null;
 }
 
 export function BattleDetailClient({ battleId }: { battleId: string }) {
@@ -869,12 +885,29 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                 <button
                   type="button"
                   onClick={() => setIsVideoModalOpen(true)}
-                  className="px-3.5 py-1.5 rounded-full bg-[#121212] hover:bg-[#202020] text-zinc-300 hover:text-white text-xs font-bold transition-all inline-flex items-center gap-1.5 shrink-0 select-none cursor-pointer self-start sm:self-auto leading-none border border-white/5 shadow-sm group"
+                  className="flex items-center gap-3 p-1.5 pr-3.5 rounded-xl bg-[#121212] hover:bg-[#202020] text-zinc-300 hover:text-white transition-all select-none cursor-pointer self-start sm:self-auto shadow-sm group text-left border border-white/5"
                   title="Watch Live Stream Jury Session"
                 >
-                  <Play className="w-3.5 h-3.5 fill-[#FF0000] text-[#FF0000] group-hover:scale-110 transition-transform" />
-                  <span>Live Stream Jury Session</span>
-                  <span className="text-xs text-zinc-400">↗</span>
+                  {/* Video Thumbnail Preview */}
+                  {(() => {
+                    const ytId = getYouTubeId(battle.youtubeVodUrl);
+                    const thumbnailUrl = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null;
+                    return thumbnailUrl ? (
+                      <div className="w-16 h-10 aspect-video rounded-lg overflow-hidden relative shrink-0 bg-black/40 shadow-inner">
+                        <Image
+                          src={thumbnailUrl}
+                          alt="Live Stream Thumbnail"
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+                    ) : null;
+                  })()}
+
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="text-xs font-bold leading-none">Live Stream Jury Session</span>
+                    <span className="text-xs text-zinc-400">↗</span>
+                  </div>
                 </button>
               )}
             </div>

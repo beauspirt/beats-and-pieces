@@ -898,10 +898,14 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     setEmailCopiedTooltip(true);
     setTimeout(() => setEmailCopiedTooltip(false), 2000);
   };
+  const isEmailHidden = Boolean(producer.hideEmail ?? producer.links?.hideEmail);
 
   const activeLinks = useMemo(() => {
-    return Object.entries(producer.links || {})
-      .filter(([_, url]) => Boolean(url && url.trim()))
+    return (Object.entries(producer.links || {}) as [string, string | boolean][])
+      .filter((entry): entry is [string, string] => {
+        const [key, url] = entry;
+        return key !== "hideEmail" && key !== "logs" && typeof url === "string" && Boolean(url.trim());
+      })
       .sort(([a], [b]) => {
         const indexA = SOCIAL_PLATFORM_ORDER.indexOf(a.toLowerCase());
         const indexB = SOCIAL_PLATFORM_ORDER.indexOf(b.toLowerCase());
@@ -923,6 +927,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
               alt={producer.nickname}
               fill
               className="object-cover"
+              sizes="(max-width: 640px) 96px, 112px"
               priority
             />
           </div>
@@ -978,7 +983,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
             </div>
 
             {/* Clickable Social Icons (Including Email at end if not hidden) */}
-            {((Boolean(producer.email) && !producer.hideEmail) || activeLinks.length > 0) && (
+            {((Boolean(producer.email) && !isEmailHidden) || activeLinks.length > 0) && (
               <div className="flex flex-wrap items-center gap-5 pt-1 text-[#888888]">
                 {activeLinks.map(([platform, url]) => {
                   const IconComponent = SocialIcons[platform.toLowerCase()] || SocialIcons.website;
@@ -1010,7 +1015,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                 })}
 
                 {/* Email Icon at the end */}
-                {Boolean(producer.email) && !producer.hideEmail && (
+                {Boolean(producer.email) && !isEmailHidden && (
                   <div className="relative inline-flex items-center">
                     <button
                       type="button"

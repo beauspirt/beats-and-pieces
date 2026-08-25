@@ -164,13 +164,22 @@ export const producerService = {
             ? localAvatar
             : (remoteAvatar || "/avatars/default-avatar.png");
 
+          const remoteHideEmail = p.links?.hideEmail !== undefined
+            ? Boolean(p.links.hideEmail)
+            : (p.hide_email !== undefined && p.hide_email !== null ? Boolean(p.hide_email) : (local?.hideEmail ?? false));
+
+          const cleanLinks = (p.links && typeof p.links === "object") 
+            ? { ...p.links } 
+            : (local?.links ? { ...local.links } : {});
+          if (remoteHideEmail) {
+            cleanLinks.hideEmail = true;
+          }
+
           custom[p.id] = {
             id: p.id,
             nickname: remoteNickname || local?.nickname || p.id,
             email: p.email || local?.email || "",
-            hideEmail: p.hide_email !== undefined && p.hide_email !== null 
-              ? Boolean(p.hide_email) 
-              : (local?.hideEmail ?? false),
+            hideEmail: remoteHideEmail,
             avatarUrl: resolvedAvatar,
             bio: remoteBio !== undefined && remoteBio !== "" ? remoteBio : (local?.bio || ""),
             location: remoteLocation !== undefined && remoteLocation !== "" ? remoteLocation : (local?.location || ""),
@@ -178,7 +187,7 @@ export const producerService = {
             discordId: p.discord_id || local?.discordId,
             discordUsername: p.discord_username || local?.discordUsername,
             discordRoles: p.discord_roles || local?.discordRoles || [],
-            links: (p.links && Object.keys(p.links).length > 0) ? p.links : (local?.links || {}),
+            links: cleanLinks,
             stats: p.stats || local?.stats || { battlesEntered: 0, battlesWon: 0, totalFlames: 0 },
             isClaimed: p.is_claimed !== undefined ? p.is_claimed : (local?.isClaimed ?? false),
             claimedAt: p.claimed_at || local?.claimedAt,
@@ -196,36 +205,45 @@ export const producerService = {
   },
 
   createProducer(profile: UserProfile): UserProfile {
+    const sanitizedLinks = { ...(profile.links || {}) };
+    if (profile.hideEmail !== undefined) {
+      sanitizedLinks.hideEmail = Boolean(profile.hideEmail);
+    }
+
+    const updatedProfile = {
+      ...profile,
+      links: sanitizedLinks,
+    };
+
     const custom = loadCustomProducers();
-    custom[profile.id] = profile;
+    custom[updatedProfile.id] = updatedProfile;
     saveCustomProducers(custom);
-    producersMap[profile.id] = profile;
+    producersMap[updatedProfile.id] = updatedProfile;
     notifyProducersUpdated();
 
     // Async write to Supabase
     supabase.from("producers").upsert({
-      id: profile.id,
-      nickname: profile.nickname,
-      email: profile.email,
-      hide_email: Boolean(profile.hideEmail),
-      avatar_url: profile.avatarUrl,
-      bio: profile.bio || "",
-      location: profile.location || "",
-      role: profile.role || "producer",
-      discord_id: profile.discordId,
-      discord_username: profile.discordUsername,
-      discord_roles: profile.discordRoles || [],
-      links: profile.links || {},
-      stats: profile.stats || { battlesEntered: 0, battlesWon: 0, totalFlames: 0 },
-      is_claimed: profile.isClaimed || false,
-      claimed_at: profile.claimedAt,
-      created_at: profile.createdAt || new Date().toISOString(),
+      id: updatedProfile.id,
+      nickname: updatedProfile.nickname,
+      email: updatedProfile.email,
+      avatar_url: updatedProfile.avatarUrl,
+      bio: updatedProfile.bio || "",
+      location: updatedProfile.location || "",
+      role: updatedProfile.role || "producer",
+      discord_id: updatedProfile.discordId,
+      discord_username: updatedProfile.discordUsername,
+      discord_roles: updatedProfile.discordRoles || [],
+      links: sanitizedLinks,
+      stats: updatedProfile.stats || { battlesEntered: 0, battlesWon: 0, totalFlames: 0 },
+      is_claimed: updatedProfile.isClaimed || false,
+      claimed_at: updatedProfile.claimedAt,
+      created_at: updatedProfile.createdAt || new Date().toISOString(),
     }).then(
       () => {},
       () => {}
     );
 
-    return profile;
+    return updatedProfile;
   },
 
   updateProducer(id: string, updates: Partial<UserProfile>): UserProfile {
@@ -250,9 +268,22 @@ export const producerService = {
       return this.createProducer(fallback);
     }
 
+    const updatedHideEmail = updates.hideEmail !== undefined ? Boolean(updates.hideEmail) : (current.hideEmail ?? false);
+    const sanitizedLinks = {
+      ...(current.links || {}),
+      ...(updates.links || {}),
+    };
+    if (updatedHideEmail) {
+      sanitizedLinks.hideEmail = true;
+    } else {
+      delete sanitizedLinks.hideEmail;
+    }
+
     const updated: UserProfile = {
       ...current,
       ...updates,
+      hideEmail: updatedHideEmail,
+      links: sanitizedLinks,
     };
 
     const custom = loadCustomProducers();
@@ -266,7 +297,6 @@ export const producerService = {
       id: updated.id,
       nickname: updated.nickname,
       email: updated.email,
-      hide_email: Boolean(updated.hideEmail),
       avatar_url: updated.avatarUrl,
       bio: updated.bio || "",
       location: updated.location || "",
@@ -274,7 +304,7 @@ export const producerService = {
       discord_id: updated.discordId,
       discord_username: updated.discordUsername,
       discord_roles: updated.discordRoles || [],
-      links: updated.links || {},
+      links: sanitizedLinks,
       stats: updated.stats || { battlesEntered: 0, battlesWon: 0, totalFlames: 0 },
       is_claimed: updated.isClaimed || false,
       claimed_at: updated.claimedAt,
@@ -289,12 +319,18 @@ export const producerService = {
 
   async updateProducerAsync(id: string, updates: Partial<UserProfile>): Promise<UserProfile> {
     const updated = this.updateProducer(id, updates);
+    const sanitizedLinks = { ...(updated.links || {}) };
+    if (updated.hideEmail) {
+      sanitizedLinks.hideEmail = true;
+    } else {
+      delete sanitizedLinks.hideEmail;
+    }
+
     try {
       await supabase.from("producers").upsert({
         id: updated.id,
         nickname: updated.nickname,
         email: updated.email,
-        hide_email: Boolean(updated.hideEmail),
         avatar_url: updated.avatarUrl,
         bio: updated.bio || "",
         location: updated.location || "",
@@ -302,7 +338,7 @@ export const producerService = {
         discord_id: updated.discordId,
         discord_username: updated.discordUsername,
         discord_roles: updated.discordRoles || [],
-        links: updated.links || {},
+        links: sanitizedLinks,
         stats: updated.stats || { battlesEntered: 0, battlesWon: 0, totalFlames: 0 },
         is_claimed: updated.isClaimed || false,
         claimed_at: updated.claimedAt,

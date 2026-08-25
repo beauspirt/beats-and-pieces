@@ -23,6 +23,7 @@ export interface UserProfile {
     soundcloud?: string;
     beatstars?: string;
     website?: string;
+    hideEmail?: boolean;
   };
   stats?: {
     battlesEntered: number;

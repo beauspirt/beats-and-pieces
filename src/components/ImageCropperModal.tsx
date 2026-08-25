@@ -12,6 +12,34 @@ interface ImageCropperModalProps {
   onCropComplete: (croppedBlob: Blob, croppedDataUrl: string) => void;
 }
 
+const CROP_SIZE = 240; // Crop circle diameter in px
+
+function getBaseDimensions(w: number, h: number) {
+  if (!w || !h) return { baseW: CROP_SIZE, baseH: CROP_SIZE };
+  const ratio = w / h;
+  if (ratio >= 1) {
+    // Landscape / square: height matches crop circle, width scales up
+    return { baseW: CROP_SIZE * ratio, baseH: CROP_SIZE };
+  } else {
+    // Portrait: width matches crop circle, height scales up
+    return { baseW: CROP_SIZE, baseH: CROP_SIZE / ratio };
+  }
+}
+
+function clampOffset(x: number, y: number, currentZoom: number, w: number, h: number) {
+  const { baseW, baseH } = getBaseDimensions(w, h);
+  const curW = baseW * currentZoom;
+  const curH = baseH * currentZoom;
+
+  const maxX = Math.max(0, (curW - CROP_SIZE) / 2);
+  const maxY = Math.max(0, (curH - CROP_SIZE) / 2);
+
+  return {
+    x: Math.max(-maxX, Math.min(maxX, x)),
+    y: Math.max(-maxY, Math.min(maxY, y)),
+  };
+}
+
 export function ImageCropperModal({
   isOpen,
   imageSrc,
@@ -45,7 +73,7 @@ export function ImageCropperModal({
     }
   }, [isOpen, imageSrc]);
 
-  // Pointer drag handlers
+  // Pointer drag handlers with strict boundary clamping
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     setIsDragging(true);
     setDragStart({
@@ -57,10 +85,10 @@ export function ImageCropperModal({
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isDragging) return;
-    setOffset({
-      x: e.clientX - dragStart.x,
-      y: e.clientY - dragStart.y,
-    });
+    const rawX = e.clientX - dragStart.x;
+    const rawY = e.clientY - dragStart.y;
+    const clamped = clampOffset(rawX, rawY, zoom, imageSize.width, imageSize.height);
+    setOffset(clamped);
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -78,19 +106,17 @@ export function ImageCropperModal({
   };
 
   const handleZoomChange = (newZoom: number) => {
-    setZoom(Math.max(1, Math.min(3, newZoom)));
+    const clampedZoom = Math.max(1, Math.min(3, newZoom));
+    setZoom(clampedZoom);
+    setOffset((prev) => clampOffset(prev.x, prev.y, clampedZoom, imageSize.width, imageSize.height));
   };
 
-  // Perform canvas crop
+  // Perform canvas crop bounded strictly within image limits
   const handleApplyCrop = useCallback(() => {
-    if (!imageRef.current || !containerRef.current || isProcessing) return;
+    if (!imageRef.current || !containerRef.current || isProcessing || !imageSize.width) return;
     setIsProcessing(true);
 
     const img = imageRef.current;
-    const container = containerRef.current;
-    const containerRect = container.getBoundingClientRect();
-    const cropSize = containerRect.width; // 280px or 320px square
-
     const outputCanvas = document.createElement("canvas");
     const outputDim = 512; // High-resolution avatar output
     outputCanvas.width = outputDim;
@@ -105,38 +131,20 @@ export function ImageCropperModal({
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
 
-    // Calculate base dimensions of image inside container (object-contain equivalent)
-    const imgRatio = imageSize.width / imageSize.height;
-    let baseW = cropSize;
-    let baseH = cropSize;
+    const { baseW, baseH } = getBaseDimensions(imageSize.width, imageSize.height);
+    const curW = baseW * zoom;
+    const curH = baseH * zoom;
+    const clamped = clampOffset(offset.x, offset.y, zoom, imageSize.width, imageSize.height);
 
-    if (imgRatio > 1) {
-      // Landscape: height matches container, width expands
-      baseH = cropSize;
-      baseW = cropSize * imgRatio;
-    } else {
-      // Portrait or square: width matches container, height expands
-      baseW = cropSize;
-      baseH = cropSize / imgRatio;
-    }
+    // Delta from image top-left to crop box top-left
+    const deltaX = (curW - CROP_SIZE) / 2 - clamped.x;
+    const deltaY = (curH - CROP_SIZE) / 2 - clamped.y;
 
-    const currentW = baseW * zoom;
-    const currentH = baseH * zoom;
-
-    // Center point in container
-    const centerX = cropSize / 2 + offset.x;
-    const centerY = cropSize / 2 + offset.y;
-
-    // Image top-left in container coordinates
-    const imgLeft = centerX - currentW / 2;
-    const imgTop = centerY - currentH / 2;
-
-    // Map container crop viewport [0, 0, cropSize, cropSize] to image source coordinates
-    const scaleToSource = imageSize.width / currentW;
-    const srcX = Math.max(0, (0 - imgLeft) * scaleToSource);
-    const srcY = Math.max(0, (0 - imgTop) * scaleToSource);
-    const srcW = Math.min(imageSize.width, cropSize * scaleToSource);
-    const srcH = Math.min(imageSize.height, cropSize * scaleToSource);
+    const scale = imageSize.width / curW;
+    const srcX = Math.max(0, Math.min(imageSize.width - CROP_SIZE * scale, deltaX * scale));
+    const srcY = Math.max(0, Math.min(imageSize.height - CROP_SIZE * scale, deltaY * scale));
+    const srcW = Math.min(imageSize.width - srcX, CROP_SIZE * scale);
+    const srcH = Math.min(imageSize.height - srcY, CROP_SIZE * scale);
 
     // Draw directly into 512x512 canvas
     ctx.drawImage(
@@ -167,6 +175,8 @@ export function ImageCropperModal({
   }, [imageSize, zoom, offset, onCropComplete, onClose, isProcessing]);
 
   if (!isOpen || !imageSrc) return null;
+
+  const { baseW, baseH } = getBaseDimensions(imageSize.width, imageSize.height);
 
   return (
     <ClientPortal>
@@ -202,20 +212,19 @@ export function ImageCropperModal({
               onPointerCancel={handlePointerUp}
               className="w-[280px] h-[280px] sm:w-[300px] sm:h-[300px] rounded-2xl relative overflow-hidden bg-black select-none touch-none cursor-grab active:cursor-grabbing shadow-inner flex items-center justify-center"
             >
-              {/* Scaled & Positioned Image */}
+              {/* Scaled & Positioned Image (Never smaller than the crop circle) */}
               <img
                 ref={imageRef}
                 src={imageSrc}
                 alt="Crop preview"
                 draggable={false}
                 style={{
-                  transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
+                  width: `${baseW * zoom}px`,
+                  height: `${baseH * zoom}px`,
+                  transform: `translate(${offset.x}px, ${offset.y}px)`,
                   transition: isDragging ? "none" : "transform 0.1s ease-out",
-                  maxWidth: "100%",
-                  maxHeight: "100%",
-                  objectFit: "contain",
                 }}
-                className="pointer-events-none select-none"
+                className="pointer-events-none select-none max-w-none max-h-none absolute"
               />
 
               {/* Circular Mask Overlay */}

@@ -53,9 +53,10 @@
     "submissionStartsAt": "2023-06-15T00:00:00Z",
     "submissionEndsAt": "2023-06-30T23:59:59Z",
     "ratingEndsAt": "2023-07-05T23:59:59Z",
-    "judgingEndsAt": "2023-07-11T20:00:00Z",
-    "endedAt": "2023-07-11",
-    "totalSubmissions": 61
+    "judgingEndsAt": "2023-07-10T20:00:00Z",
+    "endedAt": "2023-07-10",
+    "totalSubmissions": 61,
+    "youtubeVodUrl": "https://www.youtube.com/watch?v=Wsq7g-oQolw"
   },
   {
     "id": "battle-6",
@@ -83,10 +84,11 @@
     "submissionStartsAt": "2023-05-01T00:00:00Z",
     "submissionEndsAt": "2023-05-26T23:59:59Z",
     "ratingEndsAt": "2023-05-28T23:59:59Z",
-    "judgingEndsAt": "2023-05-31T20:00:00Z",
-    "endedAt": "2023-05-31",
+    "judgingEndsAt": "2023-06-07T20:00:00Z",
+    "endedAt": "2023-06-07",
     "totalSubmissions": 3,
-    "isRemixBattle": true
+    "isRemixBattle": true,
+    "youtubeVodUrl": "https://www.youtube.com/live/dAFcVM7rccc"
   },
   {
     "id": "battle-5",

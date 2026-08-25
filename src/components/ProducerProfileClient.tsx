@@ -21,7 +21,7 @@ import {
   Flame, Trophy, Mail, ExternalLink, 
   CheckCircle2, Copy, MapPin, Calendar, Star, Award, Globe,
   Pencil, Plus, Lock, Trash2, AlertTriangle, Music, Sliders, X, Play, Upload,
-  Share2, Check
+  Share2, Check, SlidersHorizontal, ChevronDown
 } from "lucide-react";
 
 /**
@@ -281,6 +281,34 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
   const [newBeatWaveformPeaks, setNewBeatWaveformPeaks] = useState<number[]>([]);
   const [isUploadingBeatAudio, setIsUploadingBeatAudio] = useState(false);
 
+  // Sorting state for beats list
+  const [beatsSortBy, setBeatsSortBy] = useState<"featured" | "recent" | "rating" | "oldest">("featured");
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const sortMenuRef = useRef<HTMLDivElement | null>(null);
+
+  const sortLabelMap: Record<"featured" | "recent" | "rating" | "oldest", string> = {
+    featured: "Featured First",
+    recent: "Newest First",
+    rating: "Highest Rated",
+    oldest: "Oldest First",
+  };
+
+  // Close sort menu on click outside
+  useEffect(() => {
+    if (!isSortOpen) return;
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      if (sortMenuRef.current && !sortMenuRef.current.contains(e.target as Node)) {
+        setIsSortOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, [isSortOpen]);
+
   const [saveToastMessage, setSaveToastMessage] = useState<string | null>(null);
 
   // Lock page scrolling when any modal is open
@@ -475,6 +503,37 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       return (b.flames || 0) - (a.flames || 0);
     });
   }, [producer, beatsVersion]);
+
+  // Apply active sorting mode
+  const displayedBeats = useMemo(() => {
+    const list = [...prioritizedBeats];
+    if (beatsSortBy === "recent") {
+      return list.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
+      });
+    }
+    if (beatsSortBy === "oldest") {
+      return list.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateA - dateB;
+      });
+    }
+    if (beatsSortBy === "rating") {
+      return list.sort((a, b) => {
+        const ratingA = a.flames || (a.juryScore ? a.juryScore / 20 : 0);
+        const ratingB = b.flames || (b.juryScore ? b.juryScore / 20 : 0);
+        if (ratingA !== ratingB) return ratingB - ratingA;
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
+      });
+    }
+    // "featured": default tier/podium prioritization
+    return list;
+  }, [prioritizedBeats, beatsSortBy]);
 
   const MAX_FREE_BEATS = 10;
   const customUploadedBeats = prioritizedBeats.filter(
@@ -1066,38 +1125,88 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
       {/* SECTION 2: PRODUCER BEATS */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <h2 className="text-2xl font-bold text-white">Beats</h2>
           </div>
           
-          {isProfileOwner && (
-            <button
-              onClick={() => {
-                if (isAtBeatLimit) {
-                  alert(`You have reached the maximum limit of ${MAX_FREE_BEATS} uploaded showcase beats.`);
-                  return;
-                }
-                setNewBeatTitle("");
-                setNewBeatAudioUrl("");
-                setNewBeatAudioName("");
-                setNewBeatBpm("");
-                setNewBeatIsForSale(false);
-                setNewBeatTags([]);
-                setIsAddModalOpen(true);
-              }}
-              disabled={isAtBeatLimit}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5 ${
-                isAtBeatLimit
-                  ? "bg-[#222222] text-zinc-500 cursor-not-allowed"
-                  : "bg-[#7B61FF] hover:bg-[#684DE6] text-white active:scale-95 cursor-pointer"
-              }`}
-              title={isAtBeatLimit ? `Limit of ${MAX_FREE_BEATS} beats reached` : "Add Beat"}
-            >
-              <Plus className="w-4 h-4" />
-              <span>Add Beat</span>
-            </button>
-          )}
+          <div className="flex items-center gap-2 sm:gap-2.5">
+            {/* Sorting Dropdown Button (Sits to the left of Add Beat) */}
+            {prioritizedBeats.length > 0 && (
+              <div className="relative" ref={sortMenuRef}>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsSortOpen((prev) => !prev);
+                  }}
+                  className="h-9 px-3 sm:px-3.5 rounded-xl bg-[#181818] hover:bg-[#222222] text-xs font-bold text-white transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
+                  title="Sort beats"
+                  aria-label="Sort beats"
+                >
+                  <SlidersHorizontal className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                  <span className="whitespace-nowrap">{sortLabelMap[beatsSortBy]}</span>
+                  <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 shrink-0 ${isSortOpen ? "rotate-180" : ""}`} />
+                </button>
+
+                {isSortOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-44 bg-[#181818] rounded-2xl p-1.5 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-150 border-none">
+                    {(["featured", "recent", "rating", "oldest"] as const).map((key) => {
+                      const isSelected = beatsSortBy === key;
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => {
+                            setBeatsSortBy(key);
+                            setIsSortOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                            isSelected
+                              ? "bg-brand text-white shadow-sm"
+                              : "text-zinc-400 hover:text-white hover:bg-[#222222]"
+                          }`}
+                        >
+                          <span>{sortLabelMap[key]}</span>
+                          {isSelected && <Check className="w-3.5 h-3.5 text-white shrink-0" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Add Beat Button */}
+            {isProfileOwner && (
+              <button
+                onClick={() => {
+                  if (isAtBeatLimit) {
+                    alert(`You have reached the maximum limit of ${MAX_FREE_BEATS} uploaded showcase beats.`);
+                    return;
+                  }
+                  setNewBeatTitle("");
+                  setNewBeatAudioUrl("");
+                  setNewBeatAudioName("");
+                  setNewBeatBpm("");
+                  setNewBeatIsForSale(false);
+                  setNewBeatTags([]);
+                  setIsAddModalOpen(true);
+                }}
+                disabled={isAtBeatLimit}
+                className={`h-9 px-3.5 sm:px-4 rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5 shrink-0 ${
+                  isAtBeatLimit
+                    ? "bg-[#222222] text-zinc-500 cursor-not-allowed"
+                    : "bg-[#7B61FF] hover:bg-[#684DE6] text-white active:scale-95 cursor-pointer"
+                }`}
+                title={isAtBeatLimit ? `Limit of ${MAX_FREE_BEATS} beats reached` : "Add Beat"}
+              >
+                <Plus className="w-4 h-4 shrink-0" />
+                <span>Add Beat</span>
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Max Upload Limit Notice */}
@@ -1115,9 +1224,9 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
           </div>
         )}
 
-        {prioritizedBeats.length > 0 ? (
+        {displayedBeats.length > 0 ? (
           <div className="space-y-4">
-            {prioritizedBeats.map((beat) => (
+            {displayedBeats.map((beat) => (
               <div
                 key={beat.id}
                 className="bg-[#181818] rounded-[28px] p-4 space-y-3 shadow-md group relative"

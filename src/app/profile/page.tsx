@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth-context";
 import { producerService, storageService } from "@/services";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ClientPortal } from "@/components/ClientPortal";
-
+import { ImageCropperModal } from "@/components/ImageCropperModal";
 import { normalizeUrl } from "@/lib/utils";
 
 const SOCIAL_PLATFORMS = [
@@ -29,6 +29,9 @@ function ProfileContent() {
   const { user: activeUser, isLoading, updateUser } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const isInitializedRef = useRef(false);
+
+  const [cropperSrc, setCropperSrc] = useState<string | null>(null);
+  const [isCropperOpen, setIsCropperOpen] = useState(false);
 
   const [links, setLinks] = useState<Record<string, string>>({
     instagram: "",
@@ -117,20 +120,35 @@ function ProfileContent() {
     setIsSaving(false);
   };
 
-  const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && profile) {
-      setIsUploadingAvatar(true);
-      try {
-        const { url } = await storageService.uploadImage(file, "avatars");
-        if (url) {
-          setProfile({ ...profile, avatarUrl: url });
-        }
-      } catch (err) {
-        // console.error("Avatar upload error:", err);
-      } finally {
-        setIsUploadingAvatar(false);
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setCropperSrc(reader.result as string);
+        setIsCropperOpen(true);
+      };
+      reader.readAsDataURL(file);
+    }
+    // Clear input so re-selecting the same file triggers change
+    e.target.value = "";
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob, croppedDataUrl: string) => {
+    if (!profile) return;
+    // Instant cropped preview
+    setProfile({ ...profile, avatarUrl: croppedDataUrl });
+    setIsUploadingAvatar(true);
+
+    try {
+      const { url } = await storageService.uploadImage(croppedBlob, "avatars");
+      if (url) {
+        setProfile((prev) => (prev ? { ...prev, avatarUrl: url } : null));
       }
+    } catch {
+      // console.error("Avatar upload error:", err);
+    } finally {
+      setIsUploadingAvatar(false);
     }
   };
 
@@ -362,6 +380,14 @@ function ProfileContent() {
         </div>
 
       </form>
+
+      {/* Interactive Profile Picture Cropper Modal */}
+      <ImageCropperModal
+        isOpen={isCropperOpen}
+        imageSrc={cropperSrc || ""}
+        onClose={() => setIsCropperOpen(false)}
+        onCropComplete={handleCropComplete}
+      />
 
     </div>
   );

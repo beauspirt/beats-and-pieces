@@ -174,6 +174,9 @@ export default function AdminActivityLogsPage() {
 
   useEffect(() => {
     loadLogs();
+    activityLogService.syncFromSupabase().then(() => {
+      loadLogs();
+    });
   }, [loadLogs]);
 
   // Listen to live platform activity events

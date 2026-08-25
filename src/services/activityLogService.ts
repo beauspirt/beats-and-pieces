@@ -30,89 +30,27 @@ export interface ActivityLogEntry {
 
 const STORAGE_KEY_LOGS = "bnp_activity_logs";
 
-const SEED_LOGS: ActivityLogEntry[] = [
-  {
-    id: "log-seed-1",
-    type: "battle.jury_score",
-    userId: "nerub",
-    userNickname: "Nerub",
-    userAvatar: "/avatars/nerub.jpg",
-    userRole: "host",
-    description: "Evaluated 12 final submissions for Beat Battle #8 (The Last Slice)",
-    metadata: { battleId: "battle-8", evaluationsCount: 12 },
-    timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(), // 45 mins ago
-  },
-  {
-    id: "log-seed-2",
-    type: "beat.upload",
-    userId: "vulpeanu",
-    userNickname: "Vulpeanu",
-    userAvatar: "/avatars/vulpeanu.jpg",
-    userRole: "producer",
-    description: "Uploaded new showcase beat 'Bucharest Drift' (92 BPM)",
-    metadata: { beatTitle: "Bucharest Drift", bpm: 92, priceTag: "For Sale" },
-    timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(), // 2 hours ago
-  },
-  {
-    id: "log-seed-3",
-    type: "battle.vote",
-    userId: "mldn",
-    userNickname: "MLDN",
-    userAvatar: "/avatars/mldn.jpg",
-    userRole: "producer",
-    description: "Submitted Phase 2 public rating ballot for Beat Battle #8",
-    metadata: { battleId: "battle-8", ratedCount: 15 },
-    timestamp: new Date(Date.now() - 1000 * 60 * 240).toISOString(), // 4 hours ago
-  },
-  {
-    id: "log-seed-4",
-    type: "profile.update",
-    userId: "adrianhrihor",
-    userNickname: "Adrian Hrihor",
-    userAvatar: "/avatars/default-avatar.png",
-    userRole: "admin",
-    description: "Updated profile details and music links",
-    metadata: { location: "Bucharest, Romania", linksUpdated: ["instagram", "spotify"] },
-    timestamp: new Date(Date.now() - 1000 * 60 * 360).toISOString(), // 6 hours ago
-  },
-  {
-    id: "log-seed-5",
-    type: "auth.login",
-    userId: "nerub",
-    userNickname: "Nerub",
-    userAvatar: "/avatars/nerub.jpg",
-    userRole: "host",
-    description: "Signed in via Google OAuth",
-    metadata: { provider: "google" },
-    timestamp: new Date(Date.now() - 1000 * 60 * 480).toISOString(), // 8 hours ago
-  },
-  {
-    id: "log-seed-6",
-    type: "release.create",
-    userId: "nerub",
-    userNickname: "Nerub",
-    userAvatar: "/avatars/nerub.jpg",
-    userRole: "admin",
-    description: "Published new compilation release 'Volume 3: Winter Heat'",
-    metadata: { releaseTitle: "Volume 3: Winter Heat", trackCount: 14 },
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
-  },
-];
-
 function loadLocalLogs(): ActivityLogEntry[] {
   if (typeof window !== "undefined") {
     try {
       const stored = localStorage.getItem(STORAGE_KEY_LOGS);
-      if (stored) return JSON.parse(stored);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          // Purge any legacy mock seed logs
+          return parsed.filter((l) => !l.id?.startsWith("log-seed-"));
+        }
+      }
     } catch {}
   }
-  return SEED_LOGS;
+  return [];
 }
 
 function saveLocalLogs(logs: ActivityLogEntry[]) {
   if (typeof window !== "undefined") {
     try {
-      localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(logs));
+      const cleanLogs = logs.filter((l) => !l.id?.startsWith("log-seed-"));
+      localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(cleanLogs));
     } catch {}
   }
 }

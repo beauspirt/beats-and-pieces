@@ -30,6 +30,14 @@ export interface ActivityLogEntry {
 
 const STORAGE_KEY_LOGS = "bnp_activity_logs";
 
+function isGenuineLog(log: ActivityLogEntry): boolean {
+  if (!log || !log.id) return false;
+  if (log.id.startsWith("log-seed-") || log.id.startsWith("test-") || log.id.endsWith("-userA")) return false;
+  if (log.description?.includes("signed out") || log.metadata?.action === "signout") return false;
+  if (log.userRole === "host" && log.description === "Signed in via Google OAuth" && !log.metadata?.email) return false;
+  return true;
+}
+
 function loadLocalLogs(): ActivityLogEntry[] {
   if (typeof window !== "undefined") {
     try {
@@ -37,8 +45,7 @@ function loadLocalLogs(): ActivityLogEntry[] {
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
-          // Purge any legacy mock seed logs
-          return parsed.filter((l) => !l.id?.startsWith("log-seed-"));
+          return parsed.filter(isGenuineLog);
         }
       }
     } catch {}
@@ -188,7 +195,7 @@ export const activityLogService = {
     // 1. Add current local logs
     const local = loadLocalLogs();
     local.forEach((l) => {
-      if (!l.id?.startsWith("log-seed-")) {
+      if (isGenuineLog(l)) {
         mergedMap.set(l.id, l);
       }
     });
@@ -203,7 +210,7 @@ export const activityLogService = {
 
       if (tableData && tableData.length > 0) {
         tableData.forEach((row) => {
-          mergedMap.set(row.id, {
+          const entry: ActivityLogEntry = {
             id: row.id,
             type: row.event_type as ActivityEventType,
             userId: row.user_id,
@@ -213,7 +220,10 @@ export const activityLogService = {
             description: row.description,
             metadata: row.metadata,
             timestamp: row.created_at,
-          });
+          };
+          if (isGenuineLog(entry)) {
+            mergedMap.set(entry.id, entry);
+          }
         });
       }
 
@@ -226,7 +236,7 @@ export const activityLogService = {
 
       if (fallbackData?.links?.logs && Array.isArray(fallbackData.links.logs)) {
         fallbackData.links.logs.forEach((l: ActivityLogEntry) => {
-          if (l.id && !l.id.startsWith("log-seed-")) {
+          if (isGenuineLog(l)) {
             mergedMap.set(l.id, l);
           }
         });

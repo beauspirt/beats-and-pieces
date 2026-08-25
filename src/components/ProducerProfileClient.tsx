@@ -281,16 +281,14 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
   const [newBeatWaveformPeaks, setNewBeatWaveformPeaks] = useState<number[]>([]);
   const [isUploadingBeatAudio, setIsUploadingBeatAudio] = useState(false);
 
-  // Sorting state for beats list
-  const [beatsSortBy, setBeatsSortBy] = useState<"featured" | "recent" | "rating" | "oldest">("featured");
+  // Sorting state for beats list (exact match with Beats discovery page)
+  const [beatsSortBy, setBeatsSortBy] = useState<"recent" | "rating">("recent");
   const [isSortOpen, setIsSortOpen] = useState(false);
   const sortMenuRef = useRef<HTMLDivElement | null>(null);
 
-  const sortLabelMap: Record<"featured" | "recent" | "rating" | "oldest", string> = {
-    featured: "Featured First",
-    recent: "Newest First",
-    rating: "Highest Rated",
-    oldest: "Oldest First",
+  const sortLabelMap: Record<"recent" | "rating", string> = {
+    recent: "Most Recent",
+    rating: "Top Rated",
   };
 
   // Close sort menu on click outside
@@ -504,34 +502,35 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     });
   }, [producer, beatsVersion]);
 
-  // Apply active sorting mode
+  // Apply active sorting mode matching Beats discovery page
   const displayedBeats = useMemo(() => {
     const list = [...prioritizedBeats];
     if (beatsSortBy === "recent") {
       return list.sort((a, b) => {
-        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-        return dateB - dateA;
-      });
-    }
-    if (beatsSortBy === "oldest") {
-      return list.sort((a, b) => {
-        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-        return dateA - dateB;
+        const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        const diff = timeB - timeA;
+        if (diff !== 0) return diff;
+        return (b.id || "").localeCompare(a.id || "");
       });
     }
     if (beatsSortBy === "rating") {
       return list.sort((a, b) => {
-        const ratingA = a.flames || (a.juryScore ? a.juryScore / 20 : 0);
-        const ratingB = b.flames || (b.juryScore ? b.juryScore / 20 : 0);
-        if (ratingA !== ratingB) return ratingB - ratingA;
-        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-        return dateB - dateA;
+        const scoreA = (typeof a.flames === "number" && a.flames > 0) 
+          ? a.flames 
+          : ((typeof a.juryScore === "number" && a.juryScore > 0) 
+              ? a.juryScore 
+              : (a.rank === 1 ? 5 : a.rank === 2 ? 4 : a.rank === 3 ? 3 : 0));
+        const scoreB = (typeof b.flames === "number" && b.flames > 0) 
+          ? b.flames 
+          : ((typeof b.juryScore === "number" && b.juryScore > 0) 
+              ? b.juryScore 
+              : (b.rank === 1 ? 5 : b.rank === 2 ? 4 : b.rank === 3 ? 3 : 0));
+        const diff = scoreB - scoreA;
+        if (diff !== 0) return diff;
+        return (b.id || "").localeCompare(a.id || "");
       });
     }
-    // "featured": default tier/podium prioritization
     return list;
   }, [prioritizedBeats, beatsSortBy]);
 
@@ -1152,7 +1151,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
                 {isSortOpen && (
                   <div className="absolute right-0 top-full mt-2 w-44 bg-[#181818] rounded-2xl p-1.5 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-150 border-none">
-                    {(["featured", "recent", "rating", "oldest"] as const).map((key) => {
+                    {(["recent", "rating"] as const).map((key) => {
                       const isSelected = beatsSortBy === key;
                       return (
                         <button

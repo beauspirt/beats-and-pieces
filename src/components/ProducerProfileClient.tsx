@@ -1121,7 +1121,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 min-w-0">
                   
                   {/* Left: Beat Title + Quick Link Badge + Rank Badge */}
-                  <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                  <div className="flex items-center gap-3.5 min-w-0 flex-1 pr-9 sm:pr-0">
                     <div className="min-w-0 flex-1">
                       {/* Title & Desktop Inline Badges */}
                       <div className="flex flex-wrap items-center gap-2 min-w-0">
@@ -1250,7 +1250,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                     {isProfileOwner && (
                       <button
                         onClick={() => handleOpenEditModal(beat)}
-                        className="p-1.5 rounded-full bg-[#121212] hover:bg-[#202020] text-zinc-400 hover:text-white transition-colors cursor-pointer select-none"
+                        className="p-1.5 rounded-full bg-[#7B61FF]/15 hover:bg-[#7B61FF]/25 text-[#7B61FF] hover:text-white transition-colors cursor-pointer select-none absolute top-4 right-4 sm:static sm:top-auto sm:right-auto"
                         title="Edit beat details"
                       >
                         <Pencil className="w-3.5 h-3.5" />

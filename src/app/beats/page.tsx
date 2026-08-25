@@ -464,7 +464,7 @@ export default function BeatsDiscoveryPage() {
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 min-w-0">
                   
                   {/* Left: Beat Title + Producer Avatar/Tag + Badges */}
-                  <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                  <div className="flex items-center gap-3.5 min-w-0 flex-1 pr-9 sm:pr-0">
                     <Link
                       href={`/${beat.beatmaker.id}`}
                       className="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden relative shrink-0 hover:opacity-80 transition-opacity bg-[#121212]"
@@ -564,7 +564,7 @@ export default function BeatsDiscoveryPage() {
                     <button
                       type="button"
                       onClick={() => toggleFavorite(beat.id)}
-                      className="p-1.5 rounded-full bg-[#121212] hover:bg-[#202020] transition-colors text-[#888888] hover:text-amber-400 cursor-pointer ml-auto sm:ml-0 select-none"
+                      className="p-1.5 rounded-full bg-[#121212] hover:bg-[#202020] transition-colors text-[#888888] hover:text-amber-400 cursor-pointer select-none absolute top-4 right-4 sm:static sm:top-auto sm:right-auto ml-auto sm:ml-0"
                       title={beat.isFavorite ? "Remove from favorites" : "Add to favorites"}
                     >
                       <Star

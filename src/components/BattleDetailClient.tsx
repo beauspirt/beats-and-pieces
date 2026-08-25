@@ -885,7 +885,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                 <button
                   type="button"
                   onClick={() => setIsVideoModalOpen(true)}
-                  className="flex flex-col gap-2.5 p-3 rounded-[24px] bg-[#121212] hover:bg-[#1A1A1A] text-zinc-300 hover:text-white transition-all select-none cursor-pointer w-full sm:w-64 shrink-0 shadow-md group text-left border border-white/5"
+                  className="flex flex-col gap-2.5 p-3 rounded-[24px] bg-[#121212] hover:bg-[#1A1A1A] text-zinc-300 hover:text-white transition-all select-none cursor-pointer w-full sm:w-64 shrink-0 shadow-md group text-left"
                   title="Watch Live Stream Jury Session"
                 >
                   {/* Text Header Above Thumbnail */}
@@ -896,17 +896,17 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                     <span className="text-xs text-zinc-400 group-hover:text-white transition-colors">↗</span>
                   </div>
 
-                  {/* Larger 16:9 Video Thumbnail Preview (Concentric R=24px, p=12px, r=12px) */}
+                  {/* 16:9 Video Thumbnail Preview (Concentric R=24px, p=12px, r=12px) */}
                   {(() => {
                     const ytId = getYouTubeId(battle.youtubeVodUrl);
                     const thumbnailUrl = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null;
                     return thumbnailUrl ? (
-                      <div className="w-full aspect-video rounded-xl overflow-hidden relative shrink-0 bg-black/50 shadow-inner">
+                      <div className="w-full aspect-video rounded-xl overflow-hidden relative shrink-0 bg-black/50">
                         <Image
                           src={thumbnailUrl}
                           alt="Live Stream Thumbnail"
                           fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="object-cover"
                         />
                       </div>
                     ) : null;
@@ -1801,11 +1801,8 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
               onClick={(e) => e.stopPropagation()}
               className="bg-[#181818] rounded-[28px] max-w-4xl w-full overflow-hidden shadow-2xl space-y-4 p-4 sm:p-6 relative cursor-default"
             >
-              {/* Modal Top Bar */}
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-bold text-white truncate pr-4">
-                  {battle.title} - Live Stream Jury Session
-                </h3>
+              {/* Modal Close Button */}
+              <div className="flex items-center justify-end">
                 <button
                   onClick={() => setIsVideoModalOpen(false)}
                   className="w-8 h-8 rounded-full bg-[#121212] text-zinc-400 hover:text-white flex items-center justify-center text-sm cursor-pointer shrink-0 transition-colors"

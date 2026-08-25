@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, Suspense } from "react";
 import Image from "next/image";
 import { UserProfile } from "@/lib/types";
-import { X, ShieldCheck, Sparkles, CheckCircle2, Camera, Loader2 } from "lucide-react";
+import { X, ShieldCheck, Sparkles, CheckCircle2, Loader2, Pencil } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { producerService, storageService } from "@/services";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -204,25 +204,30 @@ function ProfileContent() {
             <label className="sm:col-span-3 text-xs font-bold text-[#D1D1D1]">
               Profile Picture
             </label>
-            <div className="sm:col-span-9 flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full overflow-hidden relative bg-[#121212] shrink-0 shadow-md">
-                <Image
-                  src={profile.avatarUrl || "/avatars/default-avatar.png"}
-                  alt={profile.nickname}
-                  fill
-                  className="object-cover"
-                />
-                {isUploadingAvatar && (
-                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                    <Loader2 className="w-5 h-5 text-brand animate-spin" />
-                  </div>
-                )}
-              </div>
+            <div className="sm:col-span-9 flex items-center">
+              <div className="relative inline-block">
+                {/* Avatar Preview */}
+                <div className="w-16 h-16 rounded-full overflow-hidden relative bg-[#121212] shrink-0 shadow-md">
+                  <Image
+                    src={profile.avatarUrl || "/avatars/default-avatar.png"}
+                    alt={profile.nickname}
+                    fill
+                    className="object-cover"
+                  />
+                  {isUploadingAvatar && (
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                      <Loader2 className="w-5 h-5 text-brand animate-spin" />
+                    </div>
+                  )}
+                </div>
 
-              <div className="flex items-center gap-3">
-                <label className="px-4 py-2 rounded-3xl bg-[#222222] hover:bg-[#2A2A2A] text-xs font-bold text-white cursor-pointer transition-colors flex items-center gap-2">
-                  <Camera className="w-3.5 h-3.5 text-brand" />
-                  <span>Change Picture</span>
+                {/* Small Purple Crayon / Edit Icon Badge on Upper Right */}
+                <label
+                  className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-[#7B61FF] hover:bg-[#684DE6] text-white flex items-center justify-center shadow-lg cursor-pointer transition-all active:scale-95 border-2 border-[#181818]"
+                  title="Change profile picture"
+                  aria-label="Change profile picture"
+                >
+                  <Pencil className="w-3 h-3 text-white" />
                   <input
                     type="file"
                     accept="image/*"
@@ -230,7 +235,6 @@ function ProfileContent() {
                     className="hidden"
                   />
                 </label>
-                <span className="text-xs text-[#777777]">JPG, PNG or WEBP</span>
               </div>
             </div>
           </div>

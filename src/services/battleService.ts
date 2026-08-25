@@ -222,6 +222,7 @@ export const battleService = {
           youtubeVodUrl: b.youtube_vod_url,
           rules: b.rules || [],
           winner: b.winner,
+          isRemixBattle: Boolean(b.is_remix_battle || b.id === "battle-6"),
         }));
 
         saveCustomBattles(mapped);

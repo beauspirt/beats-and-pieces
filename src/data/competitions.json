@@ -55,8 +55,37 @@
     "ratingEndsAt": "2023-07-05T23:59:59Z",
     "judgingEndsAt": "2023-07-11T20:00:00Z",
     "endedAt": "2023-07-11",
-    "totalSubmissions": 61,
-    "youtubeVodUrl": "https://www.youtube.com/watch?v=Wsq7g-oQolw"
+    "totalSubmissions": 61
+  },
+  {
+    "id": "battle-6",
+    "number": 6,
+    "title": "Beat Battle #6",
+    "slug": "beat-battle-6",
+    "coverImage": "/covers/beat-battle-6.png",
+    "hosts": [
+      "Nerub"
+    ],
+    "judges": [
+      "Deliric",
+      "Silent Strike"
+    ],
+    "winner": "Reflux",
+    "description": "Sixth edition of the Beats & Pieces Beat Battle series (Deliric & Silent Strike Remix Edition).",
+    "prizes": {
+      "first": "Official Release & Showcase",
+      "second": "Beats & Pieces Merch Pack",
+      "third": "Sample Vault Access"
+    },
+    "samples": [],
+    "phase": "completed",
+    "submissionStartsAt": "2023-05-01T00:00:00Z",
+    "submissionEndsAt": "2023-05-26T23:59:59Z",
+    "ratingEndsAt": "2023-05-28T23:59:59Z",
+    "judgingEndsAt": "2023-05-31T20:00:00Z",
+    "endedAt": "2023-05-31",
+    "totalSubmissions": 3,
+    "isRemixBattle": true
   },
   {
     "id": "battle-5",

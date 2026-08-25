@@ -101,6 +101,7 @@ export interface Competition {
   rules?: string[];
   winner?: string;
   endedAt?: string;
+  isRemixBattle?: boolean;
 }
 
 export interface DiscoveryBeat {

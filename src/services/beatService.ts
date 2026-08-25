@@ -97,13 +97,16 @@ export const beatService = {
     const overrides = loadBeatOverrides();
     const deleted = loadDeletedBeatIds();
 
-    // Dynamically pull all submissions from finished/completed battles
+    // Dynamically pull all submissions from finished/completed battles (excluding remix battles like Battle #6)
     const battleBeats: DiscoveryBeat[] = [];
     try {
-      const completedBattles = battleService.getAllBattles().filter((b) => b.phase === "completed");
+      const completedBattles = battleService
+        .getAllBattles()
+        .filter((b) => b.phase === "completed" && !(b as unknown as { isRemixBattle?: boolean }).isRemixBattle && b.id !== "battle-6");
       completedBattles.forEach((b) => {
         const subs = battleService.getSubmissionsByBattleId(b.id);
         subs.forEach((sub) => {
+          if (sub.battleId === "battle-6" || (sub as unknown as { isRemix?: boolean }).isRemix) return;
           const prod = producerService.getProducerById(sub.userId) || producerService.getProducerByTag(sub.beatmakerTag);
           let beatTitle = sub.beatTitle || (b.title ? `${b.title} Entry` : "Untitled Beat");
           if (/^Beat Battle #\d+$/i.test(beatTitle.trim())) {

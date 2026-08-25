@@ -438,5 +438,25 @@
     },
     "isClaimed": false,
     "createdAt": "2022-08-01T00:00:00Z"
+  },
+  "reflux": {
+    "id": "reflux",
+    "nickname": "Reflux",
+    "email": "reflux@beatsandpieces.ro",
+    "avatarUrl": "/avatars/default-avatar.png",
+    "bio": "",
+    "location": "",
+    "role": "producer",
+    "discordRoles": [
+      "Battle Champion"
+    ],
+    "links": {},
+    "stats": {
+      "battlesEntered": 1,
+      "battlesWon": 1,
+      "totalFlames": 0
+    },
+    "isClaimed": false,
+    "createdAt": "2023-05-01T00:00:00Z"
   }
 }

@@ -437,9 +437,9 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     });
 
     submissions.forEach((sub) => {
-      // Check if battle still exists (has not been deleted)
+      // Check if battle still exists (has not been deleted) and is not a remix battle
       const battle = battleService.getBattleById(sub.battleId);
-      if (!battle) return;
+      if (!battle || sub.battleId === "battle-6" || (battle as unknown as { isRemixBattle?: boolean }).isRemixBattle || (sub as unknown as { isRemix?: boolean }).isRemix) return;
 
       const existing = mergedList.find(
         (b) => b.audioUrl === sub.audioUrl || (b.title === sub.beatTitle && sub.beatTitle !== "Beat Battle #1")

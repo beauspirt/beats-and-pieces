@@ -292,9 +292,20 @@ export const beatService = {
     return mergedBeat;
   },
 
-  deleteBeat(id: string): boolean {
+  deleteBeat(
+    id: string,
+    userContext?: { id?: string; nickname?: string; avatarUrl?: string; role?: string }
+  ): boolean {
+    let beatTitle = "Showcase Beat";
+    let beatmakerInfo: { id?: string; tag?: string; avatarUrl?: string } | undefined;
+
     if (typeof window !== "undefined") {
       const custom = loadCustomBeats();
+      const existing = custom.find((b) => b.id === id);
+      if (existing) {
+        beatTitle = existing.title || beatTitle;
+        beatmakerInfo = existing.beatmaker;
+      }
       const filtered = custom.filter((b) => b.id !== id);
       saveCustomBeats(filtered);
 
@@ -318,10 +329,19 @@ export const beatService = {
       () => {}
     );
 
+    const actorId = userContext?.id || beatmakerInfo?.id;
+    const actorNickname = userContext?.nickname || beatmakerInfo?.tag;
+    const actorAvatar = userContext?.avatarUrl || beatmakerInfo?.avatarUrl;
+    const actorRole = userContext?.role || "producer";
+
     activityLogService.logActivity({
       type: "beat.delete",
-      description: `Deleted showcase beat #${id}`,
-      metadata: { beatId: id },
+      userId: actorId,
+      userNickname: actorNickname,
+      userAvatar: actorAvatar,
+      userRole: actorRole,
+      description: `Deleted showcase beat '${beatTitle}'`,
+      metadata: { beatId: id, beatTitle },
     });
 
     return true;

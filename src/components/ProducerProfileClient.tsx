@@ -816,7 +816,12 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       return;
     }
     if (window.confirm("Are you sure you want to delete this beat?")) {
-      beatService.deleteBeat(id);
+      beatService.deleteBeat(id, {
+        id: authUser?.id || producer.id,
+        nickname: authUser?.nickname || producer.nickname,
+        avatarUrl: authUser?.avatarUrl || producer.avatarUrl,
+        role: authUser?.role || producer.role,
+      });
       setEditingBeat(null);
       setBeatsVersion((v) => v + 1);
       showToast("Beat deleted");

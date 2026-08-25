@@ -57,7 +57,7 @@ function saveLocalLogs(logs: ActivityLogEntry[]) {
 
 export const activityLogService = {
   /**
-   * Log a new platform activity event
+   * Log a new platform activity event with immediate local & Supabase persistence
    */
   logActivity(entry: {
     type: ActivityEventType;
@@ -76,7 +76,7 @@ export const activityLogService = {
 
     // 1. Update local cache
     const current = loadLocalLogs();
-    const updated = [newLog, ...current];
+    const updated = [newLog, ...current.filter((l) => l.id !== newLog.id)];
     saveLocalLogs(updated);
 
     // 2. Dispatch live update event
@@ -86,26 +86,56 @@ export const activityLogService = {
       } catch {}
     }
 
-    // 3. Asynchronously persist to Supabase `activity_logs` table
-    supabase
-      .from("activity_logs")
-      .insert({
-        id: newLog.id,
-        event_type: newLog.type,
-        user_id: newLog.userId,
-        user_nickname: newLog.userNickname,
-        user_avatar: newLog.userAvatar,
-        user_role: newLog.userRole,
-        description: newLog.description,
-        metadata: newLog.metadata,
-        created_at: newLog.timestamp,
-      })
-      .then(
-        () => {},
-        () => {}
-      );
+    // 3. Asynchronously persist to Supabase database (with dual resilience)
+    this.persistToSupabase(newLog);
 
     return newLog;
+  },
+
+  /**
+   * Persist activity to Supabase with automatic multi-table resilience
+   */
+  async persistToSupabase(log: ActivityLogEntry) {
+    try {
+      // 1. Attempt write to dedicated activity_logs table
+      supabase
+        .from("activity_logs")
+        .insert({
+          id: log.id,
+          event_type: log.type,
+          user_id: log.userId,
+          user_nickname: log.userNickname,
+          user_avatar: log.userAvatar,
+          user_role: log.userRole,
+          description: log.description,
+          metadata: log.metadata,
+          created_at: log.timestamp,
+        })
+        .then(
+          () => {},
+          () => {}
+        );
+
+      // 2. Guaranteed cross-device fallback: store in global database audit row
+      const { data } = await supabase
+        .from("producers")
+        .select("links")
+        .eq("id", "_activity_logs_")
+        .single();
+
+      const existing: ActivityLogEntry[] = (data?.links?.logs as ActivityLogEntry[]) || [];
+      const updated = [log, ...existing.filter((l) => l.id !== log.id && !l.id?.startsWith("log-seed-"))].slice(0, 300);
+
+      await supabase.from("producers").upsert({
+        id: "_activity_logs_",
+        nickname: "System Audit Logs",
+        email: "audit@beatsandpieces.ro",
+        avatar_url: "/avatars/default-avatar.png",
+        role: "system",
+        links: { logs: updated },
+        created_at: new Date().toISOString(),
+      });
+    } catch {}
   },
 
   /**
@@ -150,54 +180,83 @@ export const activityLogService = {
   },
 
   /**
-   * Sync latest activity logs from Supabase
+   * Sync latest activity logs across all devices from Supabase
    */
   async syncFromSupabase(): Promise<ActivityLogEntry[]> {
+    const mergedMap = new Map<string, ActivityLogEntry>();
+
+    // 1. Add current local logs
+    const local = loadLocalLogs();
+    local.forEach((l) => {
+      if (!l.id?.startsWith("log-seed-")) {
+        mergedMap.set(l.id, l);
+      }
+    });
+
     try {
-      const { data, error } = await supabase
+      // 2. Fetch from dedicated table if available
+      const { data: tableData } = await supabase
         .from("activity_logs")
         .select("*")
         .order("created_at", { ascending: false })
         .limit(150);
 
-      if (!error && data && data.length > 0) {
-        const remoteLogs: ActivityLogEntry[] = data.map((row) => ({
-          id: row.id,
-          type: row.event_type as ActivityEventType,
-          userId: row.user_id,
-          userNickname: row.user_nickname,
-          userAvatar: row.user_avatar,
-          userRole: row.user_role,
-          description: row.description,
-          metadata: row.metadata,
-          timestamp: row.created_at,
-        }));
-
-        // Merge with existing local logs by ID
-        const local = loadLocalLogs();
-        const mergedMap = new Map<string, ActivityLogEntry>();
-        remoteLogs.forEach((l) => mergedMap.set(l.id, l));
-        local.forEach((l) => {
-          if (!mergedMap.has(l.id)) mergedMap.set(l.id, l);
+      if (tableData && tableData.length > 0) {
+        tableData.forEach((row) => {
+          mergedMap.set(row.id, {
+            id: row.id,
+            type: row.event_type as ActivityEventType,
+            userId: row.user_id,
+            userNickname: row.user_nickname,
+            userAvatar: row.user_avatar,
+            userRole: row.user_role,
+            description: row.description,
+            metadata: row.metadata,
+            timestamp: row.created_at,
+          });
         });
+      }
 
-        const mergedList = Array.from(mergedMap.values()).sort(
-          (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-        );
+      // 3. Fetch from global database audit record
+      const { data: fallbackData } = await supabase
+        .from("producers")
+        .select("links")
+        .eq("id", "_activity_logs_")
+        .single();
 
-        saveLocalLogs(mergedList);
-        return mergedList;
+      if (fallbackData?.links?.logs && Array.isArray(fallbackData.links.logs)) {
+        fallbackData.links.logs.forEach((l: ActivityLogEntry) => {
+          if (l.id && !l.id.startsWith("log-seed-")) {
+            mergedMap.set(l.id, l);
+          }
+        });
       }
     } catch {}
 
-    return loadLocalLogs();
+    const mergedList = Array.from(mergedMap.values()).sort(
+      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+
+    saveLocalLogs(mergedList);
+    return mergedList;
   },
 
   /**
    * Clear all activity logs
    */
-  clearLogs() {
+  async clearLogs() {
     saveLocalLogs([]);
+    try {
+      await supabase.from("producers").upsert({
+        id: "_activity_logs_",
+        nickname: "System Audit Logs",
+        email: "audit@beatsandpieces.ro",
+        avatar_url: "/avatars/default-avatar.png",
+        role: "system",
+        links: { logs: [] },
+        created_at: new Date().toISOString(),
+      });
+    } catch {}
     if (typeof window !== "undefined") {
       try {
         window.dispatchEvent(new CustomEvent("bnp_activity_logged"));

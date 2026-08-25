@@ -52,7 +52,7 @@ export function notifyProducersUpdated() {
 export const producerService = {
   getAllProducers(): UserProfile[] {
     const map = this.getProducersMap();
-    return Object.values(map);
+    return Object.values(map).filter((p) => !p.id.startsWith("_"));
   },
 
   getProducersMap(): Record<string, UserProfile> {
@@ -147,6 +147,7 @@ export const producerService = {
       if (!error && data && data.length > 0) {
         const custom = loadCustomProducers();
         data.forEach((p) => {
+          if (p.id.startsWith("_")) return;
           const local = custom[p.id];
           const remoteBio = p.bio?.trim();
           const remoteLocation = p.location?.trim();

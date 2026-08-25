@@ -277,6 +277,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         localStorage.setItem(STORAGE_KEY, producerId);
       } catch {}
+
+      activityLogService.logActivity({
+        type: "auth.login",
+        userId: prod.id,
+        userNickname: prod.nickname,
+        userAvatar: prod.avatarUrl,
+        userRole: prod.role,
+        description: `Signed in as '${prod.nickname}' (${prod.role})`,
+        metadata: { provider: "switcher", email: prod.email },
+      });
     }
   };
 
@@ -288,6 +298,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
+    if (user) {
+      activityLogService.logActivity({
+        type: "auth.login",
+        userId: user.id,
+        userNickname: user.nickname,
+        userAvatar: user.avatarUrl,
+        userRole: user.role,
+        description: `User '${user.nickname}' signed out`,
+        metadata: { action: "signout", email: user.email },
+      });
+    }
+
     setIsLoading(true);
     try {
       localStorage.setItem(STORAGE_KEY, "logged_out");
@@ -297,11 +319,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await supabase.auth.signOut();
     } catch {}
 
-    if (typeof window !== "undefined") {
-      window.location.replace("/signin");
-    } else {
-      setUser(null);
-    }
+    setTimeout(() => {
+      if (typeof window !== "undefined") {
+        window.location.replace("/signin");
+      } else {
+        setUser(null);
+      }
+    }, 150);
   };
 
   return (

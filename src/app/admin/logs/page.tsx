@@ -69,7 +69,6 @@ function getEventStyle(type: ActivityEventType) {
         icon: LogIn,
         bg: "bg-emerald-500/10",
         text: "text-emerald-400",
-        border: "border-emerald-500/20",
       };
     case "auth.signup":
       return {
@@ -77,7 +76,6 @@ function getEventStyle(type: ActivityEventType) {
         icon: UserPlus,
         bg: "bg-teal-500/10",
         text: "text-teal-400",
-        border: "border-teal-500/20",
       };
     case "profile.update":
       return {
@@ -85,7 +83,6 @@ function getEventStyle(type: ActivityEventType) {
         icon: UserCheck,
         bg: "bg-purple-500/10",
         text: "text-purple-400",
-        border: "border-purple-500/20",
       };
     case "beat.upload":
       return {
@@ -93,7 +90,6 @@ function getEventStyle(type: ActivityEventType) {
         icon: Music,
         bg: "bg-[#7B61FF]/10",
         text: "text-[#7B61FF]",
-        border: "border-[#7B61FF]/20",
       };
     case "beat.delete":
       return {
@@ -101,7 +97,6 @@ function getEventStyle(type: ActivityEventType) {
         icon: Trash2,
         bg: "bg-rose-500/10",
         text: "text-rose-400",
-        border: "border-rose-500/20",
       };
     case "battle.submit":
       return {
@@ -109,7 +104,6 @@ function getEventStyle(type: ActivityEventType) {
         icon: Swords,
         bg: "bg-amber-500/10",
         text: "text-amber-400",
-        border: "border-amber-500/20",
       };
     case "battle.vote":
       return {
@@ -117,7 +111,6 @@ function getEventStyle(type: ActivityEventType) {
         icon: Flame,
         bg: "bg-orange-500/10",
         text: "text-orange-400",
-        border: "border-orange-500/20",
       };
     case "battle.jury_score":
       return {
@@ -125,7 +118,6 @@ function getEventStyle(type: ActivityEventType) {
         icon: Award,
         bg: "bg-cyan-500/10",
         text: "text-cyan-400",
-        border: "border-cyan-500/20",
       };
     case "battle.create":
     case "battle.update":
@@ -134,7 +126,6 @@ function getEventStyle(type: ActivityEventType) {
         icon: Trophy,
         bg: "bg-yellow-500/10",
         text: "text-yellow-400",
-        border: "border-yellow-500/20",
       };
     case "release.create":
     case "release.update":
@@ -143,7 +134,6 @@ function getEventStyle(type: ActivityEventType) {
         icon: Disc,
         bg: "bg-fuchsia-500/10",
         text: "text-fuchsia-400",
-        border: "border-fuchsia-500/20",
       };
     default:
       return {
@@ -151,7 +141,6 @@ function getEventStyle(type: ActivityEventType) {
         icon: Activity,
         bg: "bg-zinc-500/10",
         text: "text-zinc-400",
-        border: "border-zinc-500/20",
       };
   }
 }
@@ -233,7 +222,7 @@ export default function AdminActivityLogsPage() {
               type="button"
               onClick={handleSyncSupabase}
               disabled={isSyncing}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-[#181818] hover:bg-[#222222] text-xs font-bold text-white transition-all shadow-md self-start sm:self-auto cursor-pointer border border-white/5 disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-[#181818] hover:bg-[#222222] text-xs font-bold text-white transition-all shadow-md self-start sm:self-auto cursor-pointer disabled:opacity-50"
             >
               <RefreshCw className={`w-3.5 h-3.5 text-brand ${isSyncing ? "animate-spin" : ""}`} />
               <span>{isSyncing ? "Syncing..." : "Sync Logs"}</span>
@@ -242,7 +231,7 @@ export default function AdminActivityLogsPage() {
         </div>
 
         {/* Controls Container: Search & Category Pills */}
-        <div className="bg-[#181818] rounded-[28px] p-5 sm:p-6 space-y-4 shadow-lg border border-white/5">
+        <div className="bg-[#181818] rounded-[28px] p-5 sm:p-6 space-y-4 shadow-lg">
           {/* Search Box */}
           <div className="relative">
             <Search className="w-4 h-4 text-zinc-400 absolute left-4 top-1/2 -translate-y-1/2" />
@@ -251,7 +240,7 @@ export default function AdminActivityLogsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by user nickname, action, or track..."
-              className="w-full bg-[#121212] rounded-2xl pl-11 pr-10 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-brand border border-white/5 transition-all"
+              className="w-full bg-[#121212] rounded-2xl pl-11 pr-10 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-brand transition-all"
             />
             {search && (
               <button
@@ -289,7 +278,7 @@ export default function AdminActivityLogsPage() {
         {/* Activity Logs Stream */}
         <div className="space-y-3">
           {logs.length === 0 ? (
-            <div className="bg-[#181818] rounded-[28px] p-12 text-center space-y-3 border border-white/5">
+            <div className="bg-[#181818] rounded-[28px] p-12 text-center space-y-3">
               <Activity className="w-10 h-10 text-zinc-600 mx-auto" />
               <h2 className="text-lg font-bold text-white">No Activity Found</h2>
               <p className="text-xs text-zinc-400 max-w-sm mx-auto">
@@ -306,14 +295,14 @@ export default function AdminActivityLogsPage() {
               return (
                 <div
                   key={log.id}
-                  className="bg-[#181818] rounded-[24px] p-4 sm:p-5 border border-white/5 space-y-3 shadow-md hover:border-white/10 transition-all"
+                  className="bg-[#181818] rounded-[24px] p-4 sm:p-5 space-y-3 shadow-md transition-all"
                 >
                   <div className="flex items-start justify-between gap-4">
                     {/* Left: Avatar + Event Details */}
                     <div className="flex items-start gap-3.5">
                       {/* Avatar or Event Icon */}
                       <div className="relative shrink-0">
-                        <div className="w-10 h-10 rounded-full overflow-hidden bg-[#121212] border border-white/10 relative shadow-inner">
+                        <div className="w-10 h-10 rounded-full overflow-hidden bg-[#121212] relative shadow-inner">
                           <Image
                             src={log.userAvatar || "/avatars/default-avatar.png"}
                             alt={log.userNickname || "User"}
@@ -322,7 +311,7 @@ export default function AdminActivityLogsPage() {
                           />
                         </div>
                         <div
-                          className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full ${style.bg} ${style.border} border flex items-center justify-center`}
+                          className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full ${style.bg} flex items-center justify-center`}
                         >
                           <Icon className={`w-3 h-3 ${style.text}`} />
                         </div>
@@ -342,7 +331,7 @@ export default function AdminActivityLogsPage() {
                           )}
 
                           <span
-                            className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${style.bg} ${style.text} border ${style.border}`}
+                            className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${style.bg} ${style.text}`}
                           >
                             {style.label}
                           </span>
@@ -375,7 +364,7 @@ export default function AdminActivityLogsPage() {
 
                   {/* Expandable JSON Metadata Inspector */}
                   {hasMetadata && isExpanded && (
-                    <div className="bg-[#121212] rounded-xl p-3.5 border border-white/5 text-xs font-mono text-zinc-300 overflow-x-auto space-y-1 animate-in fade-in duration-150">
+                    <div className="bg-[#121212] rounded-xl p-3.5 text-xs font-mono text-zinc-300 overflow-x-auto space-y-1 animate-in fade-in duration-150">
                       <div className="flex items-center gap-2 text-zinc-400 font-bold mb-1">
                         <Shield className="w-3.5 h-3.5 text-brand" />
                         <span>Event Metadata:</span>

@@ -70,6 +70,8 @@ export interface BattleSubmission {
   submittedAt: string;
 }
 
+export type Battle = Competition;
+
 export interface Competition {
   id: string;
   number: number;

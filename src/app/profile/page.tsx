@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, Suspense } from "react";
 import Image from "next/image";
 import { UserProfile } from "@/lib/types";
-import { X, ShieldCheck, Sparkles, CheckCircle2, Camera } from "lucide-react";
+import { X, ShieldCheck, Sparkles, CheckCircle2, Camera, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { producerService, storageService } from "@/services";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -42,6 +42,7 @@ function ProfileContent() {
   });
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   // Initialize profile data once when user is ready
   useEffect(() => {
@@ -74,7 +75,7 @@ function ProfileContent() {
     );
   }
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profile || isSaving) return;
     setIsSaving(true);
@@ -95,7 +96,7 @@ function ProfileContent() {
 
     setLinks(normalizedFormLinks);
 
-    const updated = producerService.updateProducer(profile.id, {
+    const updated = await producerService.updateProducerAsync(profile.id, {
       ...profile,
       nickname: profile.nickname.trim() || profile.nickname,
       avatarUrl: profile.avatarUrl || "/avatars/default-avatar.png",
@@ -119,18 +120,16 @@ function ProfileContent() {
   const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && profile) {
-      const { url } = await storageService.uploadImage(file, "avatars");
-      if (url) {
-        setProfile({ ...profile, avatarUrl: url });
-      } else {
-        const reader = new FileReader();
-        reader.onload = (uploadEvent) => {
-          const res = uploadEvent.target?.result;
-          if (res) {
-            setProfile({ ...profile, avatarUrl: res as string });
-          }
-        };
-        reader.readAsDataURL(file);
+      setIsUploadingAvatar(true);
+      try {
+        const { url } = await storageService.uploadImage(file, "avatars");
+        if (url) {
+          setProfile({ ...profile, avatarUrl: url });
+        }
+      } catch (err) {
+        // console.error("Avatar upload error:", err);
+      } finally {
+        setIsUploadingAvatar(false);
       }
     }
   };
@@ -195,6 +194,11 @@ function ProfileContent() {
                   fill
                   className="object-cover"
                 />
+                {isUploadingAvatar && (
+                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                    <Loader2 className="w-5 h-5 text-brand animate-spin" />
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center gap-3">

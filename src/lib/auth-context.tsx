@@ -109,8 +109,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     });
 
+    // 4. Listen to producer updates and background database sync
+    const handleProducersUpdated = () => {
+      try {
+        const savedId = localStorage.getItem(STORAGE_KEY);
+        if (savedId && savedId !== "logged_out") {
+          const prod = producerService.getProducerById(savedId);
+          if (prod) {
+            setUser(prod);
+          }
+        }
+      } catch {}
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("bnp_producers_updated", handleProducersUpdated);
+    }
+
     return () => {
       subscription.unsubscribe();
+      if (typeof window !== "undefined") {
+        window.removeEventListener("bnp_producers_updated", handleProducersUpdated);
+      }
     };
   }, []);
 

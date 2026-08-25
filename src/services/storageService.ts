@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { optimizeAndConvertToOpus } from "@/lib/audioConverter";
+import { optimizeImage } from "@/lib/imageOptimizer";
 
 export interface AudioUploadResponse {
   url: string | null;
@@ -84,8 +85,9 @@ export const storageService = {
   },
 
   /**
-   * Upload an artwork image to Supabase Storage 'covers' bucket.
-   * Returns the public CDN URL of the uploaded cover image.
+   * Upload an artwork image to Supabase Storage with automatic client-side compression.
+   * Compresses large camera/phone photos to WebP/JPEG to guarantee fast uploads
+   * and safe fallback persistence without exceeding LocalStorage quotas.
    */
   async uploadImage(
     file: File | Blob,
@@ -93,36 +95,66 @@ export const storageService = {
     customName?: string
   ): Promise<{ url: string | null; error: string | null }> {
     try {
-      const extension = file instanceof File && file.name.includes(".")
-        ? file.name.split(".").pop()?.toLowerCase() || "png"
-        : "png";
+      // 1. Client-side image compression & resizing
+      const isAvatar = folder === "avatars";
+      const optimized = await optimizeImage(file, {
+        maxWidth: isAvatar ? 512 : 1200,
+        maxHeight: isAvatar ? 512 : 1200,
+        quality: isAvatar ? 0.85 : 0.88,
+        squareCrop: isAvatar,
+        mimeType: "image/webp",
+      });
 
+      const processedFile = optimized.file;
+      const extension = processedFile.name.split(".").pop() || "webp";
       const cleanFilename = customName
         ? `${customName}.${extension}`
         : `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${extension}`;
 
       const filePath = `${folder}/${cleanFilename}`;
+      const contentType = processedFile.type || "image/webp";
 
+      // 2. Try primary bucket "covers"
       const { data, error } = await supabase.storage
         .from("covers")
-        .upload(filePath, file, {
+        .upload(filePath, processedFile, {
           cacheControl: "3600",
           upsert: true,
-          contentType: file.type || "image/png",
+          contentType,
         });
 
-      if (error) {
-        // console.warn("Supabase Image Upload failed:", error.message);
-        return { url: null, error: error.message };
+      if (!error && data) {
+        const { data: publicData } = supabase.storage
+          .from("covers")
+          .getPublicUrl(data.path);
+        return { url: publicData.publicUrl, error: null };
       }
 
-      const { data: publicData } = supabase.storage
-        .from("covers")
-        .getPublicUrl(data.path);
+      // 3. Fallback: Try "avatars" bucket if folder is avatars
+      if (isAvatar) {
+        const { data: avatarData, error: avatarError } = await supabase.storage
+          .from("avatars")
+          .upload(cleanFilename, processedFile, {
+            cacheControl: "3600",
+            upsert: true,
+            contentType,
+          });
 
-      return { url: publicData.publicUrl, error: null };
+        if (!avatarError && avatarData) {
+          const { data: publicData } = supabase.storage
+            .from("avatars")
+            .getPublicUrl(avatarData.path);
+          return { url: publicData.publicUrl, error: null };
+        }
+      }
+
+      // 4. Safe Fallback: If Supabase Storage is not accessible, return optimized lightweight dataUrl (~30KB)
+      if (optimized.dataUrl) {
+        return { url: optimized.dataUrl, error: null };
+      }
+
+      return { url: null, error: error?.message || "Failed to upload image" };
     } catch (err: unknown) {
-      // console.error("storageService.uploadImage error:", err);
       return { url: null, error: err instanceof Error ? err.message : String(err) || "Failed to upload image" };
     }
   },

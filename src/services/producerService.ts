@@ -19,7 +19,19 @@ function saveCustomProducers(data: Record<string, UserProfile>) {
   if (typeof window !== "undefined") {
     try {
       localStorage.setItem(STORAGE_KEY_PRODUCERS, JSON.stringify(data));
-    } catch {}
+    } catch {
+      try {
+        // If quota exceeded, clean up any oversized data URLs
+        const cleaned: Record<string, UserProfile> = {};
+        Object.entries(data).forEach(([k, v]) => {
+          cleaned[k] = {
+            ...v,
+            avatarUrl: (v.avatarUrl && v.avatarUrl.length > 200000) ? "/avatars/default-avatar.png" : v.avatarUrl,
+          };
+        });
+        localStorage.setItem(STORAGE_KEY_PRODUCERS, JSON.stringify(cleaned));
+      } catch {}
+    }
   }
 }
 
@@ -140,6 +152,16 @@ export const producerService = {
           const remoteLocation = p.location?.trim();
           const remoteNickname = p.nickname?.trim();
           const remoteAvatar = p.avatar_url;
+          const localAvatar = local?.avatarUrl;
+
+          // Resilient avatar resolution: Preserve valid local avatar if remote is missing or default
+          const isRemoteValid = Boolean(remoteAvatar && remoteAvatar !== "/avatars/default-avatar.png" && remoteAvatar.trim() !== "");
+          const isLocalValid = Boolean(localAvatar && localAvatar !== "/avatars/default-avatar.png" && localAvatar.trim() !== "");
+          const resolvedAvatar = isRemoteValid
+            ? remoteAvatar
+            : isLocalValid
+            ? localAvatar
+            : (remoteAvatar || "/avatars/default-avatar.png");
 
           custom[p.id] = {
             id: p.id,
@@ -148,7 +170,7 @@ export const producerService = {
             hideEmail: p.hide_email !== undefined && p.hide_email !== null 
               ? Boolean(p.hide_email) 
               : (local?.hideEmail ?? false),
-            avatarUrl: remoteAvatar || local?.avatarUrl || "/avatars/default-avatar.png",
+            avatarUrl: resolvedAvatar,
             bio: remoteBio !== undefined && remoteBio !== "" ? remoteBio : (local?.bio || ""),
             location: remoteLocation !== undefined && remoteLocation !== "" ? remoteLocation : (local?.location || ""),
             role: p.role || local?.role || "producer",
@@ -166,7 +188,7 @@ export const producerService = {
         saveCustomProducers(custom);
         notifyProducersUpdated();
       }
-    } catch (err) {
+    } catch {
       // console.warn("producerService.syncFromSupabase error:", err);
     }
     return this.getProducersMap();
@@ -198,9 +220,7 @@ export const producerService = {
       claimed_at: profile.claimedAt,
       created_at: profile.createdAt || new Date().toISOString(),
     }).then(
-      ({ error }) => {
-        // if (error) console.warn("Supabase producer upsert failed:", error.message);
-      },
+      () => {},
       () => {}
     );
 
@@ -259,12 +279,35 @@ export const producerService = {
       claimed_at: updated.claimedAt,
       created_at: updated.createdAt || new Date().toISOString(),
     }).then(
-      ({ error }) => {
-        // if (error) console.warn("Supabase producer update failed:", error.message);
-      },
+      () => {},
       () => {}
     );
 
+    return updated;
+  },
+
+  async updateProducerAsync(id: string, updates: Partial<UserProfile>): Promise<UserProfile> {
+    const updated = this.updateProducer(id, updates);
+    try {
+      await supabase.from("producers").upsert({
+        id: updated.id,
+        nickname: updated.nickname,
+        email: updated.email,
+        hide_email: Boolean(updated.hideEmail),
+        avatar_url: updated.avatarUrl,
+        bio: updated.bio || "",
+        location: updated.location || "",
+        role: updated.role || "producer",
+        discord_id: updated.discordId,
+        discord_username: updated.discordUsername,
+        discord_roles: updated.discordRoles || [],
+        links: updated.links || {},
+        stats: updated.stats || { battlesEntered: 0, battlesWon: 0, totalFlames: 0 },
+        is_claimed: updated.isClaimed || false,
+        claimed_at: updated.claimedAt,
+        created_at: updated.createdAt || new Date().toISOString(),
+      });
+    } catch {}
     return updated;
   },
 };

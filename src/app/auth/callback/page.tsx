@@ -36,6 +36,9 @@ export default function AuthCallbackPage() {
         const googleName = data.session?.user?.user_metadata?.full_name || verifiedEmail.split("@")[0];
         const googleAvatar = data.session?.user?.user_metadata?.avatar_url || "/avatars/default-avatar.png";
 
+        // Sync latest database records from Supabase before checking email match
+        await producerService.syncFromSupabase();
+
         // Check if verified email matches any known producer/admin in our registry
         const matchedProducer = producerService.getProducerByEmail(verifiedEmail);
         const redirectUrl = (typeof window !== "undefined" ? localStorage.getItem("bnp_redirect_url") : null) || "/battles";

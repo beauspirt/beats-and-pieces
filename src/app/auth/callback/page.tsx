@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { producerService } from "@/services/producerService";
+import { producerService, activityLogService } from "@/services";
 import { UserProfile } from "@/lib/types";
 import { Loader2, CheckCircle2, ShieldAlert } from "lucide-react";
 
@@ -48,6 +48,16 @@ export default function AuthCallbackPage() {
           localStorage.setItem(STORAGE_KEY, matchedProducer.id);
           setStatus("success");
 
+          activityLogService.logActivity({
+            type: "auth.login",
+            userId: matchedProducer.id,
+            userNickname: matchedProducer.nickname,
+            userAvatar: matchedProducer.avatarUrl,
+            userRole: matchedProducer.role,
+            description: `Producer '${matchedProducer.nickname}' signed in via Google OAuth`,
+            metadata: { provider: "google", email: verifiedEmail },
+          });
+
           // Only prompt for profile details if they log in for the first time (!isClaimed)
           if (!matchedProducer.isClaimed) {
             setTimeout(() => {
@@ -78,6 +88,17 @@ export default function AuthCallbackPage() {
           producerService.updateProducer(newProfile.id, newProfile);
           localStorage.setItem(STORAGE_KEY, newProfile.id);
           setStatus("success");
+
+          activityLogService.logActivity({
+            type: "auth.signup",
+            userId: newProfile.id,
+            userNickname: newProfile.nickname,
+            userAvatar: newProfile.avatarUrl,
+            userRole: newProfile.role,
+            description: `New user '${newProfile.nickname}' registered via Google OAuth`,
+            metadata: { provider: "google", email: verifiedEmail },
+          });
+
           setTimeout(() => {
             router.push("/profile?onboarding=true");
           }, 400);

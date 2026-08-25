@@ -3,6 +3,7 @@ import rawDiscoveryBeats from "@/data/discovery-beats.json";
 import { supabase } from "@/lib/supabase";
 import { battleService } from "./battleService";
 import { producerService } from "./producerService";
+import { activityLogService } from "./activityLogService";
 
 const STORAGE_KEY_CUSTOM_BEATS = "bnp_custom_beats";
 const STORAGE_KEY_BEAT_OVERRIDES = "bnp_beats_overrides";
@@ -317,6 +318,12 @@ export const beatService = {
       () => {}
     );
 
+    activityLogService.logActivity({
+      type: "beat.delete",
+      description: `Deleted showcase beat #${id}`,
+      metadata: { beatId: id },
+    });
+
     return true;
   },
 
@@ -330,6 +337,21 @@ export const beatService = {
     const updated = [newBeat, ...custom.filter((b) => b.id !== newBeat.id)];
     saveCustomBeats(updated);
     notifyBeatsUpdated();
+
+    activityLogService.logActivity({
+      type: "beat.upload",
+      userId: newBeat.beatmaker.id,
+      userNickname: newBeat.beatmaker.tag,
+      userAvatar: newBeat.beatmaker.avatarUrl,
+      description: `Uploaded showcase beat '${newBeat.title}' (${newBeat.bpm ? newBeat.bpm + " BPM" : "Custom BPM"})`,
+      metadata: {
+        beatId: newBeat.id,
+        title: newBeat.title,
+        bpm: newBeat.bpm,
+        priceTag: newBeat.priceTag,
+        tags: newBeat.tags,
+      },
+    });
 
     try {
       // 1. Ensure producer row exists in public.producers (satisfies foreign key)

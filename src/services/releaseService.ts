@@ -1,6 +1,7 @@
 import { Release } from "@/lib/types";
 import rawReleases from "@/data/releases.json";
 import { supabase } from "@/lib/supabase";
+import { activityLogService } from "./activityLogService";
 
 const STORAGE_KEY_RELEASES = "bnp_custom_releases";
 
@@ -124,6 +125,16 @@ export const releaseService = {
       () => {}
     );
 
+    activityLogService.logActivity({
+      type: "release.create",
+      description: `Published new compilation release '${newRelease.title}'`,
+      metadata: {
+        releaseId: newRelease.id,
+        title: newRelease.title,
+        slug: newRelease.slug,
+      },
+    });
+
     return newRelease;
   },
 
@@ -156,6 +167,16 @@ export const releaseService = {
       },
       () => {}
     );
+
+    activityLogService.logActivity({
+      type: "release.update",
+      description: `Updated compilation release '${updatedRelease.title}'`,
+      metadata: {
+        releaseId: updatedRelease.id,
+        title: updatedRelease.title,
+        slug: updatedRelease.slug,
+      },
+    });
 
     return updatedRelease;
   },

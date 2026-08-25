@@ -2,6 +2,7 @@ import { Competition, BattleSubmission, BattlePhase } from "@/lib/types";
 import rawCompetitions from "@/data/competitions.json";
 import rawSubmissions from "@/data/submissions.json";
 import { supabase } from "@/lib/supabase";
+import { activityLogService } from "./activityLogService";
 
 const STORAGE_KEY_BATTLES = "bnp_custom_battles";
 const STORAGE_KEY_CUSTOM_SUBS = "bnp_custom_submissions";
@@ -429,6 +430,16 @@ export const battleService = {
       // console.warn("Supabase battle insert exception:", err);
     }
 
+    activityLogService.logActivity({
+      type: "battle.create",
+      description: `Created new beat battle '${newBattle.title}'`,
+      metadata: {
+        battleId: newBattle.id,
+        title: newBattle.title,
+        phase: newBattle.phase,
+      },
+    });
+
     return newBattle;
   },
 
@@ -491,6 +502,16 @@ export const battleService = {
     } catch (err) {
       // console.warn("Supabase battle update exception:", err);
     }
+
+    activityLogService.logActivity({
+      type: "battle.update",
+      description: `Updated beat battle '${updatedBattle.title}' (Phase: ${updatedBattle.phase})`,
+      metadata: {
+        battleId: updatedBattle.id,
+        title: updatedBattle.title,
+        phase: updatedBattle.phase,
+      },
+    });
 
     return updatedBattle;
   },
@@ -673,6 +694,18 @@ export const battleService = {
       () => {}
     );
 
+    activityLogService.logActivity({
+      type: "battle.submit",
+      userId: newSubmission.userId,
+      userNickname: newSubmission.beatmakerTag,
+      description: `Submitted track '${newSubmission.beatTitle}' to '${battle?.title || newSubmission.battleId}'`,
+      metadata: {
+        battleId: newSubmission.battleId,
+        beatTitle: newSubmission.beatTitle,
+        bpm: newSubmission.bpm,
+      },
+    });
+
     notifyBattlesUpdated();
     return newSubmission;
   },
@@ -813,6 +846,16 @@ export const battleService = {
       saveCustomSubmissions(allSubs);
       customSubsList = allSubs;
       submissionsList = allSubs;
+
+      activityLogService.logActivity({
+        type: "battle.vote",
+        userId: voterId,
+        description: `Submitted Phase 2 public rating ballot for '${battle?.title || battleId}' (${Object.keys(userRatings).length} tracks rated)`,
+        metadata: {
+          battleId,
+          ratedCount: Object.keys(userRatings).length,
+        },
+      });
 
       notifyBattlesUpdated();
       return { success: true };
@@ -1049,6 +1092,18 @@ export const battleService = {
           submitted_at: sub.submittedAt,
         });
       }
+
+      activityLogService.logActivity({
+        type: "battle.jury_score",
+        userId: judgeId,
+        userNickname: judgeName,
+        description: `Judge '${judgeName}' submitted Phase 3 jury evaluations for '${battle?.title || battleId}' (${battleSubs.length} tracks evaluated)`,
+        metadata: {
+          battleId,
+          judgeName,
+          evaluationsCount: battleSubs.length,
+        },
+      });
 
       notifyBattlesUpdated();
       return { success: true };

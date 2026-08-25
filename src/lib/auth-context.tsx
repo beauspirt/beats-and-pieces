@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { UserProfile } from "@/lib/types";
 import { supabase } from "@/lib/supabase";
-import { producerService } from "@/services/producerService";
+import { producerService, activityLogService } from "@/services";
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -171,6 +171,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         localStorage.setItem(STORAGE_KEY, matched.id);
       } catch {}
+
+      activityLogService.logActivity({
+        type: "auth.login",
+        userId: matched.id,
+        userNickname: matched.nickname,
+        userAvatar: matched.avatarUrl,
+        userRole: matched.role,
+        description: `Producer '${matched.nickname}' signed in via Email`,
+        metadata: { provider: "email", email: cleanEmail },
+      });
+
       return { success: true, isMatchedProducer: true, user: matched };
     }
 
@@ -191,6 +202,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem(STORAGE_KEY, newProfile.id);
     } catch {}
 
+    activityLogService.logActivity({
+      type: "auth.signup",
+      userId: newProfile.id,
+      userNickname: newProfile.nickname,
+      userAvatar: newProfile.avatarUrl,
+      userRole: newProfile.role,
+      description: `New user '${newProfile.nickname}' registered via Email`,
+      metadata: { provider: "email", email: cleanEmail },
+    });
+
     return { success: true, isMatchedProducer: false, user: newProfile };
   };
 
@@ -206,6 +227,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         localStorage.setItem(STORAGE_KEY, existing.id);
       } catch {}
+
+      activityLogService.logActivity({
+        type: "auth.login",
+        userId: existing.id,
+        userNickname: existing.nickname,
+        userAvatar: existing.avatarUrl,
+        userRole: existing.role,
+        description: `Producer '${existing.nickname}' signed in`,
+        metadata: { provider: "direct", email: cleanEmail },
+      });
+
       return { success: true, isNew: false, user: existing };
     }
 
@@ -224,6 +256,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       localStorage.setItem(STORAGE_KEY, newProfile.id);
     } catch {}
+
+    activityLogService.logActivity({
+      type: "auth.signup",
+      userId: newProfile.id,
+      userNickname: newProfile.nickname,
+      userAvatar: newProfile.avatarUrl,
+      userRole: newProfile.role,
+      description: `New producer '${newProfile.nickname}' registered account`,
+      metadata: { email: cleanEmail },
+    });
 
     return { success: true, isNew: true, user: newProfile };
   };

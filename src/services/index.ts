@@ -5,3 +5,4 @@ export * from './beatService';
 
 export * from './storageService';
 export * from './vaultService';
+export * from './activityLogService';

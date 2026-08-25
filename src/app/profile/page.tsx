@@ -5,7 +5,7 @@ import Image from "next/image";
 import { UserProfile } from "@/lib/types";
 import { X, ShieldCheck, Sparkles, CheckCircle2, Loader2, Pencil } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { producerService, storageService } from "@/services";
+import { producerService, storageService, activityLogService } from "@/services";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ClientPortal } from "@/components/ClientPortal";
 import { ImageCropperModal } from "@/components/ImageCropperModal";
@@ -116,6 +116,19 @@ function ProfileContent() {
       updateUser(updated);
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 2000);
+
+      activityLogService.logActivity({
+        type: "profile.update",
+        userId: updated.id,
+        userNickname: updated.nickname,
+        userAvatar: updated.avatarUrl,
+        userRole: updated.role,
+        description: `Updated profile details for '${updated.nickname}'`,
+        metadata: {
+          location: updated.location,
+          linksUpdated: Object.keys(sanitizedSaveLinks),
+        },
+      });
     }
     setIsSaving(false);
   };

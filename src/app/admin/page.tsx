@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Shield, PlusCircle, Disc, Trophy, AlertTriangle, Users, Settings, UserCheck, ArrowRight, Layers, FileEdit } from "lucide-react";
+import { Shield, PlusCircle, Disc, Trophy, AlertTriangle, Users, Settings, UserCheck, ArrowRight, Layers, FileEdit, Activity } from "lucide-react";
 import { sampleProducers } from "@/lib/mock-data";
 import { useAuth } from "@/lib/auth-context";
 import { AdminGuard } from "@/components/AdminGuard";
@@ -150,6 +150,25 @@ export default function AdminDashboardPage() {
             </p>
           </div>
         </div>
+
+        {/* Option 7: Platform Activity Logs */}
+        <Link
+          href="/admin/logs"
+          className="bg-surface-card rounded-3xl p-6 hover:bg-surface-hover transition-all space-y-4 group shadow-md"
+        >
+          <div className="w-12 h-12 rounded-3xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+            <Activity className="w-6 h-6" />
+          </div>
+
+          <div>
+            <h2 className="text-2xl font-bold text-white group-hover:text-emerald-400 transition-colors">
+              Platform Activity Logs
+            </h2>
+            <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+              Track live platform activity: logins, new producer registrations, beat uploads, battle entries, and jury votes.
+            </p>
+          </div>
+        </Link>
 
       </div>
 

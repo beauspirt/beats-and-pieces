@@ -1250,7 +1250,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                     {isProfileOwner && (
                       <button
                         onClick={() => handleOpenEditModal(beat)}
-                        className="p-1.5 rounded-full bg-[#7B61FF]/15 hover:bg-[#7B61FF]/25 text-[#7B61FF] hover:text-white transition-colors cursor-pointer select-none absolute top-4 right-4 sm:static sm:top-auto sm:right-auto"
+                        className="p-1.5 rounded-full bg-[#7B61FF]/15 hover:bg-[#7B61FF]/25 text-[#7B61FF] hover:text-white transition-colors cursor-pointer select-none absolute top-4 right-4 z-10 sm:static sm:top-auto sm:right-auto sm:z-auto"
                         title="Edit beat details"
                       >
                         <Pencil className="w-3.5 h-3.5" />

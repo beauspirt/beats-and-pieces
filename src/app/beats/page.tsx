@@ -458,7 +458,7 @@ export default function BeatsDiscoveryPage() {
             return (
               <div
                 key={beat.id}
-                className="bg-[#181818] rounded-[28px] p-4 space-y-3.5 shadow-md"
+                className="bg-[#181818] rounded-[28px] p-4 space-y-3.5 shadow-md relative"
               >
                 {/* Row 1: Header (Title, Producer, Avatar, Badges, Meta) */}
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 min-w-0">
@@ -564,7 +564,7 @@ export default function BeatsDiscoveryPage() {
                     <button
                       type="button"
                       onClick={() => toggleFavorite(beat.id)}
-                      className="p-1.5 rounded-full bg-[#121212] hover:bg-[#202020] transition-colors text-[#888888] hover:text-amber-400 cursor-pointer select-none absolute top-4 right-4 sm:static sm:top-auto sm:right-auto ml-auto sm:ml-0"
+                      className="p-1.5 rounded-full bg-[#121212] hover:bg-[#202020] transition-colors text-[#888888] hover:text-amber-400 cursor-pointer select-none absolute top-4 right-4 z-10 sm:static sm:top-auto sm:right-auto sm:z-auto ml-auto sm:ml-0"
                       title={beat.isFavorite ? "Remove from favorites" : "Add to favorites"}
                     >
                       <Star

@@ -1037,19 +1037,19 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
           {/* Action Button: Share Your Page (Only visible for users visiting their own page) */}
           {isProfileOwner && (
-            <div className="shrink-0 w-full md:w-auto self-start">
+            <div className="shrink-0 absolute top-0 right-0 md:static md:top-auto md:right-auto md:w-auto self-start z-10">
               <button
                 onClick={handleShareProfile}
-                className="w-full md:w-auto px-5 py-3 rounded-xl bg-[#121212] hover:bg-[#202020] text-zinc-300 hover:text-white text-xs font-bold transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                className="px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-[#121212] hover:bg-[#202020] text-zinc-300 hover:text-white text-xs font-bold transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer shadow-sm leading-none"
               >
                 {copiedShareLink ? (
                   <>
-                    <Check className="w-4 h-4 text-emerald-400" />
+                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />
                     <span className="text-emerald-400">Link Copied!</span>
                   </>
                 ) : (
                   <>
-                    <Share2 className="w-4 h-4 text-zinc-400" />
+                    <Share2 className="w-4 h-4 text-zinc-400 shrink-0" />
                     <span>Share Your Page</span>
                   </>
                 )}

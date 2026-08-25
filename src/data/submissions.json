@@ -68,35 +68,35 @@
   {
     "id": "sub-bb6-1",
     "battleId": "battle-6",
-    "userId": "reflux",
-    "beatmakerTag": "Reflux",
-    "beatTitle": "Flueraru (Reflux Remix)",
-    "audioUrl": "/audio/battles/battle-6/26.05.2023 - Deliric Flueraru Mic Check Battle (Master) - Reflux.opus",
-    "duration": 206,
+    "userId": "mayfourteen",
+    "beatmakerTag": "mayfourteen",
+    "beatTitle": "Tigari si Alcool (Remix)",
+    "audioUrl": "/audio/battles/battle-6/mayfourteen - Tigari si Alcool (Remix).opus",
+    "duration": 253,
     "rank": 1,
-    "submittedAt": "2023-05-26T18:28:00Z"
+    "submittedAt": "2023-05-28T22:11:00Z"
   },
   {
     "id": "sub-bb6-2",
+    "battleId": "battle-6",
+    "userId": "reflux",
+    "beatmakerTag": "Re.Flux",
+    "beatTitle": "Flueraru (Re.Flux Remix)",
+    "audioUrl": "/audio/battles/battle-6/26.05.2023 - Deliric Flueraru Mic Check Battle (Master) - Reflux.opus",
+    "duration": 206,
+    "rank": 2,
+    "submittedAt": "2023-05-26T18:28:00Z"
+  },
+  {
+    "id": "sub-bb6-3",
     "battleId": "battle-6",
     "userId": "z3nn",
     "beatmakerTag": "Z3nn",
     "beatTitle": "Beat Battle #6 Remix",
     "audioUrl": "/audio/battles/battle-6/BEAT BATTLE 6 B&P - z3nn - Z3nn.opus",
     "duration": 268,
-    "rank": 2,
-    "submittedAt": "2023-05-26T23:59:00Z"
-  },
-  {
-    "id": "sub-bb6-3",
-    "battleId": "battle-6",
-    "userId": "mayfourteen",
-    "beatmakerTag": "mayfourteen",
-    "beatTitle": "Tigari si Alcool (Remix)",
-    "audioUrl": "/audio/battles/battle-6/mayfourteen - Tigari si Alcool (Remix).opus",
-    "duration": 253,
     "rank": 3,
-    "submittedAt": "2023-05-28T22:11:00Z"
+    "submittedAt": "2023-05-26T23:59:00Z"
   },
   {
     "id": "sub-bb5-1",

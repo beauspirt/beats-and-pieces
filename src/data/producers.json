@@ -300,8 +300,8 @@
     ],
     "links": {},
     "stats": {
-      "battlesEntered": 1,
-      "battlesWon": 1,
+      "battlesEntered": 2,
+      "battlesWon": 2,
       "totalFlames": 0
     },
     "isClaimed": false,
@@ -441,19 +441,19 @@
   },
   "reflux": {
     "id": "reflux",
-    "nickname": "Reflux",
+    "nickname": "Re.Flux",
     "email": "reflux@beatsandpieces.ro",
     "avatarUrl": "/avatars/default-avatar.png",
     "bio": "",
     "location": "",
     "role": "producer",
     "discordRoles": [
-      "Battle Champion"
+      "Podium Finalist"
     ],
     "links": {},
     "stats": {
       "battlesEntered": 1,
-      "battlesWon": 1,
+      "battlesWon": 0,
       "totalFlames": 0
     },
     "isClaimed": false,

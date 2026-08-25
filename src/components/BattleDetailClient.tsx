@@ -15,7 +15,7 @@ import { FlameRating } from "./FlameRating";
 import {
   ArrowLeft, Download, Upload, CheckCircle2,
   Lock, ShieldCheck, Flame, Star, Disc, Trophy, Award, Check, FileCheck, CassetteTape,
-  ExternalLink, Pencil
+  ExternalLink, Pencil, Play
 } from "lucide-react";
 import { BattlePhase, Competition, BattleSubmission } from "@/lib/types";
 import { useAudioPlayer } from "@/lib/audio-context";
@@ -280,6 +280,8 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   const [juryScores, setJuryScores] = useState<Record<string, string>>({});
   const [juryFeedback, setJuryFeedback] = useState<Record<string, string>>({});
   const [isJurySubmitted, setIsJurySubmitted] = useState(false);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  useBodyScrollLock(isVideoModalOpen);
 
   // Dynamic Percentage-based Ballot Validation (min 50% of total entries)
   const minPercentage = 50;
@@ -812,51 +814,70 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
           </div>
 
           {/* Meta Info (identical natural flow and position to battles listing page) */}
-          <div className="flex-1 w-full min-w-0 space-y-3.5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <h1 className="text-2xl font-bold text-white tracking-tight leading-tight">
-                {battle.title}
-              </h1>
-              <div className="flex items-center gap-2 shrink-0 self-start sm:self-center flex-wrap">
-                <span className="px-3.5 py-1.5 rounded-full bg-[#7B61FF] text-xs font-bold text-white shadow-sm inline-flex items-center justify-center text-center leading-none">
-                  {battle.phase === "submission"
-                    ? "Phase 1: Submissions Open"
-                    : battle.phase === "rating"
-                    ? "Phase 2: Public Rating"
-                    : battle.phase === "judging"
-                    ? "Phase 3: Jury Evaluation"
-                    : hasJudges ? "Phase 4: Results" : "Phase 3: Results"}
-                </span>
-                <span className="px-3.5 py-1.5 rounded-full bg-[#121212] text-xs text-[#A0A0A0] inline-flex items-center justify-center text-center leading-none">
-                  {battle.totalSubmissions} Total Entries
-                </span>
+          <div className="flex-1 w-full min-w-0 space-y-3.5 flex flex-col justify-between self-stretch">
+            <div className="space-y-3.5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <h1 className="text-2xl font-bold text-white tracking-tight leading-tight">
+                  {battle.title}
+                </h1>
+                <div className="flex items-center gap-2 shrink-0 self-start sm:self-center flex-wrap">
+                  <span className="px-3.5 py-1.5 rounded-full bg-[#7B61FF] text-xs font-bold text-white shadow-sm inline-flex items-center justify-center text-center leading-none">
+                    {battle.phase === "submission"
+                      ? "Phase 1: Submissions Open"
+                      : battle.phase === "rating"
+                      ? "Phase 2: Public Rating"
+                      : battle.phase === "judging"
+                      ? "Phase 3: Jury Evaluation"
+                      : hasJudges ? "Phase 4: Results" : "Phase 3: Results"}
+                  </span>
+                  <span className="px-3.5 py-1.5 rounded-full bg-[#121212] text-xs text-[#A0A0A0] inline-flex items-center justify-center text-center leading-none">
+                    {battle.totalSubmissions} Total Entries
+                  </span>
+                </div>
               </div>
-            </div>
 
-            <div className="space-y-1 text-sm text-[#A0A0A0]">
-              <p>Hosted by: <span className="text-white">{Array.isArray(battle.hosts) && battle.hosts.length > 0 ? battle.hosts.join(", ") : "Nerub"}</span></p>
-              {hasJudges && Array.isArray(battle.judges) && battle.judges.length > 0 && (
-                <p>Judged by: <span className="text-white">{battle.judges.join(", ")}</span></p>
+              <div className="space-y-1 text-sm text-[#A0A0A0]">
+                <p>Hosted by: <span className="text-white">{Array.isArray(battle.hosts) && battle.hosts.length > 0 ? battle.hosts.join(", ") : "Nerub"}</span></p>
+                {hasJudges && Array.isArray(battle.judges) && battle.judges.length > 0 && (
+                  <p>Judged by: <span className="text-white">{battle.judges.join(", ")}</span></p>
+                )}
+              </div>
+
+              {battle.description && (
+                <p className="text-sm text-[#D1D1D1] leading-relaxed">
+                  {battle.description}
+                </p>
               )}
             </div>
 
-            {battle.description && (
-              <p className="text-sm text-[#D1D1D1] leading-relaxed">
-                {battle.description}
-              </p>
-            )}
-
-            {battle.phase === "completed" ? (
-              battle.endedAt && (
-                <div className="text-xs text-[#888888] pt-2">
-                  Ended on {new Date(battle.endedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" })}
+            {/* Bottom Row inside Main Battle Card */}
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pt-2">
+              {battle.phase === "completed" ? (
+                battle.endedAt ? (
+                  <div className="text-xs text-[#888888]">
+                    Ended on {new Date(battle.endedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" })}
+                  </div>
+                ) : <div />
+              ) : (
+                <div className="text-xs text-[#888888]">
+                  Submissions close {battle.submissionEndsAt ? new Date(battle.submissionEndsAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "TBD"} • Public rating open until {battle.ratingEndsAt ? new Date(battle.ratingEndsAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "TBD"}
                 </div>
-              )
-            ) : (
-              <div className="text-xs text-[#888888] pt-2">
-                Submissions close {battle.submissionEndsAt ? new Date(battle.submissionEndsAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "TBD"} • Public rating open until {battle.ratingEndsAt ? new Date(battle.ratingEndsAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "TBD"}
-              </div>
-            )}
+              )}
+
+              {/* Live Stream Jury Session Button on Bottom Right of Card */}
+              {battle.youtubeVodUrl && battle.youtubeVodUrl.trim() && (
+                <button
+                  type="button"
+                  onClick={() => setIsVideoModalOpen(true)}
+                  className="px-3.5 py-1.5 rounded-full bg-[#121212] hover:bg-[#202020] text-zinc-300 hover:text-white text-xs font-bold transition-all inline-flex items-center gap-1.5 shrink-0 select-none cursor-pointer self-start sm:self-auto leading-none border border-white/5 shadow-sm group"
+                  title="Watch Live Stream Jury Session"
+                >
+                  <Play className="w-3.5 h-3.5 fill-[#FF0000] text-[#FF0000] group-hover:scale-110 transition-transform" />
+                  <span>Live Stream Jury Session</span>
+                  <span className="text-xs text-zinc-400">↗</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </section>
@@ -1730,27 +1751,66 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             </div>
           )}
 
-          {/* YouTube Live Jury Evaluation Session Embed below Leaderboard */}
-          {battle.youtubeVodUrl && battle.youtubeVodUrl.trim() && (
-            <div className="w-full aspect-video rounded-3xl overflow-hidden bg-[#121212] shadow-2xl">
-              <iframe
-                src={
-                  battle.youtubeVodUrl.includes("watch?v=")
-                    ? `https://www.youtube-nocookie.com/embed/${battle.youtubeVodUrl.split("watch?v=")[1].split("&")[0]}`
-                    : battle.youtubeVodUrl.includes("/embed/")
-                    ? battle.youtubeVodUrl
-                    : `https://www.youtube-nocookie.com/embed/${battle.youtubeVodUrl.split("/").pop()}`
-                }
-                title={`${battle.title} Live Jury Evaluation`}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full border-0"
-              />
-            </div>
-          )}
-
         </div>
       )}
+
+      {/* Live Stream Jury Session Video Modal */}
+      <ClientPortal>
+        {isVideoModalOpen && battle.youtubeVodUrl && (
+          <div
+            onClick={() => setIsVideoModalOpen(false)}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150 cursor-pointer"
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#181818] rounded-[28px] max-w-4xl w-full overflow-hidden shadow-2xl space-y-4 p-4 sm:p-6 relative cursor-default"
+            >
+              {/* Modal Top Bar */}
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-bold text-white truncate pr-4">
+                  {battle.title} - Live Stream Jury Session
+                </h3>
+                <button
+                  onClick={() => setIsVideoModalOpen(false)}
+                  className="w-8 h-8 rounded-full bg-[#121212] text-zinc-400 hover:text-white flex items-center justify-center text-sm cursor-pointer shrink-0 transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Embedded 16:9 YouTube Player */}
+              <div className="w-full aspect-video rounded-2xl overflow-hidden bg-black relative shadow-inner">
+                <iframe
+                  src={
+                    battle.youtubeVodUrl.includes("watch?v=")
+                      ? `https://www.youtube-nocookie.com/embed/${battle.youtubeVodUrl.split("watch?v=")[1].split("&")[0]}?autoplay=1`
+                      : battle.youtubeVodUrl.includes("/embed/")
+                      ? `${battle.youtubeVodUrl}${battle.youtubeVodUrl.includes("?") ? "&" : "?"}autoplay=1`
+                      : `https://www.youtube-nocookie.com/embed/${battle.youtubeVodUrl.split("/").pop()}?autoplay=1`
+                  }
+                  title={`${battle.title} Live Stream Jury Session`}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="w-full h-full border-0"
+                />
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex items-center justify-end pt-1 text-xs">
+                <a
+                  href={battle.youtubeVodUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3.5 py-1.5 rounded-full bg-[#222222] hover:bg-[#2c2c2c] text-white text-xs font-bold flex items-center gap-2 shrink-0 transition-colors leading-none"
+                >
+                  <span>Watch on YouTube</span>
+                  <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
+      </ClientPortal>
 
     </div>
   );

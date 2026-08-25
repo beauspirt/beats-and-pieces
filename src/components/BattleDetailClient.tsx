@@ -880,20 +880,28 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                 </div>
               )}
 
-              {/* Live Stream Jury Session Button on Bottom Right of Card */}
+              {/* Live Stream Jury Session Card on Bottom Right */}
               {battle.youtubeVodUrl && battle.youtubeVodUrl.trim() && (
                 <button
                   type="button"
                   onClick={() => setIsVideoModalOpen(true)}
-                  className="flex items-center gap-3 p-1.5 pr-3.5 rounded-xl bg-[#121212] hover:bg-[#202020] text-zinc-300 hover:text-white transition-all select-none cursor-pointer self-start sm:self-auto shadow-sm group text-left border border-white/5"
+                  className="flex flex-col gap-2.5 p-3 rounded-[24px] bg-[#121212] hover:bg-[#1A1A1A] text-zinc-300 hover:text-white transition-all select-none cursor-pointer w-full sm:w-64 shrink-0 shadow-md group text-left border border-white/5"
                   title="Watch Live Stream Jury Session"
                 >
-                  {/* Video Thumbnail Preview */}
+                  {/* Text Header Above Thumbnail */}
+                  <div className="flex items-center justify-between gap-1.5 px-0.5 w-full">
+                    <span className="text-xs font-bold leading-none text-zinc-300 group-hover:text-white transition-colors">
+                      Live Stream Jury Session
+                    </span>
+                    <span className="text-xs text-zinc-400 group-hover:text-white transition-colors">↗</span>
+                  </div>
+
+                  {/* Larger 16:9 Video Thumbnail Preview (Concentric R=24px, p=12px, r=12px) */}
                   {(() => {
                     const ytId = getYouTubeId(battle.youtubeVodUrl);
                     const thumbnailUrl = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null;
                     return thumbnailUrl ? (
-                      <div className="w-16 h-10 aspect-video rounded-lg overflow-hidden relative shrink-0 bg-black/40 shadow-inner">
+                      <div className="w-full aspect-video rounded-xl overflow-hidden relative shrink-0 bg-black/50 shadow-inner">
                         <Image
                           src={thumbnailUrl}
                           alt="Live Stream Thumbnail"
@@ -903,11 +911,6 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                       </div>
                     ) : null;
                   })()}
-
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="text-xs font-bold leading-none">Live Stream Jury Session</span>
-                    <span className="text-xs text-zinc-400">↗</span>
-                  </div>
                 </button>
               )}
             </div>

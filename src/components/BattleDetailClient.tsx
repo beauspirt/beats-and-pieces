@@ -782,7 +782,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       
       {/* SECTION 1: HERO & PHASE HEADER */}
       <section className="space-y-4">
-        {/* Top Breadcrumb & Phases Timeline Indicator */}
+        {/* Top Breadcrumb */}
         <div className="flex items-center justify-between h-9">
           <Link
             href="/battles"
@@ -791,28 +791,6 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             <ArrowLeft className="w-4 h-4" />
             <span>Back to Battles</span>
           </Link>
-
-          {/* Battle Phases Timeline Indicator (Read-only status, no click/mock jumping) */}
-          <div className="flex items-center gap-1 bg-[#181818] p-1 rounded-3xl select-none overflow-x-auto no-scrollbar max-w-[200px] sm:max-w-none">
-            {phasesList.map((p) => {
-              const isCurrent = battle.phase === p.key;
-              return (
-                <div
-                  key={p.key}
-                  className={`px-2.5 sm:px-3 py-1 rounded-3xl text-xs font-bold transition-all flex items-center gap-1 sm:gap-1.5 shrink-0 ${
-                    isCurrent
-                      ? "bg-[#7B61FF] text-white shadow-md"
-                      : "text-[#555555] opacity-50 cursor-default hidden sm:flex"
-                  }`}
-                >
-                  <span className={`text-xs ${isCurrent ? "text-white/80" : "text-[#444444]"}`}>
-                    {p.number}
-                  </span>
-                  <span>{p.label}</span>
-                </div>
-              );
-            })}
-          </div>
         </div>
 
         {/* Hero Header */}
@@ -829,7 +807,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             />
           </div>
 
-          {/* Meta Info (identical natural flow and position to battles listing page) */}
+          {/* Middle: Content + Bottom date */}
           <div className="flex-1 w-full min-w-0 space-y-3.5 flex flex-col justify-between self-stretch">
             <div className="space-y-3.5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -837,15 +815,6 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                   {battle.title}
                 </h1>
                 <div className="flex items-center gap-2 shrink-0 self-start sm:self-center flex-wrap">
-                  <span className="px-3.5 py-1.5 rounded-full bg-[#7B61FF] text-xs font-bold text-white shadow-sm inline-flex items-center justify-center text-center leading-none">
-                    {battle.phase === "submission"
-                      ? "Phase 1: Submissions Open"
-                      : battle.phase === "rating"
-                      ? "Phase 2: Public Rating"
-                      : battle.phase === "judging"
-                      ? "Phase 3: Jury Evaluation"
-                      : hasJudges ? "Phase 4: Results" : "Phase 3: Results"}
-                  </span>
                   <span className="px-3.5 py-1.5 rounded-full bg-[#121212] text-xs text-[#A0A0A0] inline-flex items-center justify-center text-center leading-none">
                     {battle.totalSubmissions} Total Entries
                   </span>
@@ -867,54 +836,78 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             </div>
 
             {/* Bottom Row inside Main Battle Card */}
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pt-2">
+            <div className="pt-2">
               {battle.phase === "completed" ? (
                 battle.endedAt ? (
                   <div className="text-xs text-[#888888]">
                     Ended on {new Date(battle.endedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" })}
                   </div>
-                ) : <div />
+                ) : null
               ) : (
                 <div className="text-xs text-[#888888]">
                   Submissions close {battle.submissionEndsAt ? new Date(battle.submissionEndsAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "TBD"} • Public rating open until {battle.ratingEndsAt ? new Date(battle.ratingEndsAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "TBD"}
                 </div>
               )}
-
-              {/* Live Stream Jury Session Card on Bottom Right */}
-              {battle.youtubeVodUrl && battle.youtubeVodUrl.trim() && (
-                <button
-                  type="button"
-                  onClick={() => setIsVideoModalOpen(true)}
-                  className="flex flex-col gap-2.5 p-3 rounded-[24px] bg-[#121212] hover:bg-[#1A1A1A] text-zinc-300 hover:text-white transition-all select-none cursor-pointer w-full sm:w-64 shrink-0 shadow-md group text-left"
-                  title="Watch Live Stream Jury Session"
-                >
-                  {/* Text Header Above Thumbnail */}
-                  <div className="flex items-center justify-between gap-1.5 px-0.5 w-full">
-                    <span className="text-xs font-bold leading-none text-zinc-300 group-hover:text-white transition-colors">
-                      Live Stream Jury Session
-                    </span>
-                    <span className="text-xs text-zinc-400 group-hover:text-white transition-colors">↗</span>
-                  </div>
-
-                  {/* 16:9 Video Thumbnail Preview (Concentric R=24px, p=12px, r=12px) */}
-                  {(() => {
-                    const ytId = getYouTubeId(battle.youtubeVodUrl);
-                    const thumbnailUrl = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null;
-                    return thumbnailUrl ? (
-                      <div className="w-full aspect-video rounded-xl overflow-hidden relative shrink-0 bg-black/50">
-                        <Image
-                          src={thumbnailUrl}
-                          alt="Live Stream Thumbnail"
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                    ) : null;
-                  })()}
-                </button>
-              )}
             </div>
           </div>
+
+          {/* Right Column: Live Stream Jury Session Card (sitting to the right of the description) */}
+          {battle.youtubeVodUrl && battle.youtubeVodUrl.trim() && (
+            <div className="w-full md:w-64 lg:w-72 shrink-0 self-start md:self-center">
+              <button
+                type="button"
+                onClick={() => setIsVideoModalOpen(true)}
+                className="flex flex-col gap-2.5 p-3 rounded-[24px] bg-[#121212] hover:bg-[#1A1A1A] text-zinc-300 hover:text-white transition-all select-none cursor-pointer w-full shadow-md group text-left"
+                title="Watch Live Stream Jury Session"
+              >
+                {/* Text Header Above Thumbnail */}
+                <div className="flex items-center justify-between gap-1.5 px-0.5 w-full">
+                  <span className="text-xs font-bold leading-none text-zinc-300 group-hover:text-white transition-colors">
+                    Live Stream Jury Session
+                  </span>
+                  <span className="text-xs text-zinc-400 group-hover:text-white transition-colors">↗</span>
+                </div>
+
+                {/* 16:9 Video Thumbnail Preview */}
+                {(() => {
+                  const ytId = getYouTubeId(battle.youtubeVodUrl);
+                  const thumbnailUrl = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null;
+                  return thumbnailUrl ? (
+                    <div className="w-full aspect-video rounded-xl overflow-hidden relative shrink-0 bg-black/50">
+                      <Image
+                        src={thumbnailUrl}
+                        alt="Live Stream Thumbnail"
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  ) : null;
+                })()}
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Battle Phases Timeline Indicator - Full Width between Hero Card and Beats */}
+        <div className="w-full bg-[#181818] p-1.5 rounded-2xl sm:rounded-3xl flex items-center gap-1 sm:gap-1.5 select-none overflow-x-auto no-scrollbar">
+          {phasesList.map((p) => {
+            const isCurrent = battle.phase === p.key;
+            return (
+              <div
+                key={p.key}
+                className={`flex-1 py-2 sm:py-2.5 px-3 rounded-xl sm:rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 sm:gap-2 shrink-0 sm:shrink ${
+                  isCurrent
+                    ? "bg-[#7B61FF] text-white shadow-md"
+                    : "text-[#555555] opacity-50 cursor-default"
+                }`}
+              >
+                <span className={`text-xs ${isCurrent ? "text-white/80" : "text-[#444444]"}`}>
+                  {p.number}
+                </span>
+                <span>{p.label}</span>
+              </div>
+            );
+          })}
         </div>
       </section>
 

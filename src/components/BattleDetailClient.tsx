@@ -810,16 +810,9 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
           {/* Middle: Content + Bottom date */}
           <div className="flex-1 w-full min-w-0 space-y-3.5 flex flex-col justify-between self-stretch">
             <div className="space-y-3.5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <h1 className="text-2xl font-bold text-white tracking-tight leading-tight">
-                  {battle.title}
-                </h1>
-                <div className="flex items-center gap-2 shrink-0 self-start sm:self-center flex-wrap">
-                  <span className="px-3.5 py-1.5 rounded-full bg-[#121212] text-xs text-[#A0A0A0] inline-flex items-center justify-center text-center leading-none">
-                    {battle.totalSubmissions} Total Entries
-                  </span>
-                </div>
-              </div>
+              <h1 className="text-2xl font-bold text-white tracking-tight leading-tight">
+                {battle.title}
+              </h1>
 
               <div className="space-y-1 text-sm text-[#A0A0A0]">
                 <p>Hosted by: <span className="text-white">{Array.isArray(battle.hosts) && battle.hosts.length > 0 ? battle.hosts.join(", ") : "Nerub"}</span></p>
@@ -851,13 +844,19 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             </div>
           </div>
 
-          {/* Right Column: Live Stream Jury Session Card (sitting to the right of the description) */}
-          {battle.youtubeVodUrl && battle.youtubeVodUrl.trim() && (
-            <div className="w-full md:w-64 lg:w-72 shrink-0 self-start md:self-center">
+          {/* Right Column: Total Entries Tag on top, and Live Stream Jury Session Card directly under it */}
+          <div className="w-full sm:w-auto md:w-56 shrink-0 flex flex-col items-start sm:items-end justify-between self-stretch gap-3.5">
+            {/* Total Entries tag on top right */}
+            <span className="px-3.5 py-1.5 rounded-full bg-[#121212] text-xs text-[#A0A0A0] inline-flex items-center justify-center text-center leading-none shrink-0">
+              {battle.totalSubmissions} Total Entries
+            </span>
+
+            {/* Live Stream Jury Session Card under the total entries tag */}
+            {battle.youtubeVodUrl && battle.youtubeVodUrl.trim() && (
               <button
                 type="button"
                 onClick={() => setIsVideoModalOpen(true)}
-                className="flex flex-col gap-2.5 p-3 rounded-[24px] bg-[#121212] hover:bg-[#1A1A1A] text-zinc-300 hover:text-white transition-all select-none cursor-pointer w-full shadow-md group text-left"
+                className="flex flex-col gap-2.5 p-3 rounded-[24px] bg-[#121212] hover:bg-[#1A1A1A] text-zinc-300 hover:text-white transition-all select-none cursor-pointer w-full sm:w-56 shrink-0 shadow-md group text-left mt-auto"
                 title="Watch Live Stream Jury Session"
               >
                 {/* Text Header Above Thumbnail */}
@@ -868,7 +867,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                   <span className="text-xs text-zinc-400 group-hover:text-white transition-colors">↗</span>
                 </div>
 
-                {/* 16:9 Video Thumbnail Preview */}
+                {/* 16:9 Video Thumbnail Preview (Concentric R=24px, p=12px, r=12px) */}
                 {(() => {
                   const ytId = getYouTubeId(battle.youtubeVodUrl);
                   const thumbnailUrl = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null;
@@ -884,8 +883,8 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                   ) : null;
                 })()}
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Battle Phases Timeline Indicator - Full Width between Hero Card and Beats */}

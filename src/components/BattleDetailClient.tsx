@@ -888,22 +888,24 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
         </div>
 
         {/* Battle Phases Timeline Indicator - Full Width between Hero Card and Beats */}
-        <div className="w-full bg-[#181818] p-1.5 rounded-2xl sm:rounded-3xl flex items-center gap-1 sm:gap-1.5 select-none overflow-x-auto no-scrollbar">
+        <div className="w-full bg-[#181818] p-1.5 rounded-2xl sm:rounded-3xl flex items-center gap-1 sm:gap-1.5 select-none overflow-hidden">
           {phasesList.map((p) => {
             const isCurrent = battle.phase === p.key;
             return (
               <div
                 key={p.key}
-                className={`flex-1 py-2 sm:py-2.5 px-3 rounded-xl sm:rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 sm:gap-2 shrink-0 sm:shrink ${
+                className={`py-2 sm:py-2.5 px-2.5 sm:px-3 rounded-xl sm:rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 sm:gap-2 ${
                   isCurrent
-                    ? "bg-[#7B61FF] text-white shadow-md"
-                    : "text-[#555555] opacity-50 cursor-default"
+                    ? "flex-1 bg-[#7B61FF] text-white shadow-md"
+                    : "shrink-0 sm:flex-1 text-[#555555] opacity-50 cursor-default"
                 }`}
               >
                 <span className={`text-xs ${isCurrent ? "text-white/80" : "text-[#444444]"}`}>
                   {p.number}
                 </span>
-                <span>{p.label}</span>
+                <span className={`whitespace-nowrap ${isCurrent ? "inline" : "hidden sm:inline"}`}>
+                  {p.label}
+                </span>
               </div>
             );
           })}

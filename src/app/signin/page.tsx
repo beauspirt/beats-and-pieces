@@ -37,6 +37,22 @@ function SignInContent() {
     }
   }, [isLoggedIn, isLoading, redirectParam, router]);
 
+  const parseGoogleJwt = (token: string) => {
+    try {
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+          .join("")
+      );
+      return JSON.parse(jsonPayload);
+    } catch {
+      return null;
+    }
+  };
+
   // One-Tap credential handler
   const handleOneTapCredential = useCallback(
     async (response: { credential?: string }) => {
@@ -45,12 +61,23 @@ function SignInContent() {
       setAuthError(null);
 
       try {
+        const payload = parseGoogleJwt(response.credential);
+        if (!payload || !payload.email) {
+          throw new Error("Unable to read Google account information.");
+        }
+
         if (redirectParam) {
           try {
             localStorage.setItem("bnp_redirect_url", redirectParam);
           } catch {}
         }
-        const { isClaimed } = await signInWithGoogleIdToken(response.credential);
+
+        const { isClaimed } = await loginWithGoogleProfile({
+          email: payload.email,
+          name: payload.name,
+          avatarUrl: payload.picture,
+        });
+
         const target = isClaimed
           ? (localStorage.getItem("bnp_redirect_url") || redirectParam || "/battles")
           : "/profile?onboarding=true";
@@ -67,7 +94,7 @@ function SignInContent() {
         );
       }
     },
-    [redirectParam, router, signInWithGoogleIdToken]
+    [loginWithGoogleProfile, redirectParam, router]
   );
 
   // Initialize Google OAuth2 Token Client (Method 2: 100% custom button without iframe)
@@ -177,8 +204,8 @@ function SignInContent() {
     setAuthError(null);
 
     if (tokenClientRef.current) {
-      // Trigger Google's popup flow directly without any iframe
-      tokenClientRef.current.requestAccessToken({ prompt: "" });
+      // Trigger Google's popup flow directly, asking user to select account
+      tokenClientRef.current.requestAccessToken({ prompt: "select_account" });
     } else {
       // Fallback if script hasn't loaded yet
       setIsAuthenticating(true);

@@ -11,7 +11,7 @@ function SignInContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectParam = searchParams.get("redirect");
-  const { isLoggedIn, isLoading, signInWithGoogle, signInWithGoogleIdToken, loginWithGoogleProfile } = useAuth();
+  const { isLoggedIn, isLoading, signInWithGoogle, loginWithGoogleProfile } = useAuth();
 
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -37,65 +37,6 @@ function SignInContent() {
     }
   }, [isLoggedIn, isLoading, redirectParam, router]);
 
-  const parseGoogleJwt = (token: string) => {
-    try {
-      const base64Url = token.split(".")[1];
-      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-      const jsonPayload = decodeURIComponent(
-        atob(base64)
-          .split("")
-          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-          .join("")
-      );
-      return JSON.parse(jsonPayload);
-    } catch {
-      return null;
-    }
-  };
-
-  // One-Tap credential handler
-  const handleOneTapCredential = useCallback(
-    async (response: { credential?: string }) => {
-      if (!response.credential) return;
-      setIsAuthenticating(true);
-      setAuthError(null);
-
-      try {
-        const payload = parseGoogleJwt(response.credential);
-        if (!payload || !payload.email) {
-          throw new Error("Unable to read Google account information.");
-        }
-
-        if (redirectParam) {
-          try {
-            localStorage.setItem("bnp_redirect_url", redirectParam);
-          } catch {}
-        }
-
-        const { isClaimed } = await loginWithGoogleProfile({
-          email: payload.email,
-          name: payload.name,
-          avatarUrl: payload.picture,
-        });
-
-        const target = isClaimed
-          ? (localStorage.getItem("bnp_redirect_url") || redirectParam || "/battles")
-          : "/profile?onboarding=true";
-        try {
-          localStorage.removeItem("bnp_redirect_url");
-        } catch {}
-        router.replace(target);
-      } catch (err: unknown) {
-        setIsAuthenticating(false);
-        setAuthError(
-          err instanceof Error
-            ? err.message
-            : "Google Sign-In failed. Please try again."
-        );
-      }
-    },
-    [loginWithGoogleProfile, redirectParam, router]
-  );
 
   // Initialize Google OAuth2 Token Client (Method 2: 100% custom button without iframe)
   const initGoogleGIS = useCallback(() => {
@@ -104,10 +45,11 @@ function SignInContent() {
     if (!google?.accounts?.oauth2 || !googleClientId) return;
 
     try {
-      // 1. Token client for custom button click
+      // 1. Token client for custom button click (enforcing account selection)
       tokenClientRef.current = google.accounts.oauth2.initTokenClient({
         client_id: googleClientId,
         scope: "openid email profile",
+        prompt: "select_account",
         callback: async (tokenResponse: { access_token?: string; error?: string; error_description?: string }) => {
           if (tokenResponse.error) {
             setIsAuthenticating(false);
@@ -170,20 +112,16 @@ function SignInContent() {
         },
       });
 
-      // 2. Initialize One Tap if available
+      // 2. Disable One Tap so it never pops up in the corner
       if (google.accounts.id) {
-        google.accounts.id.initialize({
-          client_id: googleClientId,
-          callback: handleOneTapCredential,
-          auto_select: false,
-          cancel_on_tap_outside: true,
-        });
-        google.accounts.id.prompt();
+        try {
+          google.accounts.id.cancel();
+        } catch {}
       }
     } catch (e) {
       console.warn("Google Identity Services initialization:", e);
     }
-  }, [googleClientId, handleOneTapCredential, loginWithGoogleProfile, redirectParam, router]);
+  }, [googleClientId, loginWithGoogleProfile, redirectParam, router]);
 
   useEffect(() => {
     if (typeof window !== "undefined" && (window as unknown as { google?: any })?.google?.accounts?.oauth2) {

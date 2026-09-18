@@ -68,10 +68,10 @@ export default function BattlesPage() {
 
           <Link
             href={`/battles/${activeBattle.id}`}
-            className="bg-[#181818] rounded-[28px] p-4 flex flex-col md:flex-row gap-6 items-start hover:bg-[#1A1A1A] transition-all shadow-xl cursor-pointer group relative overflow-hidden"
+            className="bg-[#181818] rounded-[28px] p-4 flex flex-col md:flex-row gap-6 items-start hover:bg-[#1A1A1A] active:bg-[#202020] active:scale-[0.985] sm:active:scale-[0.99] transition-all duration-150 ease-out shadow-xl cursor-pointer group relative overflow-hidden select-none touch-manipulation"
           >
             {/* Cover Art Thumbnail (Matches Archive Card Dimensions Across All Breakpoints) */}
-            <div className="battle-hero-cover aspect-square rounded-xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl mx-auto md:mx-0">
+            <div className="battle-hero-cover aspect-square rounded-xl overflow-hidden relative shrink-0 bg-[#121212] shadow-2xl mx-auto md:mx-0 group-active:scale-[0.98] transition-transform duration-150">
               <Image
                 src={activeBattle.coverImage || "/covers/default-battle.png"}
                 alt={activeBattle.title}
@@ -87,7 +87,7 @@ export default function BattlesPage() {
                 <h1 className="text-2xl font-bold text-white tracking-tight leading-tight">
                   {activeBattle.title}
                 </h1>
-                <div className="flex items-center gap-2 shrink-0 self-start sm:self-center flex-wrap">
+                <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
                   <span className="px-3.5 py-1.5 rounded-full bg-[#7B61FF] text-xs font-bold text-white shadow-sm inline-flex items-center justify-center text-center leading-none">
                     {(() => {
                       const hasActiveJudges = Boolean(
@@ -119,8 +119,12 @@ export default function BattlesPage() {
                 </p>
               )}
 
-              <div className="text-xs text-[#888888] pt-2">
-                Submissions open • Enter your beat to participate
+              <div className="pt-2 flex items-center justify-between text-xs">
+                <span className="text-[#888888]">Submissions open • Enter your beat to participate</span>
+                <span className="text-brand font-bold flex items-center gap-1 group-hover:translate-x-1 group-active:translate-x-1.5 transition-transform shrink-0">
+                  <span>Enter Battle</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </span>
               </div>
             </div>
           </Link>
@@ -147,7 +151,7 @@ export default function BattlesPage() {
               <Link
                 key={battle.id}
                 href={`/battles/${battle.id}`}
-                className="bg-[#181818] rounded-[28px] p-4 hover:bg-[#1C1C1C] transition-all flex flex-col group shadow-lg space-y-3.5 border border-brand/20"
+                className="bg-[#181818] rounded-[28px] p-4 hover:bg-[#1C1C1C] active:bg-[#202020] active:scale-[0.98] transition-all duration-150 flex flex-col group shadow-lg space-y-3.5 touch-manipulation select-none cursor-pointer"
               >
                 <div className="w-full aspect-square relative rounded-xl overflow-hidden bg-[#121212] shrink-0">
                   <Image
@@ -212,7 +216,7 @@ export default function BattlesPage() {
               <Link
                 key={battle.id}
                 href={`/battles/${battle.id}`}
-                className="bg-[#181818] rounded-[28px] p-4 hover:bg-[#1C1C1C] transition-all flex flex-col group shadow-lg space-y-3.5"
+                className="bg-[#181818] rounded-[28px] p-4 hover:bg-[#1C1C1C] active:bg-[#202020] active:scale-[0.98] transition-all duration-150 flex flex-col group shadow-lg space-y-3.5 touch-manipulation select-none cursor-pointer"
               >
                 {/* Compact Square Card Cover Art */}
                 <div className="w-full aspect-square relative rounded-xl overflow-hidden bg-[#121212] shrink-0">

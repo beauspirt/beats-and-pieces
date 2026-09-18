@@ -1004,9 +1004,16 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
           {/* Middle: Content + Bottom date */}
           <div className="flex-1 w-full min-w-0 space-y-3.5 flex flex-col justify-between self-stretch">
             <div className="space-y-3.5">
-              <h1 className="text-2xl font-bold text-white tracking-tight leading-tight">
-                {battle.title}
-              </h1>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <h1 className="text-2xl font-bold text-white tracking-tight leading-tight">
+                  {battle.title}
+                </h1>
+                <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
+                  <span className="px-3.5 py-1.5 rounded-full bg-[#121212] text-xs text-[#A0A0A0] inline-flex items-center justify-center text-center leading-none">
+                    {battle.totalSubmissions} Total Entries
+                  </span>
+                </div>
+              </div>
 
               <div className="space-y-1 text-sm text-[#A0A0A0]">
                 <p>Hosted by: <span className="text-white">{Array.isArray(battle.hosts) && battle.hosts.length > 0 ? battle.hosts.join(", ") : "Nerub"}</span></p>
@@ -1038,15 +1045,9 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
             </div>
           </div>
 
-          {/* Right Column: Total Entries Tag on top, and Live Stream Jury Session Card directly under it */}
-          <div className="w-full sm:w-auto md:w-56 shrink-0 flex flex-col items-start sm:items-end justify-between self-stretch gap-3.5">
-            {/* Total Entries tag on top right */}
-            <span className="px-3.5 py-1.5 rounded-full bg-[#121212] text-xs text-[#A0A0A0] inline-flex items-center justify-center text-center leading-none shrink-0">
-              {battle.totalSubmissions} Total Entries
-            </span>
-
-            {/* Live Stream Jury Session Card under the total entries tag */}
-            {battle.youtubeVodUrl && battle.youtubeVodUrl.trim() && (
+          {/* Right Column: Live Stream Jury Session Card */}
+          {battle.youtubeVodUrl && battle.youtubeVodUrl.trim() && (
+            <div className="w-full sm:w-auto md:w-56 shrink-0 flex flex-col items-start sm:items-end justify-end self-stretch gap-3.5 mt-auto">
               <button
                 type="button"
                 onClick={() => setIsVideoModalOpen(true)}
@@ -1077,8 +1078,8 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                   ) : null;
                 })()}
               </button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Battle Phases Timeline Indicator - Full Width between Hero Card and Beats */}

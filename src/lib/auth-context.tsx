@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { UserProfile } from "@/lib/types";
 import { supabase } from "@/lib/supabase";
-import { producerService, activityLogService, sanitizeHandle } from "@/services";
+import { producerService, activityLogService } from "@/services";
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -190,18 +190,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       return { isClaimed: !!matchedProducer.isClaimed, user: matchedProducer };
     } else {
-      let baseHandle = sanitizeHandle(googleName) || sanitizeHandle(verifiedEmail.split("@")[0]) || "producer";
-      if (baseHandle.length < 3) baseHandle = `user-${baseHandle}`;
-      let initialHandle = baseHandle;
-      let counter = 2;
-      while (!producerService.isHandleAvailable(initialHandle)) {
-        initialHandle = `${baseHandle}-${counter}`;
-        counter++;
-      }
+      const cleanId = (googleName || verifiedEmail.split("@")[0] || "user")
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "") || String(Date.now());
 
       const newProfile: UserProfile = {
-        id: initialHandle,
-        handle: initialHandle,
+        id: cleanId,
         nickname: googleName,
         email: verifiedEmail,
         avatarUrl: googleAvatar,

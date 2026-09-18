@@ -38,90 +38,175 @@ function SignInContent() {
   }, [isLoggedIn, isLoading, redirectParam, router]);
 
 
-  // Initialize Google OAuth2 Token Client (Method 2: 100% custom button without iframe)
+  // Helper to parse Google JWT payload
+  const parseGoogleJwt = (token: string) => {
+    try {
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+          .join("")
+      );
+      return JSON.parse(jsonPayload);
+    } catch {
+      return null;
+    }
+  };
+
+  const dismissOneTapPopup = () => {
+    if (typeof window === "undefined") return;
+    try {
+      (window as any).google?.accounts?.id?.cancel();
+      document.getElementById("credential_picker_container")?.remove();
+      document.getElementById("credential_picker_iframe")?.remove();
+    } catch {}
+  };
+
+  // If user is already logged in, immediately dismiss any One Tap popup from previous visits
+  useEffect(() => {
+    if (isLoggedIn) {
+      dismissOneTapPopup();
+    }
+  }, [isLoggedIn]);
+
+  // One-Tap credential handler for /signin
+  const handleOneTapCredential = useCallback(
+    async (response: { credential?: string }) => {
+      if (!response.credential) return;
+      setIsAuthenticating(true);
+      setAuthError(null);
+      dismissOneTapPopup();
+
+      try {
+        const payload = parseGoogleJwt(response.credential);
+        if (!payload || !payload.email) {
+          throw new Error("Unable to read Google account information.");
+        }
+
+        if (redirectParam) {
+          try {
+            localStorage.setItem("bnp_redirect_url", redirectParam);
+          } catch {}
+        }
+
+        const { isClaimed } = await loginWithGoogleProfile({
+          email: payload.email,
+          name: payload.name,
+          avatarUrl: payload.picture,
+        });
+
+        const target = isClaimed
+          ? (localStorage.getItem("bnp_redirect_url") || redirectParam || "/battles")
+          : "/profile?onboarding=true";
+        try {
+          localStorage.removeItem("bnp_redirect_url");
+        } catch {}
+        router.replace(target);
+      } catch (err: unknown) {
+        setIsAuthenticating(false);
+        setAuthError(
+          err instanceof Error
+            ? err.message
+            : "Google Sign-In failed. Please try again."
+        );
+      }
+    },
+    [loginWithGoogleProfile, redirectParam, router]
+  );
+
+  // Initialize Google OAuth2 Token Client and One Tap
   const initGoogleGIS = useCallback(() => {
     if (typeof window === "undefined") return;
     const google = (window as unknown as { google?: any })?.google;
-    if (!google?.accounts?.oauth2 || !googleClientId) return;
+    if (!googleClientId) return;
 
     try {
-      // 1. Token client for custom button click (enforcing account selection)
-      tokenClientRef.current = google.accounts.oauth2.initTokenClient({
-        client_id: googleClientId,
-        scope: "openid email profile",
-        prompt: "select_account",
-        callback: async (tokenResponse: { access_token?: string; error?: string; error_description?: string }) => {
-          if (tokenResponse.error) {
-            setIsAuthenticating(false);
-            if (tokenResponse.error !== "popup_closed_by_user") {
-              setAuthError(tokenResponse.error_description || tokenResponse.error || "Sign in canceled");
-            }
-            return;
-          }
-
-          if (!tokenResponse.access_token) {
-            setIsAuthenticating(false);
-            return;
-          }
-
-          try {
-            setIsAuthenticating(true);
-            setAuthError(null);
-
-            // Fetch userinfo directly from Google API
-            const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-              headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-            });
-
-            if (!res.ok) {
-              throw new Error("Could not retrieve profile from Google");
+      // 1. Token client for custom button click (enforces account chooser)
+      if (google?.accounts?.oauth2) {
+        tokenClientRef.current = google.accounts.oauth2.initTokenClient({
+          client_id: googleClientId,
+          scope: "openid email profile",
+          prompt: "select_account",
+          callback: async (tokenResponse: { access_token?: string; error?: string; error_description?: string }) => {
+            if (tokenResponse.error) {
+              setIsAuthenticating(false);
+              if (tokenResponse.error !== "popup_closed_by_user") {
+                setAuthError(tokenResponse.error_description || tokenResponse.error || "Sign in canceled");
+              }
+              return;
             }
 
-            const googleProfile = await res.json();
-            if (!googleProfile.email) {
-              throw new Error("No verified email returned from Google");
+            if (!tokenResponse.access_token) {
+              setIsAuthenticating(false);
+              return;
             }
 
-            if (redirectParam) {
-              try {
-                localStorage.setItem("bnp_redirect_url", redirectParam);
-              } catch {}
-            }
-
-            const { isClaimed } = await loginWithGoogleProfile({
-              email: googleProfile.email,
-              name: googleProfile.name,
-              avatarUrl: googleProfile.picture,
-            });
-
-            const target = isClaimed
-              ? (localStorage.getItem("bnp_redirect_url") || redirectParam || "/battles")
-              : "/profile?onboarding=true";
             try {
-              localStorage.removeItem("bnp_redirect_url");
-            } catch {}
-            router.replace(target);
-          } catch (err: unknown) {
-            setIsAuthenticating(false);
-            setAuthError(
-              err instanceof Error
-                ? err.message
-                : "Google Sign-In failed. Please try again."
-            );
-          }
-        },
-      });
+              setIsAuthenticating(true);
+              setAuthError(null);
+              dismissOneTapPopup();
 
-      // 2. Disable One Tap so it never pops up in the corner
-      if (google.accounts.id) {
-        try {
-          google.accounts.id.cancel();
-        } catch {}
+              // Fetch userinfo directly from Google API
+              const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+                headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+              });
+
+              if (!res.ok) {
+                throw new Error("Could not retrieve profile from Google");
+              }
+
+              const googleProfile = await res.json();
+              if (!googleProfile.email) {
+                throw new Error("No verified email returned from Google");
+              }
+
+              if (redirectParam) {
+                try {
+                  localStorage.setItem("bnp_redirect_url", redirectParam);
+                } catch {}
+              }
+
+              const { isClaimed } = await loginWithGoogleProfile({
+                email: googleProfile.email,
+                name: googleProfile.name,
+                avatarUrl: googleProfile.picture,
+              });
+
+              const target = isClaimed
+                ? (localStorage.getItem("bnp_redirect_url") || redirectParam || "/battles")
+                : "/profile?onboarding=true";
+              try {
+                localStorage.removeItem("bnp_redirect_url");
+              } catch {}
+              router.replace(target);
+            } catch (err: unknown) {
+              setIsAuthenticating(false);
+              setAuthError(
+                err instanceof Error
+                  ? err.message
+                  : "Google Sign-In failed. Please try again."
+              );
+            }
+          },
+        });
+      }
+
+      // 2. One Tap prompt (only if NOT logged in)
+      if (google?.accounts?.id && !isLoggedIn) {
+        google.accounts.id.initialize({
+          client_id: googleClientId,
+          callback: handleOneTapCredential,
+          auto_select: false,
+          cancel_on_tap_outside: true,
+        });
+        google.accounts.id.prompt();
       }
     } catch (e) {
       console.warn("Google Identity Services initialization:", e);
     }
-  }, [googleClientId, loginWithGoogleProfile, redirectParam, router]);
+  }, [googleClientId, handleOneTapCredential, isLoggedIn, loginWithGoogleProfile, redirectParam, router]);
 
   useEffect(() => {
     if (typeof window !== "undefined" && (window as unknown as { google?: any })?.google?.accounts?.oauth2) {
@@ -129,7 +214,7 @@ function SignInContent() {
     }
   }, [initGoogleGIS]);
 
-  if (isLoading || isLoggedIn) {
+  if (isLoading) {
     return (
       <div className="min-h-[75vh] flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-brand animate-spin" />
@@ -140,9 +225,10 @@ function SignInContent() {
   const handleCustomGoogleClick = async () => {
     if (isAuthenticating) return;
     setAuthError(null);
+    dismissOneTapPopup();
 
     if (tokenClientRef.current) {
-      // Trigger Google's popup flow directly, asking user to select account
+      // Trigger Google's popup flow directly, forcing user to choose account
       tokenClientRef.current.requestAccessToken({ prompt: "select_account" });
     } else {
       // Fallback if script hasn't loaded yet

@@ -139,6 +139,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
+  // Ensure Google One Tap popup never lingers or appears once user is authenticated
+  useEffect(() => {
+    if (user && typeof window !== "undefined") {
+      try {
+        (window as unknown as { google?: any })?.google?.accounts?.id?.cancel();
+        document.getElementById("credential_picker_container")?.remove();
+        document.getElementById("credential_picker_iframe")?.remove();
+      } catch {}
+    }
+  }, [user]);
+
   const signInWithGoogle = async () => {
     const callbackUrl = typeof window !== "undefined" ? `${window.location.origin}/auth/callback` : "";
     const { error } = await supabase.auth.signInWithOAuth({

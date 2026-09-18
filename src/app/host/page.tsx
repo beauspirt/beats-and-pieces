@@ -10,6 +10,7 @@ import { useAuth } from "@/lib/auth-context";
 import { Competition, BattlePhase, BattleSample } from "@/lib/types";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { ClientPortal } from "@/components/ClientPortal";
+import { toDatetimeLocalString, fromDatetimeLocalString } from "@/lib/utils";
 
 interface PersonEntry {
   name: string;
@@ -20,6 +21,11 @@ export default function HostPanelPage() {
   const { user } = useAuth();
   const [hostedBattles, setHostedBattles] = useState<Competition[]>([]);
   const [editingBattle, setEditingBattle] = useState<Competition | null>(null);
+
+  // Date states for editing
+  const [startDate, setStartDate] = useState("");
+  const [submissionDeadline, setSubmissionDeadline] = useState("");
+  const [ratingDeadline, setRatingDeadline] = useState("");
 
   // Judges state with email accounts
   const [judgeEntries, setJudgeEntries] = useState<PersonEntry[]>([]);
@@ -79,6 +85,9 @@ export default function HostPanelPage() {
     setShowAddJudge(false);
 
     setSamples(battle.samples ? [...battle.samples] : []);
+    setStartDate(toDatetimeLocalString(battle.submissionStartsAt));
+    setSubmissionDeadline(toDatetimeLocalString(battle.submissionEndsAt));
+    setRatingDeadline(toDatetimeLocalString(battle.ratingEndsAt));
     setIsSaved(false);
   };
 
@@ -133,7 +142,7 @@ export default function HostPanelPage() {
           }
         } catch {}
 
-        const { url, error } = await storageService.uploadAudio(file, "samples", `${cleanSlug}-${Date.now()}-${idx}`);
+        const { url, error, duration } = await storageService.uploadSample(file, `${cleanSlug}-${Date.now()}-${idx}`);
         if (!url) {
           throw new Error(error || `Failed to upload sample "${file.name}"`);
         }
@@ -142,7 +151,7 @@ export default function HostPanelPage() {
           id: sampleId,
           title: sampleTitle,
           audioUrl: url,
-          duration: realDuration,
+          duration: duration || realDuration,
         };
       });
 
@@ -206,6 +215,9 @@ export default function HostPanelPage() {
 
     const updated = {
       ...editingBattle,
+      submissionStartsAt: startDate ? fromDatetimeLocalString(startDate) : (editingBattle.submissionStartsAt || ""),
+      submissionEndsAt: submissionDeadline ? fromDatetimeLocalString(submissionDeadline) : (editingBattle.submissionEndsAt || ""),
+      ratingEndsAt: ratingDeadline ? fromDatetimeLocalString(ratingDeadline) : (editingBattle.ratingEndsAt || ""),
       judges: judgeEntries.map((j) => j.name),
       judgeDetails: judgeEntries,
       samples: samples,
@@ -554,13 +566,8 @@ export default function HostPanelPage() {
                       <label className="text-xs text-zinc-400">Start Date</label>
                       <input
                         type="datetime-local"
-                        value={editingBattle.submissionStartsAt ? editingBattle.submissionStartsAt.slice(0, 16) : ""}
-                        onChange={(e) =>
-                          setEditingBattle({
-                            ...editingBattle,
-                            submissionStartsAt: e.target.value ? new Date(e.target.value).toISOString() : "",
-                          })
-                        }
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
                         className="w-full bg-[#181818] rounded-3xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-brand"
                       />
                     </div>
@@ -569,13 +576,8 @@ export default function HostPanelPage() {
                       <label className="text-xs text-zinc-400">Submission Deadline</label>
                       <input
                         type="datetime-local"
-                        value={editingBattle.submissionEndsAt ? editingBattle.submissionEndsAt.slice(0, 16) : ""}
-                        onChange={(e) =>
-                          setEditingBattle({
-                            ...editingBattle,
-                            submissionEndsAt: e.target.value ? new Date(e.target.value).toISOString() : "",
-                          })
-                        }
+                        value={submissionDeadline}
+                        onChange={(e) => setSubmissionDeadline(e.target.value)}
                         className="w-full bg-[#181818] rounded-3xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-brand"
                       />
                     </div>
@@ -584,13 +586,8 @@ export default function HostPanelPage() {
                       <label className="text-xs text-zinc-400">Rating Deadline</label>
                       <input
                         type="datetime-local"
-                        value={editingBattle.ratingEndsAt ? editingBattle.ratingEndsAt.slice(0, 16) : ""}
-                        onChange={(e) =>
-                          setEditingBattle({
-                            ...editingBattle,
-                            ratingEndsAt: e.target.value ? new Date(e.target.value).toISOString() : "",
-                          })
-                        }
+                        value={ratingDeadline}
+                        onChange={(e) => setRatingDeadline(e.target.value)}
                         className="w-full bg-[#181818] rounded-3xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-brand"
                       />
                     </div>

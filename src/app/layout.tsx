@@ -5,6 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { AudioProvider } from "@/lib/audio-context";
 import { AuthProvider } from "@/lib/auth-context";
+import { SITE_URL, DEFAULT_OG_IMAGE } from "@/lib/metadata";
 
 import { BottomFloatingPlayer } from "@/components/BottomFloatingPlayer";
 
@@ -15,8 +16,27 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Beats & Pieces - Beat Battle Platform",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Beats & Pieces - Beat Battle Platform",
+    template: "%s | Beats & Pieces",
+  },
   description: "The home of Romanian beatmakers. Beat battles, public rating, releases, and beats discovery.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/icon.png", type: "image/png" },
+    ],
+    apple: "/icon.png",
+  },
+  openGraph: {
+    type: "website",
+    siteName: "Beats & Pieces",
+    images: [{ url: DEFAULT_OG_IMAGE, alt: "Beats & Pieces" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
 };
 
 export default function RootLayout({

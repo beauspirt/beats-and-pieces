@@ -7,7 +7,7 @@
       "tag": "Z3nn",
       "avatarUrl": "/avatars/default-avatar.png"
     },
-    "audioUrl": "/audio/battles/battle-8/BEAT BATTLE 8 BP - z3nn - Z3nn.mp3",
+    "audioUrl": "/audio/battles/battle-8/BEAT BATTLE 8 BP - z3nn - Z3nn.opus",
     "duration": 80,
     "battleSource": "Beat Battle #8 (1st Place)",
     "tier": 1,
@@ -22,7 +22,7 @@
       "tag": "venr",
       "avatarUrl": "/avatars/default-avatar.png"
     },
-    "audioUrl": "/audio/battles/battle-8/koka flip - vernosu.mp3",
+    "audioUrl": "/audio/battles/battle-8/koka flip - vernosu.opus",
     "duration": 66,
     "battleSource": "Beat Battle #8 (2nd Place)",
     "tier": 2,
@@ -37,7 +37,7 @@
       "tag": "CGR",
       "avatarUrl": "/avatars/default-avatar.png"
     },
-    "audioUrl": "/audio/battles/battle-8/CONTEST BEATS N PIECES 2 august_2 - prod cgr.mp3",
+    "audioUrl": "/audio/battles/battle-8/CONTEST BEATS N PIECES 2 august_2 - prod cgr.opus",
     "duration": 75,
     "battleSource": "Beat Battle #8 (3rd Place)",
     "tier": 2,
@@ -52,7 +52,7 @@
       "tag": "GROVEEK",
       "avatarUrl": "/avatars/default-avatar.png"
     },
-    "audioUrl": "/audio/battles/battle-7/GROOVEEK - THIS IS JAMES BROWN #beatbattle7 - Victor M.mp3",
+    "audioUrl": "/audio/battles/battle-7/GROOVEEK - THIS IS JAMES BROWN beatbattle7 - Victor M.opus",
     "duration": 85,
     "battleSource": "Beat Battle #7 (1st Place)",
     "tier": 1,
@@ -63,11 +63,11 @@
     "id": "disc-bb7-2",
     "title": "Beat Battle #7 Entry",
     "beatmaker": {
-      "id": "ionbriceag",
-      "tag": "ionbriceag",
+      "id": "ionbriceagul",
+      "tag": "Ion Briceag",
       "avatarUrl": "/avatars/default-avatar.png"
     },
-    "audioUrl": "/audio/battles/battle-7/Ion Briceag - What Makka #beatbattle7 - Ion Briceag.mp3",
+    "audioUrl": "/audio/battles/battle-7/Ion Briceag - What Makka beatbattle7 - Ion Briceag.opus",
     "duration": 93,
     "battleSource": "Beat Battle #7 (2nd Place)",
     "tier": 2,
@@ -82,7 +82,7 @@
       "tag": "JoeyCrack",
       "avatarUrl": "/avatars/default-avatar.png"
     },
-    "audioUrl": "/audio/battles/battle-7/joeycrack_-_macadopere_beatbattle7.mp3",
+    "audioUrl": "/audio/battles/battle-7/joeycrack_-_macadopere_beatbattle7.opus",
     "duration": 70,
     "battleSource": "Beat Battle #7 (3rd Place)",
     "tier": 2,
@@ -97,7 +97,7 @@
       "tag": "mayfourteen",
       "avatarUrl": "/avatars/default-avatar.png"
     },
-    "audioUrl": "/audio/battles/battle-5/mayfourteen - Beats & Pieces Entry 140BPM - Erik Kecse.mp3",
+    "audioUrl": "/audio/battles/battle-5/mayfourteen - Beats & Pieces Entry 140BPM - Erik Kecse.opus",
     "duration": 80,
     "battleSource": "Beat Battle #5 (1st Place)",
     "tier": 1,
@@ -112,7 +112,7 @@
       "tag": "oliniutza",
       "avatarUrl": "/avatars/default-avatar.png"
     },
-    "audioUrl": "/audio/battles/battle-5/oliniutza contest beats & pieces.mp3",
+    "audioUrl": "/audio/battles/battle-5/oliniutza contest beats & pieces.opus",
     "duration": 73,
     "battleSource": "Beat Battle #5 (2nd Place)",
     "tier": 2,
@@ -127,7 +127,7 @@
       "tag": "bladishv",
       "avatarUrl": "/avatars/default-avatar.png"
     },
-    "audioUrl": "/audio/battles/battle-5/bladishv - bb5 - bladishv.mp3",
+    "audioUrl": "/audio/battles/battle-5/bladishv - bb5 - bladishv.opus",
     "duration": 91,
     "battleSource": "Beat Battle #5 (3rd Place)",
     "tier": 2,
@@ -142,7 +142,7 @@
       "tag": "Stolly",
       "avatarUrl": "/avatars/default-avatar.png"
     },
-    "audioUrl": "/audio/battles/battle-4/Stolly - Battle - Alin Stoleru.mp3",
+    "audioUrl": "/audio/battles/battle-4/Stolly - Battle - Alin Stoleru.opus",
     "duration": 68,
     "battleSource": "Beat Battle #4 (1st Place)",
     "tier": 1,
@@ -157,7 +157,7 @@
       "tag": "mateicojo",
       "avatarUrl": "/avatars/default-avatar.png"
     },
-    "audioUrl": "/audio/battles/battle-4/mateicojo - o fac ptr bani.mp3",
+    "audioUrl": "/audio/battles/battle-4/mateicojo - o fac ptr bani.opus",
     "duration": 77,
     "battleSource": "Beat Battle #4 (2nd Place)",
     "tier": 2,
@@ -172,7 +172,7 @@
       "tag": "BENJAHMIN",
       "avatarUrl": "/avatars/default-avatar.png"
     },
-    "audioUrl": "/audio/battles/battle-4/BENJAHMIN - Acid Rain - Ben Bacos.mp3",
+    "audioUrl": "/audio/battles/battle-4/BENJAHMIN - Acid Rain - Ben Bacos.opus",
     "duration": 82,
     "battleSource": "Beat Battle #4 (3rd Place)",
     "tier": 2,
@@ -187,7 +187,7 @@
       "tag": "Vulpeanu",
       "avatarUrl": "/avatars/default-avatar.png"
     },
-    "audioUrl": "/audio/battles/battle-3/Vulpeanu - Mic Check Monthly Beat Battle #3 - Mihai-Valentin Vulpeanu.mp3",
+    "audioUrl": "/audio/battles/battle-3/Vulpeanu - Mic Check Monthly Beat Battle 3 - Mihai-Valentin Vulpeanu.opus",
     "duration": 58,
     "battleSource": "Beat Battle #3 (1st Place)",
     "tier": 1,
@@ -202,7 +202,7 @@
       "tag": "Dinca",
       "avatarUrl": "/avatars/default-avatar.png"
     },
-    "audioUrl": "/audio/battles/battle-3/mic_check_entry_dinca_-_Andrew_Dinca.mp3",
+    "audioUrl": "/audio/battles/battle-3/mic_check_entry_dinca_-_Andrew_Dinca.opus",
     "duration": 91,
     "battleSource": "Beat Battle #3 (2nd Place)",
     "tier": 2,
@@ -217,7 +217,7 @@
       "tag": "Stolly",
       "avatarUrl": "/avatars/default-avatar.png"
     },
-    "audioUrl": "/audio/battles/battle-3/Stolly_-_zeedo_vd_-_Alin_Stoleru.mp3",
+    "audioUrl": "/audio/battles/battle-3/Stolly_-_zeedo_vd_-_Alin_Stoleru.opus",
     "duration": 61,
     "battleSource": "Beat Battle #3 (3rd Place)",
     "tier": 2,
@@ -232,7 +232,7 @@
       "tag": "mateicojo",
       "avatarUrl": "/avatars/default-avatar.png"
     },
-    "audioUrl": "/audio/battles/battle-3/un_bootleg_de_la_altceva_-_mateicojo.mp3",
+    "audioUrl": "/audio/battles/battle-3/un_bootleg_de_la_altceva_-_mateicojo.opus",
     "duration": 69,
     "battleSource": "Beat Battle #3 (4th Place)",
     "tier": 3,
@@ -247,7 +247,7 @@
       "tag": "GHERMAN",
       "avatarUrl": "/avatars/default-avatar.png"
     },
-    "audioUrl": "/audio/battles/battle-3/GHERMAN_Beat_Battle_Mic_Check_3_-_GHERMAN__.mp3",
+    "audioUrl": "/audio/battles/battle-3/GHERMAN_Beat_Battle_Mic_Check_3_-_GHERMAN__.opus",
     "duration": 69,
     "battleSource": "Beat Battle #3 (5th Place)",
     "tier": 3,
@@ -262,7 +262,7 @@
       "tag": "El Huron",
       "avatarUrl": "/avatars/default-avatar.png"
     },
-    "audioUrl": "/audio/battles/battle-2/El Huron - Film din Jungla.mp3",
+    "audioUrl": "/audio/battles/battle-2/El Huron - Film din Jungla.opus",
     "duration": 65,
     "battleSource": "Beat Battle #2 (1st Place)",
     "tier": 1,
@@ -277,7 +277,7 @@
       "tag": "mateicojo",
       "avatarUrl": "/avatars/default-avatar.png"
     },
-    "audioUrl": "/audio/battles/battle-2/mateicojo beat battle final.mp3",
+    "audioUrl": "/audio/battles/battle-2/mateicojo beat battle final.opus",
     "duration": 69,
     "battleSource": "Beat Battle #2 (2nd Place)",
     "tier": 2,
@@ -289,10 +289,10 @@
     "title": "Beat Battle #2 Entry",
     "beatmaker": {
       "id": "ceinaru",
-      "tag": "CEINARU",
-      "avatarUrl": "/avatars/default-avatar.png"
+      "tag": "Ceinaru",
+      "avatarUrl": "https://lh3.googleusercontent.com/a/ACg8ocLyjf5ug0MVNQxSFoi-rV-FsUoHMVYMwLkG87N5M8fF92E7FsPayA=s96-c"
     },
-    "audioUrl": "/audio/battles/battle-2/CEINARU - BEAT BATTLE 2 (cu bas) - Ceinaru.mp3",
+    "audioUrl": "/audio/battles/battle-2/CEINARU - BEAT BATTLE 2 (cu bas) - Ceinaru.opus",
     "duration": 75,
     "battleSource": "Beat Battle #2 (3rd Place)",
     "tier": 2,
@@ -307,7 +307,7 @@
       "tag": "Vulpeanu",
       "avatarUrl": "/avatars/default-avatar.png"
     },
-    "audioUrl": "/audio/battles/battle-1/BB1 Vulpeanu.mp3",
+    "audioUrl": "/audio/battles/battle-1/BB1 Vulpeanu.opus",
     "duration": 70,
     "battleSource": "Beat Battle #1 (1st Place)",
     "tier": 1,
@@ -322,7 +322,7 @@
       "tag": "MLDN",
       "avatarUrl": "/avatars/default-avatar.png"
     },
-    "audioUrl": "/audio/battles/battle-1/BB1 MLDN.mp3",
+    "audioUrl": "/audio/battles/battle-1/BB1 MLDN.opus",
     "duration": 75,
     "battleSource": "Beat Battle #1 (2nd Place)",
     "tier": 2,
@@ -337,7 +337,7 @@
       "tag": "CGR",
       "avatarUrl": "/avatars/default-avatar.png"
     },
-    "audioUrl": "/audio/battles/battle-1/BB1 cgr.mp3",
+    "audioUrl": "/audio/battles/battle-1/BB1 cgr.opus",
     "duration": 68,
     "battleSource": "Beat Battle #1 (3rd Place)",
     "tier": 2,
@@ -352,7 +352,7 @@
       "tag": "JoeyCrack",
       "avatarUrl": "/avatars/default-avatar.png"
     },
-    "audioUrl": "/audio/battles/battle-1/BB1 JoeyCrack.mp3",
+    "audioUrl": "/audio/battles/battle-1/BB1 JoeyCrack.opus",
     "duration": 72,
     "battleSource": "Beat Battle #1 (4th Place)",
     "tier": 3,
@@ -367,7 +367,7 @@
       "tag": "TinyBeats",
       "avatarUrl": "/avatars/default-avatar.png"
     },
-    "audioUrl": "/audio/battles/battle-1/BB1 tinyBeats.mp3",
+    "audioUrl": "/audio/battles/battle-1/BB1 tinyBeats.opus",
     "duration": 65,
     "battleSource": "Beat Battle #1 (5th Place)",
     "tier": 3,

@@ -10,6 +10,7 @@ import {
   ActivityCategory,
   ActivityEventType,
 } from "@/services/activityLogService";
+import { producerService } from "@/services/producerService";
 import {
   ArrowLeft,
   Activity,
@@ -163,6 +164,9 @@ export default function AdminActivityLogsPage() {
 
   useEffect(() => {
     loadLogs();
+    producerService.syncFromSupabase().then(() => {
+      loadLogs();
+    });
     activityLogService.syncFromSupabase().then(() => {
       loadLogs();
     });
@@ -183,7 +187,10 @@ export default function AdminActivityLogsPage() {
   const handleSyncSupabase = async () => {
     setIsSyncing(true);
     try {
-      await activityLogService.syncFromSupabase();
+      await Promise.all([
+        producerService.syncFromSupabase(),
+        activityLogService.syncFromSupabase(),
+      ]);
       loadLogs();
     } finally {
       setIsSyncing(false);
@@ -196,14 +203,14 @@ export default function AdminActivityLogsPage() {
 
   return (
     <AdminGuard>
-      <div className="max-w-5xl mx-auto space-y-6 animate-in fade-in duration-300 pb-12">
+      <div className="w-full space-y-6 animate-in fade-in duration-300 pb-12">
         {/* Navigation & Header */}
         <div className="space-y-3">
           <Link
             href="/admin"
-            className="inline-flex items-center gap-2 text-xs font-bold text-zinc-400 hover:text-white transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs text-[#888888] hover:text-white transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-3.5 h-3.5" />
             <span>Back to Admin Panel</span>
           </Link>
 
@@ -211,11 +218,8 @@ export default function AdminActivityLogsPage() {
             <div>
               <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
                 <Activity className="w-7 h-7 text-brand" />
-                <span>Platform Activity Logs</span>
+                <span>Activity Logs</span>
               </h1>
-              <p className="text-xs text-zinc-400 mt-1">
-                Real-time audit trail of logins, profile updates, beat uploads, battle submissions, and jury evaluations.
-              </p>
             </div>
 
             <button
@@ -292,6 +296,34 @@ export default function AdminActivityLogsPage() {
               const hasMetadata = log.metadata && Object.keys(log.metadata).length > 0;
               const isExpanded = expandedLogId === log.id;
 
+              const liveProducer =
+                (log.userId ? producerService.getProducerById(log.userId) : null) ||
+                (log.userNickname ? producerService.getProducerByTag(log.userNickname) : null);
+
+              const profileId =
+                liveProducer?.handle ||
+                liveProducer?.id ||
+                (log.userId && log.userId !== "system" && !log.userId.startsWith("_")
+                  ? log.userId
+                  : null) ||
+                (log.userNickname && log.userNickname !== "System"
+                  ? producerService.getProducerByTag(log.userNickname)?.handle ||
+                    producerService.getProducerByTag(log.userNickname)?.id ||
+                    producerService.getProducerById(log.userNickname.toLowerCase().replace(/\s+/g, "-"))?.handle ||
+                    producerService.getProducerById(log.userNickname.toLowerCase().replace(/\s+/g, "-"))?.id
+                  : null);
+
+              const profileHref = profileId ? `/${profileId}` : null;
+
+              const resolvedAvatar =
+                liveProducer?.avatarUrl &&
+                !liveProducer.avatarUrl.includes("supabase.co/storage") &&
+                liveProducer.avatarUrl !== "/avatars/default-avatar.png"
+                  ? liveProducer.avatarUrl
+                  : log.userAvatar && !log.userAvatar.includes("supabase.co/storage")
+                  ? log.userAvatar
+                  : "/avatars/default-avatar.png";
+
               return (
                 <div
                   key={log.id}
@@ -302,14 +334,40 @@ export default function AdminActivityLogsPage() {
                     <div className="flex items-start gap-3.5">
                       {/* Avatar or Event Icon */}
                       <div className="relative shrink-0">
-                        <div className="w-10 h-10 rounded-full overflow-hidden bg-[#121212] relative shadow-inner">
-                          <Image
-                            src={log.userAvatar || "/avatars/default-avatar.png"}
-                            alt={log.userNickname || "User"}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
+                        {profileHref ? (
+                          <Link
+                            href={profileHref}
+                            className="block w-10 h-10 rounded-full overflow-hidden bg-[#121212] relative shadow-inner hover:opacity-80 transition-opacity cursor-pointer ring-1 ring-white/5 hover:ring-brand/40"
+                          >
+                            <Image
+                              src={resolvedAvatar}
+                              alt={log.userNickname || "User"}
+                              fill
+                              className="object-cover"
+                              onError={(e) => {
+                                const img = e.currentTarget as HTMLImageElement;
+                                if (img && !img.src.endsWith("/avatars/default-avatar.png")) {
+                                  img.src = "/avatars/default-avatar.png";
+                                }
+                              }}
+                            />
+                          </Link>
+                        ) : (
+                          <div className="w-10 h-10 rounded-full overflow-hidden bg-[#121212] relative shadow-inner">
+                            <Image
+                              src={resolvedAvatar}
+                              alt={log.userNickname || "User"}
+                              fill
+                              className="object-cover"
+                              onError={(e) => {
+                                const img = e.currentTarget as HTMLImageElement;
+                                if (img && !img.src.endsWith("/avatars/default-avatar.png")) {
+                                  img.src = "/avatars/default-avatar.png";
+                                }
+                              }}
+                            />
+                          </div>
+                        )}
                         <div
                           className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full ${style.bg} flex items-center justify-center`}
                         >
@@ -320,9 +378,18 @@ export default function AdminActivityLogsPage() {
                       {/* Content */}
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-xs font-bold text-white">
-                            {log.userNickname || "System"}
-                          </span>
+                          {profileHref ? (
+                            <Link
+                              href={profileHref}
+                              className="text-xs font-bold text-white hover:text-brand hover:underline transition-colors cursor-pointer"
+                            >
+                              {log.userNickname || "User"}
+                            </Link>
+                          ) : (
+                            <span className="text-xs font-bold text-white">
+                              {log.userNickname || "System"}
+                            </span>
+                          )}
 
                           {log.userRole && (
                             <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-brand/15 text-brand">

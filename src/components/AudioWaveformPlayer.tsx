@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useCallback, useState } from "react";
-import { Play, Pause, Download } from "lucide-react";
+import { Play, Pause, Download, Loader2 } from "lucide-react";
 import { useAudioPlayer } from "@/lib/audio-context";
 import { formatTime } from "@/lib/utils";
 
@@ -89,6 +89,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = React.mem
   const {
     currentTrackId,
     isPlaying,
+    loadingTrackId,
     currentTime,
     duration: contextDuration,
     playbackProgress,
@@ -116,7 +117,8 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = React.mem
   const [peaksLoaded, setPeaksLoaded] = useState(!!precomputedPeaksV2);
 
   const isThisTrackActive = currentTrackId === id;
-  const isThisTrackPlaying = isThisTrackActive && isPlaying;
+  const isThisTrackLoading = loadingTrackId === id;
+  const isThisTrackPlaying = isThisTrackActive && isPlaying && !isThisTrackLoading;
 
   // Load precomputed peaks asynchronously on mount
   useEffect(() => {
@@ -593,20 +595,25 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = React.mem
       ref={containerRef}
       className="w-full flex items-center gap-3.5 bg-transparent select-none p-0"
     >
-      {/* Play / Pause Toggle Button */}
+      {/* Play / Pause / Loading Toggle Button */}
       <button
         type="button"
         onClick={handlePlayToggle}
-        aria-label={isThisTrackPlaying ? "Pause" : "Play"}
+        disabled={isThisTrackLoading}
+        aria-label={isThisTrackLoading ? "Loading audio" : isThisTrackPlaying ? "Pause" : "Play"}
         className={`shrink-0 rounded-full flex items-center justify-center transition-all cursor-pointer shadow-md ${
           compact ? "w-9 h-9 sm:w-10 sm:h-10 min-w-[36px] min-h-[36px]" : "w-10 h-10 sm:w-11 sm:h-11 min-w-[40px] min-h-[40px]"
         } ${
-          isThisTrackPlaying
+          isThisTrackLoading
+            ? "bg-[#202020] text-[#7B61FF] cursor-wait"
+            : isThisTrackPlaying
             ? "bg-white text-black shadow-white/10"
             : "bg-[#202020] text-white hover:bg-[#7B61FF] hover:text-white"
         }`}
       >
-        {isThisTrackPlaying ? (
+        {isThisTrackLoading ? (
+          <Loader2 className={`${compact ? "w-3.5 h-3.5" : "w-4 h-4"} animate-spin text-[#7B61FF]`} />
+        ) : isThisTrackPlaying ? (
           <Pause className={compact ? "w-3.5 h-3.5 fill-current" : "w-4 h-4 fill-current"} />
         ) : (
           <Play className={compact ? "w-3.5 h-3.5 ml-0.5 fill-current" : "w-4 h-4 ml-0.5 fill-current"} />

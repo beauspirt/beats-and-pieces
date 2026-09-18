@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Play, Pause, Volume2, Volume1, VolumeX, X, Disc } from "lucide-react";
+import { Play, Pause, Volume2, Volume1, VolumeX, X, Disc, Loader2 } from "lucide-react";
 import { useAudioPlayer } from "@/lib/audio-context";
 import { formatTime } from "@/lib/utils";
 
@@ -11,6 +11,7 @@ export const BottomFloatingPlayer: React.FC = React.memo(() => {
   const {
     currentTrackId,
     isPlaying,
+    isLoading,
     currentTime,
     duration,
     volume,
@@ -32,13 +33,10 @@ export const BottomFloatingPlayer: React.FC = React.memo(() => {
   const [isClosing, setIsClosing] = useState(false);
   const [isScrubbing, setIsScrubbing] = useState(false);
   const [scrubFraction, setScrubFraction] = useState(0);
-  const [showMobileVolume, setShowMobileVolume] = useState(false);
 
   const scrubberRef = useRef<HTMLDivElement | null>(null);
   const mobileScrubberRef = useRef<HTMLDivElement | null>(null);
   const volumeBarRef = useRef<HTMLDivElement | null>(null);
-  const mobileVolumeBarRef = useRef<HTMLDivElement | null>(null);
-  const mobileVolumePopupRef = useRef<HTMLDivElement | null>(null);
 
   const isPointerDownScrubber = useRef(false);
   const isPointerDownVolume = useRef(false);
@@ -62,22 +60,6 @@ export const BottomFloatingPlayer: React.FC = React.memo(() => {
       setIsClosing(false);
     }, 220);
   };
-
-  // Close mobile volume flyout when tapping outside
-  useEffect(() => {
-    if (!showMobileVolume) return;
-    const handleOutsideClick = (e: MouseEvent | TouchEvent) => {
-      if (mobileVolumePopupRef.current && !mobileVolumePopupRef.current.contains(e.target as Node)) {
-        setShowMobileVolume(false);
-      }
-    };
-    document.addEventListener("mousedown", handleOutsideClick);
-    document.addEventListener("touchstart", handleOutsideClick);
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
-      document.removeEventListener("touchstart", handleOutsideClick);
-    };
-  }, [showMobileVolume]);
 
   // Global Spacebar Play/Pause Shortcut when player is active
   useEffect(() => {
@@ -175,7 +157,7 @@ export const BottomFloatingPlayer: React.FC = React.memo(() => {
     return Math.max(0, Math.min(1, x / rect.width));
   };
 
-  const handleVolumePointerDown = (e: React.PointerEvent<HTMLDivElement>, isMobile = false) => {
+  const handleVolumePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     isPointerDownVolume.current = true;
@@ -183,26 +165,23 @@ export const BottomFloatingPlayer: React.FC = React.memo(() => {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch {}
 
-    const targetRef = isMobile ? mobileVolumeBarRef : volumeBarRef;
-    const frac = getVolumeFraction(e, targetRef);
+    const frac = getVolumeFraction(e, volumeBarRef);
     setVolume(frac);
   };
 
-  const handleVolumePointerMove = (e: React.PointerEvent<HTMLDivElement>, isMobile = false) => {
+  const handleVolumePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isPointerDownVolume.current) return;
-    const targetRef = isMobile ? mobileVolumeBarRef : volumeBarRef;
-    const frac = getVolumeFraction(e, targetRef);
+    const frac = getVolumeFraction(e, volumeBarRef);
     setVolume(frac);
   };
 
-  const handleVolumePointerUp = (e: React.PointerEvent<HTMLDivElement>, isMobile = false) => {
+  const handleVolumePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isPointerDownVolume.current) return;
     isPointerDownVolume.current = false;
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);
     } catch {}
-    const targetRef = isMobile ? mobileVolumeBarRef : volumeBarRef;
-    const frac = getVolumeFraction(e, targetRef);
+    const frac = getVolumeFraction(e, volumeBarRef);
     setVolume(frac);
   };
 
@@ -284,10 +263,13 @@ export const BottomFloatingPlayer: React.FC = React.memo(() => {
           <div className="flex items-center gap-4">
             <button
               onClick={togglePlay}
+              disabled={isLoading}
               className="w-9 h-9 rounded-full bg-white hover:scale-105 active:scale-95 text-black flex items-center justify-center shadow-lg transition-all cursor-pointer"
-              aria-label={isPlaying ? "Pause" : "Play"}
+              aria-label={isLoading ? "Loading..." : isPlaying ? "Pause" : "Play"}
             >
-              {isPlaying ? (
+              {isLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin text-black" />
+              ) : isPlaying ? (
                 <Pause className="w-4 h-4 fill-current" />
               ) : (
                 <Play className="w-4 h-4 fill-current ml-0.5" />
@@ -342,67 +324,15 @@ export const BottomFloatingPlayer: React.FC = React.memo(() => {
         </div>
 
         {/* RIGHT COLUMN: Mobile Play Button + Volume Popover (Mobile) / Slider (Desktop) + Dismiss */}
+        {/* RIGHT COLUMN: Mobile Play Button + Volume (Mobile toggle, Desktop slider) + Dismiss */}
         <div className="flex items-center justify-end gap-2 sm:gap-3 shrink-0 sm:w-1/3 sm:max-w-[280px] relative">
           
-          {/* Mobile Volume Popover Flyout */}
-          {showMobileVolume && (
-            <div
-              ref={mobileVolumePopupRef}
-              className="sm:hidden absolute bottom-full right-6 mb-3 bg-[#1A1A1A]/95 backdrop-blur-2xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] rounded-3xl p-3 flex items-center gap-3 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150"
-            >
-              <button
-                onClick={toggleMute}
-                className="p-1 text-[#B3B3B3] hover:text-white transition-colors cursor-pointer"
-                title={isMuted ? "Unmute" : "Mute"}
-              >
-                {isMuted || currentVolumePercent === 0 ? (
-                  <VolumeX className="w-4 h-4 text-red-400" />
-                ) : currentVolumePercent < 0.5 ? (
-                  <Volume1 className="w-4 h-4" />
-                ) : (
-                  <Volume2 className="w-4 h-4" />
-                )}
-              </button>
-
-              <div
-                ref={mobileVolumeBarRef}
-                onPointerDown={(e) => handleVolumePointerDown(e, true)}
-                onPointerMove={(e) => handleVolumePointerMove(e, true)}
-                onPointerUp={(e) => handleVolumePointerUp(e, true)}
-                className="w-24 py-2.5 -my-2.5 flex items-center relative cursor-pointer select-none touch-none"
-              >
-                <div className="w-full h-1 bg-[#3E3E3E] rounded-full overflow-hidden relative">
-                  <div
-                    className="h-full bg-[#7B61FF] rounded-full"
-                    style={{ width: `${Math.max(0, Math.min(100, currentVolumePercent * 100))}%` }}
-                  />
-                </div>
-                <div
-                  className="w-3 h-3 bg-white rounded-full absolute top-1/2 -translate-y-1/2 -translate-x-1/2 shadow-md pointer-events-none"
-                  style={{ left: `${Math.max(0, Math.min(100, currentVolumePercent * 100))}%` }}
-                />
-              </div>
-
-              <span className="text-xs font-sans tabular-nums text-zinc-400 min-w-[28px] text-right">
-                {Math.round(currentVolumePercent * 100)}%
-              </span>
-            </div>
-          )}
-
-          {/* Volume Icon Button (Opens Flyout on Mobile, Mutes on Desktop) */}
+          {/* Volume Icon Button (Desktop Only) */}
           <button
-            onClick={() => {
-              if (window.innerWidth < 640) {
-                setShowMobileVolume((prev) => !prev);
-              } else {
-                toggleMute();
-              }
-            }}
-            className={`p-1.5 transition-colors cursor-pointer shrink-0 rounded-3xl ${
-              showMobileVolume ? "text-white bg-white/10" : "text-[#B3B3B3] hover:text-white"
-            }`}
-            title={isMuted ? "Unmute" : "Volume"}
-            aria-label="Volume controls"
+            onClick={toggleMute}
+            className="hidden sm:inline-flex p-1.5 transition-colors cursor-pointer shrink-0 rounded-3xl text-[#B3B3B3] hover:text-white"
+            title={isMuted ? "Unmute" : "Mute"}
+            aria-label={isMuted ? "Unmute" : "Mute"}
           >
             {isMuted || currentVolumePercent === 0 ? (
               <VolumeX className="w-4 h-4 text-red-400" />
@@ -416,9 +346,9 @@ export const BottomFloatingPlayer: React.FC = React.memo(() => {
           {/* Spotify-style Slim 3px Volume Bar (Desktop Only) */}
           <div
             ref={volumeBarRef}
-            onPointerDown={(e) => handleVolumePointerDown(e, false)}
-            onPointerMove={(e) => handleVolumePointerMove(e, false)}
-            onPointerUp={(e) => handleVolumePointerUp(e, false)}
+            onPointerDown={handleVolumePointerDown}
+            onPointerMove={handleVolumePointerMove}
+            onPointerUp={handleVolumePointerUp}
             className="w-16 sm:w-24 py-3 -my-3 items-center relative cursor-pointer group select-none hidden sm:flex"
           >
             <div className="w-full h-[3px] bg-[#3E3E3E] rounded-full overflow-hidden relative">
@@ -448,10 +378,13 @@ export const BottomFloatingPlayer: React.FC = React.memo(() => {
           {/* Mobile Play/Pause Button (Visible on mobile right next to volume) */}
           <button
             onClick={togglePlay}
+            disabled={isLoading}
             className="w-9 h-9 rounded-full bg-white hover:scale-105 active:scale-95 text-black flex items-center justify-center shadow-md transition-all cursor-pointer sm:hidden"
-            aria-label={isPlaying ? "Pause" : "Play"}
+            aria-label={isLoading ? "Loading..." : isPlaying ? "Pause" : "Play"}
           >
-            {isPlaying ? (
+            {isLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin text-black" />
+            ) : isPlaying ? (
               <Pause className="w-4 h-4 fill-current" />
             ) : (
               <Play className="w-4 h-4 fill-current ml-0.5" />

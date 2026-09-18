@@ -1,14 +1,48 @@
 import React from "react";
+import type { Metadata } from "next";
 import { producerService } from "@/services/producerService";
 import { ProducerProfileClient } from "@/components/ProducerProfileClient";
+import { buildOgMetadata, DEFAULT_OG_IMAGE } from "@/lib/metadata";
 
 export const dynamicParams = false;
 
 export function generateStaticParams() {
   const allProducers = producerService.getAllProducers();
-  return allProducers.map((p) => ({
-    id: p.id,
+  const paths = new Set<string>();
+
+  allProducers.forEach((p) => {
+    if (p.id) paths.add(p.id);
+    if (p.handle) paths.add(p.handle);
+  });
+
+  return Array.from(paths).map((id) => ({
+    id,
   }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const producer = producerService.getProducerById(id);
+
+  if (!producer) return {};
+
+  const name = producer.nickname || producer.id;
+  const hasCustomAvatar =
+    producer.avatarUrl &&
+    !producer.avatarUrl.includes("default-avatar") &&
+    producer.avatarUrl.trim() !== "";
+  const ogImage = hasCustomAvatar ? producer.avatarUrl : DEFAULT_OG_IMAGE;
+
+  return buildOgMetadata({
+    title: name,
+    description: `${name}'s profile on Beats & Pieces`,
+    image: ogImage,
+    path: `/producers/${id}`,
+  });
 }
 
 export default async function ProducerProfilePage({

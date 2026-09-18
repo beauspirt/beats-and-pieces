@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { sampleProducers, sampleDiscoveryBeats, sampleSubmissions } from "@/lib/mock-data";
 import { 
   AudioWaveformPlayer,
@@ -11,18 +12,31 @@ import {
   WaveformData,
 } from "@/components/AudioWaveformPlayer";
 import { DiscoveryBeat, JudgeFeedbackItem, UserProfile, STANDARD_BEAT_TAGS, VaultItem } from "@/lib/types";
-import { producerService, battleService, beatService, storageService, vaultService } from "@/services";
+import { producerService, battleService, beatService, storageService, vaultService, activityLogService } from "@/services";
+import { validateHandle, sanitizeHandle } from "@/services/producerService";
 import { normalizeUrl } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { JudgeFeedbackTicker } from "@/components/JudgeFeedbackTicker";
 import { ClientPortal } from "@/components/ClientPortal";
+import { ImageCropperModal } from "@/components/ImageCropperModal";
 import { 
   Flame, Trophy, Mail, ExternalLink, 
   CheckCircle2, Copy, MapPin, Calendar, Star, Award, Globe,
   Pencil, Plus, Lock, Trash2, AlertTriangle, Music, Sliders, X, Play, Upload,
-  Share2, Check, SlidersHorizontal, ChevronDown
+  Share2, Check, SlidersHorizontal, ChevronDown, ArrowLeft, Loader2
 } from "lucide-react";
+
+const SOCIAL_PLATFORMS = [
+  { key: "website", label: "Website", placeholder: "https://yourwebsite.com" },
+  { key: "instagram", label: "Instagram", placeholder: "https://instagram.com/yourhandle" },
+  { key: "facebook", label: "Facebook", placeholder: "https://facebook.com/yourhandle" },
+  { key: "youtube", label: "YouTube", placeholder: "https://youtube.com/@yourhandle" },
+  { key: "spotify", label: "Spotify", placeholder: "https://open.spotify.com/artist/..." },
+  { key: "bandcamp", label: "Bandcamp", placeholder: "https://yourname.bandcamp.com" },
+  { key: "beatstars", label: "BeatStars", placeholder: "https://beatstars.com/yourhandle" },
+  { key: "soundcloud", label: "SoundCloud", placeholder: "https://soundcloud.com/yourhandle" },
+];
 
 /**
  * Standard Preset Tag Selector Component from platform tag pool
@@ -53,6 +67,7 @@ function StandardTagSelector({
         return;
       }
       onChange([...selectedTags, tag].slice(0, 5));
+      setSearch("");
     }
   };
 
@@ -111,6 +126,18 @@ function StandardTagSelector({
           onChange={(e) => {
             setSearch(e.target.value);
             setIsDropdownOpen(true);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              if (filteredOptions.length > 0) {
+                const exact = filteredOptions.find((t) => t.toLowerCase() === search.toLowerCase().trim());
+                const tagToAdd = exact || filteredOptions[0];
+                if (tagToAdd && !selectedTags.includes(tagToAdd)) {
+                  toggleTag(tagToAdd);
+                }
+              }
+            }
           }}
           placeholder={selectedTags.length === 0 ? "Search or select tags (e.g. Trap, Lo-Fi, Soulful)..." : "Add more tags from list..."}
           className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#7B61FF] transition-all"
@@ -212,19 +239,86 @@ const SocialIcons: Record<string, React.FC<{ className?: string }>> = {
   website: ({ className }) => <Globe className={className} />,
 };
 
-export function ProducerProfileClient({ producerId }: { producerId: string }) {
-  const { user: authUser } = useAuth();
+function Tooltip({
+  content,
+  children,
+  position = "top",
+  className = "",
+}: {
+  content: string;
+  children: React.ReactNode;
+  position?: "top" | "bottom";
+  className?: string;
+}) {
+  return (
+    <div className={`group relative inline-flex items-center ${className}`}>
+      {children}
+      <div
+        className={`absolute ${
+          position === "top" ? "bottom-full mb-2" : "top-full mt-2"
+        } left-1/2 -translate-x-1/2 px-2.5 py-1 bg-[#1E1E1E] text-white text-[11px] font-semibold rounded-lg shadow-2xl whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-150 z-50 flex items-center gap-1 leading-none select-none border border-white/10`}
+      >
+        <span>{content}</span>
+        <div
+          className={`absolute ${
+            position === "top"
+              ? "top-full border-t-[#1E1E1E]"
+              : "bottom-full border-b-[#1E1E1E]"
+          } left-1/2 -translate-x-1/2 border-4 border-transparent`}
+        />
+      </div>
+    </div>
+  );
+}
 
-  const [producer, setProducer] = useState<UserProfile>(() => {
-    return producerService.getProducerById(producerId) || sampleProducers[producerId] || sampleProducers["nerub"] || Object.values(sampleProducers)[0];
+export function ProducerProfileClient({ producerId }: { producerId: string }) {
+  const { user: authUser, updateUser } = useAuth();
+  const router = useRouter();
+
+  const [producer, setProducer] = useState<UserProfile | null | undefined>(() => {
+    return producerService.getProducerById(producerId) || producerService.getProducerByTag(producerId) || sampleProducers[producerId];
   });
+  const [hasChecked, setHasChecked] = useState(false);
+
+  // Beat Deletion Confirmation Modal State
+  const [beatToDelete, setBeatToDelete] = useState<{ id: string; title: string } | null>(null);
+
+  // Profile Direct Editing States
+  const [cropperSrc, setCropperSrc] = useState<string | null>(null);
+  const [isCropperOpen, setIsCropperOpen] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  // Display Name Edit State
+  const [isEditingNickname, setIsEditingNickname] = useState(false);
+  const [nicknameInput, setNicknameInput] = useState("");
+  const [isSavingNickname, setIsSavingNickname] = useState(false);
+
+  // Profile URL Handle Edit State
+  const [isEditingHandle, setIsEditingHandle] = useState(false);
+  const [handleInput, setHandleInput] = useState("");
+  const [handleError, setHandleError] = useState<string | null>(null);
+  const [isSavingHandle, setIsSavingHandle] = useState(false);
+
+  // Bio Inline Edit State
+  const [isEditingBio, setIsEditingBio] = useState(false);
+  const [bioInput, setBioInput] = useState("");
+  const [isSavingBio, setIsSavingBio] = useState(false);
+
+  // Location Inline Edit State
+  const [isEditingLocation, setIsEditingLocation] = useState(false);
+  const [locationInput, setLocationInput] = useState("");
+  const [isSavingLocation, setIsSavingLocation] = useState(false);
+
+  // Social Links Modal State
+  const [isSocialsModalOpen, setIsSocialsModalOpen] = useState(false);
+  const [socialsInput, setSocialsInput] = useState<Record<string, string>>({});
+  const [showEmailInput, setShowEmailInput] = useState(false);
+  const [isSavingSocials, setIsSavingSocials] = useState(false);
 
   useEffect(() => {
     const refresh = () => {
       const fresh = producerService.getProducerById(producerId) || producerService.getProducerByTag(producerId);
-      if (fresh) {
-        setProducer(fresh);
-      }
+      setProducer(fresh || null);
       setBeatsVersion((v) => v + 1);
     };
 
@@ -233,7 +327,10 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       producerService.syncFromSupabase(),
       beatService.syncFromSupabase(),
       battleService.syncFromSupabase(),
-    ]).then(refresh);
+    ]).then(() => {
+      refresh();
+      setHasChecked(true);
+    });
 
     // 2. Listen to real-time local updates and storage changes
     window.addEventListener("bnp_beats_updated", refresh);
@@ -376,14 +473,16 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
   // Check if active user is the owner of this profile (strictly owner only)
   const isProfileOwner = Boolean(
-    authUser && (
+    authUser && producer && (
       authUser.id === producer.id ||
+      (authUser.handle && producer.handle && authUser.handle.toLowerCase() === producer.handle.toLowerCase()) ||
       (authUser.nickname && authUser.nickname.toLowerCase() === producer.nickname.toLowerCase())
     )
   );
 
   // Merge and prioritize all beats for this producer dynamically from beatService
   const prioritizedBeats = useMemo(() => {
+    if (!producer) return [];
     const allBeats = beatService.getAllDiscoveryBeats();
 
     const matchesProducer = (bId: string, bTag: string) => {
@@ -437,9 +536,9 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     });
 
     submissions.forEach((sub) => {
-      // Check if battle still exists (has not been deleted) and is not a remix battle
+      // Check if battle still exists (has not been deleted), has reached results (completed), and is not a remix battle
       const battle = battleService.getBattleById(sub.battleId);
-      if (!battle || sub.battleId === "battle-6" || (battle as unknown as { isRemixBattle?: boolean }).isRemixBattle || (sub as unknown as { isRemix?: boolean }).isRemix) return;
+      if (!battle || battle.phase !== "completed" || sub.battleId === "battle-6" || (battle as unknown as { isRemixBattle?: boolean }).isRemixBattle || (sub as unknown as { isRemix?: boolean }).isRemix) return;
 
       const existing = mergedList.find(
         (b) => b.audioUrl === sub.audioUrl || (b.title === sub.beatTitle && sub.beatTitle !== "Beat Battle #1")
@@ -534,7 +633,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     return list;
   }, [prioritizedBeats, beatsSortBy]);
 
-  const MAX_FREE_BEATS = 10;
+  const MAX_FREE_BEATS = 3;
   const customUploadedBeats = prioritizedBeats.filter(
     (b) =>
       !b.battleSource &&
@@ -546,6 +645,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
   // Compute prioritized badges: Admin -> Battle Champion -> Podium Finalist / Community
   const sortedBadges = useMemo(() => {
+    if (!producer) return [];
     const rawRoles = new Set<string>(
       (producer.discordRoles || []).filter(
         (r) =>
@@ -561,13 +661,13 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     // 1. Automatic Battle Champion: Check if producer has won any battle (1st place) or has battlesWon > 0
     const hasWonAnyBattle =
       (producer.stats?.battlesWon && producer.stats.battlesWon > 0) ||
-      prioritizedBeats.some((b) => b.rank === 1);
+      prioritizedBeats.some((b) => b.rank === 1 && Boolean(b.battleSource || b.competitionTitle));
     if (hasWonAnyBattle) {
       rawRoles.add("Battle Champion");
     }
 
     // 2. Inject system roles if applicable (Admin)
-    if (producer.role === "admin" || producer.email === "adrian.hrihor@gmail.com" || producer.nickname.toLowerCase() === "nerub") {
+    if (producer && (producer.role === "admin" || producer.email === "adrian.hrihor@gmail.com" || producer.nickname.toLowerCase() === "nerub")) {
       rawRoles.add("Admin");
     }
 
@@ -582,6 +682,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
   }, [producer, prioritizedBeats]);
 
   const producerVaultItems = useMemo(() => {
+    if (!producer) return [];
     return vaultService.getItemsByProducer(producer.id || producer.nickname);
   }, [producer]);
 
@@ -658,10 +759,10 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     // Transcode and upload to Supabase Storage immediately in the background
     setIsUploadingBeatAudio(true);
     try {
+      const producerSlug = producer?.handle || producer?.id || authUser?.handle || authUser?.id || "producer";
       const { url, error: uploadError, duration, waveformPeaks } = await storageService.uploadAudio(
         file,
-        "beats",
-        `${producer.id}-${Date.now()}`
+        `beats/${producerSlug}`
       );
 
       if (!url) {
@@ -747,10 +848,10 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
         // decode fallback
       }
 
+      const producerSlug = producer?.handle || producer?.id || authUser?.handle || authUser?.id || "producer";
       const { url, error: uploadError } = await storageService.uploadAudio(
         file,
-        "beats",
-        `${producer.id}-${Date.now()}`
+        `beats/${producerSlug}`
       );
 
       if (!url) {
@@ -812,38 +913,30 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
   const handleDeleteBeat = (id: string) => {
     if (editingBeat?.isBattleSubmission) {
-      alert("Battle submissions cannot be deleted as they are part of the battle archive.");
+      showToast("Battle submissions cannot be deleted as they are part of the battle archive.");
       return;
     }
-    if (window.confirm("Are you sure you want to delete this beat?")) {
-      beatService.deleteBeat(id, {
-        id: authUser?.id || producer.id,
-        nickname: authUser?.nickname || producer.nickname,
-        avatarUrl: authUser?.avatarUrl || producer.avatarUrl,
-        role: authUser?.role || producer.role,
-      });
-      setEditingBeat(null);
-      setBeatsVersion((v) => v + 1);
-      showToast("Beat deleted");
+    if (editingBeat) {
+      setBeatToDelete(editingBeat);
     }
   };
 
   const handleCreateBeat = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isAtBeatLimit) {
-      alert(`You have reached the maximum limit of ${MAX_FREE_BEATS} uploaded showcase beats.`);
+      showToast(`You have reached the maximum limit of ${MAX_FREE_BEATS} uploaded showcase beats.`);
       return;
     }
     if (!newBeatTitle.trim()) {
-      alert("Please enter a beat title.");
+      showToast("Please enter a beat title.");
       return;
     }
     if (isUploadingBeatAudio) {
-      alert("Please wait for audio transcoding and upload to complete.");
+      showToast("Please wait for audio transcoding and upload to complete.");
       return;
     }
-    if (!newBeatAudioUrl && !stagedNewBeatFile) {
-      alert("Please select or drop an audio file.");
+    if (!newBeatAudioUrl.trim()) {
+      showToast("Please select or drop an audio file.");
       return;
     }
 
@@ -855,10 +948,10 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       // Fallback if background upload hasn't replaced blob URL
       if (stagedNewBeatFile && (!finalAudioUrl || finalAudioUrl.startsWith("blob:"))) {
         setIsUploadingBeatAudio(true);
+        const producerSlug = producer?.handle || producer?.id || authUser?.handle || authUser?.id || "producer";
         const { url, error: uploadError, duration, waveformPeaks } = await storageService.uploadAudio(
           stagedNewBeatFile,
-          "beats",
-          `${producer.id}-${Date.now()}`
+          `beats/${producerSlug}`
         );
 
         if (!url) {
@@ -881,9 +974,9 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       await beatService.createBeat({
         title: newBeatTitle.trim(),
         beatmaker: {
-          id: producer.id,
-          tag: producer.nickname,
-          avatarUrl: producer.avatarUrl || "/avatars/default-avatar.png",
+          id: producer?.id || authUser?.id || "producer",
+          tag: producer?.nickname || authUser?.nickname || "Producer",
+          avatarUrl: producer?.avatarUrl || authUser?.avatarUrl || "/avatars/default-avatar.png",
         },
         audioUrl: finalAudioUrl,
         duration: finalDuration,
@@ -918,7 +1011,8 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
   const handleShareProfile = async () => {
     const origin = typeof window !== "undefined" ? window.location.origin : "https://www.beatsandpieces.ro";
-    const profileUrl = `${origin}/${producer.id}`;
+    const profileSlug = producer?.handle || producer?.id || authUser?.handle || authUser?.id || "producer";
+    const profileUrl = `${origin}/${profileSlug}`;
 
     try {
       if (navigator.clipboard && window.isSecureContext) {
@@ -942,7 +1036,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
   };
 
   const handleCopyEmail = async () => {
-    if (!producer.email) return;
+    if (!producer?.email) return;
     try {
       if (navigator?.clipboard?.writeText) {
         await navigator.clipboard.writeText(producer.email);
@@ -961,20 +1055,341 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     setEmailCopiedTooltip(true);
     setTimeout(() => setEmailCopiedTooltip(false), 2000);
   };
-  const isEmailHidden = Boolean(producer.hideEmail ?? producer.links?.hideEmail);
+
+  // Avatar Upload & Crop Handlers
+  const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setCropperSrc(reader.result as string);
+        setIsCropperOpen(true);
+      };
+      reader.readAsDataURL(file);
+    }
+    e.target.value = "";
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob, croppedDataUrl: string) => {
+    if (!producer) return;
+    setIsCropperOpen(false);
+    setIsUploadingAvatar(true);
+
+    try {
+      // 1. Optimistic UI update
+      setProducer({
+        ...producer,
+        avatarUrl: croppedDataUrl,
+      });
+
+      // 2. Upload to storage
+      const { url, error } = await storageService.uploadImage(
+        croppedBlob,
+        "avatars",
+        `${producer.id}-${Date.now()}`
+      );
+
+      if (error || !url) {
+        throw new Error(error || "Upload failed");
+      }
+
+      // 3. Save avatar URL to user profile
+      const updated = await producerService.updateProducerAsync(producer.id, {
+        ...producer,
+        avatarUrl: url,
+      });
+
+      if (updated) {
+        setProducer(updated);
+        updateUser(updated);
+
+        activityLogService.logActivity({
+          type: "profile.update",
+          userId: updated.id,
+          userNickname: updated.nickname,
+          userAvatar: updated.avatarUrl,
+          userRole: updated.role,
+          description: `Updated profile avatar for '${updated.nickname}'`,
+        });
+        showToast("Profile picture updated!");
+      }
+    } catch {
+      alert("Failed to upload avatar. Please try again.");
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
+  // Save Display Name
+  const handleSaveNickname = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!producer || !nicknameInput.trim() || isSavingNickname) return;
+    setIsSavingNickname(true);
+    try {
+      const trimmed = nicknameInput.trim();
+      const updated = await producerService.updateProducerAsync(producer.id, {
+        ...producer,
+        nickname: trimmed,
+      });
+      if (updated) {
+        setProducer(updated);
+        updateUser(updated);
+        setIsEditingNickname(false);
+        activityLogService.logActivity({
+          type: "profile.update",
+          userId: updated.id,
+          userNickname: updated.nickname,
+          userAvatar: updated.avatarUrl,
+          userRole: updated.role,
+          description: `Updated display name to '${updated.nickname}'`,
+        });
+        showToast("Display name updated!");
+      }
+    } catch {
+      alert("Failed to update display name. Please try again.");
+    } finally {
+      setIsSavingNickname(false);
+    }
+  };
+
+  // Save Profile URL Handle
+  const handleSaveHandle = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!producer || !handleInput.trim() || isSavingHandle) return;
+    const clean = sanitizeHandle(handleInput);
+    const valRes = validateHandle(clean);
+    if (!valRes.isValid) {
+      setHandleError(valRes.error || "Invalid handle");
+      return;
+    }
+    if (!producerService.isHandleAvailable(clean, producer.id)) {
+      setHandleError("This handle is already taken by another producer.");
+      return;
+    }
+    setIsSavingHandle(true);
+    try {
+      const updated = await producerService.updateProducerAsync(producer.id, {
+        ...producer,
+        handle: clean,
+      });
+      if (updated) {
+        setProducer(updated);
+        updateUser(updated);
+        setIsEditingHandle(false);
+        setHandleError(null);
+        router.replace(`/${clean}`);
+        activityLogService.logActivity({
+          type: "profile.update",
+          userId: updated.id,
+          userNickname: updated.nickname,
+          userAvatar: updated.avatarUrl,
+          userRole: updated.role,
+          description: `Changed profile URL handle to @${clean}`,
+        });
+        showToast("Profile URL updated!");
+      }
+    } catch {
+      alert("Failed to update profile URL handle. Please try again.");
+    } finally {
+      setIsSavingHandle(false);
+    }
+  };
+
+  // Bio Inline Handlers
+  const handleOpenBioEdit = () => {
+    if (!producer) return;
+    setBioInput(producer.bio || "");
+    setIsEditingBio(true);
+  };
+
+  const handleSaveBio = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!producer || isSavingBio) return;
+    setIsSavingBio(true);
+    try {
+      const updated = await producerService.updateProducerAsync(producer.id, {
+        ...producer,
+        bio: bioInput.trim(),
+      });
+      if (updated) {
+        setProducer(updated);
+        updateUser(updated);
+        setIsEditingBio(false);
+        activityLogService.logActivity({
+          type: "profile.update",
+          userId: updated.id,
+          userNickname: updated.nickname,
+          userAvatar: updated.avatarUrl,
+          userRole: updated.role,
+          description: `Updated bio for '${updated.nickname}'`,
+        });
+        showToast("Bio updated!");
+      }
+    } catch {
+      alert("Failed to update bio. Please try again.");
+    } finally {
+      setIsSavingBio(false);
+    }
+  };
+
+  // Location Inline Handlers
+  const handleOpenLocationEdit = () => {
+    if (!producer) return;
+    setLocationInput(producer.location || "");
+    setIsEditingLocation(true);
+  };
+
+  const handleSaveLocation = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!producer || isSavingLocation) return;
+    setIsSavingLocation(true);
+    try {
+      const updated = await producerService.updateProducerAsync(producer.id, {
+        ...producer,
+        location: locationInput.trim(),
+      });
+      if (updated) {
+        setProducer(updated);
+        updateUser(updated);
+        setIsEditingLocation(false);
+        activityLogService.logActivity({
+          type: "profile.update",
+          userId: updated.id,
+          userNickname: updated.nickname,
+          userAvatar: updated.avatarUrl,
+          userRole: updated.role,
+          description: `Updated location for '${updated.nickname}'`,
+        });
+        showToast("Location updated!");
+      }
+    } catch {
+      alert("Failed to update location. Please try again.");
+    } finally {
+      setIsSavingLocation(false);
+    }
+  };
+
+  // Social Links Modal Handlers
+  const handleOpenSocialsModal = () => {
+    if (!producer) return;
+    setSocialsInput({
+      instagram: producer.links?.instagram || "",
+      facebook: producer.links?.facebook || "",
+      youtube: producer.links?.youtube || "",
+      spotify: producer.links?.spotify || "",
+      bandcamp: producer.links?.bandcamp || "",
+      soundcloud: producer.links?.soundcloud || "",
+      beatstars: producer.links?.beatstars || "",
+      website: producer.links?.website || "",
+    });
+    const isEmailShown = Boolean(
+      producer.showEmail ??
+      producer.links?.showEmail ??
+      (producer.hideEmail === false && producer.links?.hideEmail === false)
+    );
+    setShowEmailInput(isEmailShown);
+    setIsSocialsModalOpen(true);
+  };
+
+  const handleSaveSocials = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!producer || isSavingSocials) return;
+    setIsSavingSocials(true);
+    try {
+      const sanitizedSaveLinks: Record<string, string> = {};
+      SOCIAL_PLATFORMS.forEach(({ key }) => {
+        const val = socialsInput[key]?.trim() || "";
+        if (val) {
+          sanitizedSaveLinks[key] = normalizeUrl(val, key);
+        }
+      });
+
+      const updated = await producerService.updateProducerAsync(producer.id, {
+        ...producer,
+        showEmail: showEmailInput,
+        hideEmail: !showEmailInput,
+        links: {
+          ...sanitizedSaveLinks,
+          showEmail: showEmailInput,
+          hideEmail: !showEmailInput,
+        },
+      });
+
+      if (updated) {
+        setProducer(updated);
+        updateUser(updated);
+        setIsSocialsModalOpen(false);
+        activityLogService.logActivity({
+          type: "profile.update",
+          userId: updated.id,
+          userNickname: updated.nickname,
+          userAvatar: updated.avatarUrl,
+          userRole: updated.role,
+          description: `Updated social links for '${updated.nickname}'`,
+          metadata: {
+            linksUpdated: Object.keys(sanitizedSaveLinks),
+          },
+        });
+        showToast("Social links updated!");
+      }
+    } catch {
+      alert("Failed to update social links. Please try again.");
+    } finally {
+      setIsSavingSocials(false);
+    }
+  };
+
+  const isEmailVisible = Boolean(
+    producer?.showEmail ??
+    producer?.links?.showEmail ??
+    (producer?.hideEmail === false && producer?.links?.hideEmail === false)
+  );
+
+  const KNOWN_PLATFORMS = useMemo(() => new Set(SOCIAL_PLATFORMS.map((p) => p.key.toLowerCase())), []);
 
   const activeLinks = useMemo(() => {
+    if (!producer) return [];
     return (Object.entries(producer.links || {}) as [string, string | boolean][])
       .filter((entry): entry is [string, string] => {
         const [key, url] = entry;
-        return key !== "hideEmail" && key !== "logs" && typeof url === "string" && Boolean(url.trim());
+        return (
+          KNOWN_PLATFORMS.has(key.toLowerCase()) &&
+          typeof url === "string" &&
+          Boolean(url.trim())
+        );
       })
       .sort(([a], [b]) => {
         const indexA = SOCIAL_PLATFORM_ORDER.indexOf(a.toLowerCase());
         const indexB = SOCIAL_PLATFORM_ORDER.indexOf(b.toLowerCase());
         return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
       });
-  }, [producer.links]);
+  }, [producer?.links, KNOWN_PLATFORMS]);
+
+  if (!producer) {
+    if (!hasChecked) {
+      return (
+        <div className="min-h-[70vh] flex items-center justify-center animate-in fade-in duration-200">
+          <div className="w-8 h-8 rounded-full border-2 border-[#FF5E3A] border-t-transparent animate-spin" />
+        </div>
+      );
+    }
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4 space-y-4">
+        <h1 className="text-3xl font-black text-[#FF5E3A]">404</h1>
+        <h2 className="text-xl font-bold text-white">Producer Page Not Found</h2>
+        <p className="text-xs text-zinc-400 max-w-sm">
+          No producer exists with handle or ID <span className="text-white font-mono">@{producerId}</span>.
+        </p>
+        <Link
+          href="/beats"
+          className="px-6 py-2.5 rounded-full bg-[#FF5E3A] hover:bg-[#FF4520] text-white text-xs font-bold transition-all inline-flex items-center gap-2 shadow-lg"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Explore All Beats</span>
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full space-y-12 animate-in fade-in duration-300">
@@ -983,71 +1398,368 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       <div className="relative">
         <div className="flex flex-col md:flex-row items-start md:items-start justify-between gap-6 sm:gap-8">
           
-          {/* Avatar */}
-          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden relative shrink-0 bg-[#121212] shadow-inner">
+          {/* Avatar with Owner Hover Change Overlay */}
+          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden relative shrink-0 bg-[#121212] shadow-inner group">
             <Image
-              src={producer.avatarUrl || "/avatars/default-avatar.png"}
+              src={
+                producer.avatarUrl && !producer.avatarUrl.includes("supabase.co/storage")
+                  ? producer.avatarUrl
+                  : "/avatars/default-avatar.png"
+              }
               alt={producer.nickname}
               fill
               className="object-cover"
               sizes="(max-width: 640px) 96px, 112px"
               priority
+              onError={(e) => {
+                const img = e.currentTarget as HTMLImageElement;
+                if (img && !img.src.endsWith("/avatars/default-avatar.png")) {
+                  img.src = "/avatars/default-avatar.png";
+                }
+              }}
             />
+            {isProfileOwner && (
+              <Tooltip content="Change profile picture" className="w-full h-full">
+                <label
+                  className="w-full h-full bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center cursor-pointer transition-opacity text-white text-[11px] font-bold gap-1"
+                >
+                  <Pencil className="w-4 h-4 text-white" />
+                  <span>Change</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarFileChange}
+                    className="hidden"
+                  />
+                </label>
+              </Tooltip>
+            )}
+            {isUploadingAvatar && (
+              <div className="absolute inset-0 bg-black/75 flex items-center justify-center z-10">
+                <Loader2 className="w-5 h-5 text-[#7B61FF] animate-spin" />
+              </div>
+            )}
           </div>
 
           {/* Producer Info & Bio */}
-          <div className="flex-1 space-y-3">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <h1 className="text-2xl font-bold text-white tracking-tight">
-                {producer.nickname}
-              </h1>
+          <div className="flex-1 space-y-2.5">
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-center gap-2.5">
+                {isEditingNickname ? (
+                  <form onSubmit={handleSaveNickname} className="h-8 inline-flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={nicknameInput}
+                      onChange={(e) => setNicknameInput(e.target.value)}
+                      style={{ width: `${Math.max(nicknameInput.length, 1)}ch` }}
+                      className="bg-transparent text-2xl font-bold text-white tracking-tight p-0 m-0 border-0 outline-none border-b border-[#7B61FF]/60 rounded-none focus:outline-none focus:border-[#7B61FF] h-8 leading-8"
+                      autoFocus
+                      required
+                    />
+                    <div className="inline-flex items-center gap-1">
+                      <Tooltip content="Save name">
+                        <button
+                          type="submit"
+                          disabled={isSavingNickname || !nicknameInput.trim()}
+                          className="p-1 -m-1 text-emerald-400 hover:text-emerald-300 disabled:opacity-40 cursor-pointer"
+                        >
+                          {isSavingNickname ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                        </button>
+                      </Tooltip>
+                      <Tooltip content="Cancel">
+                        <button
+                          type="button"
+                          onClick={() => setIsEditingNickname(false)}
+                          className="p-1 -m-1 text-zinc-400 hover:text-zinc-200 cursor-pointer"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </Tooltip>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="h-8 flex items-center gap-2">
+                    <h1 className="text-2xl font-bold text-white tracking-tight h-8 leading-8 flex items-center">
+                      {producer.nickname}
+                    </h1>
+                    {isProfileOwner && (
+                      <Tooltip content="Edit display name">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setNicknameInput(producer.nickname);
+                            setIsEditingNickname(true);
+                          }}
+                          className="p-1 -m-1 text-zinc-400 hover:text-white transition-all cursor-pointer"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                      </Tooltip>
+                    )}
+                  </div>
+                )}
 
-              {/* Sorted Priority Badges */}
-              {sortedBadges.map((role) => {
-                const lower = role.toLowerCase();
-                let badgeClass = "bg-[#1E232A] text-[#94A3B8]";
-                if (lower === "admin") {
-                  badgeClass = "bg-brand text-white font-bold shadow-sm";
-                } else if (lower === "host") {
-                  badgeClass = "bg-[#FF8A65]/20 text-[#FF8A65] font-bold";
-                } else if (lower.includes("champion") || lower.includes("winner") || lower.includes("1st")) {
-                  badgeClass = "bg-[#FF5E3A]/20 text-[#FF5E3A] font-bold";
-                }
+                {/* Sorted Priority Badges */}
+                {sortedBadges.map((role) => {
+                  const lower = role.toLowerCase();
+                  let badgeClass = "bg-[#1E1E1E] text-[#888888]";
+                  if (lower === "admin") {
+                    badgeClass = "bg-brand text-white font-bold shadow-sm";
+                  } else if (lower === "host") {
+                    badgeClass = "bg-[#FF8A65]/20 text-[#FF8A65] font-bold";
+                  } else if (lower.includes("champion") || lower.includes("winner") || lower.includes("1st")) {
+                    badgeClass = "bg-[#FF5E3A]/20 text-[#FF5E3A] font-bold";
+                  }
 
-                return (
-                  <span
-                    key={role}
-                    className={`px-3 py-1 rounded-full text-xs ${badgeClass}`}
-                  >
-                    {role}
+                  return (
+                    <span
+                      key={role}
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${badgeClass}`}
+                    >
+                      {role}
+                    </span>
+                  );
+                })}
+              </div>
+
+              {/* Handle row: beatsandpieces.ro/nerub (Click to copy + Edit button) */}
+              <div className="flex items-center gap-2 min-h-[18px]">
+                {isEditingHandle ? (
+                  <form onSubmit={handleSaveHandle} className="inline-flex items-center relative leading-none">
+                    <span className="text-xs text-[#888888] font-normal select-none leading-none">
+                      beatsandpieces.ro/
+                    </span>
+                    <input
+                      type="text"
+                      value={handleInput}
+                      onChange={(e) => {
+                        const val = sanitizeHandle(e.target.value);
+                        setHandleInput(val);
+                        if (val) {
+                          const res = validateHandle(val);
+                          if (!res.isValid) {
+                            setHandleError(res.error || "Invalid handle");
+                          } else if (!producerService.isHandleAvailable(val, producer.id)) {
+                            setHandleError("This handle is already taken.");
+                          } else {
+                            setHandleError(null);
+                          }
+                        } else {
+                          setHandleError("Handle cannot be empty.");
+                        }
+                      }}
+                      style={{ width: `${Math.max(handleInput.length, 1)}ch` }}
+                      className="bg-transparent text-xs text-white font-medium p-0 m-0 border-0 outline-none border-b border-[#7B61FF]/60 rounded-none focus:outline-none focus:border-[#7B61FF] leading-none lowercase h-[14px]"
+                      autoFocus
+                      required
+                    />
+                    <div className="inline-flex items-center gap-1.5 ml-2">
+                      <Tooltip content="Save URL">
+                        <button
+                          type="submit"
+                          disabled={isSavingHandle || Boolean(handleError) || !handleInput.trim()}
+                          className="p-1 -m-1 text-emerald-400 hover:text-emerald-300 disabled:opacity-40 cursor-pointer"
+                        >
+                          {isSavingHandle ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+                        </button>
+                      </Tooltip>
+                      <Tooltip content="Cancel">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsEditingHandle(false);
+                            setHandleError(null);
+                          }}
+                          className="p-1 -m-1 text-[#888888] hover:text-white cursor-pointer"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </Tooltip>
+                    </div>
+
+                    {handleError && (
+                      <div className="absolute top-full left-0 mt-1 z-20 text-[11px] text-[#FF5E3A] font-medium whitespace-nowrap bg-[#181818] px-2 py-0.5 rounded shadow-lg">
+                        {handleError}
+                      </div>
+                    )}
+                  </form>
+                ) : (
+                  <div className="flex items-center gap-2 leading-none">
+                    <div className="relative inline-flex items-center">
+                      <Tooltip content="Click to copy profile URL">
+                        <button
+                          type="button"
+                          onClick={handleShareProfile}
+                          className="text-xs text-[#888888] hover:text-zinc-200 font-normal transition-colors cursor-pointer text-left leading-none flex items-center gap-1.5"
+                        >
+                          <span>
+                            <span>beatsandpieces.ro/</span>
+                            <span className="text-white font-medium">{producer.handle || producer.id}</span>
+                          </span>
+                        </button>
+                      </Tooltip>
+
+                      {copiedShareLink && (
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-[#222222] text-white text-[11px] font-bold rounded-full shadow-2xl whitespace-nowrap z-50 flex items-center gap-1.5 leading-none pointer-events-none animate-in fade-in zoom-in-95 duration-150">
+                          <Check className="w-3 h-3 text-emerald-400 shrink-0" />
+                          <span>Profile link copied!</span>
+                          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#222222]" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Edit URL Handle Button (Owner Only - permanently visible) */}
+                    {isProfileOwner && (
+                      <Tooltip content="Edit profile URL">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setHandleInput(producer.handle || producer.id);
+                            setHandleError(null);
+                            setIsEditingHandle(true);
+                          }}
+                          className="p-1 -m-1 text-[#888888] hover:text-white transition-all cursor-pointer"
+                        >
+                          <Pencil className="w-3 h-3" />
+                        </button>
+                      </Tooltip>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Location Inline Edit / Display */}
+            {isEditingLocation ? (
+              <form onSubmit={handleSaveLocation} className="inline-flex items-center gap-1.5 text-xs text-[#888888] h-4 leading-4 max-w-md">
+                <MapPin className="w-3.5 h-3.5 text-[#888888] shrink-0" />
+                <input
+                  type="text"
+                  value={locationInput}
+                  onChange={(e) => setLocationInput(e.target.value)}
+                  placeholder="e.g. Bucharest, Romania"
+                  className="bg-transparent text-xs text-white p-0 m-0 border-0 outline-none border-b border-[#7B61FF]/60 rounded-none focus:outline-none focus:border-[#7B61FF] h-4 leading-4 placeholder:text-[#666666]"
+                  autoFocus
+                />
+                <div className="inline-flex items-center gap-1 ml-1">
+                  <Tooltip content="Save location">
+                    <button
+                      type="submit"
+                      disabled={isSavingLocation}
+                      className="p-1 -m-1 text-emerald-400 hover:text-emerald-300 disabled:opacity-40 cursor-pointer"
+                    >
+                      {isSavingLocation ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                    </button>
+                  </Tooltip>
+                  <Tooltip content="Cancel">
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingLocation(false)}
+                      className="p-1 -m-1 text-[#888888] hover:text-white cursor-pointer"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </Tooltip>
+                </div>
+              </form>
+            ) : (
+              <div className="flex flex-wrap items-center gap-4 text-xs text-[#888888] min-h-[16px]">
+                {producer.location ? (
+                  <span className="flex items-center gap-1.5 h-4 leading-4">
+                    <MapPin className="w-3.5 h-3.5 text-[#888888] shrink-0" />
+                    <span className="h-4 leading-4 text-[#888888]">{producer.location}</span>
+                    {isProfileOwner && (
+                      <Tooltip content="Edit location">
+                        <button
+                          type="button"
+                          onClick={handleOpenLocationEdit}
+                          className="p-1 -m-1 text-[#888888] hover:text-white transition-all cursor-pointer"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                      </Tooltip>
+                    )}
                   </span>
-                );
-              })}
-            </div>
+                ) : isProfileOwner ? (
+                  <button
+                    onClick={handleOpenLocationEdit}
+                    className="text-xs text-[#888888] hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer h-4 leading-4"
+                  >
+                    <MapPin className="w-3.5 h-3.5 text-[#888888] shrink-0" />
+                    <span>Add location</span>
+                  </button>
+                ) : null}
+              </div>
+            )}
 
-            {producer.bio ? (
-              <p className="text-sm text-[#D1D1D1] leading-relaxed max-w-2xl">
-                {producer.bio}
-              </p>
-            ) : null}
+            {/* Bio Inline Edit / Display */}
+            {isEditingBio ? (
+              <form onSubmit={handleSaveBio} className="space-y-1.5 max-w-2xl">
+                <div className="flex items-start gap-2">
+                  <textarea
+                    value={bioInput}
+                    onChange={(e) => setBioInput(e.target.value)}
+                    placeholder="Tell the community about yourself"
+                    rows={3}
+                    className="w-full bg-transparent p-0 m-0 text-sm sm:text-base text-white leading-relaxed border-0 outline-none border-b border-[#7B61FF]/60 rounded-none focus:outline-none focus:border-[#7B61FF] resize-none placeholder:text-[#666666] block"
+                    autoFocus
+                  />
+                  <div className="inline-flex items-center gap-1 shrink-0 mt-0.5">
+                    <Tooltip content="Save bio">
+                      <button
+                        type="submit"
+                        disabled={isSavingBio}
+                        className="p-1 -m-1 text-emerald-400 hover:text-emerald-300 disabled:opacity-40 cursor-pointer"
+                      >
+                        {isSavingBio ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                      </button>
+                    </Tooltip>
+                    <Tooltip content="Cancel">
+                      <button
+                        type="button"
+                        onClick={() => setIsEditingBio(false)}
+                        className="p-1 -m-1 text-[#888888] hover:text-white cursor-pointer"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </Tooltip>
+                  </div>
+                </div>
+              </form>
+            ) : (
+              <div>
+                {producer.bio ? (
+                  <div className="flex items-start gap-2">
+                    <p className="text-sm sm:text-base text-white leading-relaxed max-w-2xl font-normal">
+                      {producer.bio}
+                    </p>
+                    {isProfileOwner && (
+                      <Tooltip content="Edit bio">
+                        <button
+                          type="button"
+                          onClick={handleOpenBioEdit}
+                          className="p-1 -m-1 text-[#888888] hover:text-white transition-all cursor-pointer shrink-0 mt-0.5"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                      </Tooltip>
+                    )}
+                  </div>
+                ) : isProfileOwner ? (
+                  <button
+                    onClick={handleOpenBioEdit}
+                    className="text-xs text-[#888888] hover:text-white flex items-center gap-1 py-0.5 transition-colors cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add bio</span>
+                  </button>
+                ) : null}
+              </div>
+            )}
 
-            {/* Location & Member Since */}
-            <div className="flex flex-wrap items-center gap-4 text-xs text-[#888888]">
-              {producer.location && (
-                <span className="flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-[#7B61FF]" />
-                  <span>{producer.location}</span>
-                </span>
-              )}
-              <span className="flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-[#888888]" />
-                <span>Member since {new Date(producer.createdAt).getFullYear()}</span>
-              </span>
-            </div>
-
-            {/* Clickable Social Icons (Including Email at end if not hidden) */}
-            {((Boolean(producer.email) && !isEmailHidden) || activeLinks.length > 0) && (
-              <div className="flex flex-wrap items-center gap-5 pt-1 text-[#888888]">
+            {/* Clickable Social Icons (Including Email at end if enabled & Edit Socials button) */}
+            {((Boolean(producer.email) && isEmailVisible) || activeLinks.length > 0 || isProfileOwner) && (
+              <div className="flex flex-wrap items-center gap-4 pt-1 text-[#888888]">
                 {activeLinks.map(([platform, url]) => {
                   const IconComponent = SocialIcons[platform.toLowerCase()] || SocialIcons.website;
                   const hoverColorClasses: Record<string, string> = {
@@ -1062,33 +1774,35 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                   };
                   const hoverColor = hoverColorClasses[platform.toLowerCase()] || "hover:text-[#7B61FF]";
                   const formattedUrl = normalizeUrl(url, platform);
+                  const platformLabel = platform.charAt(0).toUpperCase() + platform.slice(1);
 
                   return (
-                    <a
-                      key={platform}
-                      href={formattedUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`p-2 -m-2 inline-flex items-center justify-center text-[#888888] ${hoverColor} transition-colors duration-200 active:scale-95 cursor-pointer`}
-                      title={`${platform.charAt(0).toUpperCase() + platform.slice(1)}: ${url}`}
-                    >
-                      <IconComponent className="w-4 h-4" />
-                    </a>
+                    <Tooltip key={platform} content={`${platformLabel}: ${url}`}>
+                      <a
+                        href={formattedUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`p-2 -m-2 inline-flex items-center justify-center text-zinc-400 ${hoverColor} transition-colors duration-200 active:scale-95 cursor-pointer`}
+                      >
+                        <IconComponent className="w-4 h-4" />
+                      </a>
+                    </Tooltip>
                   );
                 })}
 
                 {/* Email Icon at the end */}
-                {Boolean(producer.email) && !isEmailHidden && (
+                {Boolean(producer.email) && isEmailVisible && (
                   <div className="relative inline-flex items-center">
-                    <button
-                      type="button"
-                      onClick={handleCopyEmail}
-                      className="p-2 -m-2 inline-flex items-center justify-center text-[#888888] hover:text-[#7B61FF] transition-colors duration-200 active:scale-95 cursor-pointer"
-                      title={`Copy email (${producer.email})`}
-                      aria-label="Copy Email"
-                    >
-                      <Mail className="w-4 h-4" />
-                    </button>
+                    <Tooltip content={`Copy email (${producer.email})`}>
+                      <button
+                        type="button"
+                        onClick={handleCopyEmail}
+                        className="p-2 -m-2 inline-flex items-center justify-center text-zinc-400 hover:text-white transition-colors duration-200 active:scale-95 cursor-pointer"
+                        aria-label="Copy Email"
+                      >
+                        <Mail className="w-4 h-4" />
+                      </button>
+                    </Tooltip>
 
                     {emailCopiedTooltip && (
                       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3.5 py-1.5 bg-[#222222] text-white text-xs font-bold rounded-full shadow-2xl whitespace-nowrap animate-in fade-in zoom-in-95 duration-150 z-50 flex items-center justify-center gap-1.5 leading-none pointer-events-none">
@@ -1099,31 +1813,23 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                     )}
                   </div>
                 )}
+
+                {/* Edit Social Links Trigger Button (Owner Only) */}
+                {isProfileOwner && (
+                  <Tooltip content="Edit social links and email privacy">
+                    <button
+                      type="button"
+                      onClick={handleOpenSocialsModal}
+                      className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-semibold text-zinc-400 hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Pencil className="w-3 h-3" />
+                      <span>{activeLinks.length > 0 ? "Edit Links" : "Add Links"}</span>
+                    </button>
+                  </Tooltip>
+                )}
               </div>
             )}
           </div>
-
-          {/* Action Button: Share Your Page (Only visible for users visiting their own page) */}
-          {isProfileOwner && (
-            <div className="shrink-0 absolute top-0 right-0 md:static md:top-auto md:right-auto md:w-auto self-start z-10">
-              <button
-                onClick={handleShareProfile}
-                className="px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-[#121212] hover:bg-[#202020] text-zinc-300 hover:text-white text-xs font-bold transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer shadow-sm leading-none"
-              >
-                {copiedShareLink ? (
-                  <>
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span className="text-emerald-400">Link Copied!</span>
-                  </>
-                ) : (
-                  <>
-                    <Share2 className="w-4 h-4 text-zinc-400 shrink-0" />
-                    <span>Share Your Page</span>
-                  </>
-                )}
-              </button>
-            </div>
-          )}
         </div>
       </div>
 
@@ -1255,7 +1961,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                             </span>
                           )}
                           {beat.rank === 2 && (
-                            <span className="h-6 px-3.5 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
+                            <span className="h-6 px-3.5 rounded-full bg-[#1E1E1E] text-[#AAAAAA] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
                               2nd Place
                             </span>
                           )}
@@ -1302,7 +2008,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                               </span>
                             )}
                             {beat.rank === 2 && (
-                              <span className="h-6 px-3.5 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
+                              <span className="h-6 px-3.5 rounded-full bg-[#1E1E1E] text-[#AAAAAA] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
                                 2nd Place
                               </span>
                             )}
@@ -1350,29 +2056,35 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
                     {/* Jury Score Avg */}
                     {typeof beat.juryScore === "number" && beat.juryScore > 0 ? (
-                      <div className="flex items-center gap-1 text-xs text-[#7B61FF] font-bold px-1.5 select-none" title="Jury Score Average">
-                        <Star className="w-4 h-4 fill-current text-[#7B61FF]" />
-                        <span>{beat.juryScore.toFixed(2)}</span>
-                      </div>
+                      <Tooltip content="Jury Score Average">
+                        <div className="flex items-center gap-1 text-xs text-[#7B61FF] font-bold px-1.5 select-none cursor-default">
+                          <Star className="w-4 h-4 fill-current text-[#7B61FF]" />
+                          <span>{beat.juryScore.toFixed(2)}</span>
+                        </div>
+                      </Tooltip>
                     ) : null}
 
                     {/* Public Rating Avg */}
                     {typeof beat.flames === "number" && beat.flames >= 1 ? (
-                      <div className="flex items-center gap-1 text-xs text-[#FF5E3A] font-bold px-1.5 select-none" title="Public Rating Average">
-                        <Flame className="w-4 h-4 fill-current" />
-                        <span>{beat.flames.toFixed(2)}</span>
-                      </div>
+                      <Tooltip content="Public Rating Average">
+                        <div className="flex items-center gap-1 text-xs text-[#FF5E3A] font-bold px-1.5 select-none cursor-default">
+                          <Flame className="w-4 h-4 fill-current" />
+                          <span>{beat.flames.toFixed(2)}</span>
+                        </div>
+                      </Tooltip>
                     ) : null}
 
                     {/* Edit Beat Button (Profile Owner only) */}
                     {isProfileOwner && (
-                      <button
-                        onClick={() => handleOpenEditModal(beat)}
-                        className="p-1.5 rounded-full bg-[#7B61FF]/15 hover:bg-[#7B61FF]/25 text-[#7B61FF] hover:text-white transition-colors cursor-pointer select-none absolute top-4 right-4 z-10 sm:static sm:top-auto sm:right-auto sm:z-auto"
-                        title="Edit beat details"
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                      </button>
+                      <Tooltip content="Edit beat details" className="absolute top-4 right-4 z-10 sm:static sm:top-auto sm:right-auto sm:z-auto">
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEditModal(beat)}
+                          className="p-1.5 rounded-full bg-[#7B61FF]/15 hover:bg-[#7B61FF]/25 text-[#7B61FF] hover:text-white transition-colors cursor-pointer select-none"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                      </Tooltip>
                     )}
                   </div>
 
@@ -1416,7 +2128,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
         ) : (
           <div className="bg-[#181818] rounded-[28px] p-8 text-center space-y-2">
             <p className="text-zinc-400 text-sm">
-              This producer hasn&apos;t submitted any beats yet.
+              This producer hasn&apos;t submitted any beats.
             </p>
           </div>
         )}
@@ -1908,6 +2620,65 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
         )}
       </ClientPortal>
 
+      {/* Custom Beat Deletion Confirmation Modal */}
+      <ClientPortal>
+        {beatToDelete && (
+          <div
+            className="fixed inset-0 z-[220] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150"
+            onClick={() => setBeatToDelete(null)}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#181818] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150 text-left"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500 shrink-0">
+                  <Trash2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white leading-tight">Delete Beat</h3>
+                  <p className="text-xs text-zinc-400 mt-0.5">This action cannot be undone.</p>
+                </div>
+              </div>
+
+              <p className="text-sm text-zinc-300">
+                Are you sure you want to permanently delete <span className="text-white font-semibold">"{beatToDelete.title}"</span> from your showcase?
+              </p>
+
+              <div className="flex items-center justify-end gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setBeatToDelete(null)}
+                  className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-semibold text-zinc-300 hover:text-white transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (beatToDelete) {
+                      beatService.deleteBeat(beatToDelete.id, {
+                        id: authUser?.id || producer?.id,
+                        nickname: authUser?.nickname || producer?.nickname,
+                        avatarUrl: authUser?.avatarUrl || producer?.avatarUrl,
+                        role: authUser?.role || producer?.role,
+                      });
+                      setBeatToDelete(null);
+                      setEditingBeat(null);
+                      setBeatsVersion((v) => v + 1);
+                      showToast("Beat deleted");
+                    }
+                  }}
+                  className="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-xs font-bold text-white transition-all shadow-md active:scale-95 cursor-pointer"
+                >
+                  Delete Beat
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </ClientPortal>
+
       {/* Floating Save Toast Pop-up Notification */}
       <ClientPortal>
         {saveToastMessage && (
@@ -1971,6 +2742,105 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
           </div>
         )}
       </ClientPortal>
+
+      {/* SOCIAL LINKS MODAL */}
+      {isSocialsModalOpen && (
+        <ClientPortal>
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-[#181818] rounded-[24px] p-6 sm:p-8 w-full max-w-xl max-h-[90vh] overflow-y-auto space-y-6 shadow-2xl">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-bold text-white">Socials & Links</h2>
+                  <p className="text-xs text-[#888888]">
+                    Connect your portfolio, stream links, and social platforms.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsSocialsModalOpen(false)}
+                  className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveSocials} className="space-y-4">
+                <div className="space-y-3">
+                  {SOCIAL_PLATFORMS.map(({ key, label, placeholder }) => (
+                    <div key={key} className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 items-center">
+                      <label className="sm:col-span-3 text-xs font-bold text-[#D1D1D1]">
+                        {label}
+                      </label>
+                      <div className="sm:col-span-9">
+                        <input
+                          type="text"
+                          value={socialsInput[key] || ""}
+                          onChange={(e) => setSocialsInput({ ...socialsInput, [key]: e.target.value })}
+                          placeholder={placeholder}
+                          className="w-full bg-[#121212] rounded-xl px-3.5 py-2.5 text-xs text-white placeholder:text-white/25 placeholder:font-normal focus:outline-none focus:ring-1 focus:ring-[#7B61FF]"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Email Privacy - Toggle Pillbox */}
+                <div className="pt-2">
+                  <div className="flex items-center justify-between bg-[#121212] p-4 rounded-2xl">
+                    <div className="space-y-0.5">
+                      <p className="text-xs font-bold text-white">Show email on public profile</p>
+                      <p className="text-[11px] text-[#888888]">
+                        When enabled, visitors can see and copy your contact email.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={showEmailInput}
+                      onClick={() => setShowEmailInput(!showEmailInput)}
+                      className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-200 cursor-pointer ${
+                        showEmailInput ? "bg-[#7B61FF]" : "bg-[#262626]"
+                      }`}
+                    >
+                      <div
+                        className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${
+                          showEmailInput ? "translate-x-5" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsSocialsModalOpen(false)}
+                    className="px-4 py-2.5 rounded-full bg-white/5 hover:bg-white/10 text-xs font-semibold text-zinc-300 hover:text-white transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSavingSocials}
+                    className="px-6 py-2.5 rounded-full bg-[#7B61FF] hover:bg-[#684DE6] text-white text-xs font-bold transition-all shadow-lg active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {isSavingSocials && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                    <span>Save Changes</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </ClientPortal>
+      )}
+
+      {/* Interactive Profile Picture Cropper Modal */}
+      <ImageCropperModal
+        isOpen={isCropperOpen}
+        imageSrc={cropperSrc || ""}
+        onClose={() => setIsCropperOpen(false)}
+        onCropComplete={handleCropComplete}
+      />
     </div>
   );
 }

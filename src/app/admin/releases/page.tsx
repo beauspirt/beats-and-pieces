@@ -76,7 +76,7 @@ export default function AdminReleasesManagerPage() {
 
   return (
     <AdminGuard>
-      <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-300 py-4">
+      <div className="w-full space-y-8 animate-in fade-in duration-300">
         
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -90,11 +90,8 @@ export default function AdminReleasesManagerPage() {
             </Link>
             <h1 className="text-2xl font-bold text-white flex items-center gap-3">
               <Disc className="w-7 h-7 text-brand" />
-              <span>Edit Release(s)</span>
+              <span>Releases</span>
             </h1>
-            <p className="text-xs text-zinc-400">
-              Manage official compilation tapes, update descriptions, and edit streaming links.
-            </p>
           </div>
 
           <Link

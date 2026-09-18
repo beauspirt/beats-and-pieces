@@ -126,3 +126,36 @@ export async function optimizeAndConvertToOpus(
     convertedSize: originalSize,
   };
 }
+
+/**
+ * Extract audio duration and waveform peaks without re-encoding to Opus.
+ * Ideal for raw sample files where the original format (WAV, MP3, FLAC, AIFF, etc.) must be preserved.
+ */
+export async function extractAudioMetadata(
+  inputFile: File | Blob
+): Promise<{ duration: number; waveformPeaks: number[] }> {
+  let realDuration = 120;
+  let waveformPeaks: number[] = [];
+
+  try {
+    const arrayBuf = await inputFile.arrayBuffer();
+    const AudioCtx =
+      typeof window !== "undefined"
+        ? window.AudioContext ||
+          (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+        : null;
+
+    if (AudioCtx) {
+      const ctx = new AudioCtx();
+      const decodedAudioBuffer = await ctx.decodeAudioData(arrayBuf.slice(0));
+      realDuration = Math.round(decodedAudioBuffer.duration);
+      const extractedWaveform = extractRealAudioBufferWaveform(decodedAudioBuffer, 800);
+      waveformPeaks = extractedWaveform ? extractedWaveform.peaks : [];
+      ctx.close();
+    }
+  } catch (decodeErr) {
+    // decode fallback
+  }
+
+  return { duration: realDuration, waveformPeaks };
+}

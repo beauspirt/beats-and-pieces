@@ -5,11 +5,75 @@ import { supabase } from "@/lib/supabase";
 
 const STORAGE_KEY_PRODUCERS = "bnp_custom_producers";
 
+export const RESERVED_ROUTES = [
+  "admin",
+  "api",
+  "auth",
+  "battles",
+  "beats",
+  "host",
+  "profile",
+  "releases",
+  "signin",
+  "vault",
+  "producers",
+];
+
+export function sanitizeHandle(raw?: string): string {
+  if (!raw) return "";
+  return raw
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9-_]/g, "")
+    .slice(0, 30);
+}
+
+export function validateHandle(handle?: string): { isValid: boolean; error?: string } {
+  const clean = sanitizeHandle(handle);
+  if (!clean) {
+    return { isValid: false, error: "Custom profile URL cannot be empty." };
+  }
+  if (clean.length < 3) {
+    return { isValid: false, error: "Custom URL must be at least 3 characters." };
+  }
+  if (clean.length > 30) {
+    return { isValid: false, error: "Custom URL must be 30 characters or fewer." };
+  }
+  if (!/^[a-z0-9][a-z0-9-_]*[a-z0-9]$|^[a-z0-9]{3,}$/.test(clean)) {
+    return { isValid: false, error: "Custom URL must start and end with a letter or number (hyphens/underscores allowed)." };
+  }
+  if (RESERVED_ROUTES.includes(clean)) {
+    return { isValid: false, error: `'${clean}' is a reserved platform URL. Please choose another.` };
+  }
+  return { isValid: true };
+}
+
+export function sanitizeAvatarUrl(url?: string | null): string {
+  if (!url || typeof url !== "string" || url.trim() === "" || url.includes("supabase.co/storage")) {
+    return "/avatars/default-avatar.png";
+  }
+  return url;
+}
+
 function loadCustomProducers(): Record<string, UserProfile> {
   if (typeof window !== "undefined") {
     try {
       const stored = localStorage.getItem(STORAGE_KEY_PRODUCERS);
-      if (stored) return JSON.parse(stored);
+      if (stored) {
+        const parsed = JSON.parse(stored) as Record<string, UserProfile>;
+        Object.keys(parsed).forEach((key) => {
+          if (parsed[key]) {
+            parsed[key].avatarUrl = sanitizeAvatarUrl(parsed[key].avatarUrl);
+            if (parsed[key].createdAt && (parsed[key].createdAt.startsWith("2021-") || parsed[key].createdAt.startsWith("2022-") || parsed[key].createdAt.startsWith("2023-"))) {
+              delete parsed[key].createdAt;
+            }
+          }
+        });
+        delete parsed["ionbriceag"];
+        delete parsed["ondakniv"];
+        delete parsed["ceinaru-2"];
+        return parsed;
+      }
     } catch {}
   }
   return {};
@@ -26,7 +90,7 @@ function saveCustomProducers(data: Record<string, UserProfile>) {
         Object.entries(data).forEach(([k, v]) => {
           cleaned[k] = {
             ...v,
-            avatarUrl: (v.avatarUrl && v.avatarUrl.length > 200000) ? "/avatars/default-avatar.png" : v.avatarUrl,
+            avatarUrl: sanitizeAvatarUrl(v.avatarUrl),
           };
         });
         localStorage.setItem(STORAGE_KEY_PRODUCERS, JSON.stringify(cleaned));
@@ -61,6 +125,9 @@ export const producerService = {
       ...(rawProducers as Record<string, UserProfile>),
       ...custom,
     };
+    delete base["ionbriceag"];
+    delete base["ondakniv"];
+    delete base["ceinaru-2"];
 
     // Auto-populate any beatmaker from discovery-beats.json that is not explicitly defined in producers.json
     (rawDiscoveryBeats as Array<{ beatmaker?: { id?: string; tag?: string; avatarUrl?: string }; rank?: number; createdAt?: string }>).forEach((beat) => {
@@ -82,7 +149,6 @@ export const producerService = {
             totalFlames: 0,
           },
           isClaimed: false,
-          createdAt: beat.createdAt || "2023-01-01T00:00:00Z",
         };
       }
     });
@@ -95,32 +161,15 @@ export const producerService = {
     const map = this.getProducersMap();
     if (map[id]) return map[id];
     
-    // Case-insensitive lookup
-    const lower = id.toLowerCase();
+    // Case-insensitive lookup (by id, handle, or nickname)
+    const lower = id.toLowerCase().trim();
     const match = Object.values(map).find(
-      (p) => p.id.toLowerCase() === lower || (p.nickname && p.nickname.toLowerCase() === lower)
+      (p) =>
+        p.id.toLowerCase() === lower ||
+        (p.handle && p.handle.toLowerCase() === lower) ||
+        (p.nickname && p.nickname.toLowerCase() === lower)
     );
-    if (match) return match;
-
-    // Fallback stub for unknown user IDs
-    return {
-      id,
-      nickname: id.length > 20 ? `Producer-${id.slice(0, 5)}` : id,
-      email: `${id}@beatsandpieces.ro`,
-      avatarUrl: "/avatars/default-avatar.png",
-      bio: "Community Beatmaker",
-      location: "Romania",
-      role: "producer",
-      discordRoles: ["Battle Producer"],
-      links: {},
-      stats: {
-        battlesEntered: 0,
-        battlesWon: 0,
-        totalFlames: 0,
-      },
-      isClaimed: false,
-      createdAt: new Date().toISOString(),
-    };
+    return match;
   },
 
   getProducerByEmail(email: string): UserProfile | undefined {
@@ -130,11 +179,35 @@ export const producerService = {
     );
   },
 
+  getProducerByHandle(handle?: string): UserProfile | undefined {
+    if (!handle) return undefined;
+    const clean = sanitizeHandle(handle);
+    return Object.values(this.getProducersMap()).find(
+      (p) => sanitizeHandle(p.handle || p.id) === clean
+    );
+  },
+
+  isHandleAvailable(handle: string, excludeUserId?: string): boolean {
+    const clean = sanitizeHandle(handle);
+    const valid = validateHandle(clean);
+    if (!valid.isValid) return false;
+    const map = this.getProducersMap();
+    const existing = Object.values(map).find((p) => {
+      if (excludeUserId && p.id === excludeUserId) return false;
+      const h = sanitizeHandle(p.handle || p.id);
+      return h === clean || sanitizeHandle(p.id) === clean;
+    });
+    return !existing;
+  },
+
   getProducerByTag(tag?: string): UserProfile | undefined {
     if (!tag) return undefined;
     const cleanTag = tag.trim().toLowerCase();
     return Object.values(this.getProducersMap()).find(
-      (p) => (p.nickname && p.nickname.toLowerCase() === cleanTag) || (p.id && p.id.toLowerCase() === cleanTag)
+      (p) =>
+        (p.nickname && p.nickname.toLowerCase() === cleanTag) ||
+        (p.handle && p.handle.toLowerCase() === cleanTag) ||
+        (p.id && p.id.toLowerCase() === cleanTag)
     );
   },
 
@@ -147,22 +220,25 @@ export const producerService = {
       if (!error && data && data.length > 0) {
         const custom = loadCustomProducers();
         data.forEach((p) => {
-          if (p.id.startsWith("_")) return;
+          if (p.id.startsWith("_") || p.id === "ionbriceag" || p.id === "ondakniv") return;
           const local = custom[p.id];
           const remoteBio = p.bio?.trim();
           const remoteLocation = p.location?.trim();
           const remoteNickname = p.nickname?.trim();
-          const remoteAvatar = p.avatar_url;
-          const localAvatar = local?.avatarUrl;
+          const remoteHandle = sanitizeHandle(p.handle || p.links?.handle);
+          const localHandle = sanitizeHandle(local?.handle);
+          const resolvedHandle = remoteHandle || localHandle || sanitizeHandle(p.id);
+          const remoteAvatar = sanitizeAvatarUrl(p.avatar_url);
+          const localAvatar = sanitizeAvatarUrl(local?.avatarUrl);
 
           // Resilient avatar resolution: Preserve valid local avatar if remote is missing or default
-          const isRemoteValid = Boolean(remoteAvatar && remoteAvatar !== "/avatars/default-avatar.png" && remoteAvatar.trim() !== "");
-          const isLocalValid = Boolean(localAvatar && localAvatar !== "/avatars/default-avatar.png" && localAvatar.trim() !== "");
+          const isRemoteValid = Boolean(remoteAvatar && remoteAvatar !== "/avatars/default-avatar.png");
+          const isLocalValid = Boolean(localAvatar && localAvatar !== "/avatars/default-avatar.png");
           const resolvedAvatar = isRemoteValid
             ? remoteAvatar
             : isLocalValid
             ? localAvatar
-            : (remoteAvatar || "/avatars/default-avatar.png");
+            : "/avatars/default-avatar.png";
 
           const remoteHideEmail = p.links?.hideEmail !== undefined
             ? Boolean(p.links.hideEmail)
@@ -174,9 +250,13 @@ export const producerService = {
           if (remoteHideEmail) {
             cleanLinks.hideEmail = true;
           }
+          if (resolvedHandle) {
+            cleanLinks.handle = resolvedHandle;
+          }
 
           custom[p.id] = {
             id: p.id,
+            handle: resolvedHandle,
             nickname: remoteNickname || local?.nickname || p.id,
             email: p.email || local?.email || "",
             hideEmail: remoteHideEmail,
@@ -195,6 +275,16 @@ export const producerService = {
           };
           producersMap[p.id] = custom[p.id];
         });
+
+        // Prune any custom producers that are no longer in Supabase and not in local base producers
+        const remoteIds = new Set(data.map((p) => p.id));
+        Object.keys(custom).forEach((id) => {
+          if (!remoteIds.has(id) && !(rawProducers as Record<string, any>)[id]) {
+            delete custom[id];
+            delete producersMap[id];
+          }
+        });
+
         saveCustomProducers(custom);
         notifyProducersUpdated();
       }
@@ -205,13 +295,18 @@ export const producerService = {
   },
 
   createProducer(profile: UserProfile): UserProfile {
+    const resolvedHandle = sanitizeHandle(profile.handle || profile.id);
     const sanitizedLinks = { ...(profile.links || {}) };
     if (profile.hideEmail !== undefined) {
       sanitizedLinks.hideEmail = Boolean(profile.hideEmail);
     }
+    if (resolvedHandle) {
+      sanitizedLinks.handle = resolvedHandle;
+    }
 
     const updatedProfile = {
       ...profile,
+      handle: resolvedHandle,
       links: sanitizedLinks,
     };
 
@@ -251,6 +346,7 @@ export const producerService = {
     if (!current) {
       const fallback: UserProfile = {
         id,
+        handle: sanitizeHandle(updates.handle || id),
         nickname: id,
         email: `${id}@beatsandpieces.ro`,
         hideEmail: false,
@@ -268,6 +364,7 @@ export const producerService = {
       return this.createProducer(fallback);
     }
 
+    const resolvedHandle = sanitizeHandle(updates.handle !== undefined ? updates.handle : (current.handle || id));
     const updatedHideEmail = updates.hideEmail !== undefined ? Boolean(updates.hideEmail) : (current.hideEmail ?? false);
     const sanitizedLinks = {
       ...(current.links || {}),
@@ -278,10 +375,14 @@ export const producerService = {
     } else {
       delete sanitizedLinks.hideEmail;
     }
+    if (resolvedHandle) {
+      sanitizedLinks.handle = resolvedHandle;
+    }
 
     const updated: UserProfile = {
       ...current,
       ...updates,
+      handle: resolvedHandle,
       hideEmail: updatedHideEmail,
       links: sanitizedLinks,
     };
@@ -324,6 +425,9 @@ export const producerService = {
       sanitizedLinks.hideEmail = true;
     } else {
       delete sanitizedLinks.hideEmail;
+    }
+    if (updated.handle) {
+      sanitizedLinks.handle = updated.handle;
     }
 
     try {

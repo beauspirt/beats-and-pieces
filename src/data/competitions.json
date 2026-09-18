@@ -4,7 +4,7 @@
     "number": 8,
     "title": "Beat Battle #8",
     "slug": "beat-battle-8",
-    "coverImage": "/covers/beat-battle-8.png",
+    "coverImage": "/images/covers/battles/beat-battle-8.png",
     "hosts": [
       "Nerub"
     ],
@@ -34,7 +34,7 @@
     "number": 7,
     "title": "Beat Battle #7",
     "slug": "beat-battle-7",
-    "coverImage": "/covers/beat-battle-7.png",
+    "coverImage": "/images/covers/battles/beat-battle-7.png",
     "hosts": [
       "Nerub"
     ],
@@ -63,7 +63,7 @@
     "number": 6,
     "title": "Beat Battle #6",
     "slug": "beat-battle-6",
-    "coverImage": "/covers/beat-battle-6.png",
+    "coverImage": "/images/covers/battles/beat-battle-6.png",
     "hosts": [
       "Nerub"
     ],
@@ -95,7 +95,7 @@
     "number": 5,
     "title": "Beat Battle #5",
     "slug": "beat-battle-5",
-    "coverImage": "/covers/beat-battle-5.png",
+    "coverImage": "/images/covers/battles/beat-battle-5.png",
     "hosts": [
       "Nerub"
     ],
@@ -124,7 +124,7 @@
     "number": 4,
     "title": "Beat Battle #4",
     "slug": "beat-battle-4",
-    "coverImage": "/covers/beat-battle-4.png",
+    "coverImage": "/images/covers/battles/beat-battle-4.png",
     "hosts": [
       "Nerub"
     ],
@@ -155,7 +155,7 @@
     "number": 3,
     "title": "Beat Battle #3",
     "slug": "beat-battle-3",
-    "coverImage": "/covers/beat-battle-3.png",
+    "coverImage": "/images/covers/battles/beat-battle-3.png",
     "hosts": [
       "Nerub"
     ],
@@ -186,7 +186,7 @@
     "number": 2,
     "title": "Beat Battle #2",
     "slug": "beat-battle-2",
-    "coverImage": "/covers/beat-battle-2.png",
+    "coverImage": "/images/covers/battles/beat-battle-2.png",
     "hosts": [
       "Nerub"
     ],
@@ -216,7 +216,7 @@
     "number": 1,
     "title": "Beat Battle #1",
     "slug": "beat-battle-1",
-    "coverImage": "/covers/beat-battle-1.png",
+    "coverImage": "/images/covers/battles/beat-battle-1.png",
     "hosts": [
       "Nerub"
     ],

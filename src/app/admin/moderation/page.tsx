@@ -256,42 +256,37 @@ export default function VotingModerationPage() {
 
   return (
     <AdminGuard>
-      <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-300">
+      <div className="w-full space-y-8 animate-in fade-in duration-300">
         
-        {/* Top Breadcrumb */}
-        <Link
-          href="/admin"
-          className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to Admin Control Center</span>
-        </Link>
-
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6">
-          <div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-2">
+            <Link
+              href="/admin"
+              className="inline-flex items-center gap-1.5 text-xs text-[#888888] hover:text-white transition-colors"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back to Admin Panel</span>
+            </Link>
             <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-              <ShieldAlert className="w-8 h-8 text-[#FF5E3A]" />
-              <span>Voting Anomaly & Moderation</span>
+              <ShieldAlert className="w-7 h-7 text-[#FF5E3A]" />
+              <span>Voting Moderation</span>
             </h1>
-            <p className="text-xs text-zinc-400 mt-1">
-              Real-time fraud prevention & voting audit across all beat battles.
-            </p>
           </div>
 
           <div className="flex items-center gap-3">
             {/* Metric Card: Pending */}
-            <div className="bg-surface-card rounded-3xl px-4 py-2 text-center shadow-sm">
-              <span className="text-xs text-zinc-500 uppercase font-bold block">Pending</span>
-              <span className="text-lg font-bold text-[#FF5E3A]">
+            <div className="bg-surface-card rounded-2xl px-4 py-2 flex items-center gap-2 shadow-sm">
+              <span className="text-xs text-zinc-400 font-bold">Pending</span>
+              <span className="text-sm font-bold text-[#FF5E3A]">
                 {pendingCount}
               </span>
             </div>
 
             {/* Metric Card: Discarded */}
-            <div className="bg-surface-card rounded-3xl px-4 py-2 text-center shadow-sm">
-              <span className="text-xs text-zinc-500 uppercase font-bold block">Discarded</span>
-              <span className="text-lg font-bold text-zinc-400">
+            <div className="bg-surface-card rounded-2xl px-4 py-2 flex items-center gap-2 shadow-sm">
+              <span className="text-xs text-zinc-400 font-bold">Discarded</span>
+              <span className="text-sm font-bold text-zinc-300">
                 {discardedCount}
               </span>
             </div>
@@ -300,7 +295,7 @@ export default function VotingModerationPage() {
             <button
               onClick={scanAnomalies}
               disabled={isLoading}
-              className="px-3.5 py-3 rounded-xl bg-surface-card hover:bg-surface-hover text-zinc-300 hover:text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
+              className="px-3.5 py-2 rounded-2xl bg-surface-card hover:bg-surface-hover text-zinc-300 hover:text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
               title="Scan all battles for anomalies"
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin text-brand" : "text-zinc-400"}`} />
@@ -309,49 +304,38 @@ export default function VotingModerationPage() {
           </div>
         </div>
 
-        {/* Battle Filter Dropdown / Pills */}
-        <div className="bg-surface-card rounded-3xl p-4 space-y-3 shadow-md">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">
-              Filter by Battle:
-            </span>
-            <span className="text-xs text-zinc-500">
-              {battles.length} battles tracked
-            </span>
-          </div>
+        {/* Battle Filter Pills */}
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setSelectedBattleId("all")}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              selectedBattleId === "all"
+                ? "bg-brand text-white shadow-md"
+                : "bg-surface-card text-zinc-400 hover:text-white hover:bg-surface-hover"
+            }`}
+          >
+            All Battles
+          </button>
 
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setSelectedBattleId("all")}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                selectedBattleId === "all"
-                  ? "bg-brand text-white shadow-md"
-                  : "bg-[#121212] text-zinc-400 hover:text-white hover:bg-[#1E1E1E]"
-              }`}
-            >
-              All Battles
-            </button>
-
-            {battles.map((b) => {
-              const isSelected = selectedBattleId === b.id;
-              return (
-                <button
-                  key={b.id}
-                  onClick={() => setSelectedBattleId(b.id)}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                    isSelected
-                      ? "bg-brand text-white shadow-md"
-                      : "bg-[#121212] text-zinc-400 hover:text-white hover:bg-[#1E1E1E]"
-                  }`}
-                >
-                  <span>{b.title}</span>
-                  {b.phase === "rating" && (
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" title="Live Rating Active" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
+          {battles.map((b) => {
+            const isSelected = selectedBattleId === b.id;
+            return (
+              <button
+                key={b.id}
+                onClick={() => setSelectedBattleId(b.id)}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  isSelected
+                    ? "bg-brand text-white shadow-md"
+                    : "bg-surface-card text-zinc-400 hover:text-white hover:bg-surface-hover"
+                }`}
+              >
+                <span>{b.title}</span>
+                {b.phase === "rating" && (
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" title="Live Rating Active" />
+                )}
+              </button>
+            );
+          })}
         </div>
 
         {/* Filter Status Tabs */}
@@ -378,7 +362,7 @@ export default function VotingModerationPage() {
         </div>
 
         {/* Flags List */}
-        <div className="space-y-4">
+        <div className="space-y-3.5">
           {isLoading ? (
             <div className="bg-surface-card rounded-3xl p-12 text-center space-y-3 shadow-md">
               <div className="w-8 h-8 rounded-full border-2 border-brand border-t-transparent animate-spin mx-auto" />

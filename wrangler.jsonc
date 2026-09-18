@@ -1,12 +1,21 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "beats-and-pieces",
+  "main": "src/worker.ts",
   "compatibility_date": "2026-08-18",
   "compatibility_flags": [
     "nodejs_compat"
   ],
   "assets": {
     "directory": "./out",
-    "not_found_handling": "404-page"
-  }
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": true
+  },
+  "r2_buckets": [
+    {
+      "binding": "MEDIA_BUCKET",
+      "bucket_name": "beats-and-pieces"
+    }
+  ]
 }

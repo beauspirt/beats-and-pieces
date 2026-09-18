@@ -126,20 +126,6 @@ export const Navbar: React.FC = () => {
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 
-            {/* Desktop Admin Link */}
-            {mounted && currentUser?.role === "admin" && (
-              <Link
-                href="/admin"
-                className={`hidden sm:flex text-xs font-bold transition-colors items-center gap-1.5 ${
-                  pathname.startsWith("/admin")
-                    ? "text-[#FF8A65]"
-                    : "text-[#D1D1D1] hover:text-white"
-                }`}
-              >
-                Admin Panel
-              </Link>
-            )}
-
             {/* Desktop Host Link */}
             {mounted && currentUser?.role !== "admin" && isHost && (
               <Link
@@ -164,10 +150,20 @@ export const Navbar: React.FC = () => {
                     aria-label="Open profile menu"
                   >
                     <Image
-                      src={currentUser.avatarUrl}
+                      src={
+                        currentUser.avatarUrl && !currentUser.avatarUrl.includes("supabase.co/storage")
+                          ? currentUser.avatarUrl
+                          : "/avatars/default-avatar.png"
+                      }
                       alt={currentUser.nickname}
                       fill
                       className="object-cover"
+                      onError={(e) => {
+                        const img = e.currentTarget as HTMLImageElement;
+                        if (img && !img.src.endsWith("/avatars/default-avatar.png")) {
+                          img.src = "/avatars/default-avatar.png";
+                        }
+                      }}
                     />
                   </button>
 
@@ -179,28 +175,19 @@ export const Navbar: React.FC = () => {
                       </div>
 
                       <Link
-                        href={`/${currentUser.id}`}
+                        href={`/${currentUser.handle || currentUser.id}`}
                         onClick={() => setShowProfileMenu(false)}
                         className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-[#D1D1D1] hover:text-white hover:bg-[#7B61FF] transition-colors"
                       >
                         <UserIcon className="w-4 h-4" />
-                        <span>Your Page</span>
-                      </Link>
-
-                      <Link
-                        href="/profile"
-                        onClick={() => setShowProfileMenu(false)}
-                        className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-[#D1D1D1] hover:text-white hover:bg-[#7B61FF] transition-colors"
-                      >
-                        <Settings className="w-4 h-4" />
-                        <span>Edit Profile</span>
+                        <span>Your Profile</span>
                       </Link>
 
                       {currentUser?.role === "admin" && (
                         <Link
                           href="/admin"
                           onClick={() => setShowProfileMenu(false)}
-                          className="sm:hidden flex items-center gap-2.5 px-4 py-2.5 text-xs text-[#FF8A65] hover:bg-[#262626] transition-colors"
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-[#D1D1D1] hover:text-white hover:bg-[#7B61FF] transition-colors"
                         >
                           <Shield className="w-4 h-4" />
                           <span>Admin Panel</span>

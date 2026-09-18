@@ -65,7 +65,7 @@ export default function NewReleasePage() {
 
   return (
     <AdminGuard>
-      <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-300 py-4">
+      <div className="w-full space-y-8 animate-in fade-in duration-300">
       
         {/* Top Header & Breadcrumb */}
         <div className="space-y-3">

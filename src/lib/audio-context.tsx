@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 interface AudioContextType {
   currentTrackId: string | null;
   isPlaying: boolean;
+  isLoading: boolean;
+  loadingTrackId: string | null;
   currentTime: number;
   duration: number;
   playbackProgress: number; // 0 to 1
@@ -42,12 +44,21 @@ const DECLICK_FADE_DURATION = 0.015;
 // Maximum number of uncompressed AudioBuffers kept in browser memory (prevents mobile OOM)
 const MAX_CACHED_BUFFERS = 4;
 
+const isIOSDevice = () => {
+  if (typeof navigator === "undefined") return false;
+  return (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  );
+};
+
 export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const pathname = usePathname();
   const prevPathnameRef = useRef(pathname);
 
   const [currentTrackId, setCurrentTrackId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [loadingTrackId, setLoadingTrackId] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(45);
   const [activeTrackTitle, setActiveTrackTitle] = useState<string | null>(null);
@@ -253,6 +264,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       fallbackAudioRef.current.pause();
     }
 
+    setLoadingTrackId(null);
     setIsPlaying(false);
   }, [stopActiveSourceWithDeclick]);
 
@@ -297,6 +309,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     startContextTimeRef.current = now;
     startTrackOffsetRef.current = safeOffset;
 
+    setLoadingTrackId(null);
     sourceNode.start(now, safeOffset);
     setIsPlaying(true);
     startTimeLoop();
@@ -337,6 +350,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const closePlayer = useCallback(() => {
     pauseTrack();
+    setLoadingTrackId(null);
     setCurrentTrackId(null);
     setActiveTrackTitle(null);
     setActiveTrackArtist(null);
@@ -349,15 +363,19 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (typeof progress !== "number" || isNaN(progress) || !isFinite(progress)) return;
     const targetProgress = Math.max(0, Math.min(1, progress));
 
+    if (fallbackAudioRef.current && (!currentBufferRef.current || isIOSDevice())) {
+      const audio = fallbackAudioRef.current;
+      const dur = isFinite(audio.duration) && audio.duration > 0 ? audio.duration : duration;
+      const targetTime = targetProgress * dur;
+      audio.currentTime = targetTime;
+      setCurrentTime(targetTime);
+      return;
+    }
+
     const buf = currentBufferRef.current;
     if (buf) {
       const targetTime = targetProgress * buf.duration;
       startBufferPlayback(buf, targetTime);
-    } else if (fallbackAudioRef.current) {
-      const dur = isFinite(fallbackAudioRef.current.duration) ? fallbackAudioRef.current.duration : duration;
-      const targetTime = targetProgress * dur;
-      fallbackAudioRef.current.currentTime = targetTime;
-      setCurrentTime(targetTime);
     }
   }, [duration, startBufferPlayback]);
 
@@ -372,6 +390,13 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     artistId?: string,
     coverUrl?: string
   ) => {
+    // Unlock iOS Audio Session to Playback category so audio plays through the hardware Silent Switch
+    if (typeof navigator !== "undefined" && "audioSession" in navigator) {
+      try {
+        (navigator as any).audioSession.type = "playback";
+      } catch {}
+    }
+
     const ctx = getAudioContext();
     const sourceUrl = audioUrl || currentUrlRef.current || "";
     if (!sourceUrl && !currentBufferRef.current && !fallbackAudioRef.current) {
@@ -391,28 +416,58 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       ? Math.max(0, Math.min(1, startProgress))
       : 0;
 
+    const isIOS = isIOSDevice();
+
     // 1. If clicking the currently active track
-    if ((currentTrackId === id || !id) && currentBufferRef.current) {
-      if (startProgress !== undefined) {
-        const targetTime = initialProgress * currentBufferRef.current.duration;
-        startBufferPlayback(currentBufferRef.current, targetTime);
-      } else {
-        if (isPlaying) {
-          pauseTrack();
+    if (currentTrackId === id || !id) {
+      if (fallbackAudioRef.current && (!currentBufferRef.current || isIOS)) {
+        const audio = fallbackAudioRef.current;
+        if (startProgress !== undefined) {
+          const targetTime = initialProgress * (audio.duration || duration || 0);
+          audio.currentTime = targetTime;
+          audio.play().catch(() => {});
+          setIsPlaying(true);
         } else {
-          const isAtEnd =
-            (duration > 0 && currentTime >= duration - 0.5) ||
-            currentTime >= currentBufferRef.current.duration - 0.5;
-          const resumeTime = isAtEnd ? 0 : currentTime;
-          startBufferPlayback(currentBufferRef.current, resumeTime);
+          if (isPlaying) {
+            audio.pause();
+            setIsPlaying(false);
+          } else {
+            const isAtEnd =
+              (duration > 0 && currentTime >= duration - 0.5) ||
+              (audio.duration && currentTime >= audio.duration - 0.5);
+            if (isAtEnd) audio.currentTime = 0;
+            audio.play().catch(() => {});
+            setIsPlaying(true);
+            startTimeLoop();
+          }
         }
+        return;
       }
-      return;
+
+      if (currentBufferRef.current) {
+        if (startProgress !== undefined) {
+          const targetTime = initialProgress * currentBufferRef.current.duration;
+          startBufferPlayback(currentBufferRef.current, targetTime);
+        } else {
+          if (isPlaying) {
+            pauseTrack();
+          } else {
+            const isAtEnd =
+              (duration > 0 && currentTime >= duration - 0.5) ||
+              currentTime >= currentBufferRef.current.duration - 0.5;
+            const resumeTime = isAtEnd ? 0 : currentTime;
+            startBufferPlayback(currentBufferRef.current, resumeTime);
+          }
+        }
+        return;
+      }
     }
 
-    // 2. Switching to a new track: Instantly stop previous track & reset progress
+    // 2. Switching to a new track: Instantly stop previous track & enter loading state
     pauseTrack();
+    currentBufferRef.current = null;
     setCurrentTrackId(id);
+    setLoadingTrackId(id);
     setActiveTrackTitle(title || `Beat #${id}`);
     setActiveTrackArtist(artist || null);
     setActiveTrackArtistId(artistId || null);
@@ -422,6 +477,41 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     // Instantly reset time so previous track progress never flashes on new track
     setCurrentTime(0);
     setDuration(knownDuration && knownDuration > 0 ? knownDuration : 0);
+
+    // On iOS, trigger HTML5 Audio synchronously inside the user interaction event
+    // so Safari grants playback permission, streams immediately, and plays through the hardware silent switch.
+    if (isIOS) {
+      if (!fallbackAudioRef.current) {
+        fallbackAudioRef.current = new Audio();
+      }
+      const audio = fallbackAudioRef.current;
+      audio.src = resolvedUrl;
+      audio.volume = isMutedRef.current ? 0 : volumeRef.current;
+
+      audio.onloadedmetadata = () => {
+        if (isFinite(audio.duration) && audio.duration > 0) {
+          setDuration(audio.duration);
+          if (initialProgress > 0) {
+            audio.currentTime = initialProgress * audio.duration;
+          }
+        }
+      };
+
+      audio.onended = () => {
+        setIsPlaying(false);
+        setCurrentTime(0);
+      };
+
+      audio.play().then(() => {
+        setLoadingTrackId(null);
+        setIsPlaying(true);
+        startTimeLoop();
+      }).catch((err) => {
+        console.warn("iOS audio playback failed:", err);
+        setLoadingTrackId(null);
+      });
+      return;
+    }
 
     // Check if AudioBuffer is already in LRU cache
     const cachedBuffer = getCachedBuffer(resolvedUrl);
@@ -433,10 +523,13 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return;
     }
 
-    // Fetch and decode via Web Audio API
+    // Fetch and decode via Web Audio API (Desktop / non-iOS)
     try {
       if (ctx) {
         const response = await fetch(resolvedUrl);
+        if (!response.ok) {
+          throw new Error(`Failed to load audio: HTTP ${response.status}`);
+        }
         const arrayBuffer = await response.arrayBuffer();
         const decodedBuffer = await ctx.decodeAudioData(arrayBuffer);
 
@@ -453,6 +546,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     } catch (err) {
       // console.warn("Web Audio fetch/decode failed, using HTML5 Audio fallback:", err);
+      currentBufferRef.current = null;
     }
 
     // Fallback to HTML5 audio element if Web Audio API decode is unavailable
@@ -473,16 +567,37 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     audio.play().then(() => {
+      setLoadingTrackId(null);
       setIsPlaying(true);
       startTimeLoop();
-    }).catch(() => {});
+    }).catch(() => {
+      setLoadingTrackId(null);
+    });
 
   }, [currentTrackId, getAudioContext, isPlaying, currentTime, pauseTrack, startBufferPlayback, startTimeLoop, getCachedBuffer, setCachedBuffer]);
 
   const togglePlay = useCallback(() => {
+    if (typeof navigator !== "undefined" && "audioSession" in navigator) {
+      try {
+        (navigator as any).audioSession.type = "playback";
+      } catch {}
+    }
+
     if (isPlaying) {
       pauseTrack();
     } else {
+      if (fallbackAudioRef.current && (!currentBufferRef.current || isIOSDevice())) {
+        const audio = fallbackAudioRef.current;
+        const isAtEnd =
+          (duration > 0 && currentTime >= duration - 0.5) ||
+          (audio.duration && currentTime >= audio.duration - 0.5);
+        if (isAtEnd) audio.currentTime = 0;
+        audio.play().catch(() => {});
+        setIsPlaying(true);
+        startTimeLoop();
+        return;
+      }
+
       const isAtEnd =
         (duration > 0 && currentTime >= duration - 0.5) ||
         (currentBufferRef.current && currentTime >= currentBufferRef.current.duration - 0.5);
@@ -518,6 +633,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       value={{
         currentTrackId,
         isPlaying,
+        isLoading: Boolean(loadingTrackId),
+        loadingTrackId,
         currentTime,
         duration,
         playbackProgress,

@@ -22,6 +22,7 @@ import { useAudioPlayer } from "@/lib/audio-context";
 import { useAuth } from "@/lib/auth-context";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { ClientPortal } from "./ClientPortal";
+import { formatTime } from "@/lib/utils";
 
 // Deterministic pseudo-random seeded shuffle (Mulberry32 PRNG)
 function seededShuffle<T>(array: T[], seedStr: string): T[] {
@@ -67,17 +68,20 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   const { pauseTrack } = useAudioPlayer();
   const { user: currentUser, isLoggedIn, isLoading: isAuthLoading } = useAuth();
   
-  const [battle, setBattle] = useState<Competition>(() => {
-    return battleService.getCompetitionById(battleId) || battleService.getAllCompetitions()[0];
+  const [battle, setBattle] = useState<Competition | null>(() => {
+    const found = battleService.getCompetitionById(battleId);
+    return found && found.id === battleId ? found : null;
   });
 
   const [submissions, setSubmissions] = useState<BattleSubmission[]>(() => {
     return battleService.getSubmissionsByBattleId(battleId);
   });
 
+  const [hasChecked, setHasChecked] = useState(false);
+
   const refreshBattleData = useCallback(() => {
     const freshBattle = battleService.getCompetitionById(battleId);
-    if (freshBattle) {
+    if (freshBattle && freshBattle.id === battleId) {
       setBattle(freshBattle);
     }
     setSubmissions(battleService.getSubmissionsByBattleId(battleId));
@@ -88,6 +92,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
     battleService.syncFromSupabase().then(() => {
       refreshBattleData();
+      setHasChecked(true);
     });
 
     const handleUpdate = () => {
@@ -104,22 +109,14 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
   // Route Guard: Require login for ongoing active battles
   useEffect(() => {
-    if (!isAuthLoading && !isLoggedIn && battle?.phase !== "completed") {
+    if (!isAuthLoading && !isLoggedIn && battle && battle.phase !== "completed") {
       router.replace(`/signin?redirect=/battles/${battleId}`);
     }
-  }, [isAuthLoading, isLoggedIn, battle?.phase, router, battleId]);
-
-  if (!isAuthLoading && !isLoggedIn && battle?.phase !== "completed") {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full border-2 border-brand border-t-transparent animate-spin" />
-      </div>
-    );
-  }
+  }, [isAuthLoading, isLoggedIn, battle, router, battleId]);
 
   // Determine if the currently logged in user is explicitly assigned as a judge for THIS battle
   const isUserJudge = Boolean(
-    currentUser && (
+    currentUser && battle && (
       battle.judgeDetails?.some((j) => 
         (j.email && j.email.toLowerCase() === currentUser.email.toLowerCase()) ||
         (j.name && j.name.toLowerCase() === currentUser.nickname.toLowerCase())
@@ -134,6 +131,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   );
 
   const [isDownloadingSamples, setIsDownloadingSamples] = useState(false);
+  const [downloadingSampleId, setDownloadingSampleId] = useState<string | null>(null);
 
   // Helper for cross-origin audio downloads preserving clean filenames
   const downloadAudioFile = async (url: string, desiredFilename: string) => {
@@ -165,9 +163,18 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     }
   };
 
+  const handleDownloadSingleSample = async (sampleId: string, url: string, title: string) => {
+    setDownloadingSampleId(sampleId);
+    try {
+      await downloadAudioFile(url, title);
+    } finally {
+      setDownloadingSampleId(null);
+    }
+  };
+
   // Helper for downloading sample(s): single file or zipped bundle if multiple
   const downloadSamples = async () => {
-    if (!battle.samples || battle.samples.length === 0) return;
+    if (!battle?.samples || battle.samples.length === 0) return;
     if (battle.samples.length === 1) {
       const sample = battle.samples[0];
       await downloadAudioFile(sample.audioUrl, sample.title);
@@ -179,7 +186,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       const JSZipModule = await import("jszip");
       const JSZip = JSZipModule.default || JSZipModule;
       const zip = new JSZip();
-      const folderName = `${battle.title.replace(/[^a-z0-9_-]/gi, "_")}_Samples`;
+      const folderName = `${(battle.title || "Battle").replace(/[^a-z0-9_-]/gi, "_")}_Samples`;
       const folder = zip.folder(folderName) || zip;
 
       const fetchPromises = battle.samples.map(async (s) => {
@@ -200,7 +207,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       const blobUrl = URL.createObjectURL(zipBlob);
       const a = document.createElement("a");
       a.href = blobUrl;
-      a.download = `${battle.title.replace(/[^a-z0-9_-]/gi, "_")}_Samples.zip`;
+      a.download = `${(battle.title || "Battle").replace(/[^a-z0-9_-]/gi, "_")}_Samples.zip`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -208,7 +215,9 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     } catch (err) {
       // console.error("Failed to generate zip:", err);
       // Fallback: download first sample
-      downloadAudioFile(battle.samples[0].audioUrl, battle.samples[0].title);
+      if (battle?.samples?.[0]) {
+        downloadAudioFile(battle.samples[0].audioUrl, battle.samples[0].title);
+      }
     } finally {
       setIsDownloadingSamples(false);
     }
@@ -275,7 +284,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     const uId = currentUser?.id || visitorSeed;
     let draftRatings: Record<string, number> = {};
     try {
-      const stored = localStorage.getItem(`bnp_draft_ratings_${battle.id}_${uId}`);
+      const stored = localStorage.getItem(`bnp_draft_ratings_${battle?.id || battleId}_${uId}`);
       if (stored) draftRatings = JSON.parse(stored);
     } catch {}
 
@@ -285,12 +294,14 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       return;
     }
 
-    battleService.getUserRatingsForBattle(battle.id, currentUser.id).then(({ ratings: userRatings, isSubmitted }) => {
-      const merged = { ...draftRatings, ...userRatings };
-      setRatings(merged);
-      setIsRatingsSubmitted(isSubmitted);
-    });
-  }, [battle.id, currentUser?.id, visitorSeed]);
+    if (battle?.id) {
+      battleService.getUserRatingsForBattle(battle.id, currentUser.id).then(({ ratings: userRatings, isSubmitted }) => {
+        const merged = { ...draftRatings, ...userRatings };
+        setRatings(merged);
+        setIsRatingsSubmitted(isSubmitted);
+      });
+    }
+  }, [battle?.id, battleId, currentUser?.id, visitorSeed]);
 
   // Phase 3: Clean Single-Score Jury evaluation state (slider 0.00 to 5.00)
   const [juryScores, setJuryScores] = useState<Record<string, string>>({});
@@ -307,7 +318,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   const isBallotQualified = totalEntries > 0 && currentVotesCount >= requiredVotes;
 
   // Deterministic user-seeded randomized queue for Phase 2 public rating
-  const userSeed = `${currentUser?.id || currentUser?.email || visitorSeed}_${battle.id}`;
+  const userSeed = `${currentUser?.id || currentUser?.email || visitorSeed}_${battle?.id || battleId}`;
   const shuffledSubmissions = React.useMemo(() => {
     return seededShuffle(submissions, userSeed);
   }, [submissions, userSeed]);
@@ -324,7 +335,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   }));
 
   // Top 10 finalists triaged by Phase 2 public flame rating, randomized presentation order for judges
-  const cutoff = battle.topFinalistsCutoff || 10;
+  const cutoff = battle?.topFinalistsCutoff || 10;
   const finalistSubmissions = React.useMemo(() => {
     const topFinalists = [...submissions]
       .sort((a, b) => (b.flameRating || 0) - (a.flameRating || 0))
@@ -334,7 +345,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
   // Restore judge's drafted scores and check submission status purely from database
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser || !battle) return;
     const cleanName = currentUser.nickname.toLowerCase().trim();
     const cleanEmail = currentUser.email.toLowerCase().trim();
     const cleanId = currentUser.id.toLowerCase().trim();
@@ -377,7 +388,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     // Only submitted if every finalist has a submitted score in the database
     const isSubmitted = finalistSubmissions.length > 0 && scoredFinalistsCount === finalistSubmissions.length;
     setIsJurySubmitted(isSubmitted);
-  }, [finalistSubmissions, currentUser, battle.id]);
+  }, [finalistSubmissions, currentUser, battle?.id]);
 
   // Set of judges who have submitted scores
   const submittedJudgeNames = React.useMemo(() => {
@@ -458,7 +469,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   };
 
   const handleConfirmSubmitStagedEntry = async () => {
-    if (!stagedBeat || !stagedBeat.title.trim()) return;
+    if (!stagedBeat || !stagedBeat.title.trim() || !battle) return;
     setIsUploading(true);
     try {
       const uploaderId = currentUser?.id || "guest";
@@ -533,7 +544,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   };
 
   const handleSaveEditedTitle = async () => {
-    if (!myEntry || !editingMyEntryTitle.trim()) return;
+    if (!myEntry || !editingMyEntryTitle.trim() || !battle) return;
     const newTitle = editingMyEntryTitle.trim();
     setIsUploading(true);
     try {
@@ -552,7 +563,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   };
 
   const handleRemoveMyEntry = async () => {
-    if (!myEntry) return;
+    if (!myEntry || !battle) return;
     pauseTrack();
     setIsUploading(true);
     try {
@@ -597,9 +608,94 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   // Compact Samples Audio Player State
   const [playingSampleId, setPlayingSampleId] = useState<string | null>(null);
   const [sampleProgress, setSampleProgress] = useState<Record<string, number>>({});
+  const [sampleCurrentTimes, setSampleCurrentTimes] = useState<Record<string, number>>({});
+  const [sampleDurations, setSampleDurations] = useState<Record<string, number>>({});
+  const [scrubbingSample, setScrubbingSample] = useState<{ id: string; fraction: number } | null>(null);
+  const isPointerDownSample = useRef<string | null>(null);
   const sampleAudioRefs = useRef<Record<string, HTMLAudioElement | null>>({});
 
+  // Preload sample metadata so durations are immediately known
+  useEffect(() => {
+    if (battle?.samples && battle.samples.length > 0) {
+      battle.samples.forEach((sample) => {
+        if (sample.duration && sample.duration > 0) {
+          setSampleDurations((prev) => ({ ...prev, [sample.id]: sample.duration }));
+        }
+        if (sample.audioUrl) {
+          try {
+            const probe = new Audio();
+            probe.preload = "metadata";
+            probe.src = sample.audioUrl;
+            probe.onloadedmetadata = () => {
+              if (probe.duration && isFinite(probe.duration) && probe.duration > 0) {
+                setSampleDurations((prev) => ({ ...prev, [sample.id]: probe.duration }));
+              }
+            };
+          } catch {}
+        }
+      });
+    }
+  }, [battle?.samples]);
+
+  // Clean up all sample audio instances on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(sampleAudioRefs.current).forEach((audio) => {
+        if (audio) {
+          audio.pause();
+          audio.src = "";
+        }
+      });
+    };
+  }, []);
+
+  const ensureSampleAudio = useCallback((sampleId: string, audioUrl: string): HTMLAudioElement => {
+    let audio = sampleAudioRefs.current[sampleId];
+    if (!audio) {
+      const newAudio = new Audio(audioUrl);
+      newAudio.preload = "auto";
+      sampleAudioRefs.current[sampleId] = newAudio;
+
+      newAudio.ontimeupdate = () => {
+        if (isPointerDownSample.current !== sampleId) {
+          const cur = newAudio.currentTime;
+          const dur = (newAudio.duration && isFinite(newAudio.duration) && newAudio.duration > 0)
+            ? newAudio.duration
+            : (sampleDurations[sampleId] || 0);
+
+          setSampleCurrentTimes((prev) => ({ ...prev, [sampleId]: cur }));
+          if (dur > 0) {
+            setSampleProgress((prev) => ({
+              ...prev,
+              [sampleId]: (cur / dur) * 100,
+            }));
+          }
+        }
+      };
+
+      newAudio.onloadedmetadata = () => {
+        if (newAudio.duration && isFinite(newAudio.duration) && newAudio.duration > 0) {
+          setSampleDurations((prev) => ({ ...prev, [sampleId]: newAudio.duration }));
+        }
+      };
+
+      newAudio.onended = () => {
+        setPlayingSampleId(null);
+        setSampleProgress((prev) => ({ ...prev, [sampleId]: 0 }));
+        setSampleCurrentTimes((prev) => ({ ...prev, [sampleId]: 0 }));
+      };
+
+      audio = newAudio;
+    }
+    return audio;
+  }, [sampleDurations]);
+
   const handleToggleSample = (sampleId: string, audioUrl: string) => {
+    if (typeof navigator !== "undefined" && "audioSession" in navigator) {
+      try {
+        (navigator as any).audioSession.type = "playback";
+      } catch {}
+    }
     if (playingSampleId === sampleId) {
       const audio = sampleAudioRefs.current[sampleId];
       if (audio) {
@@ -607,26 +703,96 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       }
       setPlayingSampleId(null);
     } else {
+      pauseTrack();
       if (playingSampleId && sampleAudioRefs.current[playingSampleId]) {
         sampleAudioRefs.current[playingSampleId]?.pause();
       }
-      let audio = sampleAudioRefs.current[sampleId];
-      if (!audio) {
-        const newAudio = new Audio(audioUrl);
-        sampleAudioRefs.current[sampleId] = newAudio;
-        newAudio.ontimeupdate = () => {
-          if (newAudio.duration) {
-            setSampleProgress((prev) => ({
-              ...prev,
-              [sampleId]: (newAudio.currentTime / newAudio.duration) * 100,
-            }));
-          }
-        };
-        newAudio.onended = () => {
-          setPlayingSampleId(null);
-          setSampleProgress((prev) => ({ ...prev, [sampleId]: 0 }));
-        };
-        audio = newAudio;
+      const audio = ensureSampleAudio(sampleId, audioUrl);
+      audio.play().catch(() => {});
+      setPlayingSampleId(sampleId);
+    }
+  };
+
+  const getSampleFraction = (e: React.PointerEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    if (rect.width <= 0) return 0;
+    const x = e.clientX - rect.left;
+    return Math.max(0, Math.min(1, x / rect.width));
+  };
+
+  const handleSampleScrubberPointerDown = (
+    e: React.PointerEvent<HTMLDivElement>,
+    sampleId: string,
+    audioUrl: string,
+    fallbackDuration: number
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+    isPointerDownSample.current = sampleId;
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {}
+
+    const frac = getSampleFraction(e);
+    setScrubbingSample({ id: sampleId, fraction: frac });
+    ensureSampleAudio(sampleId, audioUrl);
+  };
+
+  const handleSampleScrubberPointerMove = (
+    e: React.PointerEvent<HTMLDivElement>,
+    sampleId: string
+  ) => {
+    if (isPointerDownSample.current !== sampleId) return;
+    const frac = getSampleFraction(e);
+    setScrubbingSample({ id: sampleId, fraction: frac });
+  };
+
+  const handleSampleScrubberPointerUp = (
+    e: React.PointerEvent<HTMLDivElement>,
+    sampleId: string,
+    audioUrl: string,
+    fallbackDuration: number
+  ) => {
+    if (isPointerDownSample.current !== sampleId) return;
+    isPointerDownSample.current = null;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {}
+
+    const frac = getSampleFraction(e);
+    setScrubbingSample(null);
+
+    const audio = ensureSampleAudio(sampleId, audioUrl);
+    const dur = (audio.duration && isFinite(audio.duration) && audio.duration > 0)
+      ? audio.duration
+      : (sampleDurations[sampleId] || fallbackDuration || 0);
+
+    if (dur > 0) {
+      const targetTime = frac * dur;
+      audio.currentTime = targetTime;
+      setSampleCurrentTimes((prev) => ({ ...prev, [sampleId]: targetTime }));
+      setSampleProgress((prev) => ({ ...prev, [sampleId]: frac * 100 }));
+    } else {
+      const onLoaded = () => {
+        if (audio.duration && isFinite(audio.duration) && audio.duration > 0) {
+          audio.currentTime = frac * audio.duration;
+          setSampleCurrentTimes((prev) => ({ ...prev, [sampleId]: frac * audio.duration }));
+          setSampleProgress((prev) => ({ ...prev, [sampleId]: frac * 100 }));
+        }
+        audio.removeEventListener("loadedmetadata", onLoaded);
+      };
+      audio.addEventListener("loadedmetadata", onLoaded);
+    }
+
+    if (playingSampleId !== sampleId) {
+      if (typeof navigator !== "undefined" && "audioSession" in navigator) {
+        try {
+          (navigator as any).audioSession.type = "playback";
+        } catch {}
+      }
+      pauseTrack();
+      if (playingSampleId && sampleAudioRefs.current[playingSampleId]) {
+        sampleAudioRefs.current[playingSampleId]?.pause();
       }
       audio.play().catch(() => {});
       setPlayingSampleId(sampleId);
@@ -661,10 +827,10 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       sampleAudioRefs.current[playingSampleId]?.pause();
       setPlayingSampleId(null);
     }
-  }, [battle.phase]);
+  }, [battle?.phase]);
 
   const handleRateBeat = async (trackId: string, flames: number) => {
-    if (isRatingsSubmitted) return; // Locked once submitted
+    if (isRatingsSubmitted || !battle) return; // Locked once submitted
     const updated = { ...ratings, [trackId]: flames };
     setRatings(updated);
     setLastSavedTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
@@ -678,7 +844,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   };
 
   const handleJuryScoreChange = (subId: string, val: string) => {
-    if (isJurySubmitted) return;
+    if (isJurySubmitted || !battle) return;
     setJuryScores((prev) => {
       const updated = { ...prev, [subId]: val };
       const uId = currentUser?.id || "judge";
@@ -690,7 +856,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   };
 
   const handleJuryFeedbackChange = (subId: string, val: string) => {
-    if (isJurySubmitted) return;
+    if (isJurySubmitted || !battle) return;
     setJuryFeedback((prev) => {
       const updated = { ...prev, [subId]: val };
       const uId = currentUser?.id || "judge";
@@ -714,7 +880,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   };
 
   const handleConfirmSubmitRatings = async () => {
-    if (!currentUser?.id) return;
+    if (!currentUser?.id || !battle) return;
     setIsRatingsSubmitted(true);
     setShowSubmitWarningModal(false);
     await battleService.submitUserRatings(battle.id, currentUser.id, ratings);
@@ -722,13 +888,14 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   };
 
   const handleUnlockRatings = async () => {
-    if (!currentUser?.id) return;
+    if (!currentUser?.id || !battle) return;
     setIsRatingsSubmitted(false);
     await battleService.unlockUserRatings(battle.id, currentUser.id);
     refreshBattleData();
   };
 
   const handlePublishJuryBallot = async () => {
+    if (!battle) return;
     const judgeId = currentUser?.id || "judge";
     const judgeName = currentUser?.nickname || "Judge";
 
@@ -746,6 +913,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   };
 
   const handleUnlockJuryBallot = async () => {
+    if (!battle) return;
     const judgeId = currentUser?.id || "judge";
     const judgeName = currentUser?.nickname || "Judge";
     setIsJurySubmitted(false);
@@ -758,6 +926,32 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     const prevTrack = blindTracks[index - 1];
     return !!ratings[prevTrack.id];
   };
+
+  if (!battle || battle.id !== battleId) {
+    if (!hasChecked) {
+      return (
+        <div className="min-h-[70vh] flex items-center justify-center animate-in fade-in duration-200">
+          <div className="w-8 h-8 rounded-full border-2 border-brand border-t-transparent animate-spin" />
+        </div>
+      );
+    }
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4 space-y-4 animate-in fade-in duration-200">
+        <h1 className="text-3xl font-black text-brand">404</h1>
+        <h2 className="text-xl font-bold text-white">Battle Not Found</h2>
+        <p className="text-sm text-neutral-400 max-w-md">
+          The battle you are looking for does not exist or has been removed.
+        </p>
+        <Link
+          href="/battles"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-brand text-black rounded-lg font-bold text-sm hover:bg-brand/90 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Battles
+        </Link>
+      </div>
+    );
+  }
 
   const hasJudges = Boolean(
     (Array.isArray(battle.judges) && battle.judges.length > 0) ||
@@ -963,34 +1157,38 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                       ) : (
                         <Download className="w-4 h-4" />
                       )}
-                      <span>{isDownloadingSamples ? "Zipping..." : "Download"}</span>
+                      <span>{isDownloadingSamples ? "Zipping..." : "Download All"}</span>
                     </button>
                   </div>
 
                   <div className="space-y-2.5 pt-1">
                     {battle.samples.map((sample) => {
                       const isPlaying = playingSampleId === sample.id;
-                      const progress = sampleProgress[sample.id] || 0;
+                      const isScrubbingThis = scrubbingSample?.id === sample.id;
+                      const duration = sampleDurations[sample.id] || sample.duration || 0;
+                      const currentTime = sampleCurrentTimes[sample.id] || 0;
+
+                      const displayProgress = isScrubbingThis
+                        ? scrubbingSample.fraction
+                        : duration > 0
+                        ? (currentTime / duration)
+                        : 0;
+
+                      const displayCurrentTime = isScrubbingThis
+                        ? scrubbingSample.fraction * duration
+                        : currentTime;
 
                       return (
                         <div
                           key={sample.id}
-                          className="relative overflow-hidden rounded-xl p-3 sm:p-3.5 flex items-center justify-between gap-3 transition-all bg-[#181818] border-0"
+                          className="relative overflow-hidden rounded-xl p-3 sm:p-3.5 transition-all bg-[#181818]"
                         >
-                          {/* Live playback progress fill overlay */}
-                          {isPlaying && (
-                            <div
-                              className="absolute inset-0 bg-[#4D4696]/60 pointer-events-none transition-all duration-100 ease-linear"
-                              style={{ width: `${progress}%` }}
-                            />
-                          )}
-
-                          {/* Left: Play / Pause button + Title */}
-                          <div className="flex items-center gap-3 relative z-10 min-w-0 flex-1">
+                          <div className="flex items-center gap-3 w-full">
+                            {/* Play / Pause button */}
                             <button
                               type="button"
                               onClick={() => handleToggleSample(sample.id, sample.audioUrl)}
-                              className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all cursor-pointer shadow-md ${
+                              className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all cursor-pointer shadow-md ${
                                 isPlaying
                                   ? "bg-[#7B61FF] text-white hover:scale-105 active:scale-95"
                                   : "bg-white text-black hover:scale-105 active:scale-95"
@@ -1007,9 +1205,65 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                               )}
                             </button>
 
-                            <span className="text-xs font-bold text-white truncate">
-                              {sample.title}
-                            </span>
+                            {/* Middle: Title & Live Time + Interactive Scrubber */}
+                            <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5">
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="text-xs sm:text-sm font-bold text-white truncate" title={sample.title}>
+                                  {sample.title}
+                                </span>
+                                <span className="text-[11px] font-medium text-[#A7A7A7] tabular-nums shrink-0 select-none">
+                                  {formatTime(displayCurrentTime)} / {formatTime(duration)}
+                                </span>
+                              </div>
+
+                              {/* Interactive Scrubber Bar */}
+                              <div
+                                onPointerDown={(e) => handleSampleScrubberPointerDown(e, sample.id, sample.audioUrl, sample.duration)}
+                                onPointerMove={(e) => handleSampleScrubberPointerMove(e, sample.id)}
+                                onPointerUp={(e) => handleSampleScrubberPointerUp(e, sample.id, sample.audioUrl, sample.duration)}
+                                onPointerCancel={(e) => handleSampleScrubberPointerUp(e, sample.id, sample.audioUrl, sample.duration)}
+                                className="py-1.5 -my-1.5 flex items-center relative cursor-pointer group select-none touch-none"
+                                role="slider"
+                                aria-label={`${sample.title} playback scrubber`}
+                                aria-valuemin={0}
+                                aria-valuemax={duration}
+                                aria-valuenow={Math.round(displayCurrentTime)}
+                              >
+                                {/* Track Bar */}
+                                <div className="w-full h-1.5 bg-[#2E2E2E] rounded-full overflow-hidden relative">
+                                  <div
+                                    className="h-full bg-[#7B61FF] rounded-full transition-none"
+                                    style={{ width: `${Math.max(0, Math.min(100, displayProgress * 100))}%` }}
+                                  />
+                                </div>
+
+                                {/* Scrubber Thumb */}
+                                <div
+                                  className={`w-3 h-3 bg-white rounded-full absolute top-1/2 -translate-y-1/2 -translate-x-1/2 shadow-md pointer-events-none transition-transform duration-100 ${
+                                    isScrubbingThis ? "scale-125" : "group-hover:scale-110 opacity-90 group-hover:opacity-100"
+                                  }`}
+                                  style={{
+                                    left: `${Math.max(0, Math.min(100, displayProgress * 100))}%`,
+                                  }}
+                                />
+                              </div>
+                            </div>
+
+                            {/* Download Button for individual sample (Icon only, purple container matching Download All) */}
+                            <button
+                              type="button"
+                              onClick={() => handleDownloadSingleSample(sample.id, sample.audioUrl, sample.title)}
+                              disabled={downloadingSampleId === sample.id}
+                              className="w-8 h-8 rounded-xl bg-[#7B61FF] hover:bg-[#684DE6] text-white flex items-center justify-center shrink-0 shadow-md active:scale-95 transition-all cursor-pointer disabled:opacity-60"
+                              title={`Download ${sample.title}`}
+                              aria-label={`Download ${sample.title}`}
+                            >
+                              {downloadingSampleId === sample.id ? (
+                                <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                              ) : (
+                                <Download className="w-4 h-4" />
+                              )}
+                            </button>
                           </div>
                         </div>
                       );
@@ -1714,7 +1968,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                               1st Place
                             </span>
                           ) : isTop2 ? (
-                            <span className="h-7 px-3.5 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
+                            <span className="h-7 px-3.5 rounded-full bg-[#1E1E1E] text-[#AAAAAA] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
                               2nd Place
                             </span>
                           ) : isTop3 ? (

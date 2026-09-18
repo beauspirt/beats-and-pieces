@@ -18,8 +18,7 @@
       "battlesWon": 0,
       "totalFlames": 0
     },
-    "isClaimed": false,
-    "createdAt": "2021-01-15T00:00:00Z"
+    "isClaimed": false
   },
   "vulpeanu": {
     "id": "vulpeanu",
@@ -40,8 +39,7 @@
       "battlesWon": 2,
       "totalFlames": 0
     },
-    "isClaimed": false,
-    "createdAt": "2021-06-01T00:00:00Z"
+    "isClaimed": false
   },
   "mldn": {
     "id": "mldn",
@@ -62,8 +60,7 @@
       "battlesWon": 0,
       "totalFlames": 0
     },
-    "isClaimed": false,
-    "createdAt": "2021-06-01T00:00:00Z"
+    "isClaimed": false
   },
   "cgr": {
     "id": "cgr",
@@ -84,8 +81,7 @@
       "battlesWon": 0,
       "totalFlames": 0
     },
-    "isClaimed": false,
-    "createdAt": "2021-06-01T00:00:00Z"
+    "isClaimed": false
   },
   "joeycrack": {
     "id": "joeycrack",
@@ -106,8 +102,7 @@
       "battlesWon": 0,
       "totalFlames": 0
     },
-    "isClaimed": false,
-    "createdAt": "2021-06-01T00:00:00Z"
+    "isClaimed": false
   },
   "tinybeats": {
     "id": "tinybeats",
@@ -128,8 +123,7 @@
       "battlesWon": 0,
       "totalFlames": 0
     },
-    "isClaimed": false,
-    "createdAt": "2021-06-01T00:00:00Z"
+    "isClaimed": false
   },
   "elhuron": {
     "id": "elhuron",
@@ -150,8 +144,7 @@
       "battlesWon": 1,
       "totalFlames": 0
     },
-    "isClaimed": false,
-    "createdAt": "2021-08-01T00:00:00Z"
+    "isClaimed": false
   },
   "mateicojo": {
     "id": "mateicojo",
@@ -172,30 +165,35 @@
       "battlesWon": 0,
       "totalFlames": 0
     },
-    "isClaimed": false,
-    "createdAt": "2021-08-01T00:00:00Z"
+    "isClaimed": false
   },
   "ceinaru": {
     "id": "ceinaru",
-    "nickname": "CEINARU",
-    "email": "qishta.ceinaru@live.com",
-    "avatarUrl": "/avatars/default-avatar.png",
+    "nickname": "Ceinaru",
+    "email": "qishta.ceinaru@gmail.com",
+    "avatarUrl": "https://lh3.googleusercontent.com/a/ACg8ocLyjf5ug0MVNQxSFoi-rV-FsUoHMVYMwLkG87N5M8fF92E7FsPayA=s96-c",
     "bio": "",
-    "location": "",
+    "location": "Bucharest, Romania",
     "role": "producer",
     "discordId": "431102796025167874",
     "discordUsername": "ceinaru#6543",
     "discordRoles": [
       "Podium Finalist"
     ],
-    "links": {},
+    "links": {
+      "handle": "ceinaru",
+      "website": "https://www.ceinarumedia.ro",
+      "youtube": "https://www.youtube.com/@ceinaru",
+      "hideEmail": true,
+      "instagram": "https://www.instalgram.com/ceinaru",
+      "showEmail": false
+    },
     "stats": {
       "battlesEntered": 1,
       "battlesWon": 0,
       "totalFlames": 0
     },
-    "isClaimed": false,
-    "createdAt": "2021-08-01T00:00:00Z"
+    "isClaimed": true
   },
   "dinca": {
     "id": "dinca",
@@ -216,8 +214,7 @@
       "battlesWon": 0,
       "totalFlames": 0
     },
-    "isClaimed": false,
-    "createdAt": "2021-10-01T00:00:00Z"
+    "isClaimed": false
   },
   "stolly": {
     "id": "stolly",
@@ -238,8 +235,7 @@
       "battlesWon": 1,
       "totalFlames": 0
     },
-    "isClaimed": false,
-    "createdAt": "2021-10-01T00:00:00Z"
+    "isClaimed": false
   },
   "gherman": {
     "id": "gherman",
@@ -260,8 +256,7 @@
       "battlesWon": 0,
       "totalFlames": 0
     },
-    "isClaimed": false,
-    "createdAt": "2021-10-01T00:00:00Z"
+    "isClaimed": false
   },
   "benjahmin": {
     "id": "benjahmin",
@@ -282,8 +277,7 @@
       "battlesWon": 0,
       "totalFlames": 0
     },
-    "isClaimed": false,
-    "createdAt": "2021-12-01T00:00:00Z"
+    "isClaimed": false
   },
   "mayfourteen": {
     "id": "mayfourteen",
@@ -304,8 +298,7 @@
       "battlesWon": 2,
       "totalFlames": 0
     },
-    "isClaimed": false,
-    "createdAt": "2022-02-01T00:00:00Z"
+    "isClaimed": false
   },
   "oliniutza": {
     "id": "oliniutza",
@@ -326,8 +319,7 @@
       "battlesWon": 0,
       "totalFlames": 0
     },
-    "isClaimed": false,
-    "createdAt": "2022-02-01T00:00:00Z"
+    "isClaimed": false
   },
   "bladishv": {
     "id": "bladishv",
@@ -348,8 +340,7 @@
       "battlesWon": 0,
       "totalFlames": 0
     },
-    "isClaimed": false,
-    "createdAt": "2022-02-01T00:00:00Z"
+    "isClaimed": false
   },
   "groveek": {
     "id": "groveek",
@@ -370,13 +361,13 @@
       "battlesWon": 1,
       "totalFlames": 0
     },
-    "isClaimed": false,
-    "createdAt": "2022-05-01T00:00:00Z"
+    "isClaimed": false
   },
-  "ionbriceag": {
-    "id": "ionbriceag",
-    "nickname": "ionbriceag",
-    "email": "ionut.nicola08@gmail.com",
+  "ionbriceagul": {
+    "id": "ionbriceagul",
+    "handle": "ionbriceag",
+    "nickname": "Ion Briceag",
+    "email": "ionbriceagul@gmail.com",
     "avatarUrl": "/avatars/default-avatar.png",
     "bio": "",
     "location": "",
@@ -386,14 +377,16 @@
     "discordRoles": [
       "Podium Finalist"
     ],
-    "links": {},
+    "links": {
+      "handle": "ionbriceag",
+      "instagram": "https://www.instagram.com/ionbriceagtoataziuaeveryday"
+    },
     "stats": {
       "battlesEntered": 1,
       "battlesWon": 0,
       "totalFlames": 0
     },
-    "isClaimed": false,
-    "createdAt": "2022-05-01T00:00:00Z"
+    "isClaimed": true
   },
   "z3nn": {
     "id": "z3nn",
@@ -414,8 +407,7 @@
       "battlesWon": 1,
       "totalFlames": 0
     },
-    "isClaimed": false,
-    "createdAt": "2022-08-01T00:00:00Z"
+    "isClaimed": false
   },
   "venr": {
     "id": "venr",
@@ -436,8 +428,7 @@
       "battlesWon": 0,
       "totalFlames": 0
     },
-    "isClaimed": false,
-    "createdAt": "2022-08-01T00:00:00Z"
+    "isClaimed": false
   },
   "reflux": {
     "id": "reflux",
@@ -456,7 +447,6 @@
       "battlesWon": 0,
       "totalFlames": 0
     },
-    "isClaimed": false,
-    "createdAt": "2023-05-01T00:00:00Z"
+    "isClaimed": false
   }
 }

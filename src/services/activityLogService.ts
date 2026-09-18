@@ -38,6 +38,13 @@ function isGenuineLog(log: ActivityLogEntry): boolean {
   return true;
 }
 
+function sanitizeLogAvatar(url?: string): string {
+  if (!url || typeof url !== "string" || url.trim() === "" || url.includes("supabase.co/storage")) {
+    return "/avatars/default-avatar.png";
+  }
+  return url;
+}
+
 function loadLocalLogs(): ActivityLogEntry[] {
   if (typeof window !== "undefined") {
     try {
@@ -45,7 +52,10 @@ function loadLocalLogs(): ActivityLogEntry[] {
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
-          return parsed.filter(isGenuineLog);
+          return parsed.filter(isGenuineLog).map((l) => ({
+            ...l,
+            userAvatar: sanitizeLogAvatar(l.userAvatar),
+          }));
         }
       }
     } catch {}
@@ -215,7 +225,7 @@ export const activityLogService = {
             type: row.event_type as ActivityEventType,
             userId: row.user_id,
             userNickname: row.user_nickname,
-            userAvatar: row.user_avatar,
+            userAvatar: sanitizeLogAvatar(row.user_avatar),
             userRole: row.user_role,
             description: row.description,
             metadata: row.metadata,
@@ -237,7 +247,10 @@ export const activityLogService = {
       if (fallbackData?.links?.logs && Array.isArray(fallbackData.links.logs)) {
         fallbackData.links.logs.forEach((l: ActivityLogEntry) => {
           if (isGenuineLog(l)) {
-            mergedMap.set(l.id, l);
+            mergedMap.set(l.id, {
+              ...l,
+              userAvatar: sanitizeLogAvatar(l.userAvatar),
+            });
           }
         });
       }

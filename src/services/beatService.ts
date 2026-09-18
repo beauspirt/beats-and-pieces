@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabase";
 import { battleService } from "./battleService";
 import { producerService } from "./producerService";
 import { activityLogService } from "./activityLogService";
+import { storageService } from "./storageService";
 
 const STORAGE_KEY_CUSTOM_BEATS = "bnp_custom_beats";
 const STORAGE_KEY_BEAT_OVERRIDES = "bnp_beats_overrides";
@@ -308,6 +309,9 @@ export const beatService = {
       if (existing) {
         beatTitle = existing.title || beatTitle;
         beatmakerInfo = existing.beatmaker;
+        if (existing.audioUrl) {
+          storageService.deleteFile(existing.audioUrl).catch(() => {});
+        }
       }
       const filtered = custom.filter((b) => b.id !== id);
       saveCustomBeats(filtered);

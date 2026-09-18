@@ -65,10 +65,20 @@ export default function VaultPage() {
               >
                 <div className="w-6 h-6 rounded-full overflow-hidden relative shrink-0 bg-[#222222]">
                   <Image
-                    src={prod.avatarUrl || "/avatars/default-avatar.png"}
+                    src={
+                      prod.avatarUrl && !prod.avatarUrl.includes("supabase.co/storage")
+                        ? prod.avatarUrl
+                        : "/avatars/default-avatar.png"
+                    }
                     alt={prod.nickname}
                     fill
                     className="object-cover"
+                    onError={(e) => {
+                      const img = e.currentTarget as HTMLImageElement;
+                      if (img && !img.src.endsWith("/avatars/default-avatar.png")) {
+                        img.src = "/avatars/default-avatar.png";
+                      }
+                    }}
                   />
                 </div>
                 <span className="truncate group-hover/prod:text-[#7B61FF] transition-colors">

@@ -450,7 +450,12 @@ export default function BeatsDiscoveryPage() {
           visibleBeats.map((beat) => {
             const prod = producerService.getProducerById(beat.beatmaker.id) || producerService.getProducerByTag(beat.beatmaker.tag);
             const displayTag = prod?.nickname || beat.beatmaker.tag;
-            const displayAvatar = prod?.avatarUrl || beat.beatmaker.avatarUrl || "/avatars/default-avatar.png";
+            const displayAvatar =
+              (prod?.avatarUrl && !prod.avatarUrl.includes("supabase.co/storage"))
+                ? prod.avatarUrl
+                : (beat.beatmaker.avatarUrl && !beat.beatmaker.avatarUrl.includes("supabase.co/storage"))
+                ? beat.beatmaker.avatarUrl
+                : "/avatars/default-avatar.png";
             const match =
               (beat.battleSource && beat.battleSource.match(/Beat Battle #?(\d+)/i)) ||
               (beat.id && beat.id.match(/disc-bb(\d+)/));
@@ -474,6 +479,12 @@ export default function BeatsDiscoveryPage() {
                         alt={displayTag}
                         fill
                         className="object-cover"
+                        onError={(e) => {
+                          const img = e.currentTarget as HTMLImageElement;
+                          if (img && !img.src.endsWith("/avatars/default-avatar.png")) {
+                            img.src = "/avatars/default-avatar.png";
+                          }
+                        }}
                       />
                     </Link>
 
@@ -490,7 +501,7 @@ export default function BeatsDiscoveryPage() {
                           </span>
                         )}
                         {beat.rank === 2 && (
-                          <span className="h-6 px-3.5 rounded-full bg-[#1E232A] text-[#94A3B8] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
+                          <span className="h-6 px-3.5 rounded-full bg-[#1E1E1E] text-[#AAAAAA] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
                             2nd Place
                           </span>
                         )}

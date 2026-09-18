@@ -4,9 +4,11 @@ export type UserRole = "user" | "producer" | "judge" | "host" | "admin";
 
 export interface UserProfile {
   id: string;
+  handle?: string;
   nickname: string;
   email: string;
   hideEmail?: boolean;
+  showEmail?: boolean;
   avatarUrl: string;
   bio?: string;
   location?: string;
@@ -24,6 +26,8 @@ export interface UserProfile {
     beatstars?: string;
     website?: string;
     hideEmail?: boolean;
+    showEmail?: boolean;
+    handle?: string;
   };
   stats?: {
     battlesEntered: number;
@@ -32,7 +36,7 @@ export interface UserProfile {
   };
   isClaimed?: boolean;
   claimedAt?: string;
-  createdAt: string;
+  createdAt?: string;
 }
 
 export interface BattleSample {

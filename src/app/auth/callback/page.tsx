@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { producerService, activityLogService } from "@/services";
+import { producerService, sanitizeHandle } from "@/services/producerService";
+import { activityLogService } from "@/services/activityLogService";
 import { UserProfile } from "@/lib/types";
 import { Loader2, CheckCircle2, ShieldAlert } from "lucide-react";
 
@@ -74,9 +75,18 @@ export default function AuthCallbackPage() {
           }
         } else {
           // New verified community user (first time login)
-          const newUserId = verifiedEmail.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "") || String(Date.now());
+          let baseHandle = sanitizeHandle(googleName) || sanitizeHandle(verifiedEmail.split("@")[0]) || "producer";
+          if (baseHandle.length < 3) baseHandle = `user-${baseHandle}`;
+          let initialHandle = baseHandle;
+          let counter = 2;
+          while (!producerService.isHandleAvailable(initialHandle)) {
+            initialHandle = `${baseHandle}-${counter}`;
+            counter++;
+          }
+
           const newProfile: UserProfile = {
-            id: newUserId,
+            id: initialHandle,
+            handle: initialHandle,
             nickname: googleName,
             email: verifiedEmail,
             avatarUrl: googleAvatar,

@@ -8,6 +8,7 @@ import { Plus, X, ArrowLeft, Music, Trash2, Image as ImageIcon } from "lucide-re
 import { AdminGuard } from "@/components/AdminGuard";
 import { battleService, producerService, storageService } from "@/services";
 import { BattleSample, UserProfile } from "@/lib/types";
+import { fromDatetimeLocalString } from "@/lib/utils";
 
 interface PersonEntry {
   name: string;
@@ -103,7 +104,7 @@ export default function NewBattlePage() {
           }
         } catch {}
 
-        const { url, error } = await storageService.uploadAudio(file, "samples", `${cleanSlug}-${Date.now()}-${idx}`);
+        const { url, error, duration } = await storageService.uploadSample(file, `${cleanSlug}-${Date.now()}-${idx}`);
         if (!url) {
           throw new Error(error || `Failed to upload sample "${file.name}"`);
         }
@@ -112,7 +113,7 @@ export default function NewBattlePage() {
           id: sampleId,
           title: sampleTitle,
           audioUrl: url,
-          duration: realDuration,
+          duration: duration || realDuration,
         };
       });
 
@@ -246,9 +247,9 @@ export default function NewBattlePage() {
         description: description.trim(),
         rules: extraRules,
         samples: samples,
-        submissionStartsAt: startDate ? new Date(startDate).toISOString() : new Date().toISOString(),
-        submissionEndsAt: submissionDeadline ? new Date(submissionDeadline).toISOString() : new Date(Date.now() + 14 * 86400000).toISOString(),
-        ratingEndsAt: ratingDeadline ? new Date(ratingDeadline).toISOString() : new Date(Date.now() + 21 * 86400000).toISOString(),
+        submissionStartsAt: startDate ? fromDatetimeLocalString(startDate) : new Date().toISOString(),
+        submissionEndsAt: submissionDeadline ? fromDatetimeLocalString(submissionDeadline) : new Date(Date.now() + 14 * 86400000).toISOString(),
+        ratingEndsAt: ratingDeadline ? fromDatetimeLocalString(ratingDeadline) : new Date(Date.now() + 21 * 86400000).toISOString(),
       });
     } catch (err) {
       // console.error("Failed to create battle:", err);
@@ -262,7 +263,7 @@ export default function NewBattlePage() {
 
   return (
     <AdminGuard>
-      <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-300 py-4">
+      <div className="w-full space-y-8 animate-in fade-in duration-300">
         
         {/* Top Header & Breadcrumb */}
         <div className="space-y-3">

@@ -5,7 +5,7 @@
     "userId": "z3nn",
     "beatmakerTag": "Z3nn",
     "beatTitle": "Beat Battle #8 Entry",
-    "audioUrl": "/audio/battles/battle-8/BEAT BATTLE 8 BP - z3nn - Z3nn.mp3",
+    "audioUrl": "/audio/battles/battle-8/BEAT BATTLE 8 BP - z3nn - Z3nn.opus",
     "duration": 80,
     "rank": 1,
     "submittedAt": "2023-08-10T14:32:00Z"
@@ -16,7 +16,7 @@
     "userId": "venr",
     "beatmakerTag": "venr",
     "beatTitle": "Beat Battle #8 Entry",
-    "audioUrl": "/audio/battles/battle-8/koka flip - vernosu.mp3",
+    "audioUrl": "/audio/battles/battle-8/koka flip - vernosu.opus",
     "duration": 66,
     "rank": 2,
     "submittedAt": "2023-08-11T16:20:00Z"
@@ -27,7 +27,7 @@
     "userId": "cgr",
     "beatmakerTag": "CGR",
     "beatTitle": "Beat Battle #8 Entry",
-    "audioUrl": "/audio/battles/battle-8/CONTEST BEATS N PIECES 2 august_2 - prod cgr.mp3",
+    "audioUrl": "/audio/battles/battle-8/CONTEST BEATS N PIECES 2 august_2 - prod cgr.opus",
     "duration": 75,
     "rank": 3,
     "submittedAt": "2023-08-12T18:45:00Z"
@@ -38,7 +38,7 @@
     "userId": "groveek",
     "beatmakerTag": "GROVEEK",
     "beatTitle": "Beat Battle #7 Entry",
-    "audioUrl": "/audio/battles/battle-7/GROOVEEK - THIS IS JAMES BROWN #beatbattle7 - Victor M.mp3",
+    "audioUrl": "/audio/battles/battle-7/GROOVEEK - THIS IS JAMES BROWN beatbattle7 - Victor M.opus",
     "duration": 85,
     "rank": 1,
     "submittedAt": "2023-05-10T11:15:00Z"
@@ -46,10 +46,10 @@
   {
     "id": "sub-bb7-2",
     "battleId": "battle-7",
-    "userId": "ionbriceag",
-    "beatmakerTag": "ionbriceag",
+    "userId": "ionbriceagul",
+    "beatmakerTag": "Ion Briceag",
     "beatTitle": "Beat Battle #7 Entry",
-    "audioUrl": "/audio/battles/battle-7/Ion Briceag - What Makka #beatbattle7 - Ion Briceag.mp3",
+    "audioUrl": "/audio/battles/battle-7/Ion Briceag - What Makka beatbattle7 - Ion Briceag.opus",
     "duration": 93,
     "rank": 2,
     "submittedAt": "2023-05-11T13:40:00Z"
@@ -60,7 +60,7 @@
     "userId": "joeycrack",
     "beatmakerTag": "JoeyCrack",
     "beatTitle": "Beat Battle #7 Entry",
-    "audioUrl": "/audio/battles/battle-7/joeycrack_-_macadopere_beatbattle7.mp3",
+    "audioUrl": "/audio/battles/battle-7/joeycrack_-_macadopere_beatbattle7.opus",
     "duration": 70,
     "rank": 3,
     "submittedAt": "2023-05-12T15:55:00Z"
@@ -104,7 +104,7 @@
     "userId": "mayfourteen",
     "beatmakerTag": "mayfourteen",
     "beatTitle": "Beat Battle #5 Entry",
-    "audioUrl": "/audio/battles/battle-5/mayfourteen - Beats & Pieces Entry 140BPM - Erik Kecse.mp3",
+    "audioUrl": "/audio/battles/battle-5/mayfourteen - Beats & Pieces Entry 140BPM - Erik Kecse.opus",
     "duration": 80,
     "rank": 1,
     "submittedAt": "2023-02-10T12:00:00Z"
@@ -115,7 +115,7 @@
     "userId": "oliniutza",
     "beatmakerTag": "oliniutza",
     "beatTitle": "Beat Battle #5 Entry",
-    "audioUrl": "/audio/battles/battle-5/oliniutza contest beats & pieces.mp3",
+    "audioUrl": "/audio/battles/battle-5/oliniutza contest beats & pieces.opus",
     "duration": 73,
     "rank": 2,
     "submittedAt": "2023-02-11T14:30:00Z"
@@ -126,7 +126,7 @@
     "userId": "bladishv",
     "beatmakerTag": "bladishv",
     "beatTitle": "Beat Battle #5 Entry",
-    "audioUrl": "/audio/battles/battle-5/bladishv - bb5 - bladishv.mp3",
+    "audioUrl": "/audio/battles/battle-5/bladishv - bb5 - bladishv.opus",
     "duration": 91,
     "rank": 3,
     "submittedAt": "2023-02-12T17:10:00Z"
@@ -137,7 +137,7 @@
     "userId": "stolly",
     "beatmakerTag": "Stolly",
     "beatTitle": "Beat Battle #4 Entry",
-    "audioUrl": "/audio/battles/battle-4/Stolly - Battle - Alin Stoleru.mp3",
+    "audioUrl": "/audio/battles/battle-4/Stolly - Battle - Alin Stoleru.opus",
     "duration": 68,
     "rank": 1,
     "submittedAt": "2022-11-10T10:20:00Z"
@@ -148,7 +148,7 @@
     "userId": "mateicojo",
     "beatmakerTag": "mateicojo",
     "beatTitle": "Beat Battle #4 Entry",
-    "audioUrl": "/audio/battles/battle-4/mateicojo - o fac ptr bani.mp3",
+    "audioUrl": "/audio/battles/battle-4/mateicojo - o fac ptr bani.opus",
     "duration": 77,
     "rank": 2,
     "submittedAt": "2022-11-11T12:45:00Z"
@@ -159,7 +159,7 @@
     "userId": "benjahmin",
     "beatmakerTag": "BENJAHMIN",
     "beatTitle": "Beat Battle #4 Entry",
-    "audioUrl": "/audio/battles/battle-4/BENJAHMIN - Acid Rain - Ben Bacos.mp3",
+    "audioUrl": "/audio/battles/battle-4/BENJAHMIN - Acid Rain - Ben Bacos.opus",
     "duration": 82,
     "rank": 3,
     "submittedAt": "2022-11-12T15:30:00Z"
@@ -170,7 +170,7 @@
     "userId": "vulpeanu",
     "beatmakerTag": "Vulpeanu",
     "beatTitle": "Beat Battle #3 Entry",
-    "audioUrl": "/audio/battles/battle-3/Vulpeanu - Mic Check Monthly Beat Battle #3 - Mihai-Valentin Vulpeanu.mp3",
+    "audioUrl": "/audio/battles/battle-3/Vulpeanu - Mic Check Monthly Beat Battle 3 - Mihai-Valentin Vulpeanu.opus",
     "duration": 58,
     "rank": 1,
     "submittedAt": "2022-08-10T09:15:00Z"
@@ -181,7 +181,7 @@
     "userId": "dinca",
     "beatmakerTag": "Dinca",
     "beatTitle": "Beat Battle #3 Entry",
-    "audioUrl": "/audio/battles/battle-3/mic_check_entry_dinca_-_Andrew_Dinca.mp3",
+    "audioUrl": "/audio/battles/battle-3/mic_check_entry_dinca_-_Andrew_Dinca.opus",
     "duration": 91,
     "rank": 2,
     "submittedAt": "2022-08-11T11:40:00Z"
@@ -192,7 +192,7 @@
     "userId": "stolly",
     "beatmakerTag": "Stolly",
     "beatTitle": "Beat Battle #3 Entry",
-    "audioUrl": "/audio/battles/battle-3/Stolly_-_zeedo_vd_-_Alin_Stoleru.mp3",
+    "audioUrl": "/audio/battles/battle-3/Stolly_-_zeedo_vd_-_Alin_Stoleru.opus",
     "duration": 61,
     "rank": 3,
     "submittedAt": "2022-08-12T14:10:00Z"
@@ -203,7 +203,7 @@
     "userId": "mateicojo",
     "beatmakerTag": "mateicojo",
     "beatTitle": "Beat Battle #3 Entry",
-    "audioUrl": "/audio/battles/battle-3/un_bootleg_de_la_altceva_-_mateicojo.mp3",
+    "audioUrl": "/audio/battles/battle-3/un_bootleg_de_la_altceva_-_mateicojo.opus",
     "duration": 69,
     "rank": 4,
     "submittedAt": "2022-08-13T16:35:00Z"
@@ -214,7 +214,7 @@
     "userId": "gherman",
     "beatmakerTag": "GHERMAN",
     "beatTitle": "Beat Battle #3 Entry",
-    "audioUrl": "/audio/battles/battle-3/GHERMAN_Beat_Battle_Mic_Check_3_-_GHERMAN__.mp3",
+    "audioUrl": "/audio/battles/battle-3/GHERMAN_Beat_Battle_Mic_Check_3_-_GHERMAN__.opus",
     "duration": 69,
     "rank": 5,
     "submittedAt": "2022-08-14T18:00:00Z"
@@ -225,7 +225,7 @@
     "userId": "elhuron",
     "beatmakerTag": "El Huron",
     "beatTitle": "Beat Battle #2 Entry",
-    "audioUrl": "/audio/battles/battle-2/El Huron - Film din Jungla.mp3",
+    "audioUrl": "/audio/battles/battle-2/El Huron - Film din Jungla.opus",
     "duration": 65,
     "rank": 1,
     "submittedAt": "2022-05-10T10:00:00Z"
@@ -236,7 +236,7 @@
     "userId": "mateicojo",
     "beatmakerTag": "mateicojo",
     "beatTitle": "Beat Battle #2 Entry",
-    "audioUrl": "/audio/battles/battle-2/mateicojo beat battle final.mp3",
+    "audioUrl": "/audio/battles/battle-2/mateicojo beat battle final.opus",
     "duration": 69,
     "rank": 2,
     "submittedAt": "2022-05-11T13:20:00Z"
@@ -245,9 +245,9 @@
     "id": "sub-bb2-3",
     "battleId": "battle-2",
     "userId": "ceinaru",
-    "beatmakerTag": "CEINARU",
+    "beatmakerTag": "Ceinaru",
     "beatTitle": "Beat Battle #2 Entry",
-    "audioUrl": "/audio/battles/battle-2/CEINARU - BEAT BATTLE 2 (cu bas) - Ceinaru.mp3",
+    "audioUrl": "/audio/battles/battle-2/CEINARU - BEAT BATTLE 2 (cu bas) - Ceinaru.opus",
     "duration": 75,
     "rank": 3,
     "submittedAt": "2022-05-12T15:50:00Z"
@@ -258,7 +258,7 @@
     "userId": "vulpeanu",
     "beatmakerTag": "Vulpeanu",
     "beatTitle": "Beat Battle #1 Entry",
-    "audioUrl": "/audio/battles/battle-1/BB1 Vulpeanu.mp3",
+    "audioUrl": "/audio/battles/battle-1/BB1 Vulpeanu.opus",
     "duration": 70,
     "rank": 1,
     "submittedAt": "2022-01-20T11:00:00Z"
@@ -269,7 +269,7 @@
     "userId": "mldn",
     "beatmakerTag": "MLDN",
     "beatTitle": "Beat Battle #1 Entry",
-    "audioUrl": "/audio/battles/battle-1/BB1 MLDN.mp3",
+    "audioUrl": "/audio/battles/battle-1/BB1 MLDN.opus",
     "duration": 75,
     "rank": 2,
     "submittedAt": "2022-01-21T13:15:00Z"
@@ -280,7 +280,7 @@
     "userId": "cgr",
     "beatmakerTag": "CGR",
     "beatTitle": "Beat Battle #1 Entry",
-    "audioUrl": "/audio/battles/battle-1/BB1 cgr.mp3",
+    "audioUrl": "/audio/battles/battle-1/BB1 cgr.opus",
     "duration": 68,
     "rank": 3,
     "submittedAt": "2022-01-22T15:30:00Z"
@@ -291,7 +291,7 @@
     "userId": "joeycrack",
     "beatmakerTag": "JoeyCrack",
     "beatTitle": "Beat Battle #1 Entry",
-    "audioUrl": "/audio/battles/battle-1/BB1 JoeyCrack.mp3",
+    "audioUrl": "/audio/battles/battle-1/BB1 JoeyCrack.opus",
     "duration": 72,
     "rank": 4,
     "submittedAt": "2022-01-23T17:45:00Z"
@@ -302,7 +302,7 @@
     "userId": "tinybeats",
     "beatmakerTag": "TinyBeats",
     "beatTitle": "Beat Battle #1 Entry",
-    "audioUrl": "/audio/battles/battle-1/BB1 tinyBeats.mp3",
+    "audioUrl": "/audio/battles/battle-1/BB1 tinyBeats.opus",
     "duration": 65,
     "rank": 5,
     "submittedAt": "2022-01-24T19:00:00Z"

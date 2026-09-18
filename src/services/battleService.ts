@@ -3,6 +3,7 @@ import rawCompetitions from "@/data/competitions.json";
 import rawSubmissions from "@/data/submissions.json";
 import { supabase } from "@/lib/supabase";
 import { activityLogService } from "./activityLogService";
+import { storageService } from "./storageService";
 
 const STORAGE_KEY_BATTLES = "bnp_custom_battles";
 const STORAGE_KEY_CUSTOM_SUBS = "bnp_custom_submissions";
@@ -103,7 +104,22 @@ function loadCustomSubmissions(): BattleSubmission[] {
   if (typeof window !== "undefined") {
     try {
       const stored = localStorage.getItem(STORAGE_KEY_CUSTOM_SUBS);
-      if (stored) return JSON.parse(stored);
+      if (stored) {
+        const parsed: BattleSubmission[] = JSON.parse(stored);
+        const battles = loadCustomBattles();
+        const incompleteMap = new Set(
+          battles.filter((b) => b.phase !== "completed").map((b) => b.id)
+        );
+        (rawCompetitions as Competition[]).forEach((b) => {
+          if (b.phase !== "completed") incompleteMap.add(b.id);
+        });
+        parsed.forEach((s) => {
+          if (incompleteMap.has(s.battleId)) {
+            delete s.rank;
+          }
+        });
+        return parsed;
+      }
     } catch {}
   }
   return [];
@@ -284,13 +300,21 @@ export const battleService = {
           };
         });
 
-        // Compute rankings & auto-assign winner for completed battles
+        // Compute rankings & auto-assign winner ONLY for completed battles
         const allBattles = this.getAllCompetitions();
         let battlesModified = false;
 
         for (const b of allBattles) {
           const bSubs = mappedSubs.filter((s) => s.battleId === b.id);
           if (bSubs.length > 0) {
+            // NEVER assign ranks or winner for active/ongoing battles!
+            if (b.phase !== "completed") {
+              bSubs.forEach((sub) => {
+                delete sub.rank;
+              });
+              continue;
+            }
+
             const hasJudges = Boolean(
               (Array.isArray(b.judges) && b.judges.length > 0) ||
               (Array.isArray(b.judgeDetails) && b.judgeDetails.length > 0)
@@ -319,9 +343,18 @@ export const battleService = {
               if (!sub.rank || !hasJudges) sub.rank = idx + 1;
             });
 
-            if (b.phase === "completed" && (!b.winner || b.winner === "TBD") && sorted[0]) {
+            if ((!b.winner || b.winner === "TBD") && sorted[0]) {
               b.winner = sorted[0].beatmakerTag;
               battlesModified = true;
+            }
+
+            // If battle is completed, clean up and delete its samples from storage and DB
+            if (b.phase === "completed" && Array.isArray(b.samples) && b.samples.length > 0) {
+              const urlsToDelete = b.samples.map((s) => s.audioUrl).filter(Boolean);
+              b.samples = [];
+              battlesModified = true;
+              urlsToDelete.forEach((url) => storageService.deleteFile(url).catch(() => {}));
+              supabase.from("battles").update({ samples: [] }).eq("id", b.id).then(() => {}, () => {});
             }
           }
         }
@@ -360,6 +393,8 @@ export const battleService = {
       phase: battleData.phase || "submission",
     });
 
+    const finalSamples = computedPhase === "completed" ? [] : (battleData.samples || []);
+
     const newBattle: Competition = {
       id: battleData.id || `battle-${nextNumber}`,
       number: battleData.number || nextNumber,
@@ -376,7 +411,7 @@ export const battleService = {
         second: "Beats & Pieces Merch Pack",
         third: "Sample Vault Access",
       },
-      samples: battleData.samples || [],
+      samples: finalSamples,
       phase: computedPhase,
       submissionStartsAt,
       submissionEndsAt,
@@ -452,8 +487,21 @@ export const battleService = {
     const merged = { ...target, ...updates };
     const computedPhase = calculateBattlePhase(merged);
 
+    let finalSamples = merged.samples || [];
+    if (computedPhase === "completed") {
+      // Delete physical sample files from storage for completed battle
+      if (Array.isArray(target.samples) && target.samples.length > 0) {
+        target.samples.forEach((s) => storageService.deleteFile(s.audioUrl).catch(() => {}));
+      }
+      if (Array.isArray(finalSamples) && finalSamples.length > 0) {
+        finalSamples.forEach((s) => storageService.deleteFile(s.audioUrl).catch(() => {}));
+      }
+      finalSamples = [];
+    }
+
     const updatedBattle: Competition = {
       ...merged,
+      samples: finalSamples,
       phase: computedPhase,
     };
 
@@ -606,23 +654,44 @@ export const battleService = {
   },
 
   getSubmissionsByBattleId(battleId: string): BattleSubmission[] {
+    const battle = this.getBattleById(battleId);
+    let subs: BattleSubmission[] = [];
     if (typeof window !== "undefined") {
       const freshSubs = loadCustomSubmissions();
       const customIds = new Set(freshSubs.map((s) => s.id));
       const remainingRaw = (rawSubmissions as BattleSubmission[]).filter((s) => !customIds.has(s.id));
-      return [...freshSubs, ...remainingRaw].filter((s) => s.battleId === battleId);
+      subs = [...freshSubs, ...remainingRaw].filter((s) => s.battleId === battleId);
+    } else {
+      subs = submissionsList.filter((s) => s.battleId === battleId);
     }
-    return submissionsList.filter((s) => s.battleId === battleId);
+    if (battle && battle.phase !== "completed") {
+      subs.forEach((s) => {
+        delete s.rank;
+      });
+    }
+    return subs;
   },
 
   getAllSubmissions(): BattleSubmission[] {
+    let subs: BattleSubmission[] = [];
     if (typeof window !== "undefined") {
       const freshSubs = loadCustomSubmissions();
       const customIds = new Set(freshSubs.map((s) => s.id));
       const remainingRaw = (rawSubmissions as BattleSubmission[]).filter((s) => !customIds.has(s.id));
-      return [...freshSubs, ...remainingRaw];
+      subs = [...freshSubs, ...remainingRaw];
+    } else {
+      subs = [...submissionsList];
     }
-    return [...submissionsList];
+    const battles = this.getAllCompetitions();
+    const incompleteMap = new Set(
+      battles.filter((b) => b.phase !== "completed").map((b) => b.id)
+    );
+    subs.forEach((s) => {
+      if (incompleteMap.has(s.battleId)) {
+        delete s.rank;
+      }
+    });
+    return subs;
   },
 
   submitEntry(newSubmission: BattleSubmission): BattleSubmission {
@@ -820,7 +889,8 @@ export const battleService = {
         (Array.isArray(battle?.judgeDetails) && battle.judgeDetails.length > 0)
       );
 
-      if (!hasJudges) {
+      // If no judges are assigned and battle has concluded into completed phase, finalize rankings
+      if (!hasJudges && battle && battle.phase === "completed") {
         const battleSubs = allSubs.filter((s) => s.battleId === battleId);
         const ranked = [...battleSubs].sort((a, b) => {
           const aFlame = typeof a.flameRating === "number" ? a.flameRating : -1;
@@ -837,10 +907,8 @@ export const battleService = {
           await supabase.from("submissions").update({ rank: sub.rank }).eq("id", sub.id);
         }
 
-        if (battle && (battle.phase === "completed" || battle.phase === "rating")) {
-          if (ranked[0]?.beatmakerTag) {
-            battle.winner = ranked[0].beatmakerTag;
-          }
+        if (ranked[0]?.beatmakerTag) {
+          battle.winner = ranked[0].beatmakerTag;
         }
       }
 
@@ -1022,20 +1090,6 @@ export const battleService = {
         return bJury - aJury;
       });
 
-      ranked.forEach((s, idx) => {
-        s.rank = idx + 1;
-      });
-
-      // Update in-memory and local storage
-      const allSubs = this.getAllSubmissions();
-      const updatedAllSubs = allSubs.map((s) => {
-        const match = ranked.find((r) => r.id === s.id);
-        return match || s;
-      });
-      saveCustomSubmissions(updatedAllSubs);
-      customSubsList = updatedAllSubs;
-      submissionsList = updatedAllSubs;
-
       // Determine if all assigned judges have submitted their ballots
       const assignedJudges = (
         battle?.judgeDetails && battle.judgeDetails.length > 0
@@ -1063,13 +1117,30 @@ export const battleService = {
         );
 
       if (allJudgesFinished) {
+        ranked.forEach((s, idx) => {
+          s.rank = idx + 1;
+        });
         // Automatically transition battle to completed Results phase
         await this.updateBattle(battleId, {
           phase: "completed",
           winner: ranked[0]?.beatmakerTag || battle?.winner,
           endedAt: new Date().toISOString(),
         });
+      } else {
+        ranked.forEach((s) => {
+          delete s.rank;
+        });
       }
+
+      // Update in-memory and local storage
+      const allSubs = this.getAllSubmissions();
+      const updatedAllSubs = allSubs.map((s) => {
+        const match = ranked.find((r) => r.id === s.id);
+        return match || s;
+      });
+      saveCustomSubmissions(updatedAllSubs);
+      customSubsList = updatedAllSubs;
+      submissionsList = updatedAllSubs;
 
       // Upsert updated submissions to Supabase
       for (const sub of ranked) {
@@ -1160,8 +1231,8 @@ export const battleService = {
         return bJury - aJury;
       });
 
-      ranked.forEach((s, idx) => {
-        s.rank = idx + 1;
+      ranked.forEach((s) => {
+        delete s.rank;
       });
 
       // Update in-memory and local storage
@@ -1198,7 +1269,7 @@ export const battleService = {
           jury_feedback: sub.juryFeedback || null,
           judge_name: sub.judgeName || null,
           jury_feedbacks: sub.juryFeedbacks || [],
-          rank: sub.rank,
+          rank: null,
           submitted_at: sub.submittedAt,
         });
       }

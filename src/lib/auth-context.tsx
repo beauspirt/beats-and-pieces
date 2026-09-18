@@ -11,6 +11,7 @@ interface AuthContextType {
   isLoading: boolean;
   signInWithGoogle: () => Promise<void>;
   signInWithGoogleIdToken: (idToken: string) => Promise<{ isClaimed: boolean; user: UserProfile }>;
+  loginWithGoogleProfile: (profile: { email: string; name?: string; avatarUrl?: string }) => Promise<{ isClaimed: boolean; user: UserProfile }>;
   signInWithDiscord: () => Promise<void>;
   signUpNewProducer: (nickname: string, email: string) => { success: boolean; isNew: boolean; user: UserProfile };
   loginWithEmail: (email: string) => { success: boolean; isMatchedProducer: boolean; user: UserProfile };
@@ -153,21 +154,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (error) throw error;
   };
 
-  const signInWithGoogleIdToken = async (idToken: string): Promise<{ isClaimed: boolean; user: UserProfile }> => {
-    const { data, error } = await supabase.auth.signInWithIdToken({
-      provider: "google",
-      token: idToken,
-    });
-    if (error) throw error;
-
-    const sessionUser = data.session?.user;
-    if (!sessionUser || !sessionUser.email) {
-      throw new Error("Unable to retrieve authenticated Google account information.");
-    }
-
-    const verifiedEmail = sessionUser.email.toLowerCase().trim();
-    const googleName = sessionUser.user_metadata?.full_name || sessionUser.user_metadata?.name || verifiedEmail.split("@")[0];
-    const googleAvatar = sessionUser.user_metadata?.avatar_url || sessionUser.user_metadata?.picture || "/avatars/default-avatar.png";
+  const loginWithGoogleProfile = async ({
+    email,
+    name,
+    avatarUrl,
+  }: {
+    email: string;
+    name?: string;
+    avatarUrl?: string;
+  }): Promise<{ isClaimed: boolean; user: UserProfile }> => {
+    const verifiedEmail = email.toLowerCase().trim();
+    const googleName = name || verifiedEmail.split("@")[0];
+    const googleAvatar = avatarUrl || "/avatars/default-avatar.png";
 
     try {
       await producerService.syncFromSupabase();
@@ -185,7 +183,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         userNickname: matchedProducer.nickname,
         userAvatar: matchedProducer.avatarUrl,
         userRole: matchedProducer.role,
-        description: `Producer '${matchedProducer.nickname}' signed in via Google ID Token`,
+        description: `Producer '${matchedProducer.nickname}' signed in with Google`,
         metadata: { provider: "google", email: verifiedEmail },
       });
       return { isClaimed: !!matchedProducer.isClaimed, user: matchedProducer };
@@ -215,11 +213,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         userNickname: newProfile.nickname,
         userAvatar: newProfile.avatarUrl,
         userRole: newProfile.role,
-        description: `New user '${newProfile.nickname}' registered via Google ID Token`,
+        description: `New user '${newProfile.nickname}' registered via Google`,
         metadata: { provider: "google", email: verifiedEmail },
       });
       return { isClaimed: false, user: newProfile };
     }
+  };
+
+  const signInWithGoogleIdToken = async (idToken: string): Promise<{ isClaimed: boolean; user: UserProfile }> => {
+    const { data, error } = await supabase.auth.signInWithIdToken({
+      provider: "google",
+      token: idToken,
+    });
+    if (error) throw error;
+
+    const sessionUser = data.session?.user;
+    if (!sessionUser || !sessionUser.email) {
+      throw new Error("Unable to retrieve authenticated Google account information.");
+    }
+
+    return loginWithGoogleProfile({
+      email: sessionUser.email,
+      name: sessionUser.user_metadata?.full_name || sessionUser.user_metadata?.name,
+      avatarUrl: sessionUser.user_metadata?.avatar_url || sessionUser.user_metadata?.picture,
+    });
   };
 
   const signInWithDiscord = async () => {
@@ -395,6 +412,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoading,
         signInWithGoogle,
         signInWithGoogleIdToken,
+        loginWithGoogleProfile,
         signInWithDiscord,
         signUpNewProducer,
         loginWithEmail,

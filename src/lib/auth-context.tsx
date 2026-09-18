@@ -3,13 +3,14 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { UserProfile } from "@/lib/types";
 import { supabase } from "@/lib/supabase";
-import { producerService, activityLogService } from "@/services";
+import { producerService, activityLogService, sanitizeHandle } from "@/services";
 
 interface AuthContextType {
   user: UserProfile | null;
   isLoggedIn: boolean;
   isLoading: boolean;
   signInWithGoogle: () => Promise<void>;
+  signInWithGoogleIdToken: (idToken: string) => Promise<{ isClaimed: boolean; user: UserProfile }>;
   signInWithDiscord: () => Promise<void>;
   signUpNewProducer: (nickname: string, email: string) => { success: boolean; isNew: boolean; user: UserProfile };
   loginWithEmail: (email: string) => { success: boolean; isMatchedProducer: boolean; user: UserProfile };
@@ -67,13 +68,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(false);
     }
 
-    // 2. Check active Supabase session
+    // 2. Check active Supabase session (only if no explicit active user is already cached in localStorage)
     supabase.auth.getSession().then(({ data: { session } }) => {
+      try {
+        const savedId = localStorage.getItem(STORAGE_KEY);
+        if (savedId && savedId !== "logged_out") {
+          const current = producerService.getProducerById(savedId);
+          if (current) {
+            setUser(current);
+            return;
+          }
+        }
+        if (savedId === "logged_out") return;
+      } catch {}
+
       if (session?.user?.email) {
-        // Don't re-login if user explicitly logged out
-        try {
-          if (localStorage.getItem(STORAGE_KEY) === "logged_out") return;
-        } catch {}
         const email = session.user.email.toLowerCase().trim();
         const matched = producerService.getProducerByEmail(email);
         if (matched) {
@@ -87,12 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // 3. Listen to auth state transitions
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      // Don't re-login if user explicitly logged out
-      try {
-        if (localStorage.getItem(STORAGE_KEY) === "logged_out" && _event !== "SIGNED_OUT") return;
-      } catch {}
-
-      if (session?.user?.email) {
+      if (_event === "SIGNED_IN" && session?.user?.email) {
         const email = session.user.email.toLowerCase().trim();
         const matched = producerService.getProducerByEmail(email);
         if (matched) {
@@ -104,7 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else if (_event === "SIGNED_OUT") {
         setUser(null);
         try {
-          localStorage.removeItem(STORAGE_KEY);
+          localStorage.setItem(STORAGE_KEY, "logged_out");
         } catch {}
       }
     });
@@ -147,6 +151,81 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       },
     });
     if (error) throw error;
+  };
+
+  const signInWithGoogleIdToken = async (idToken: string): Promise<{ isClaimed: boolean; user: UserProfile }> => {
+    const { data, error } = await supabase.auth.signInWithIdToken({
+      provider: "google",
+      token: idToken,
+    });
+    if (error) throw error;
+
+    const sessionUser = data.session?.user;
+    if (!sessionUser || !sessionUser.email) {
+      throw new Error("Unable to retrieve authenticated Google account information.");
+    }
+
+    const verifiedEmail = sessionUser.email.toLowerCase().trim();
+    const googleName = sessionUser.user_metadata?.full_name || sessionUser.user_metadata?.name || verifiedEmail.split("@")[0];
+    const googleAvatar = sessionUser.user_metadata?.avatar_url || sessionUser.user_metadata?.picture || "/avatars/default-avatar.png";
+
+    try {
+      await producerService.syncFromSupabase();
+    } catch {}
+
+    const matchedProducer = producerService.getProducerByEmail(verifiedEmail);
+    if (matchedProducer) {
+      try {
+        localStorage.setItem(STORAGE_KEY, matchedProducer.id);
+      } catch {}
+      setUser(matchedProducer);
+      activityLogService.logActivity({
+        type: "auth.login",
+        userId: matchedProducer.id,
+        userNickname: matchedProducer.nickname,
+        userAvatar: matchedProducer.avatarUrl,
+        userRole: matchedProducer.role,
+        description: `Producer '${matchedProducer.nickname}' signed in via Google ID Token`,
+        metadata: { provider: "google", email: verifiedEmail },
+      });
+      return { isClaimed: !!matchedProducer.isClaimed, user: matchedProducer };
+    } else {
+      let baseHandle = sanitizeHandle(googleName) || sanitizeHandle(verifiedEmail.split("@")[0]) || "producer";
+      if (baseHandle.length < 3) baseHandle = `user-${baseHandle}`;
+      let initialHandle = baseHandle;
+      let counter = 2;
+      while (!producerService.isHandleAvailable(initialHandle)) {
+        initialHandle = `${baseHandle}-${counter}`;
+        counter++;
+      }
+
+      const newProfile: UserProfile = {
+        id: initialHandle,
+        handle: initialHandle,
+        nickname: googleName,
+        email: verifiedEmail,
+        avatarUrl: googleAvatar,
+        role: verifiedEmail === "adrian.hrihor@gmail.com" ? "admin" : "producer",
+        isClaimed: false,
+        createdAt: new Date().toISOString(),
+      };
+
+      producerService.updateProducer(newProfile.id, newProfile);
+      try {
+        localStorage.setItem(STORAGE_KEY, newProfile.id);
+      } catch {}
+      setUser(newProfile);
+      activityLogService.logActivity({
+        type: "auth.signup",
+        userId: newProfile.id,
+        userNickname: newProfile.nickname,
+        userAvatar: newProfile.avatarUrl,
+        userRole: newProfile.role,
+        description: `New user '${newProfile.nickname}' registered via Google ID Token`,
+        metadata: { provider: "google", email: verifiedEmail },
+      });
+      return { isClaimed: false, user: newProfile };
+    }
   };
 
   const signInWithDiscord = async () => {
@@ -321,6 +400,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoggedIn: !!user,
         isLoading,
         signInWithGoogle,
+        signInWithGoogleIdToken,
         signInWithDiscord,
         signUpNewProducer,
         loginWithEmail,

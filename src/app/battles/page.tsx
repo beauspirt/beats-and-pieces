@@ -82,46 +82,49 @@ export default function BattlesPage() {
             </div>
 
             {/* Info */}
-            <div className="flex-1 w-full min-w-0 space-y-3.5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <h1 className="text-2xl font-bold text-white tracking-tight leading-tight">
-                  {activeBattle.title}
-                </h1>
-                <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
-                  <span className="px-3.5 py-1.5 rounded-full bg-[#7B61FF] text-xs font-bold text-white shadow-sm inline-flex items-center justify-center text-center leading-none">
-                    {(() => {
-                      const hasActiveJudges = Boolean(
-                        (Array.isArray(activeBattle.judges) && activeBattle.judges.length > 0) ||
-                        (Array.isArray(activeBattle.judgeDetails) && activeBattle.judgeDetails.length > 0)
-                      );
-                      if (activeBattle.phase === "submission") return "Phase 1: Submissions Open";
-                      if (activeBattle.phase === "rating") return "Phase 2: Public Rating";
-                      if (activeBattle.phase === "judging") return "Phase 3: Jury Evaluation";
-                      return hasActiveJudges ? "Phase 4: Results" : "Phase 3: Results";
-                    })()}
-                  </span>
-                  <span className="px-3.5 py-1.5 rounded-full bg-[#121212] text-xs text-[#A0A0A0] inline-flex items-center justify-center text-center leading-none">
-                    {activeBattle.totalSubmissions} Total Entries
-                  </span>
+            <div className="flex-1 w-full min-w-0 flex flex-col justify-between self-stretch space-y-3.5">
+              <div className="space-y-3.5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <h1 className="text-2xl font-bold text-white tracking-tight leading-tight">
+                    {activeBattle.title}
+                  </h1>
+                  <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
+                    <span className="px-3.5 py-1.5 rounded-full bg-[#7B61FF] text-xs font-bold text-white shadow-sm inline-flex items-center justify-center text-center leading-none">
+                      {(() => {
+                        const hasActiveJudges = Boolean(
+                          (Array.isArray(activeBattle.judges) && activeBattle.judges.length > 0) ||
+                          (Array.isArray(activeBattle.judgeDetails) && activeBattle.judgeDetails.length > 0)
+                        );
+                        if (activeBattle.phase === "submission") return "Phase 1: Submissions Open";
+                        if (activeBattle.phase === "rating") return "Phase 2: Public Rating";
+                        if (activeBattle.phase === "judging") return "Phase 3: Jury Evaluation";
+                        return hasActiveJudges ? "Phase 4: Results" : "Phase 3: Results";
+                      })()}
+                    </span>
+                    <span className="px-3.5 py-1.5 rounded-full bg-[#121212] text-xs text-[#A0A0A0] inline-flex items-center justify-center text-center leading-none">
+                      {activeBattle.totalSubmissions} Total Entries
+                    </span>
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-1 text-sm text-[#A0A0A0]">
-                <p>Hosted by: <span className="text-white">{activeBattle.hosts?.[0] || "Nerub"}</span></p>
-                {activeBattle.judges.length > 0 && (
-                  <p>Judged by: <span className="text-white">{activeBattle.judges.join(", ")}</span></p>
+                <div className="space-y-1 text-sm text-[#A0A0A0]">
+                  <p>Hosted by: <span className="text-white">{activeBattle.hosts?.[0] || "Nerub"}</span></p>
+                  {activeBattle.judges.length > 0 && (
+                    <p>Judged by: <span className="text-white">{activeBattle.judges.join(", ")}</span></p>
+                  )}
+                </div>
+
+                {activeBattle.description && (
+                  <p className="text-sm text-[#D1D1D1] leading-relaxed">
+                    {activeBattle.description}
+                  </p>
                 )}
               </div>
 
-              {activeBattle.description && (
-                <p className="text-sm text-[#D1D1D1] leading-relaxed">
-                  {activeBattle.description}
-                </p>
-              )}
-
-              <div className="pt-2 flex items-center justify-between text-xs">
+              {/* Bottom Row inside Main Battle Card */}
+              <div className="pt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs mt-auto">
                 <span className="text-[#888888]">Submissions open • Enter your beat to participate</span>
-                <span className="text-brand font-bold flex items-center gap-1 group-hover:translate-x-1 group-active:translate-x-1.5 transition-transform shrink-0">
+                <span className="text-brand font-bold flex items-center gap-1 group-hover:translate-x-1 group-active:translate-x-1.5 transition-transform shrink-0 self-end sm:self-auto ml-auto">
                   <span>Enter Battle</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </span>

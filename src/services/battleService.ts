@@ -843,16 +843,27 @@ export const battleService = {
     try {
       const cleanVoterId = voterId.toLowerCase().trim();
 
+      // Filter user ratings strictly to valid submissions belonging to this battle
+      const battleSubs = this.getSubmissionsByBattleId(battleId);
+      const validSubIdSet = new Set(battleSubs.map((s) => s.id));
+
+      const cleanRatings: Record<string, number> = {};
+      Object.entries(userRatings).forEach(([submissionId, score]) => {
+        if (validSubIdSet.has(submissionId) && typeof score === "number" && score > 0) {
+          cleanRatings[submissionId] = score;
+        }
+      });
+
       // Persist submission lock in localStorage immediately
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem(`bnp_ratings_locked_${battleId}_${cleanVoterId}`, "true");
-          localStorage.setItem(`bnp_submitted_ratings_${battleId}_${cleanVoterId}`, JSON.stringify(userRatings));
+          localStorage.setItem(`bnp_submitted_ratings_${battleId}_${cleanVoterId}`, JSON.stringify(cleanRatings));
         } catch {}
       }
 
       // 1. Upsert all user votes to Supabase ratings table
-      const upsertRows = Object.entries(userRatings).map(([submissionId, score]) => ({
+      const upsertRows = Object.entries(cleanRatings).map(([submissionId, score]) => ({
         battle_id: battleId,
         submission_id: submissionId,
         voter_id: cleanVoterId,
@@ -860,7 +871,10 @@ export const battleService = {
       }));
 
       if (upsertRows.length > 0) {
-        await supabase.from("ratings").upsert(upsertRows, { onConflict: "submission_id,voter_id" });
+        const { error: upsertErr } = await supabase.from("ratings").upsert(upsertRows, { onConflict: "submission_id,voter_id" });
+        if (upsertErr) {
+          throw new Error(`Failed to save ratings: ${upsertErr.message}`);
+        }
       }
 
       // 2. Fetch all ratings for this battle to accurately recompute flame averages

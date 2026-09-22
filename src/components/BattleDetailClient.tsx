@@ -1007,15 +1007,24 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
     const effectiveUserId = currentUser?.id || (typeof window !== "undefined" ? localStorage.getItem("bnp_active_user_id") : null);
     if (!effectiveUserId || !targetBattleId) return;
     const cleanId = effectiveUserId.toLowerCase().trim();
+
+    // Filter to only submissions that actually belong to this battle
+    const validRatings: Record<string, number> = {};
+    submissions.forEach((s) => {
+      if (typeof ratings[s.id] === "number" && ratings[s.id] > 0) {
+        validRatings[s.id] = ratings[s.id];
+      }
+    });
+
     setIsRatingsSubmitted(true);
     setShowSubmitWarningModal(false);
     if (typeof window !== "undefined") {
       try {
         localStorage.setItem(`bnp_ratings_locked_${targetBattleId}_${cleanId}`, "true");
-        localStorage.setItem(`bnp_submitted_ratings_${targetBattleId}_${cleanId}`, JSON.stringify(ratings));
+        localStorage.setItem(`bnp_submitted_ratings_${targetBattleId}_${cleanId}`, JSON.stringify(validRatings));
       } catch {}
     }
-    await battleService.submitUserRatings(targetBattleId, cleanId, ratings);
+    await battleService.submitUserRatings(targetBattleId, cleanId, validRatings);
     refreshBattleData();
   };
 

@@ -275,7 +275,20 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   });
 
   // Unique visitor seed for device-level guest randomizer
-  const [visitorSeed, setVisitorSeed] = useState<string>("guest");
+  const [visitorSeed, setVisitorSeed] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        let stored = localStorage.getItem("bnp_visitor_id");
+        if (!stored) {
+          stored = `vis_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+          localStorage.setItem("bnp_visitor_id", stored);
+        }
+        return stored;
+      } catch {}
+    }
+    return "guest";
+  });
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       let stored = localStorage.getItem("bnp_visitor_id");
@@ -340,10 +353,62 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   const isBallotQualified = totalEntries > 0 && currentVotesCount >= requiredVotes;
 
   // Deterministic user-seeded randomized queue for Phase 2 public rating
-  const userSeed = `${currentUser?.id || currentUser?.email || visitorSeed}_${battle?.id || battleId}`;
+  const effectiveUserId = (currentUser?.id || (typeof window !== "undefined" ? localStorage.getItem("bnp_active_user_id") : null) || "").toLowerCase().trim();
+  const queueUserId = effectiveUserId && effectiveUserId !== "logged_out" ? effectiveUserId : visitorSeed;
+  const currentBattleId = battle?.id || battleId;
+  const userSeed = `${queueUserId}_${currentBattleId}`;
+
   const shuffledSubmissions = React.useMemo(() => {
-    return seededShuffle(submissions, userSeed);
-  }, [submissions, userSeed]);
+    if (submissions.length === 0) return [];
+
+    // Always sort canonically first to guarantee deterministic input to the shuffle algorithm
+    const canonicalSubs = [...submissions].sort((a, b) =>
+      (a.submittedAt || "").localeCompare(b.submittedAt || "") || a.id.localeCompare(b.id)
+    );
+
+    const storageKey = `bnp_track_order_${currentBattleId}_${queueUserId}`;
+
+    // Check if we already have a fixed randomized order for this user & battle in localStorage
+    if (typeof window !== "undefined") {
+      try {
+        const storedOrder = localStorage.getItem(storageKey);
+        if (storedOrder) {
+          const orderedIds: string[] = JSON.parse(storedOrder);
+          const subsMap = new Map(canonicalSubs.map((s) => [s.id, s]));
+          const result: BattleSubmission[] = [];
+
+          // Add existing tracks in their saved order
+          orderedIds.forEach((id) => {
+            const sub = subsMap.get(id);
+            if (sub) {
+              result.push(sub);
+              subsMap.delete(id);
+            }
+          });
+
+          // If any new submissions were added since order was saved, append them cleanly
+          if (subsMap.size > 0) {
+            Array.from(subsMap.values()).forEach((sub) => result.push(sub));
+            localStorage.setItem(storageKey, JSON.stringify(result.map((s) => s.id)));
+          }
+
+          if (result.length > 0) return result;
+        }
+      } catch {}
+    }
+
+    // Otherwise generate the deterministic shuffle from the canonical order
+    const shuffled = seededShuffle(canonicalSubs, userSeed);
+
+    // Save this order so refreshing the page ALWAYS maintains the exact same sequence for this user
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(shuffled.map((s) => s.id)));
+      } catch {}
+    }
+
+    return shuffled;
+  }, [submissions, userSeed, currentBattleId, queueUserId]);
 
   // Anonymized track queue derived from user-seeded randomized submissions
   const blindTracks = shuffledSubmissions.map((sub, idx) => ({
@@ -359,11 +424,47 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   // Top 10 finalists triaged by Phase 2 public flame rating, randomized presentation order for judges
   const cutoff = battle?.topFinalistsCutoff || 10;
   const finalistSubmissions = React.useMemo(() => {
+    if (submissions.length === 0) return [];
     const topFinalists = [...submissions]
-      .sort((a, b) => (b.flameRating || 0) - (a.flameRating || 0))
+      .sort((a, b) => (b.flameRating || 0) - (a.flameRating || 0) || a.id.localeCompare(b.id))
       .slice(0, cutoff);
-    return seededShuffle(topFinalists, `${userSeed}_jury_finalists`);
-  }, [submissions, cutoff, userSeed]);
+
+    const storageKey = `bnp_jury_finalist_order_${currentBattleId}_${queueUserId}`;
+
+    if (typeof window !== "undefined") {
+      try {
+        const storedOrder = localStorage.getItem(storageKey);
+        if (storedOrder) {
+          const orderedIds: string[] = JSON.parse(storedOrder);
+          const subsMap = new Map(topFinalists.map((s) => [s.id, s]));
+          const result: BattleSubmission[] = [];
+
+          orderedIds.forEach((id) => {
+            const sub = subsMap.get(id);
+            if (sub) {
+              result.push(sub);
+              subsMap.delete(id);
+            }
+          });
+
+          if (subsMap.size > 0) {
+            Array.from(subsMap.values()).forEach((sub) => result.push(sub));
+            localStorage.setItem(storageKey, JSON.stringify(result.map((s) => s.id)));
+          }
+
+          if (result.length > 0) return result;
+        }
+      } catch {}
+    }
+
+    const shuffled = seededShuffle(topFinalists, `${userSeed}_jury_finalists`);
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(shuffled.map((s) => s.id)));
+      } catch {}
+    }
+    return shuffled;
+  }, [submissions, cutoff, userSeed, currentBattleId, queueUserId]);
 
   // Restore judge's drafted scores and check submission status purely from database
   useEffect(() => {

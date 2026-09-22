@@ -249,7 +249,7 @@ export const battleService = {
 
       // 2. Sync Submissions & Ratings
       const [{ data: dbSubs, error: sErr }, { data: dbRatings }] = await Promise.all([
-        supabase.from("submissions").select("*"),
+        supabase.from("submissions").select("*").order("submitted_at", { ascending: true }),
         supabase.from("ratings").select("*"),
       ]);
 
@@ -664,6 +664,9 @@ export const battleService = {
     } else {
       subs = submissionsList.filter((s) => s.battleId === battleId);
     }
+    // Always ensure deterministic canonical sorting
+    subs.sort((a, b) => (a.submittedAt || "").localeCompare(b.submittedAt || "") || a.id.localeCompare(b.id));
+
     if (battle && battle.phase !== "completed") {
       subs.forEach((s) => {
         delete s.rank;

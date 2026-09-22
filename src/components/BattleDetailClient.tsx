@@ -262,7 +262,17 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
   // Phase 2: Rating state (Track ratings) with localStorage & database persistence
   const [ratings, setRatings] = useState<Record<string, number>>({});
-  const [isRatingsSubmitted, setIsRatingsSubmitted] = useState<boolean>(false);
+  const [isRatingsSubmitted, setIsRatingsSubmitted] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const uId = localStorage.getItem("bnp_active_user_id");
+        if (uId && uId !== "logged_out") {
+          return localStorage.getItem(`bnp_ratings_locked_${battleId}_${uId.toLowerCase().trim()}`) === "true";
+        }
+      } catch {}
+    }
+    return false;
+  });
 
   // Unique visitor seed for device-level guest randomizer
   const [visitorSeed, setVisitorSeed] = useState<string>("guest");
@@ -281,26 +291,38 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
   // Sync user's existing ratings from database and local draft on mount / auth change
   useEffect(() => {
-    const uId = currentUser?.id || visitorSeed;
+    const targetBattleId = battle?.id || battleId;
+    const effectiveUserId = (currentUser?.id || (typeof window !== "undefined" ? localStorage.getItem("bnp_active_user_id") : null) || "").toLowerCase().trim();
+    const uId = effectiveUserId || visitorSeed;
+
+    if (!targetBattleId) return;
+
     let draftRatings: Record<string, number> = {};
     try {
-      const stored = localStorage.getItem(`bnp_draft_ratings_${battle?.id || battleId}_${uId}`);
+      const stored = localStorage.getItem(`bnp_draft_ratings_${targetBattleId}_${uId}`) ||
+                     localStorage.getItem(`bnp_submitted_ratings_${targetBattleId}_${uId}`);
       if (stored) draftRatings = JSON.parse(stored);
     } catch {}
 
-    if (!currentUser?.id) {
+    const isLockedLocally = typeof window !== "undefined" && Boolean(
+      uId && uId !== "guest" && localStorage.getItem(`bnp_ratings_locked_${targetBattleId}_${uId}`) === "true"
+    );
+
+    if (isLockedLocally) {
+      setIsRatingsSubmitted(true);
+    }
+
+    if (!effectiveUserId) {
       setRatings(draftRatings);
-      setIsRatingsSubmitted(false);
+      setIsRatingsSubmitted(isLockedLocally);
       return;
     }
 
-    if (battle?.id) {
-      battleService.getUserRatingsForBattle(battle.id, currentUser.id).then(({ ratings: userRatings, isSubmitted }) => {
-        const merged = { ...draftRatings, ...userRatings };
-        setRatings(merged);
-        setIsRatingsSubmitted(isSubmitted);
-      });
-    }
+    battleService.getUserRatingsForBattle(targetBattleId, effectiveUserId).then(({ ratings: userRatings, isSubmitted }) => {
+      const merged = { ...draftRatings, ...userRatings };
+      setRatings(merged);
+      setIsRatingsSubmitted(isSubmitted || isLockedLocally);
+    });
   }, [battle?.id, battleId, currentUser?.id, visitorSeed]);
 
   // Phase 3: Clean Single-Score Jury evaluation state (slider 0.00 to 5.00)
@@ -880,17 +902,34 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
   };
 
   const handleConfirmSubmitRatings = async () => {
-    if (!currentUser?.id || !battle) return;
+    const targetBattleId = battle?.id || battleId;
+    const effectiveUserId = currentUser?.id || (typeof window !== "undefined" ? localStorage.getItem("bnp_active_user_id") : null);
+    if (!effectiveUserId || !targetBattleId) return;
+    const cleanId = effectiveUserId.toLowerCase().trim();
     setIsRatingsSubmitted(true);
     setShowSubmitWarningModal(false);
-    await battleService.submitUserRatings(battle.id, currentUser.id, ratings);
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(`bnp_ratings_locked_${targetBattleId}_${cleanId}`, "true");
+        localStorage.setItem(`bnp_submitted_ratings_${targetBattleId}_${cleanId}`, JSON.stringify(ratings));
+      } catch {}
+    }
+    await battleService.submitUserRatings(targetBattleId, cleanId, ratings);
     refreshBattleData();
   };
 
   const handleUnlockRatings = async () => {
-    if (!currentUser?.id || !battle) return;
+    const targetBattleId = battle?.id || battleId;
+    const effectiveUserId = currentUser?.id || (typeof window !== "undefined" ? localStorage.getItem("bnp_active_user_id") : null);
+    if (!effectiveUserId || !targetBattleId) return;
+    const cleanId = effectiveUserId.toLowerCase().trim();
     setIsRatingsSubmitted(false);
-    await battleService.unlockUserRatings(battle.id, currentUser.id);
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem(`bnp_ratings_locked_${targetBattleId}_${cleanId}`);
+      } catch {}
+    }
+    await battleService.unlockUserRatings(targetBattleId, cleanId);
     refreshBattleData();
   };
 

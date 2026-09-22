@@ -69,6 +69,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(false);
     }
 
+    // Background sync producers from Supabase to ensure active user is populated if not yet cached
+    producerService.syncFromSupabase().then(() => {
+      try {
+        const savedId = localStorage.getItem(STORAGE_KEY);
+        if (savedId && savedId !== "logged_out") {
+          const prod = producerService.getProducerById(savedId);
+          if (prod) setUser(prod);
+        }
+      } catch {}
+    }).catch(() => {});
+
     // 2. Check active Supabase session (only if no explicit active user is already cached in localStorage)
     supabase.auth.getSession().then(({ data: { session } }) => {
       try {

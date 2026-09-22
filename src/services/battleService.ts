@@ -838,11 +838,21 @@ export const battleService = {
     userRatings: Record<string, number>
   ): Promise<{ success: boolean; error?: string }> {
     try {
+      const cleanVoterId = voterId.toLowerCase().trim();
+
+      // Persist submission lock in localStorage immediately
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem(`bnp_ratings_locked_${battleId}_${cleanVoterId}`, "true");
+          localStorage.setItem(`bnp_submitted_ratings_${battleId}_${cleanVoterId}`, JSON.stringify(userRatings));
+        } catch {}
+      }
+
       // 1. Upsert all user votes to Supabase ratings table
       const upsertRows = Object.entries(userRatings).map(([submissionId, score]) => ({
         battle_id: battleId,
         submission_id: submissionId,
-        voter_id: voterId,
+        voter_id: cleanVoterId,
         score: score,
       }));
 
@@ -918,7 +928,7 @@ export const battleService = {
 
       activityLogService.logActivity({
         type: "battle.vote",
-        userId: voterId,
+        userId: cleanVoterId,
         description: `Submitted Phase 2 public rating ballot for '${battle?.title || battleId}' (${Object.keys(userRatings).length} tracks rated)`,
         metadata: {
           battleId,
@@ -939,12 +949,21 @@ export const battleService = {
     voterId: string
   ): Promise<{ success: boolean; error?: string }> {
     try {
+      const cleanVoterId = voterId.toLowerCase().trim();
+
+      // Clear local lock flag
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.removeItem(`bnp_ratings_locked_${battleId}_${cleanVoterId}`);
+        } catch {}
+      }
+
       // 1. Delete all rows from Supabase ratings table for this user & battle
       await supabase
         .from("ratings")
         .delete()
         .eq("battle_id", battleId)
-        .eq("voter_id", voterId);
+        .eq("voter_id", cleanVoterId);
 
       // 2. Re-fetch all remaining ratings for this battle to recompute flame averages without this user's votes
       const { data: dbRatings } = await supabase
@@ -996,8 +1015,24 @@ export const battleService = {
   ): Promise<{ ratings: Record<string, number>; isSubmitted: boolean }> {
     if (!userId || !battleId) return { ratings: {}, isSubmitted: false };
 
+    const cleanUserId = userId.toLowerCase().trim();
     const ratings: Record<string, number> = {};
     let isSubmitted = false;
+
+    // Check localStorage lock first for instant synchronization
+    if (typeof window !== "undefined") {
+      try {
+        const localLocked = localStorage.getItem(`bnp_ratings_locked_${battleId}_${cleanUserId}`) === "true";
+        if (localLocked) {
+          isSubmitted = true;
+        }
+        const localSaved = localStorage.getItem(`bnp_submitted_ratings_${battleId}_${cleanUserId}`) ||
+                           localStorage.getItem(`bnp_draft_ratings_${battleId}_${cleanUserId}`);
+        if (localSaved) {
+          Object.assign(ratings, JSON.parse(localSaved));
+        }
+      } catch {}
+    }
 
     // Fetch directly from Supabase ratings table for this specific user & battle
     try {
@@ -1005,7 +1040,7 @@ export const battleService = {
         .from("ratings")
         .select("submission_id, score")
         .eq("battle_id", battleId)
-        .eq("voter_id", userId);
+        .eq("voter_id", cleanUserId);
 
       if (dbRatings && dbRatings.length > 0) {
         dbRatings.forEach((r: { submission_id: string; score: number }) => {
@@ -1015,6 +1050,12 @@ export const battleService = {
         });
         if (Object.keys(ratings).length > 0) {
           isSubmitted = true;
+          if (typeof window !== "undefined") {
+            try {
+              localStorage.setItem(`bnp_ratings_locked_${battleId}_${cleanUserId}`, "true");
+              localStorage.setItem(`bnp_submitted_ratings_${battleId}_${cleanUserId}`, JSON.stringify(ratings));
+            } catch {}
+          }
         }
       }
     } catch (err) {

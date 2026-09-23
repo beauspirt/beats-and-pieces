@@ -144,37 +144,45 @@ export default function VotingModerationPage() {
             });
           }
 
-          // Check 3: Rapid Velocity Clicking (multiple votes submitted under 1.5 seconds)
+          // Check 3: Rapid Velocity Clicking (multiple individual votes submitted under 1.5 seconds)
+          // Note: When a user locks their completed ballot, all rows are inserted in a single batch with identical timestamps.
+          // We ignore single-batch ballot submissions (time span < 3s across all tracks) to prevent false positives.
           if (votesCast >= 3) {
             const sortedByTime = [...userVotes]
               .filter((v) => v.created_at)
               .map((v) => new Date(v.created_at!).getTime())
               .sort((a, b) => a - b);
 
-            let rapidCount = 0;
-            for (let i = 1; i < sortedByTime.length; i++) {
-              if (sortedByTime[i] - sortedByTime[i - 1] < 1500) {
-                rapidCount++;
-              }
-            }
+            const totalTimeSpan = sortedByTime[sortedByTime.length - 1] - sortedByTime[0];
+            const isSingleBatchSubmission = totalTimeSpan < 3000;
 
-            if (rapidCount >= 3) {
-              const flagId = `flag-rapid-${bId}-${voterId}`;
-              detectedFlags.push({
-                id: flagId,
-                battleId: bId,
-                battleTitle,
-                voterUserId: voterId,
-                voterNickname,
-                voterEmail,
-                voterAvatar,
-                flagType: "rapid_clicking",
-                details: `Detected ${rapidCount} rapid vote submissions (<1.5s interval), indicating bot-like or speed voting without listening.`,
-                timestamp: userVotes[userVotes.length - 1]?.created_at || new Date().toISOString(),
-                status: decisions[flagId] || "pending",
-                votesCast,
-                averageRatingGiven,
-              });
+            if (!isSingleBatchSubmission) {
+              let rapidCount = 0;
+              for (let i = 1; i < sortedByTime.length; i++) {
+                const diff = sortedByTime[i] - sortedByTime[i - 1];
+                if (diff > 100 && diff < 1500) {
+                  rapidCount++;
+                }
+              }
+
+              if (rapidCount >= 3) {
+                const flagId = `flag-rapid-${bId}-${voterId}`;
+                detectedFlags.push({
+                  id: flagId,
+                  battleId: bId,
+                  battleTitle,
+                  voterUserId: voterId,
+                  voterNickname,
+                  voterEmail,
+                  voterAvatar,
+                  flagType: "rapid_clicking",
+                  details: `Detected ${rapidCount} rapid vote submissions (<1.5s interval), indicating bot-like or speed voting without listening.`,
+                  timestamp: userVotes[userVotes.length - 1]?.created_at || new Date().toISOString(),
+                  status: decisions[flagId] || "pending",
+                  votesCast,
+                  averageRatingGiven,
+                });
+              }
             }
           }
         });

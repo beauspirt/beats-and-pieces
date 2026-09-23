@@ -4,6 +4,7 @@ import rawSubmissions from "@/data/submissions.json";
 import { supabase } from "@/lib/supabase";
 import { activityLogService } from "./activityLogService";
 import { storageService } from "./storageService";
+import { producerService } from "./producerService";
 
 const STORAGE_KEY_BATTLES = "bnp_custom_battles";
 const STORAGE_KEY_CUSTOM_SUBS = "bnp_custom_submissions";
@@ -767,15 +768,21 @@ export const battleService = {
       () => {}
     );
 
+    const uploader = newSubmission.userId ? producerService.getProducerById(newSubmission.userId) : null;
+    const authorName = newSubmission.beatmakerTag || uploader?.nickname || newSubmission.userId;
+
     activityLogService.logActivity({
       type: "battle.submit",
       userId: newSubmission.userId,
-      userNickname: newSubmission.beatmakerTag,
-      description: `Submitted track '${newSubmission.beatTitle}' to '${battle?.title || newSubmission.battleId}'`,
+      userNickname: authorName,
+      userAvatar: uploader?.avatarUrl,
+      userRole: uploader?.role,
+      description: `${authorName} submitted track '${newSubmission.beatTitle}' to '${battle?.title || newSubmission.battleId}'`,
       metadata: {
         battleId: newSubmission.battleId,
         beatTitle: newSubmission.beatTitle,
         bpm: newSubmission.bpm,
+        producerName: authorName,
       },
     });
 
@@ -943,13 +950,21 @@ export const battleService = {
       customSubsList = allSubs;
       submissionsList = allSubs;
 
+      const voter = cleanVoterId ? producerService.getProducerById(cleanVoterId) : null;
+      const voterName = voter?.nickname || cleanVoterId;
+
       activityLogService.logActivity({
         type: "battle.vote",
         userId: cleanVoterId,
-        description: `Submitted Phase 2 public rating ballot for '${battle?.title || battleId}' (${Object.keys(userRatings).length} tracks rated)`,
+        userNickname: voterName,
+        userAvatar: voter?.avatarUrl,
+        userRole: voter?.role,
+        description: `${voterName} submitted Phase 2 public rating ballot for '${battle?.title || battleId}' (${Object.keys(userRatings).length} tracks rated)`,
         metadata: {
           battleId,
           ratedCount: Object.keys(userRatings).length,
+          voterId: cleanVoterId,
+          voterName,
         },
       });
 
@@ -1017,6 +1032,23 @@ export const battleService = {
       saveCustomSubmissions(allSubs);
       customSubsList = allSubs;
       submissionsList = allSubs;
+
+      const voter = cleanVoterId ? producerService.getProducerById(cleanVoterId) : null;
+      const voterName = voter?.nickname || cleanVoterId;
+      activityLogService.logActivity({
+        type: "battle.vote",
+        userId: cleanVoterId,
+        userNickname: voterName,
+        userAvatar: voter?.avatarUrl,
+        userRole: voter?.role,
+        description: `${voterName} unlocked their Phase 2 public ratings ballot for '${battleId}'`,
+        metadata: {
+          battleId,
+          action: "unlock",
+          voterId: cleanVoterId,
+          voterName,
+        },
+      });
 
       notifyBattlesUpdated();
       return { success: true };

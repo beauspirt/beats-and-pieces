@@ -300,17 +300,26 @@ export default function AdminActivityLogsPage() {
                 (log.userId ? producerService.getProducerById(log.userId) : null) ||
                 (log.userNickname ? producerService.getProducerByTag(log.userNickname) : null);
 
+              const displayName =
+                (log.userNickname && log.userNickname !== "User" && log.userNickname !== "System" ? log.userNickname : null) ||
+                liveProducer?.nickname ||
+                (log.userId && log.userId !== "system" && !log.userId.startsWith("_")
+                  ? (log.userId.charAt(0).toUpperCase() + log.userId.slice(1))
+                  : (log.userId === "system" ? "System" : "Anonymous User"));
+
+              const displayRole = log.userRole || liveProducer?.role || null;
+
               const profileId =
                 liveProducer?.handle ||
                 liveProducer?.id ||
                 (log.userId && log.userId !== "system" && !log.userId.startsWith("_")
                   ? log.userId
                   : null) ||
-                (log.userNickname && log.userNickname !== "System"
-                  ? producerService.getProducerByTag(log.userNickname)?.handle ||
-                    producerService.getProducerByTag(log.userNickname)?.id ||
-                    producerService.getProducerById(log.userNickname.toLowerCase().replace(/\s+/g, "-"))?.handle ||
-                    producerService.getProducerById(log.userNickname.toLowerCase().replace(/\s+/g, "-"))?.id
+                (displayName && displayName !== "System" && displayName !== "Anonymous User"
+                  ? producerService.getProducerByTag(displayName)?.handle ||
+                    producerService.getProducerByTag(displayName)?.id ||
+                    producerService.getProducerById(displayName.toLowerCase().replace(/\s+/g, "-"))?.handle ||
+                    producerService.getProducerById(displayName.toLowerCase().replace(/\s+/g, "-"))?.id
                   : null);
 
               const profileHref = profileId ? `/${profileId}` : null;
@@ -323,6 +332,18 @@ export default function AdminActivityLogsPage() {
                   : log.userAvatar && !log.userAvatar.includes("supabase.co/storage")
                   ? log.userAvatar
                   : "/avatars/default-avatar.png";
+
+              const displayDescription = (() => {
+                let desc = log.description || "";
+                if (displayName && displayName !== "System" && displayName !== "Anonymous User") {
+                  if (desc.startsWith("Submitted Phase 2 public rating ballot")) {
+                    desc = `${displayName} submitted Phase 2 public rating ballot${desc.slice("Submitted Phase 2 public rating ballot".length)}`;
+                  } else if (desc.startsWith("Submitted track ")) {
+                    desc = `${displayName} submitted track ${desc.slice("Submitted track ".length)}`;
+                  }
+                }
+                return desc;
+              })();
 
               return (
                 <div
@@ -341,7 +362,7 @@ export default function AdminActivityLogsPage() {
                           >
                             <Image
                               src={resolvedAvatar}
-                              alt={log.userNickname || "User"}
+                              alt={displayName}
                               fill
                               className="object-cover"
                               onError={(e) => {
@@ -356,7 +377,7 @@ export default function AdminActivityLogsPage() {
                           <div className="w-10 h-10 rounded-full overflow-hidden bg-[#121212] relative shadow-inner">
                             <Image
                               src={resolvedAvatar}
-                              alt={log.userNickname || "User"}
+                              alt={displayName}
                               fill
                               className="object-cover"
                               onError={(e) => {
@@ -383,17 +404,17 @@ export default function AdminActivityLogsPage() {
                               href={profileHref}
                               className="text-xs font-bold text-white hover:text-brand hover:underline transition-colors cursor-pointer"
                             >
-                              {log.userNickname || "User"}
+                              {displayName}
                             </Link>
                           ) : (
                             <span className="text-xs font-bold text-white">
-                              {log.userNickname || "System"}
+                              {displayName}
                             </span>
                           )}
 
-                          {log.userRole && (
+                          {displayRole && (
                             <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-brand/15 text-brand">
-                              {log.userRole}
+                              {displayRole}
                             </span>
                           )}
 
@@ -405,7 +426,7 @@ export default function AdminActivityLogsPage() {
                         </div>
 
                         <p className="text-sm text-zinc-300 leading-relaxed">
-                          {log.description}
+                          {displayDescription}
                         </p>
                       </div>
                     </div>

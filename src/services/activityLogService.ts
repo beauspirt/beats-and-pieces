@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { producerService } from "./producerService";
 
 export type ActivityEventType =
   | "auth.login"
@@ -45,6 +46,38 @@ function sanitizeLogAvatar(url?: string): string {
   return url;
 }
 
+function enrichLogEntry(log: ActivityLogEntry): ActivityLogEntry {
+  let userNickname = log.userNickname;
+  let userAvatar = sanitizeLogAvatar(log.userAvatar);
+  let userRole = log.userRole;
+
+  if (log.userId && log.userId !== "system" && !log.userId.startsWith("_")) {
+    const p = producerService.getProducerById(log.userId);
+    if (p) {
+      if (!userNickname || userNickname === "User" || userNickname === "System") userNickname = p.nickname;
+      if (userAvatar === "/avatars/default-avatar.png" && p.avatarUrl) userAvatar = sanitizeLogAvatar(p.avatarUrl);
+      if (!userRole) userRole = p.role;
+    }
+  }
+
+  let description = log.description || "";
+  if (userNickname && userNickname !== "User" && userNickname !== "System") {
+    if (description.startsWith("Submitted Phase 2 public rating ballot")) {
+      description = `${userNickname} submitted Phase 2 public rating ballot${description.slice("Submitted Phase 2 public rating ballot".length)}`;
+    } else if (description.startsWith("Submitted track ")) {
+      description = `${userNickname} submitted track ${description.slice("Submitted track ".length)}`;
+    }
+  }
+
+  return {
+    ...log,
+    userNickname,
+    userAvatar,
+    userRole,
+    description,
+  };
+}
+
 function loadLocalLogs(): ActivityLogEntry[] {
   if (typeof window !== "undefined") {
     try {
@@ -52,10 +85,7 @@ function loadLocalLogs(): ActivityLogEntry[] {
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
-          return parsed.filter(isGenuineLog).map((l) => ({
-            ...l,
-            userAvatar: sanitizeLogAvatar(l.userAvatar),
-          }));
+          return parsed.filter(isGenuineLog).map((l) => enrichLogEntry(l));
         }
       }
     } catch {}
@@ -85,11 +115,13 @@ export const activityLogService = {
     description: string;
     metadata?: Record<string, unknown>;
   }): ActivityLogEntry {
-    const newLog: ActivityLogEntry = {
+    const enriched = enrichLogEntry({
       id: `log-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       timestamp: new Date().toISOString(),
       ...entry,
-    };
+    });
+
+    const newLog: ActivityLogEntry = enriched;
 
     // 1. Update local cache
     const current = loadLocalLogs();
@@ -220,7 +252,7 @@ export const activityLogService = {
 
       if (tableData && tableData.length > 0) {
         tableData.forEach((row) => {
-          const entry: ActivityLogEntry = {
+          const entry: ActivityLogEntry = enrichLogEntry({
             id: row.id,
             type: row.event_type as ActivityEventType,
             userId: row.user_id,
@@ -230,7 +262,7 @@ export const activityLogService = {
             description: row.description,
             metadata: row.metadata,
             timestamp: row.created_at,
-          };
+          });
           if (isGenuineLog(entry)) {
             mergedMap.set(entry.id, entry);
           }
@@ -247,10 +279,7 @@ export const activityLogService = {
       if (fallbackData?.links?.logs && Array.isArray(fallbackData.links.logs)) {
         fallbackData.links.logs.forEach((l: ActivityLogEntry) => {
           if (isGenuineLog(l)) {
-            mergedMap.set(l.id, {
-              ...l,
-              userAvatar: sanitizeLogAvatar(l.userAvatar),
-            });
+            mergedMap.set(l.id, enrichLogEntry(l));
           }
         });
       }

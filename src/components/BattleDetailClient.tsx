@@ -2088,7 +2088,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                   return (
                     <div
                       key={sub.id}
-                      className="bg-[#181818] rounded-[28px] p-4 sm:p-5 space-y-3.5 shadow-md relative"
+                      className="bg-[#181818] rounded-[28px] p-4 space-y-3.5 shadow-md relative"
                     >
                       {/* Header Row: [Badge] [Avatar] [Title + Producer] on Left, [Scores/BPM] on Right */}
                       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 min-w-0">
@@ -2119,49 +2119,51 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                             {/* Corner Medal Badge (Top 3 use custom images, #4+ uses consistent dark circle) */}
                             {rank === 1 ? (
                               <div
-                                className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-[22px] sm:h-[22px] rounded-full overflow-hidden shadow-md ring-2 ring-[#181818] select-none pointer-events-none"
+                                className="absolute -bottom-0.5 -right-0.5 w-[18px] h-[18px] sm:w-5 sm:h-5 rounded-full overflow-hidden shadow-md ring-[1.5px] ring-[#181818] select-none pointer-events-none"
                                 title="1st Place"
                               >
                                 <Image
                                   src="/1stplace.png"
                                   alt="1st Place"
-                                  width={22}
-                                  height={22}
+                                  width={20}
+                                  height={20}
                                   className="w-full h-full object-contain"
                                 />
                               </div>
                             ) : rank === 2 ? (
                               <div
-                                className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-[22px] sm:h-[22px] rounded-full overflow-hidden shadow-md ring-2 ring-[#181818] select-none pointer-events-none"
+                                className="absolute -bottom-0.5 -right-0.5 w-[18px] h-[18px] sm:w-5 sm:h-5 rounded-full overflow-hidden shadow-md ring-[1.5px] ring-[#181818] select-none pointer-events-none"
                                 title="2nd Place"
                               >
                                 <Image
                                   src="/2ndplace.png"
                                   alt="2nd Place"
-                                  width={22}
-                                  height={22}
+                                  width={20}
+                                  height={20}
                                   className="w-full h-full object-contain"
                                 />
                               </div>
                             ) : rank === 3 ? (
                               <div
-                                className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-[22px] sm:h-[22px] rounded-full overflow-hidden shadow-md ring-2 ring-[#181818] select-none pointer-events-none"
+                                className="absolute -bottom-0.5 -right-0.5 w-[18px] h-[18px] sm:w-5 sm:h-5 rounded-full overflow-hidden shadow-md ring-[1.5px] ring-[#181818] select-none pointer-events-none"
                                 title="3rd Place"
                               >
                                 <Image
                                   src="/3rdplace.png"
                                   alt="3rd Place"
-                                  width={22}
-                                  height={22}
+                                  width={20}
+                                  height={20}
                                   className="w-full h-full object-contain"
                                 />
                               </div>
                             ) : (
                               <div
-                                className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-[22px] sm:h-[22px] rounded-full bg-zinc-800 text-zinc-400 font-bold text-[10px] sm:text-[11px] flex items-center justify-center leading-none ring-2 ring-[#181818] select-none pointer-events-none shadow-sm"
+                                className="absolute -bottom-0.5 -right-0.5 w-[18px] h-[18px] sm:w-5 sm:h-5 rounded-full bg-[#242424] text-zinc-300 font-bold text-[9px] sm:text-[10px] grid place-items-center ring-[1.5px] ring-[#181818] select-none pointer-events-none shadow-sm"
                                 title={`Place #${rank}`}
                               >
-                                {rank}
+                                <span className="leading-none text-center -translate-y-[0.5px]">
+                                  {rank}
+                                </span>
                               </div>
                             )}
                           </div>

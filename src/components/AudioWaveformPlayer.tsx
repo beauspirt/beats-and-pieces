@@ -242,6 +242,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = React.mem
     offUnplayed.width = pixelWidth;
     offUnplayed.height = pixelHeight;
     const ctxU = offUnplayed.getContext("2d")!;
+    ctxU.imageSmoothingEnabled = false;
     ctxU.clearRect(0, 0, pixelWidth, pixelHeight);
     ctxU.fillStyle = isLight ? "#D4D4D8" : "#262626";
     for (let px = 0; px < pixelWidth; px++) {
@@ -258,6 +259,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = React.mem
     offPlayed.width = pixelWidth;
     offPlayed.height = pixelHeight;
     const ctxP = offPlayed.getContext("2d")!;
+    ctxP.imageSmoothingEnabled = false;
     ctxP.clearRect(0, 0, pixelWidth, pixelHeight);
     ctxP.fillStyle = isLight ? "#7B61FF" : "#FFFFFF";
     for (let px = 0; px < pixelWidth; px++) {
@@ -280,6 +282,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = React.mem
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+    ctx.imageSmoothingEnabled = false;
 
     const rect = canvas.getBoundingClientRect();
     if (rect.width === 0 || rect.height === 0) return;
@@ -630,7 +633,7 @@ export const AudioWaveformPlayer: React.FC<AudioWaveformPlayerProps> = React.mem
           onPointerCancel={handlePointerUp}
           onPointerLeave={handlePointerLeave}
           className="w-full h-full cursor-pointer touch-pan-y select-none block"
-          style={{ width: "100%", height: "100%", display: "block" }}
+          style={{ width: "100%", height: "100%", display: "block", imageRendering: "pixelated" }}
         />
 
         {/* Bottom Right Corner Timecode Pillbox (Border-free, Inter font) */}

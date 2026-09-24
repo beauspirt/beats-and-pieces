@@ -2100,46 +2100,48 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                           <div className="shrink-0 flex items-center justify-center">
                             {rank === 1 ? (
                               <div
-                                className="w-9 h-9 sm:w-10 sm:h-10 relative shrink-0 select-none flex items-center justify-center"
+                                className="w-6 h-6 relative shrink-0 select-none flex items-center justify-center"
                                 title="1st Place"
                               >
                                 <Image
                                   src="/1stplace.png"
                                   alt="1st Place"
-                                  width={40}
-                                  height={40}
+                                  width={24}
+                                  height={24}
                                   className="w-full h-full object-contain pointer-events-none"
                                 />
                               </div>
                             ) : rank === 2 ? (
                               <div
-                                className="w-9 h-9 sm:w-10 sm:h-10 relative shrink-0 select-none flex items-center justify-center"
+                                className="w-6 h-6 relative shrink-0 select-none flex items-center justify-center"
                                 title="2nd Place"
                               >
                                 <Image
                                   src="/2ndplace.png"
                                   alt="2nd Place"
-                                  width={40}
-                                  height={40}
+                                  width={24}
+                                  height={24}
                                   className="w-full h-full object-contain pointer-events-none"
                                 />
                               </div>
                             ) : rank === 3 ? (
                               <div
-                                className="w-9 h-9 sm:w-10 sm:h-10 relative shrink-0 select-none flex items-center justify-center"
+                                className="w-6 h-6 relative shrink-0 select-none flex items-center justify-center"
                                 title="3rd Place"
                               >
                                 <Image
                                   src="/3rdplace.png"
                                   alt="3rd Place"
-                                  width={40}
-                                  height={40}
+                                  width={24}
+                                  height={24}
                                   className="w-full h-full object-contain pointer-events-none"
                                 />
                               </div>
                             ) : (
                               <span
-                                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/[0.08] text-zinc-400 font-bold text-xs sm:text-[13px] flex items-center justify-center leading-none select-none shrink-0"
+                                className={`w-6 h-6 rounded-full bg-white/[0.08] text-zinc-400 font-bold flex items-center justify-center leading-none select-none shrink-0 ${
+                                  rank >= 10 ? "text-[10px] tracking-tighter" : "text-[11px]"
+                                }`}
                                 title={`#${rank} Place`}
                               >
                                 #{rank}

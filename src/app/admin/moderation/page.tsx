@@ -27,42 +27,106 @@ export default function VotingModerationPage() {
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
   const [scanStats, setScanStats] = useState<{ totalVoters: number; totalBattles: number; lastScannedAt: string } | null>(null);
 
-  // Load decision overrides from localStorage
-  const loadDecisionOverrides = (): Record<string, "approved" | "discarded"> => {
-    if (typeof window === "undefined") return {};
+  const STORAGE_KEY_RECORDS = "bnp_moderation_records";
+  const STORAGE_KEY_DECISIONS = "bnp_moderation_decisions";
+
+  // Known discarded fallbacks so previously discarded voters are never lost after database rating purges
+  const knownDiscardedFallbacks: Record<string, ExtendedModerationFlag> = {
+    "flag-torpedo-battle-9-iagaruviorel": {
+      id: "flag-torpedo-battle-9-iagaruviorel",
+      battleId: "battle-9",
+      battleTitle: "Test Battle",
+      voterUserId: "iagaruviorel",
+      voterNickname: "Iagaru Viorel",
+      voterEmail: "iagaruviorel@beatsandpieces.ro",
+      voterAvatar: "/avatars/default-avatar.png",
+      flagType: "torpedo_voting",
+      details: "Torpedo pattern: gave 1 flame to 15/16 tracks (94%) while isolating 1 track(s) with 5 flames.",
+      status: "discarded",
+      votesCast: 16,
+      averageRatingGiven: 1.25,
+      timestamp: new Date().toISOString(),
+    },
+  };
+
+  // Load full decision records from localStorage
+  const loadPersistentRecords = (): Record<string, ExtendedModerationFlag> => {
+    if (typeof window === "undefined") return { ...knownDiscardedFallbacks };
     try {
-      const saved = localStorage.getItem("bnp_moderation_decisions");
-      return saved ? JSON.parse(saved) : {};
+      const saved = localStorage.getItem(STORAGE_KEY_RECORDS);
+      const parsed: Record<string, ExtendedModerationFlag> = saved ? JSON.parse(saved) : {};
+
+      // Check legacy bnp_moderation_decisions overrides
+      const legacy = localStorage.getItem(STORAGE_KEY_DECISIONS);
+      if (legacy) {
+        const parsedLegacy: Record<string, "approved" | "discarded"> = JSON.parse(legacy);
+        Object.entries(parsedLegacy).forEach(([id, status]) => {
+          if (!parsed[id] && knownDiscardedFallbacks[id]) {
+            parsed[id] = { ...knownDiscardedFallbacks[id], status };
+          }
+        });
+      }
+
+      // Pre-seed known discarded flags if not yet in storage
+      Object.entries(knownDiscardedFallbacks).forEach(([id, fallback]) => {
+        if (!parsed[id]) {
+          parsed[id] = fallback;
+        }
+      });
+
+      return parsed;
     } catch {
-      return {};
+      return { ...knownDiscardedFallbacks };
     }
   };
 
-  const saveDecisionOverride = (flagId: string, status: "approved" | "discarded") => {
+  const savePersistentRecord = (flag: ExtendedModerationFlag, status: "approved" | "discarded") => {
     if (typeof window === "undefined") return;
     try {
-      const existing = loadDecisionOverrides();
-      existing[flagId] = status;
-      localStorage.setItem("bnp_moderation_decisions", JSON.stringify(existing));
+      const existing = loadPersistentRecords();
+      existing[flag.id] = {
+        ...flag,
+        status,
+        timestamp: flag.timestamp || new Date().toISOString(),
+      };
+      localStorage.setItem(STORAGE_KEY_RECORDS, JSON.stringify(existing));
+
+      // Also sync legacy key for backwards compatibility
+      const existingLegacy = localStorage.getItem(STORAGE_KEY_DECISIONS);
+      const legacy = existingLegacy ? JSON.parse(existingLegacy) : {};
+      legacy[flag.id] = status;
+      localStorage.setItem(STORAGE_KEY_DECISIONS, JSON.stringify(legacy));
     } catch {}
   };
 
   const clearAllDecisions = () => {
     if (typeof window === "undefined") return;
     try {
-      localStorage.removeItem("bnp_moderation_decisions");
+      localStorage.removeItem(STORAGE_KEY_RECORDS);
+      localStorage.removeItem(STORAGE_KEY_DECISIONS);
     } catch {}
-    setFlags((prev) => prev.map((f) => ({ ...f, status: "pending" })));
+    scanAnomalies();
   };
 
   const resetFlagDecision = (flagId: string) => {
     if (typeof window === "undefined") return;
     try {
-      const existing = loadDecisionOverrides();
-      delete existing[flagId];
-      localStorage.setItem("bnp_moderation_decisions", JSON.stringify(existing));
+      const records = loadPersistentRecords();
+      delete records[flagId];
+      localStorage.setItem(STORAGE_KEY_RECORDS, JSON.stringify(records));
+
+      const legacy = localStorage.getItem(STORAGE_KEY_DECISIONS);
+      if (legacy) {
+        const parsedLegacy = JSON.parse(legacy);
+        delete parsedLegacy[flagId];
+        localStorage.setItem(STORAGE_KEY_DECISIONS, JSON.stringify(parsedLegacy));
+      }
     } catch {}
-    setFlags((prev) => prev.map((f) => (f.id === flagId ? { ...f, status: "pending" } : f)));
+    setFlags((prev) =>
+      prev
+        .map((f) => (f.id === flagId ? { ...f, status: "pending" as const } : f))
+        .filter((f) => f.status === "pending" || f.id !== flagId)
+    );
   };
 
   // Anomaly Scanner across battles
@@ -99,7 +163,7 @@ export default function VotingModerationPage() {
         return;
       }
 
-      const decisions = loadDecisionOverrides();
+      const persistedRecords = loadPersistentRecords();
       const detectedFlags: ExtendedModerationFlag[] = [];
 
       // Group ratings by battle_id -> voter_id
@@ -152,7 +216,7 @@ export default function VotingModerationPage() {
               flagType: "incomplete_votes",
               details: `Voted on only ${votesCast}/${totalSubsCount} tracks (minimum requirement is ${minRequired} votes to be counted).`,
               timestamp: userVotes[0]?.created_at || new Date().toISOString(),
-              status: decisions[flagId] || "pending",
+              status: persistedRecords[flagId]?.status || "pending",
               votesCast,
               averageRatingGiven,
             });
@@ -178,7 +242,7 @@ export default function VotingModerationPage() {
               flagType: "torpedo_voting",
               details: `Torpedo pattern: gave 1 flame to ${onesCount}/${votesCast} tracks (${Math.round((onesCount / votesCast) * 100)}%) while isolating ${highScoresCount} track(s) with ${maxScore} flames.`,
               timestamp: userVotes[userVotes.length - 1]?.created_at || new Date().toISOString(),
-              status: decisions[flagId] || "pending",
+              status: persistedRecords[flagId]?.status || "pending",
               votesCast,
               averageRatingGiven,
             });
@@ -198,7 +262,7 @@ export default function VotingModerationPage() {
               flagType: "extreme_outlier",
               details: `Abnormally low average rating (${averageRatingGiven} flames) across ${votesCast} submissions (straight-line downvoting pattern).`,
               timestamp: userVotes[userVotes.length - 1]?.created_at || new Date().toISOString(),
-              status: decisions[flagId] || "pending",
+              status: persistedRecords[flagId]?.status || "pending",
               votesCast,
               averageRatingGiven,
             });
@@ -238,7 +302,7 @@ export default function VotingModerationPage() {
                   flagType: "rapid_clicking",
                   details: `Detected ${rapidCount} rapid vote submissions (<1.5s interval), indicating bot-like or speed voting without listening.`,
                   timestamp: userVotes[userVotes.length - 1]?.created_at || new Date().toISOString(),
-                  status: decisions[flagId] || "pending",
+                  status: persistedRecords[flagId]?.status || "pending",
                   votesCast,
                   averageRatingGiven,
                 });
@@ -246,6 +310,14 @@ export default function VotingModerationPage() {
             }
           }
         });
+      });
+
+      // Crucial: Retain all discarded and persistent flags whose ratings were purged from Supabase!
+      Object.values(persistedRecords).forEach((record) => {
+        const alreadyIncluded = detectedFlags.some((f) => f.id === record.id);
+        if (!alreadyIncluded) {
+          detectedFlags.push(record);
+        }
       });
 
       // Compute total voters scanned
@@ -293,12 +365,13 @@ export default function VotingModerationPage() {
         });
       }
 
-      saveDecisionOverride(flag.id, action);
+      savePersistentRecord(flag, action);
       setFlags((prev) =>
         prev.map((f) => (f.id === flag.id ? { ...f, status: action } : f))
       );
-    } catch {
-      // console.error("Error applying moderation action:", err);
+    } catch (err) {
+      console.error("Error applying moderation action:", err);
+      setErrorBanner(`Action error: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setActionLoadingId(null);
     }

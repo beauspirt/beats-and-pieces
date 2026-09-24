@@ -22,6 +22,7 @@ import { useAudioPlayer } from "@/lib/audio-context";
 import { useAuth } from "@/lib/auth-context";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { ClientPortal } from "./ClientPortal";
+import { Tooltip } from "./Tooltip";
 import { formatTime } from "@/lib/utils";
 
 // Deterministic pseudo-random seeded shuffle (Mulberry32 PRNG)
@@ -2202,14 +2203,12 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                           )}
 
                           {hasFlame && (
-                            <div
-                              className="flex items-center gap-1.5 text-[#FF5E3A] px-2 inline-flex items-center justify-center leading-none font-bold text-xs"
-                              title="Public Rating Average"
-                            >
-                              <Flame className="w-4 h-4 fill-current" />
-                              <span>{Number(sub.flameRating).toFixed(2)}</span>
-                              <span className="text-[11px] text-[#A0A0A0]">Public Avg</span>
-                            </div>
+                            <Tooltip content="Public Rating Average">
+                              <div className="flex items-center gap-1 text-xs text-[#FF5E3A] font-bold px-1.5 select-none cursor-default leading-none">
+                                <Flame className="w-4 h-4 fill-current" />
+                                <span>{Number(sub.flameRating).toFixed(2)}</span>
+                              </div>
+                            </Tooltip>
                           )}
                         </div>
 

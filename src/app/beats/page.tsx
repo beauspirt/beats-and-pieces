@@ -11,6 +11,7 @@ import { producerService } from "@/services/producerService";
 import { JudgeFeedbackTicker } from "@/components/JudgeFeedbackTicker";
 import { useAuth } from "@/lib/auth-context";
 import { Search, Filter, SlidersHorizontal, Star, Flame, ChevronDown, Upload, Check } from "lucide-react";
+import { Tooltip } from "@/components/Tooltip";
 
 export default function BeatsDiscoveryPage() {
   const { user: currentUser } = useAuth();
@@ -557,18 +558,22 @@ export default function BeatsDiscoveryPage() {
 
                     {/* Jury Score Avg */}
                     {typeof beat.juryScore === "number" && beat.juryScore > 0 ? (
-                      <div className="flex items-center gap-1 text-xs text-[#7B61FF] font-bold px-1.5 select-none" title="Jury Score Average">
-                        <Star className="w-4 h-4 fill-current text-[#7B61FF]" />
-                        <span>{beat.juryScore.toFixed(2)}</span>
-                      </div>
+                      <Tooltip content="Jury Score Average">
+                        <div className="flex items-center gap-1 text-xs text-[#7B61FF] font-bold px-1.5 select-none cursor-default">
+                          <Star className="w-4 h-4 fill-current text-[#7B61FF]" />
+                          <span>{beat.juryScore.toFixed(2)}</span>
+                        </div>
+                      </Tooltip>
                     ) : null}
 
                     {/* Community Flames (Public Rating Avg) */}
                     {typeof beat.flames === "number" && beat.flames >= 1 ? (
-                      <div className="flex items-center gap-1 text-xs text-[#FF5E3A] font-bold px-1.5 select-none" title="Public Rating Average">
-                        <Flame className="w-4 h-4 fill-current" />
-                        <span>{beat.flames.toFixed(2)}</span>
-                      </div>
+                      <Tooltip content="Public Rating Average">
+                        <div className="flex items-center gap-1 text-xs text-[#FF5E3A] font-bold px-1.5 select-none cursor-default">
+                          <Flame className="w-4 h-4 fill-current" />
+                          <span>{beat.flames.toFixed(2)}</span>
+                        </div>
+                      </Tooltip>
                     ) : null}
 
                     {/* Favorite Button */}

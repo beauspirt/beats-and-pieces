@@ -2093,66 +2093,21 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                       {/* Header Row: [Badge] [Avatar] [Title + Producer] on Left, [Scores/BPM] on Right */}
                       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 min-w-0">
                         
-                        {/* Left: Place Badge + Beatmaker Avatar + Info (Title & Beatmaker Name) */}
+                        {/* Left: Beatmaker Avatar (with colored border for top 3) + Info (Title & Beatmaker Name) */}
                         <div className="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
-                          
-                          {/* Place Badge on the left of Avatar */}
-                          <div className="shrink-0 flex items-center justify-center">
-                            {rank === 1 ? (
-                              <div
-                                className="w-6 h-6 relative shrink-0 select-none flex items-center justify-center"
-                                title="1st Place"
-                              >
-                                <Image
-                                  src="/1stplace.png"
-                                  alt="1st Place"
-                                  width={24}
-                                  height={24}
-                                  className="w-full h-full object-contain pointer-events-none"
-                                />
-                              </div>
-                            ) : rank === 2 ? (
-                              <div
-                                className="w-6 h-6 relative shrink-0 select-none flex items-center justify-center"
-                                title="2nd Place"
-                              >
-                                <Image
-                                  src="/2ndplace.png"
-                                  alt="2nd Place"
-                                  width={24}
-                                  height={24}
-                                  className="w-full h-full object-contain pointer-events-none"
-                                />
-                              </div>
-                            ) : rank === 3 ? (
-                              <div
-                                className="w-6 h-6 relative shrink-0 select-none flex items-center justify-center"
-                                title="3rd Place"
-                              >
-                                <Image
-                                  src="/3rdplace.png"
-                                  alt="3rd Place"
-                                  width={24}
-                                  height={24}
-                                  className="w-full h-full object-contain pointer-events-none"
-                                />
-                              </div>
-                            ) : (
-                              <span
-                                className={`w-6 h-6 rounded-full bg-white/[0.08] text-zinc-400 font-bold flex items-center justify-center leading-none select-none shrink-0 ${
-                                  rank >= 10 ? "text-[10px] tracking-tighter" : "text-[11px]"
-                                }`}
-                                title={`#${rank} Place`}
-                              >
-                                #{rank}
-                              </span>
-                            )}
-                          </div>
-
                           {/* Beatmaker Avatar */}
                           <Link
                             href={`/${profileId}`}
-                            className="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden relative shrink-0 hover:opacity-80 transition-opacity bg-[#121212]"
+                            className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden relative shrink-0 hover:opacity-80 transition-opacity bg-[#121212] ${
+                              rank === 1
+                                ? "border-[2.5px] border-[#FFD700]"
+                                : rank === 2
+                                ? "border-[2.5px] border-[#E2E8F0]"
+                                : rank === 3
+                                ? "border-[2.5px] border-[#CD7F32]"
+                                : "border-[2.5px] border-transparent"
+                            }`}
+                            title={rank <= 3 ? `${rank === 1 ? '1st' : rank === 2 ? '2nd' : '3rd'} Place: ${displayTag}` : displayTag}
                           >
                             <Image
                               src={displayAvatar}

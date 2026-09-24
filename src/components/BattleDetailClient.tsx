@@ -2096,32 +2096,51 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                         {/* Left: Place Badge + Beatmaker Avatar + Info (Title & Beatmaker Name) */}
                         <div className="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
                           
-                          {/* Place Badge on the left of Avatar (Clean circle, colored text, no borders, no glow) */}
+                          {/* Place Badge on the left of Avatar */}
                           <div className="shrink-0 flex items-center justify-center">
                             {rank === 1 ? (
-                              <span
-                                className="w-8 h-8 rounded-full bg-[#FFD700]/15 text-[#FFD700] font-black text-xs sm:text-[13px] flex items-center justify-center leading-none select-none shrink-0"
+                              <div
+                                className="w-9 h-9 sm:w-10 sm:h-10 relative shrink-0 select-none flex items-center justify-center"
                                 title="1st Place"
                               >
-                                #1
-                              </span>
+                                <Image
+                                  src="/1stplace.png"
+                                  alt="1st Place"
+                                  width={40}
+                                  height={40}
+                                  className="w-full h-full object-contain pointer-events-none"
+                                />
+                              </div>
                             ) : rank === 2 ? (
-                              <span
-                                className="w-8 h-8 rounded-full bg-[#E2E8F0]/15 text-[#E2E8F0] font-black text-xs sm:text-[13px] flex items-center justify-center leading-none select-none shrink-0"
+                              <div
+                                className="w-9 h-9 sm:w-10 sm:h-10 relative shrink-0 select-none flex items-center justify-center"
                                 title="2nd Place"
                               >
-                                #2
-                              </span>
+                                <Image
+                                  src="/2ndplace.png"
+                                  alt="2nd Place"
+                                  width={40}
+                                  height={40}
+                                  className="w-full h-full object-contain pointer-events-none"
+                                />
+                              </div>
                             ) : rank === 3 ? (
-                              <span
-                                className="w-8 h-8 rounded-full bg-[#CD7F32]/15 text-[#E08A3C] font-black text-xs sm:text-[13px] flex items-center justify-center leading-none select-none shrink-0"
+                              <div
+                                className="w-9 h-9 sm:w-10 sm:h-10 relative shrink-0 select-none flex items-center justify-center"
                                 title="3rd Place"
                               >
-                                #3
-                              </span>
+                                <Image
+                                  src="/3rdplace.png"
+                                  alt="3rd Place"
+                                  width={40}
+                                  height={40}
+                                  className="w-full h-full object-contain pointer-events-none"
+                                />
+                              </div>
                             ) : (
                               <span
-                                className="w-8 h-8 rounded-full bg-[#121212] text-zinc-500 font-bold text-xs flex items-center justify-center leading-none select-none shrink-0"
+                                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/[0.08] text-zinc-400 font-bold text-xs sm:text-[13px] flex items-center justify-center leading-none select-none shrink-0"
+                                title={`#${rank} Place`}
                               >
                                 #{rank}
                               </span>

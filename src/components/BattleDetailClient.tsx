@@ -2088,98 +2088,105 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                   return (
                     <div
                       key={sub.id}
-                      className="bg-[#181818] rounded-[28px] p-4 space-y-3.5 shadow-md relative"
+                      className="bg-[#181818] rounded-[28px] p-4 sm:p-5 space-y-3.5 shadow-md relative"
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 min-w-0">
-                        
-                        {/* Left: Beatmaker Avatar + Info (Place badge on top, Beat Title, Beatmaker link) */}
-                        <div className="flex items-start gap-3.5 min-w-0 flex-1">
-                          <Link
-                            href={`/${profileId}`}
-                            className="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden relative shrink-0 hover:opacity-80 transition-opacity bg-[#121212] mt-0.5"
-                          >
-                            <Image
-                              src={displayAvatar}
-                              alt={displayTag}
-                              fill
-                              className="object-cover"
-                              onError={(e) => {
-                                const img = e.currentTarget as HTMLImageElement;
-                                if (img && !img.src.endsWith("/avatars/default-avatar.png")) {
-                                  img.src = "/avatars/default-avatar.png";
-                                }
-                              }}
-                            />
-                          </Link>
-
-                          <div className="min-w-0 flex-1">
-                            {/* Place Badge on top */}
-                            <div className="flex items-center gap-2 mb-1">
-                              {rank === 1 ? (
-                                <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-500/25 text-[#FFD700] border border-[#FFD700]/40 shadow-[0_0_12px_rgba(255,215,0,0.18)] inline-flex items-center justify-center leading-none select-none shrink-0 tracking-wider">
-                                  #1
-                                </span>
-                              ) : rank === 2 ? (
-                                <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-gradient-to-r from-slate-400/20 via-slate-200/20 to-slate-400/20 text-[#E2E8F0] border border-[#CBD5E1]/40 shadow-[0_0_10px_rgba(226,232,240,0.15)] inline-flex items-center justify-center leading-none select-none shrink-0 tracking-wider">
-                                  #2
-                                </span>
-                              ) : rank === 3 ? (
-                                <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-gradient-to-r from-amber-800/25 via-amber-700/20 to-amber-800/25 text-[#E08A3C] border border-[#CD7F32]/45 shadow-[0_0_10px_rgba(205,127,50,0.18)] inline-flex items-center justify-center leading-none select-none shrink-0 tracking-wider">
-                                  #3
-                                </span>
-                              ) : (
-                                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-[#121212] text-[#888888] border border-white/5 inline-flex items-center justify-center leading-none select-none shrink-0">
-                                  #{rank}
-                                </span>
-                              )}
-                            </div>
-
-                            {/* Beat Title (Same font styling as Beats page) */}
-                            <h3 className="font-bold text-white text-lg leading-snug break-words [overflow-wrap:anywhere]">
-                              {displayTitle}
-                            </h3>
-
-                            {/* Beatmaker Name (Same font styling as Beats page) */}
-                            <Link
-                              href={`/${profileId}`}
-                              className="text-xs text-[#7B61FF] hover:underline font-bold block truncate mt-0.5"
+                      {/* Top Bar: Place Badge in Upper Left Corner & Scores/BPM in Upper Right */}
+                      <div className="flex items-center justify-between gap-3 min-w-0">
+                        {/* Upper Left: Circular Place Badge (clean, no borders, no glow) */}
+                        <div className="flex items-center">
+                          {rank === 1 ? (
+                            <span
+                              className="w-7 h-7 rounded-full bg-[#FFD700] text-black font-black text-xs flex items-center justify-center leading-none select-none shrink-0 shadow-sm"
+                              title="1st Place"
                             >
-                              {displayTag}
-                            </Link>
-                          </div>
+                              #1
+                            </span>
+                          ) : rank === 2 ? (
+                            <span
+                              className="w-7 h-7 rounded-full bg-[#E2E8F0] text-black font-black text-xs flex items-center justify-center leading-none select-none shrink-0 shadow-sm"
+                              title="2nd Place"
+                            >
+                              #2
+                            </span>
+                          ) : rank === 3 ? (
+                            <span
+                              className="w-7 h-7 rounded-full bg-[#CD7F32] text-white font-black text-xs flex items-center justify-center leading-none select-none shrink-0 shadow-sm"
+                              title="3rd Place"
+                            >
+                              #3
+                            </span>
+                          ) : (
+                            <span
+                              className="w-7 h-7 rounded-full bg-[#262626] text-zinc-400 font-bold text-xs flex items-center justify-center leading-none select-none shrink-0"
+                            >
+                              #{rank}
+                            </span>
+                          )}
                         </div>
 
-                        {/* Right: Scores & Meta Badges (BPM, Jury Score, Public Rating) */}
-                        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 text-xs font-bold flex-wrap select-none self-start">
+                        {/* Upper Right: Scores & BPM */}
+                        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 text-xs font-bold flex-wrap select-none">
                           {sub.bpm ? (
-                            <span className="text-xs font-bold px-3.5 py-1.5 rounded-full bg-[#121212] text-[#888888] select-none inline-flex items-center justify-center text-center leading-none">
+                            <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-[#121212] text-[#888888] select-none inline-flex items-center justify-center text-center leading-none">
                               {sub.bpm} BPM
                             </span>
                           ) : null}
 
                           {hasJury && (
                             <div
-                              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#7B61FF]/15 text-[#7B61FF] font-bold text-xs shadow-sm inline-flex items-center justify-center leading-none"
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#7B61FF]/15 text-[#7B61FF] font-bold text-xs inline-flex items-center justify-center leading-none"
                               title="Jury Score Average"
                             >
-                              <Star className="w-4 h-4 fill-current text-[#7B61FF]" />
+                              <Star className="w-3.5 h-3.5 fill-current text-[#7B61FF]" />
                               <span>{Number(sub.juryScore).toFixed(2)}</span>
-                              <span className="text-xs text-[#A0A0A0]">Jury Avg</span>
+                              <span className="text-[11px] text-[#A0A0A0]">Jury Avg</span>
                             </div>
                           )}
 
                           {hasFlame && (
                             <div
-                              className="flex items-center gap-1.5 text-[#FF5E3A] px-2 inline-flex items-center justify-center leading-none"
+                              className="flex items-center gap-1.5 text-[#FF5E3A] px-1.5 inline-flex items-center justify-center leading-none font-bold text-xs"
                               title="Public Rating Average"
                             >
-                              <Flame className="w-4 h-4 fill-current" />
+                              <Flame className="w-3.5 h-3.5 fill-current" />
                               <span>{Number(sub.flameRating).toFixed(2)}</span>
-                              <span className="text-xs text-[#A0A0A0]">Public Rating Avg</span>
+                              <span className="text-[11px] text-[#A0A0A0]">Public Avg</span>
                             </div>
                           )}
                         </div>
+                      </div>
 
+                      {/* Middle Row: Beatmaker Avatar aligned with Beat Name & Beatmaker Name */}
+                      <div className="flex items-center gap-3.5 min-w-0">
+                        <Link
+                          href={`/${profileId}`}
+                          className="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden relative shrink-0 hover:opacity-80 transition-opacity bg-[#121212]"
+                        >
+                          <Image
+                            src={displayAvatar}
+                            alt={displayTag}
+                            fill
+                            className="object-cover"
+                            onError={(e) => {
+                              const img = e.currentTarget as HTMLImageElement;
+                              if (img && !img.src.endsWith("/avatars/default-avatar.png")) {
+                                img.src = "/avatars/default-avatar.png";
+                              }
+                            }}
+                          />
+                        </Link>
+
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-bold text-white text-lg leading-snug break-words [overflow-wrap:anywhere]">
+                            {displayTitle}
+                          </h3>
+                          <Link
+                            href={`/${profileId}`}
+                            className="text-xs text-[#7B61FF] hover:underline font-bold block truncate mt-0.5"
+                          >
+                            {displayTag}
+                          </Link>
+                        </div>
                       </div>
 
                       {/* Waveform Scrubber with real audio */}

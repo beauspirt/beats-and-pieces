@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Battle, ModerationFlag, UserProfile } from "@/lib/types";
 import { 
   ArrowLeft, ShieldAlert, CheckCircle2, Ban, AlertTriangle, 
-  Flame, RefreshCw, Trophy, Swords, Zap, Check, ChevronDown, Clock
+  Flame, RefreshCw, Trophy, Swords, Zap, Check, ChevronDown, Clock, RotateCcw
 } from "lucide-react";
 import { AdminGuard } from "@/components/AdminGuard";
 import { battleService, producerService, activityLogService } from "@/services";
@@ -24,6 +24,8 @@ export default function VotingModerationPage() {
   const [filterStatus, setFilterStatus] = useState<"all" | "pending" | "approved" | "discarded">("pending");
   const [isLoading, setIsLoading] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+  const [errorBanner, setErrorBanner] = useState<string | null>(null);
+  const [scanStats, setScanStats] = useState<{ totalVoters: number; totalBattles: number; lastScannedAt: string } | null>(null);
 
   // Load decision overrides from localStorage
   const loadDecisionOverrides = (): Record<string, "approved" | "discarded"> => {
@@ -45,22 +47,54 @@ export default function VotingModerationPage() {
     } catch {}
   };
 
+  const clearAllDecisions = () => {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.removeItem("bnp_moderation_decisions");
+    } catch {}
+    setFlags((prev) => prev.map((f) => ({ ...f, status: "pending" })));
+  };
+
+  const resetFlagDecision = (flagId: string) => {
+    if (typeof window === "undefined") return;
+    try {
+      const existing = loadDecisionOverrides();
+      delete existing[flagId];
+      localStorage.setItem("bnp_moderation_decisions", JSON.stringify(existing));
+    } catch {}
+    setFlags((prev) => prev.map((f) => (f.id === flagId ? { ...f, status: "pending" } : f)));
+  };
+
   // Anomaly Scanner across battles
   const scanAnomalies = useCallback(async () => {
     setIsLoading(true);
+    setErrorBanner(null);
     try {
-      // 1. Sync fresh battles & submissions
-      await battleService.syncFromSupabase();
+      // 1. Sync fresh battles, submissions & producers
+      await Promise.all([
+        battleService.syncFromSupabase(),
+        producerService.syncFromSupabase(),
+      ]);
       const allBattles = battleService.getAllBattles();
       setBattles(allBattles);
 
       // 2. Fetch all ratings from Supabase
-      const { data: dbRatings, error } = await supabase
+      const { data: dbRatings, error: rError } = await supabase
         .from("ratings")
         .select("id, battle_id, submission_id, voter_id, score, created_at");
 
-      if (error || !dbRatings) {
+      if (rError) {
+        console.error("Error fetching ratings from Supabase:", rError);
+        setErrorBanner(`Failed to load ratings: ${rError.message}`);
         setFlags([]);
+        setIsLoading(false);
+        return;
+      }
+
+      if (!dbRatings || dbRatings.length === 0) {
+        console.warn("No ratings found in Supabase.");
+        setFlags([]);
+        setScanStats({ totalVoters: 0, totalBattles: 0, lastScannedAt: new Date().toLocaleTimeString() });
         setIsLoading(false);
         return;
       }
@@ -214,9 +248,22 @@ export default function VotingModerationPage() {
         });
       });
 
+      // Compute total voters scanned
+      let totalVotersScanned = 0;
+      Object.values(battleVoterGroups).forEach((voters) => {
+        totalVotersScanned += Object.keys(voters).length;
+      });
+
+      setScanStats({
+        totalVoters: totalVotersScanned,
+        totalBattles: Object.keys(battleVoterGroups).length,
+        lastScannedAt: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
+      });
+
       setFlags(detectedFlags);
-    } catch {
-      // console.error("Error scanning anomalies:", err);
+    } catch (err) {
+      console.error("Error scanning anomalies:", err);
+      setErrorBanner(`Scan error: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setIsLoading(false);
     }
@@ -286,8 +333,16 @@ export default function VotingModerationPage() {
     (f) => (selectedBattleId === "all" || f.battleId === selectedBattleId) && f.status === "pending"
   ).length;
 
+  const approvedCount = flags.filter(
+    (f) => (selectedBattleId === "all" || f.battleId === selectedBattleId) && f.status === "approved"
+  ).length;
+
   const discardedCount = flags.filter(
     (f) => (selectedBattleId === "all" || f.battleId === selectedBattleId) && f.status === "discarded"
+  ).length;
+
+  const totalFlagsCount = flags.filter(
+    (f) => selectedBattleId === "all" || f.battleId === selectedBattleId
   ).length;
 
   return (
@@ -308,14 +363,28 @@ export default function VotingModerationPage() {
               <ShieldAlert className="w-7 h-7 text-[#FF5E3A]" />
               <span>Voting Moderation</span>
             </h1>
+            {scanStats && (
+              <p className="text-xs text-zinc-400 flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-zinc-500" />
+                <span>Scanned {scanStats.totalVoters} voters across {scanStats.totalBattles} battle(s) • Last scan: {scanStats.lastScannedAt}</span>
+              </p>
+            )}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             {/* Metric Card: Pending */}
             <div className="bg-surface-card rounded-2xl px-4 py-2 flex items-center gap-2 shadow-sm">
               <span className="text-xs text-zinc-400 font-bold">Pending</span>
               <span className="text-sm font-bold text-[#FF5E3A]">
                 {pendingCount}
+              </span>
+            </div>
+
+            {/* Metric Card: Approved */}
+            <div className="bg-surface-card rounded-2xl px-4 py-2 flex items-center gap-2 shadow-sm">
+              <span className="text-xs text-zinc-400 font-bold">Approved</span>
+              <span className="text-sm font-bold text-emerald-400">
+                {approvedCount}
               </span>
             </div>
 
@@ -326,6 +395,18 @@ export default function VotingModerationPage() {
                 {discardedCount}
               </span>
             </div>
+
+            {/* Reset Decisions Button */}
+            {(approvedCount > 0 || discardedCount > 0) && (
+              <button
+                onClick={clearAllDecisions}
+                className="px-3.5 py-2 rounded-2xl bg-surface-card hover:bg-surface-hover text-zinc-400 hover:text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
+                title="Reset all moderation overrides back to Pending"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Reset Decisions</span>
+              </button>
+            )}
 
             {/* Refresh Scanner Button */}
             <button
@@ -339,6 +420,22 @@ export default function VotingModerationPage() {
             </button>
           </div>
         </div>
+
+        {/* Error Alert Banner */}
+        {errorBanner && (
+          <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-4 flex items-center justify-between gap-3 text-rose-400 text-xs">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 shrink-0" />
+              <span>{errorBanner}</span>
+            </div>
+            <button
+              onClick={() => setErrorBanner(null)}
+              className="text-zinc-400 hover:text-white font-bold"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
 
         {/* Battle Filter Pills */}
         <div className="flex flex-wrap gap-2">
@@ -405,14 +502,35 @@ export default function VotingModerationPage() {
               <p className="text-xs text-zinc-400">Scanning all battle ratings for anomalies...</p>
             </div>
           ) : filteredFlags.length === 0 ? (
-            <div className="bg-surface-card rounded-3xl p-12 text-center text-zinc-400 shadow-md space-y-2">
+            <div className="bg-surface-card rounded-3xl p-12 text-center text-zinc-400 shadow-md space-y-3">
               <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto mb-2" />
-              <h2 className="text-lg font-bold text-white">All Clear!</h2>
+              <h2 className="text-lg font-bold text-white">
+                {totalFlagsCount > 0 ? "No Flags in This View" : "All Clear!"}
+              </h2>
               <p className="text-xs text-zinc-500 max-w-md mx-auto">
-                {selectedBattleId === "all"
+                {totalFlagsCount > 0
+                  ? `There are ${totalFlagsCount} anomaly/anomalies detected for this battle, but none under "${filterStatus}". Switch tabs or reset decisions.`
+                  : selectedBattleId === "all"
                   ? "No flagged voting anomalies detected across any battle in this category."
                   : `No flagged voting anomalies found for ${battles.find((b) => b.id === selectedBattleId)?.title || "this battle"}.`}
               </p>
+              {totalFlagsCount > 0 && filterStatus !== "all" && (
+                <div className="pt-2 flex items-center justify-center gap-3">
+                  <button
+                    onClick={() => setFilterStatus("all")}
+                    className="px-4 py-2 rounded-xl bg-brand text-white text-xs font-bold shadow-md cursor-pointer"
+                  >
+                    View All Flags ({totalFlagsCount})
+                  </button>
+                  <button
+                    onClick={clearAllDecisions}
+                    className="px-4 py-2 rounded-xl bg-surface-subtle hover:bg-surface-hover text-zinc-300 hover:text-white text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Reset All to Pending</span>
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             filteredFlags.map((flag) => {
@@ -488,7 +606,7 @@ export default function VotingModerationPage() {
                   </div>
 
                   {/* Moderation Actions */}
-                  {flag.status === "pending" && (
+                  {flag.status === "pending" ? (
                     <div className="flex items-center justify-end gap-3 pt-1">
                       <button
                         onClick={() => handleAction(flag, "approved")}
@@ -506,6 +624,18 @@ export default function VotingModerationPage() {
                       >
                         <Ban className="w-3.5 h-3.5" />
                         <span>Discard Votes & Recalculate</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-end gap-3 pt-1">
+                      <button
+                        onClick={() => resetFlagDecision(flag.id)}
+                        disabled={isActionLoading}
+                        className="px-3.5 py-1.5 rounded-xl bg-surface-subtle hover:bg-surface-hover text-zinc-400 hover:text-white text-xs font-semibold transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
+                        title="Reopen flag for review"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        <span>Reopen / Reset to Pending</span>
                       </button>
                     </div>
                   )}

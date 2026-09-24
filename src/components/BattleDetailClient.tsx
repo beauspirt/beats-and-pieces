@@ -2093,35 +2093,78 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                       {/* Header Row: [Badge] [Avatar] [Title + Producer] on Left, [Scores/BPM] on Right */}
                       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 min-w-0">
                         
-                        {/* Left: Beatmaker Avatar (with colored border for top 3) + Info (Title & Beatmaker Name) */}
+                        {/* Left: Beatmaker Avatar (with Corner Medal Badge) + Info (Title & Beatmaker Name) */}
                         <div className="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
-                          {/* Beatmaker Avatar */}
-                          <Link
-                            href={`/${profileId}`}
-                            className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden relative shrink-0 hover:opacity-80 transition-opacity bg-[#121212] ${
-                              rank === 1
-                                ? "border-[2.5px] border-[#FFD700]"
-                                : rank === 2
-                                ? "border-[2.5px] border-[#E2E8F0]"
-                                : rank === 3
-                                ? "border-[2.5px] border-[#CD7F32]"
-                                : "border-[2.5px] border-transparent"
-                            }`}
-                            title={rank <= 3 ? `${rank === 1 ? '1st' : rank === 2 ? '2nd' : '3rd'} Place: ${displayTag}` : displayTag}
-                          >
-                            <Image
-                              src={displayAvatar}
-                              alt={displayTag}
-                              fill
-                              className="object-cover"
-                              onError={(e) => {
-                                const img = e.currentTarget as HTMLImageElement;
-                                if (img && !img.src.endsWith("/avatars/default-avatar.png")) {
-                                  img.src = "/avatars/default-avatar.png";
-                                }
-                              }}
-                            />
-                          </Link>
+                          {/* Beatmaker Avatar with Corner Medal */}
+                          <div className="relative shrink-0">
+                            <Link
+                              href={`/${profileId}`}
+                              className="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden relative block hover:opacity-80 transition-opacity bg-[#121212]"
+                              title={rank <= 3 ? `${rank === 1 ? '1st' : rank === 2 ? '2nd' : '3rd'} Place: ${displayTag}` : displayTag}
+                            >
+                              <Image
+                                src={displayAvatar}
+                                alt={displayTag}
+                                fill
+                                className="object-cover"
+                                onError={(e) => {
+                                  const img = e.currentTarget as HTMLImageElement;
+                                  if (img && !img.src.endsWith("/avatars/default-avatar.png")) {
+                                    img.src = "/avatars/default-avatar.png";
+                                  }
+                                }}
+                              />
+                            </Link>
+
+                            {/* Corner Medal Badge (Top 3 use custom images, #4+ uses consistent dark circle) */}
+                            {rank === 1 ? (
+                              <div
+                                className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-[22px] sm:h-[22px] rounded-full overflow-hidden shadow-md ring-2 ring-[#181818] select-none pointer-events-none"
+                                title="1st Place"
+                              >
+                                <Image
+                                  src="/1stplace.png"
+                                  alt="1st Place"
+                                  width={22}
+                                  height={22}
+                                  className="w-full h-full object-contain"
+                                />
+                              </div>
+                            ) : rank === 2 ? (
+                              <div
+                                className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-[22px] sm:h-[22px] rounded-full overflow-hidden shadow-md ring-2 ring-[#181818] select-none pointer-events-none"
+                                title="2nd Place"
+                              >
+                                <Image
+                                  src="/2ndplace.png"
+                                  alt="2nd Place"
+                                  width={22}
+                                  height={22}
+                                  className="w-full h-full object-contain"
+                                />
+                              </div>
+                            ) : rank === 3 ? (
+                              <div
+                                className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-[22px] sm:h-[22px] rounded-full overflow-hidden shadow-md ring-2 ring-[#181818] select-none pointer-events-none"
+                                title="3rd Place"
+                              >
+                                <Image
+                                  src="/3rdplace.png"
+                                  alt="3rd Place"
+                                  width={22}
+                                  height={22}
+                                  className="w-full h-full object-contain"
+                                />
+                              </div>
+                            ) : (
+                              <div
+                                className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-[22px] sm:h-[22px] rounded-full bg-zinc-800 text-zinc-400 font-bold text-[10px] sm:text-[11px] flex items-center justify-center leading-none ring-2 ring-[#181818] select-none pointer-events-none shadow-sm"
+                                title={`Place #${rank}`}
+                              >
+                                {rank}
+                              </div>
+                            )}
+                          </div>
 
                           {/* Beat Name & Beatmaker Name */}
                           <div className="min-w-0 flex-1">

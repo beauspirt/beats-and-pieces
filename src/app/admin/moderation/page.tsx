@@ -124,8 +124,34 @@ export default function VotingModerationPage() {
             });
           }
 
-          // Check 2: Extreme Outlier / Straight-line downvoting (e.g. giving all 1.0s or <= 1.2 across 5+ votes)
-          if (votesCast >= 5 && averageRatingGiven <= 1.2) {
+          // Check 2: Torpedo / Favoritism Bias (giving 1 star to almost all tracks while isolating 1 or 2 tracks with high scores)
+          const onesCount = userVotes.filter((v) => Number(v.score) === 1).length;
+          const maxScore = Math.max(...userVotes.map((v) => Number(v.score) || 0));
+          const highScoresCount = userVotes.filter((v) => Number(v.score) >= 4).length;
+          let hasTorpedoFlag = false;
+
+          if (votesCast >= 5 && (onesCount / votesCast) >= 0.75 && highScoresCount <= 2 && maxScore >= 4) {
+            hasTorpedoFlag = true;
+            const flagId = `flag-torpedo-${bId}-${voterId}`;
+            detectedFlags.push({
+              id: flagId,
+              battleId: bId,
+              battleTitle,
+              voterUserId: voterId,
+              voterNickname,
+              voterEmail,
+              voterAvatar,
+              flagType: "torpedo_voting",
+              details: `Torpedo pattern: gave 1 flame to ${onesCount}/${votesCast} tracks (${Math.round((onesCount / votesCast) * 100)}%) while isolating ${highScoresCount} track(s) with ${maxScore} flames.`,
+              timestamp: userVotes[userVotes.length - 1]?.created_at || new Date().toISOString(),
+              status: decisions[flagId] || "pending",
+              votesCast,
+              averageRatingGiven,
+            });
+          }
+
+          // Check 3: Extreme Outlier / Straight-line downvoting (average <= 1.5 across 5+ votes)
+          if (votesCast >= 5 && averageRatingGiven <= 1.5 && !hasTorpedoFlag) {
             const flagId = `flag-outlier-${bId}-${voterId}`;
             detectedFlags.push({
               id: flagId,
@@ -242,8 +268,10 @@ export default function VotingModerationPage() {
 
   const getBadgeStyle = (type: ModerationFlag["flagType"]) => {
     switch (type) {
+      case "torpedo_voting":
+        return { label: "Torpedo / Favoritism Bias", color: "text-rose-400 bg-rose-500/10" };
       case "rapid_clicking":
-        return { label: "Rapid Click Velocity", color: "text-rose-400 bg-rose-500/10" };
+        return { label: "Rapid Click Velocity", color: "text-amber-400 bg-amber-500/10" };
       case "multi_account_ip":
         return { label: "IP/Device Collusion", color: "text-purple-400 bg-purple-500/10" };
       case "incomplete_votes":

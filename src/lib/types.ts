@@ -168,7 +168,7 @@ export interface ModerationFlag {
   voterUserId: string;
   voterNickname: string;
   voterEmail: string;
-  flagType: "rapid_clicking" | "extreme_outlier" | "multi_account_ip" | "incomplete_votes";
+  flagType: "rapid_clicking" | "extreme_outlier" | "multi_account_ip" | "incomplete_votes" | "torpedo_voting";
   details: string;
   timestamp: string;
   status: "pending" | "approved" | "discarded";

@@ -2117,56 +2117,23 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                               />
                             </Link>
 
-                            {/* Corner Medal Badge (Top 3 use custom images, #4+ uses consistent dark circle) */}
-                            {rank === 1 ? (
-                              <div
-                                className="absolute -bottom-0.5 -right-0.5 w-[18px] h-[18px] sm:w-5 sm:h-5 rounded-full overflow-hidden shadow-md ring-[1.5px] ring-[#181818] select-none pointer-events-none"
-                                title="1st Place"
-                              >
-                                <Image
-                                  src="/1stplace.png"
-                                  alt="1st Place"
-                                  width={20}
-                                  height={20}
-                                  className="w-full h-full object-contain"
-                                />
-                              </div>
-                            ) : rank === 2 ? (
-                              <div
-                                className="absolute -bottom-0.5 -right-0.5 w-[18px] h-[18px] sm:w-5 sm:h-5 rounded-full overflow-hidden shadow-md ring-[1.5px] ring-[#181818] select-none pointer-events-none"
-                                title="2nd Place"
-                              >
-                                <Image
-                                  src="/2ndplace.png"
-                                  alt="2nd Place"
-                                  width={20}
-                                  height={20}
-                                  className="w-full h-full object-contain"
-                                />
-                              </div>
-                            ) : rank === 3 ? (
-                              <div
-                                className="absolute -bottom-0.5 -right-0.5 w-[18px] h-[18px] sm:w-5 sm:h-5 rounded-full overflow-hidden shadow-md ring-[1.5px] ring-[#181818] select-none pointer-events-none"
-                                title="3rd Place"
-                              >
-                                <Image
-                                  src="/3rdplace.png"
-                                  alt="3rd Place"
-                                  width={20}
-                                  height={20}
-                                  className="w-full h-full object-contain"
-                                />
-                              </div>
-                            ) : (
-                              <div
-                                className="absolute -bottom-0.5 -right-0.5 w-[18px] h-[18px] sm:w-5 sm:h-5 rounded-full bg-[#242424] text-zinc-300 font-bold text-[9px] sm:text-[10px] grid place-items-center ring-[1.5px] ring-[#181818] select-none pointer-events-none shadow-sm"
-                                title={`Place #${rank}`}
-                              >
-                                <span className="leading-none text-center -translate-y-[0.5px]">
-                                  {rank}
-                                </span>
-                              </div>
-                            )}
+                            {/* Corner Medal Badge (Flat minimalist design with gold/silver/bronze/zinc colors) */}
+                            <div
+                              className={`absolute -bottom-0.5 -right-0.5 w-[18px] h-[18px] sm:w-5 sm:h-5 rounded-full grid place-items-center ring-[1.5px] ring-[#181818] select-none pointer-events-none shadow-sm ${
+                                rank === 1
+                                  ? "bg-[#FFC72C] text-[#78350F] font-black text-[9px] sm:text-[10px]"
+                                  : rank === 2
+                                  ? "bg-[#DDE3EA] text-[#334155] font-black text-[9px] sm:text-[10px]"
+                                  : rank === 3
+                                  ? "bg-[#D97736] text-[#4A1D08] font-black text-[9px] sm:text-[10px]"
+                                  : `bg-[#242424] text-zinc-300 font-bold ${rank >= 10 ? "text-[8px] sm:text-[9px] tracking-tighter" : "text-[9px] sm:text-[10px]"}`
+                              }`}
+                              title={rank <= 3 ? `${rank === 1 ? '1st' : rank === 2 ? '2nd' : '3rd'} Place` : `Place #${rank}`}
+                            >
+                              <span className="leading-none text-center -translate-y-[0.5px]">
+                                {rank}
+                              </span>
+                            </div>
                           </div>
 
                           {/* Beat Name & Beatmaker Name */}

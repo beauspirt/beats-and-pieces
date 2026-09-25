@@ -231,10 +231,10 @@ export function BeatDetailClient() {
       {/* Main Beat Card (Using the exact layout from Beats Discovery) */}
       <div className="bg-[#181818] rounded-[32px] p-5 sm:p-6 relative">
         
-        {/* Row 1: Header (Actions & Meta on Top on mobile, Avatar + Title + Producer under) */}
-        <div className="flex flex-col-reverse sm:flex-row sm:items-start justify-between gap-4 sm:gap-6 min-w-0">
+        {/* Row 1: Header (Avatar + Title + Producer on Left, Actions on Right) */}
+        <div className="flex items-start justify-between gap-4 min-w-0">
           
-          {/* Main Info: Beat Title + Producer Avatar/Tag + Badges (Underneath on mobile, left on desktop) */}
+          {/* Left: Beat Title + Producer Avatar/Tag */}
           <div className="flex items-start gap-3.5 sm:gap-4 min-w-0 flex-1">
             <Link
               href={`/${beat.beatmaker.id}`}
@@ -255,39 +255,9 @@ export function BeatDetailClient() {
             </Link>
 
             <div className="min-w-0 flex-1 pt-0.5 sm:pt-1">
-              {/* Title & Badges */}
-              <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 min-w-0 mb-1.5">
-                <h1 className="font-bold text-white text-lg leading-snug break-words [overflow-wrap:anywhere]">
-                  {beat.title}
-                </h1>
-
-                {beat.rank === 1 && (
-                  <span className="h-7 px-3.5 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
-                    1st Place
-                  </span>
-                )}
-                {beat.rank === 2 && (
-                  <span className="h-7 px-3.5 rounded-full bg-[#1E1E1E] text-[#AAAAAA] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
-                    2nd Place
-                  </span>
-                )}
-                {beat.rank === 3 && (
-                  <span className="h-7 px-3.5 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
-                    3rd Place
-                  </span>
-                )}
-
-                {match && (
-                  <Link
-                    href={`/battles/battle-${match[1]}`}
-                    className="px-3.5 h-7 rounded-full bg-[#7B61FF]/15 text-zinc-300 hover:bg-[#7B61FF]/25 hover:text-white text-xs font-bold shrink-0 transition-all inline-flex items-center gap-1.5 leading-none"
-                    title={`View ${beat.battleSource || `Beat Battle #${match[1]}`}`}
-                  >
-                    <span>BB#{match[1]}</span>
-                    <span className="text-[10px]">↗</span>
-                  </Link>
-                )}
-              </div>
+              <h1 className="font-bold text-white text-lg leading-snug break-words [overflow-wrap:anywhere] mb-1">
+                {beat.title}
+              </h1>
 
               {/* Beatmaker name */}
               <Link
@@ -299,79 +269,53 @@ export function BeatDetailClient() {
             </div>
           </div>
 
-          {/* Meta & Actions: (Favorites / Share / Public Rating / Badges) - Top on mobile, right on desktop */}
-          <div className="flex flex-wrap items-center justify-between sm:justify-end gap-3 sm:gap-3.5 shrink-0 select-none w-full sm:w-auto">
-            {/* Left subgroup on mobile: BPM, Price Tag & Jury */}
-            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-              {/* BPM */}
-              {beat.bpm ? (
-                <span className="text-xs font-bold px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-full bg-[#121212] text-[#888888] select-none inline-flex items-center justify-center text-center leading-none">
-                  {beat.bpm} BPM
-                </span>
-              ) : null}
+          {/* Right: Actions (Share, Favorite, Flames, Jury Score) */}
+          <div className="flex items-center gap-3 shrink-0 select-none self-start">
+            {/* Jury Score Avg */}
+            {typeof beat.juryScore === "number" && beat.juryScore > 0 ? (
+              <Tooltip content="Jury Score Average">
+                <div className="flex items-center gap-1 text-sm text-[#7B61FF] font-bold px-2 select-none cursor-default">
+                  <Star className="w-4 h-4 fill-current text-[#7B61FF]" />
+                  <span>{beat.juryScore.toFixed(2)}</span>
+                </div>
+              </Tooltip>
+            ) : null}
 
-              {/* Price Tag Pill */}
-              {beat.priceTag ? (
-                <span
-                  className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-full text-xs font-bold select-none inline-flex items-center justify-center text-center leading-none ${
-                    beat.priceTag === "Not For Sale"
-                      ? "bg-[#121212] text-[#666666]"
-                      : "bg-emerald-500/10 text-emerald-400"
+            {/* Share Button */}
+            <Tooltip content={copied ? "Link copied!" : "Copy link to beat"}>
+              <button
+                type="button"
+                onClick={handleShare}
+                className="p-2 rounded-full bg-[#121212] hover:bg-[#202020] transition-colors text-[#888888] hover:text-white cursor-pointer select-none shadow-sm"
+              >
+                {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Share2 className="w-4 h-4" />}
+              </button>
+            </Tooltip>
+
+            {/* Favorite Button */}
+            <Tooltip content={beat.isFavorite ? "Remove from favorites" : "Add to favorites"}>
+              <button
+                type="button"
+                onClick={toggleFavorite}
+                className="p-2 rounded-full bg-[#121212] hover:bg-[#202020] transition-colors text-[#888888] hover:text-amber-400 cursor-pointer select-none shadow-sm"
+              >
+                <Star
+                  className={`w-4 h-4 ${
+                    beat.isFavorite ? "fill-amber-400 text-amber-400" : ""
                   }`}
-                >
-                  {beat.priceTag}
-                </span>
-              ) : null}
+                />
+              </button>
+            </Tooltip>
 
-              {/* Jury Score Avg */}
-              {typeof beat.juryScore === "number" && beat.juryScore > 0 ? (
-                <Tooltip content="Jury Score Average">
-                  <div className="flex items-center gap-1 text-sm text-[#7B61FF] font-bold px-2 select-none cursor-default">
-                    <Star className="w-4 h-4 fill-current text-[#7B61FF]" />
-                    <span>{beat.juryScore.toFixed(2)}</span>
-                  </div>
-                </Tooltip>
-              ) : null}
-            </div>
-
-            {/* Right subgroup: Share, Favorite, Flame Rating */}
-            <div className="flex items-center gap-3 ml-auto sm:ml-0">
-              {/* Share Button */}
-              <Tooltip content={copied ? "Link copied!" : "Copy link to beat"}>
-                <button
-                  type="button"
-                  onClick={handleShare}
-                  className="p-2 rounded-full bg-[#121212] hover:bg-[#202020] transition-colors text-[#888888] hover:text-white cursor-pointer select-none shadow-sm"
-                >
-                  {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Share2 className="w-4 h-4" />}
-                </button>
+            {/* Community Flames (Public Rating Avg) */}
+            {typeof beat.flames === "number" && beat.flames >= 1 ? (
+              <Tooltip content="Public Rating Average">
+                <div className="flex items-center gap-1 text-sm text-[#FF5E3A] font-bold select-none cursor-default leading-none">
+                  <Flame className="w-4 h-4 fill-current" />
+                  <span>{beat.flames.toFixed(2)}</span>
+                </div>
               </Tooltip>
-
-              {/* Favorite Button */}
-              <Tooltip content={beat.isFavorite ? "Remove from favorites" : "Add to favorites"}>
-                <button
-                  type="button"
-                  onClick={toggleFavorite}
-                  className="p-2 rounded-full bg-[#121212] hover:bg-[#202020] transition-colors text-[#888888] hover:text-amber-400 cursor-pointer select-none shadow-sm"
-                >
-                  <Star
-                    className={`w-4 h-4 ${
-                      beat.isFavorite ? "fill-amber-400 text-amber-400" : ""
-                    }`}
-                  />
-                </button>
-              </Tooltip>
-
-              {/* Community Flames (Public Rating Avg) */}
-              {typeof beat.flames === "number" && beat.flames >= 1 ? (
-                <Tooltip content="Public Rating Average">
-                  <div className="flex items-center gap-1 text-sm text-[#FF5E3A] font-bold select-none cursor-default leading-none">
-                    <Flame className="w-4 h-4 fill-current" />
-                    <span>{beat.flames.toFixed(2)}</span>
-                  </div>
-                </Tooltip>
-              ) : null}
-            </div>
+            ) : null}
           </div>
         </div>
 
@@ -391,13 +335,63 @@ export function BeatDetailClient() {
           />
         </div>
 
-        {/* Row 3: Clickable Genre & Tags */}
-        {((beat.genres && beat.genres.length > 0) || (beat.tags && beat.tags.length > 0)) ? (
+        {/* Row 3: Bottom Tags (Place, Beat Battle, BPM, Sale Status, Genres & Styles) */}
+        {(beat.rank || match || beat.bpm || beat.priceTag || (beat.genres && beat.genres.length > 0) || (beat.tags && beat.tags.length > 0)) ? (
           <div className="flex flex-wrap items-center gap-2 pt-4 text-xs select-none mt-2">
+            {/* 1. Place tag */}
+            {beat.rank === 1 && (
+              <span className="h-7 px-3.5 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
+                1st Place
+              </span>
+            )}
+            {beat.rank === 2 && (
+              <span className="h-7 px-3.5 rounded-full bg-[#1E1E1E] text-[#AAAAAA] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
+                2nd Place
+              </span>
+            )}
+            {beat.rank === 3 && (
+              <span className="h-7 px-3.5 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
+                3rd Place
+              </span>
+            )}
+
+            {/* 2. Beat battle tag */}
+            {match && (
+              <Link
+                href={`/battles/battle-${match[1]}`}
+                className="px-3.5 h-7 rounded-full bg-[#7B61FF]/15 text-zinc-300 hover:bg-[#7B61FF]/25 hover:text-white text-xs font-bold shrink-0 transition-all inline-flex items-center gap-1.5 leading-none"
+                title={`View ${beat.battleSource || `Beat Battle #${match[1]}`}`}
+              >
+                <span>BB#{match[1]}</span>
+                <span className="text-[10px]">↗</span>
+              </Link>
+            )}
+
+            {/* 3. BPM tag */}
+            {beat.bpm ? (
+              <span className="h-7 px-3.5 rounded-full bg-[#121212] text-[#888888] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
+                {beat.bpm} BPM
+              </span>
+            ) : null}
+
+            {/* 4. For sale / not for sale tag */}
+            {beat.priceTag ? (
+              <span
+                className={`h-7 px-3.5 rounded-full text-xs font-bold select-none inline-flex items-center justify-center text-center leading-none shrink-0 ${
+                  beat.priceTag === "Not For Sale"
+                    ? "bg-[#121212] text-[#666666]"
+                    : "bg-emerald-500/10 text-emerald-400"
+                }`}
+              >
+                {beat.priceTag}
+              </span>
+            ) : null}
+
+            {/* 5. Genre / style tags */}
             {beat.genres?.map((g) => (
               <span
                 key={g}
-                className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#121212] text-[#888888]"
+                className="h-7 px-3.5 rounded-full text-xs font-bold bg-[#121212] text-[#888888] inline-flex items-center justify-center text-center leading-none shrink-0"
               >
                 {g}
               </span>
@@ -406,7 +400,7 @@ export function BeatDetailClient() {
             {beat.tags?.map((t) => (
               <span
                 key={t}
-                className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#121212] text-[#777777]"
+                className="h-7 px-3.5 rounded-full text-xs font-bold bg-[#121212] text-[#777777] inline-flex items-center justify-center text-center leading-none shrink-0"
               >
                 {t}
               </span>

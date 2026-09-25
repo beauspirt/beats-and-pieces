@@ -629,8 +629,9 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       }
 
       // Register submission in database service
+      const slugBase = `${uploaderId}-${finalTitle}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
       const newSub = battleService.submitEntry({
-        id: `sub-${battle.id}-${uploaderId}-${Date.now()}`,
+        id: slugBase || `sub-${Date.now()}`,
         battleId: battle.id,
         userId: uploaderId,
         beatmakerTag: uploaderTag,

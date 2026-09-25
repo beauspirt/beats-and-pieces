@@ -8,7 +8,7 @@ import { beatService } from "@/services/beatService";
 import { DiscoveryBeat } from "@/lib/types";
 import { AudioWaveformPlayer } from "@/components/AudioWaveformPlayer";
 import { Tooltip } from "@/components/Tooltip";
-import { Flame, Star, ArrowLeft, Loader2, Share2, Check, CheckCircle2 } from "lucide-react";
+import { Flame, Star, ArrowLeft, Loader2, Share2, Check } from "lucide-react";
 
 export function BeatDetailClient() {
   const router = useRouter();
@@ -18,12 +18,6 @@ export function BeatDetailClient() {
   const [beat, setBeat] = useState<DiscoveryBeat | null>(null);
   const [hasChecked, setHasChecked] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
-  };
 
   // Re-fetch beat when storage updates
   useEffect(() => {
@@ -60,7 +54,6 @@ export function BeatDetailClient() {
     const url = `${window.location.origin}/${beat.beatmaker.id}/beat?id=${beat.id}`;
     navigator.clipboard.writeText(url).then(() => {
       setCopied(true);
-      showToast("Beat link copied!");
       setTimeout(() => setCopied(false), 2000);
     });
   };
@@ -115,7 +108,7 @@ export function BeatDetailClient() {
       </Link>
 
       {/* Main Beat Card (Using the exact layout from Beats Discovery) */}
-      <div className="bg-[#181818] rounded-[32px] p-5 sm:p-6 shadow-2xl relative">
+      <div className="bg-[#181818] rounded-[32px] p-5 sm:p-6 relative">
         
         {/* Row 1: Header (Title, Producer, Avatar, Badges, Meta) */}
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 min-w-0">
@@ -220,15 +213,25 @@ export function BeatDetailClient() {
             {/* Top Right Corner Actions (Absolute on mobile, inline on desktop) */}
             <div className="absolute top-5 right-5 sm:static sm:top-auto sm:right-auto z-10 flex items-center gap-3">
               {/* Share Button */}
-              <Tooltip content="Copy link to beat">
-                <button
-                  type="button"
-                  onClick={handleShare}
-                  className="p-2 rounded-full bg-[#121212] hover:bg-[#202020] transition-colors text-[#888888] hover:text-white cursor-pointer select-none shadow-sm"
-                >
-                  {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Share2 className="w-4 h-4" />}
-                </button>
-              </Tooltip>
+              <div className="relative flex items-center justify-center">
+                <Tooltip content="Copy link to beat">
+                  <button
+                    type="button"
+                    onClick={handleShare}
+                    className="p-2 rounded-full bg-[#121212] hover:bg-[#202020] transition-colors text-[#888888] hover:text-white cursor-pointer select-none shadow-sm"
+                  >
+                    {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Share2 className="w-4 h-4" />}
+                  </button>
+                </Tooltip>
+                
+                {copied && (
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-[#222222] text-white text-[11px] font-bold rounded-full shadow-2xl whitespace-nowrap z-50 flex items-center gap-1.5 leading-none pointer-events-none animate-in fade-in zoom-in-95 duration-150">
+                    <Check className="w-3 h-3 text-emerald-400 shrink-0" />
+                    <span>Beat link copied!</span>
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#222222]" />
+                  </div>
+                )}
+              </div>
 
               {/* Favorite Button */}
               <Tooltip content={beat.isFavorite ? "Remove from favorites" : "Add to favorites"}>
@@ -298,19 +301,6 @@ export function BeatDetailClient() {
         ) : null}
 
       </div>
-
-      {/* Floating Save Toast Pop-up Notification */}
-      {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-[210] bg-[#181818] text-white px-5 py-3.5 rounded-3xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300 backdrop-blur-md">
-          <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-            <CheckCircle2 className="w-4 h-4" />
-          </div>
-          <div>
-            <p className="text-xs font-bold text-white">Notification</p>
-            <p className="text-xs text-zinc-400">{toastMessage}</p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

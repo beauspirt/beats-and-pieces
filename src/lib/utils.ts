@@ -156,6 +156,7 @@ export function toBeatSlug(title?: string, fallbackId?: string): string {
 export interface BeatBattleInfo {
   battleName: string;
   battleUrl: string;
+  prefixText: string;
   statusText: string;
 }
 
@@ -224,16 +225,17 @@ export function getBeatBattleInfo(beat: {
 
   if (!battleName) return null;
 
-  // 3. Status text: 1st place winner, 2nd place winner, 3rd place winner, or entry
-  let statusText = "entry";
-  if (rank === 1) statusText = "1st place winner";
-  else if (rank === 2) statusText = "2nd place winner";
-  else if (rank === 3) statusText = "3rd place winner";
+  // 3. Prefix text: 1st place winner of, 2nd place winner of, 3rd place winner of, or Entry of
+  let prefixText = "Entry of";
+  if (rank === 1) prefixText = "1st place winner of";
+  else if (rank === 2) prefixText = "2nd place winner of";
+  else if (rank === 3) prefixText = "3rd place winner of";
 
   return {
     battleName,
     battleUrl,
-    statusText,
+    prefixText,
+    statusText: prefixText,
   };
 }
 

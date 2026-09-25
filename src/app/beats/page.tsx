@@ -499,13 +499,13 @@ export default function BeatsDiscoveryPage() {
                       {/* Attribution Text (Under beat name, above beatmaker name) */}
                       {battleInfo && (
                         <p className="text-xs text-zinc-400 select-none mt-0.5 leading-snug">
+                          <span>{battleInfo.prefixText} </span>
                           <Link
                             href={battleInfo.battleUrl}
                             className="text-[#7B61FF] hover:underline font-semibold"
                           >
                             {battleInfo.battleName}
-                          </Link>{" "}
-                          <span>{battleInfo.statusText}</span>
+                          </Link>
                         </p>
                       )}
 

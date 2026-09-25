@@ -231,11 +231,11 @@ export function BeatDetailClient() {
       {/* Main Beat Card (Using the exact layout from Beats Discovery) */}
       <div className="bg-[#181818] rounded-[32px] p-5 sm:p-6 relative">
         
-        {/* Row 1: Header (Title, Producer, Avatar, Badges, Meta) */}
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 min-w-0">
+        {/* Row 1: Header (Actions & Meta on Top on mobile, Avatar + Title + Producer under) */}
+        <div className="flex flex-col-reverse sm:flex-row sm:items-start justify-between gap-4 sm:gap-6 min-w-0">
           
-          {/* Left: Beat Title + Producer Avatar/Tag + Badges */}
-          <div className="flex items-start gap-4 min-w-0 flex-1 pr-24 sm:pr-0">
+          {/* Main Info: Beat Title + Producer Avatar/Tag + Badges (Underneath on mobile, left on desktop) */}
+          <div className="flex items-start gap-3.5 sm:gap-4 min-w-0 flex-1">
             <Link
               href={`/${beat.beatmaker.id}`}
               className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden relative shrink-0 hover:opacity-80 transition-opacity bg-[#121212]"
@@ -254,9 +254,9 @@ export function BeatDetailClient() {
               />
             </Link>
 
-            <div className="min-w-0 flex-1 pt-1">
+            <div className="min-w-0 flex-1 pt-0.5 sm:pt-1">
               {/* Title & Badges */}
-              <div className="flex flex-wrap items-center gap-2.5 min-w-0 mb-1.5">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 min-w-0 mb-1.5">
                 <h1 className="font-bold text-white text-lg leading-snug break-words [overflow-wrap:anywhere]">
                   {beat.title}
                 </h1>
@@ -299,40 +299,43 @@ export function BeatDetailClient() {
             </div>
           </div>
 
-          {/* Right: Meta Badges (BPM, Price, Jury, Fav) */}
-          <div className="flex flex-wrap items-center gap-3 sm:gap-3.5 shrink-0 select-none sm:self-start">
-            {/* BPM */}
-            {beat.bpm ? (
-              <span className="text-xs font-bold px-3.5 py-2 rounded-full bg-[#121212] text-[#888888] select-none inline-flex items-center justify-center text-center leading-none">
-                {beat.bpm} BPM
-              </span>
-            ) : null}
+          {/* Meta & Actions: (Favorites / Share / Public Rating / Badges) - Top on mobile, right on desktop */}
+          <div className="flex flex-wrap items-center justify-between sm:justify-end gap-3 sm:gap-3.5 shrink-0 select-none w-full sm:w-auto">
+            {/* Left subgroup on mobile: BPM, Price Tag & Jury */}
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+              {/* BPM */}
+              {beat.bpm ? (
+                <span className="text-xs font-bold px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-full bg-[#121212] text-[#888888] select-none inline-flex items-center justify-center text-center leading-none">
+                  {beat.bpm} BPM
+                </span>
+              ) : null}
 
-            {/* Price Tag Pill */}
-            {beat.priceTag ? (
-              <span
-                className={`px-3.5 py-2 rounded-full text-xs font-bold select-none inline-flex items-center justify-center text-center leading-none ${
-                  beat.priceTag === "Not For Sale"
-                    ? "bg-[#121212] text-[#666666]"
-                    : "bg-emerald-500/10 text-emerald-400"
-                }`}
-              >
-                {beat.priceTag}
-              </span>
-            ) : null}
+              {/* Price Tag Pill */}
+              {beat.priceTag ? (
+                <span
+                  className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-full text-xs font-bold select-none inline-flex items-center justify-center text-center leading-none ${
+                    beat.priceTag === "Not For Sale"
+                      ? "bg-[#121212] text-[#666666]"
+                      : "bg-emerald-500/10 text-emerald-400"
+                  }`}
+                >
+                  {beat.priceTag}
+                </span>
+              ) : null}
 
-            {/* Jury Score Avg */}
-            {typeof beat.juryScore === "number" && beat.juryScore > 0 ? (
-              <Tooltip content="Jury Score Average">
-                <div className="flex items-center gap-1 text-sm text-[#7B61FF] font-bold px-2 select-none cursor-default">
-                  <Star className="w-4 h-4 fill-current text-[#7B61FF]" />
-                  <span>{beat.juryScore.toFixed(2)}</span>
-                </div>
-              </Tooltip>
-            ) : null}
+              {/* Jury Score Avg */}
+              {typeof beat.juryScore === "number" && beat.juryScore > 0 ? (
+                <Tooltip content="Jury Score Average">
+                  <div className="flex items-center gap-1 text-sm text-[#7B61FF] font-bold px-2 select-none cursor-default">
+                    <Star className="w-4 h-4 fill-current text-[#7B61FF]" />
+                    <span>{beat.juryScore.toFixed(2)}</span>
+                  </div>
+                </Tooltip>
+              ) : null}
+            </div>
 
-            {/* Top Right Corner Actions (Absolute on mobile, inline on desktop) */}
-            <div className="absolute top-5 right-5 sm:static sm:top-auto sm:right-auto z-10 flex items-center gap-3">
+            {/* Right subgroup: Share, Favorite, Flame Rating */}
+            <div className="flex items-center gap-3 ml-auto sm:ml-0">
               {/* Share Button */}
               <Tooltip content={copied ? "Link copied!" : "Copy link to beat"}>
                 <button

@@ -2117,23 +2117,47 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                               />
                             </Link>
 
-                            {/* Corner Medal Badge (Flat minimalist design with gold/silver/bronze/zinc colors) */}
-                            <div
-                              className={`absolute -bottom-0.5 -right-0.5 w-[18px] h-[18px] sm:w-5 sm:h-5 rounded-full grid place-items-center ring-[1.5px] ring-[#181818] select-none pointer-events-none shadow-sm ${
-                                rank === 1
-                                  ? "bg-[#FFC72C] text-[#78350F] font-black text-[11px] sm:text-xs"
-                                  : rank === 2
-                                  ? "bg-[#DDE3EA] text-[#334155] font-black text-[11px] sm:text-xs"
-                                  : rank === 3
-                                  ? "bg-[#D97736] text-[#4A1D08] font-black text-[11px] sm:text-xs"
-                                  : `bg-[#242424] text-zinc-300 font-bold ${rank >= 10 ? "text-[9px] sm:text-[10px] tracking-tight" : "text-[11px] sm:text-xs"}`
-                              }`}
-                              title={rank <= 3 ? `${rank === 1 ? '1st' : rank === 2 ? '2nd' : '3rd'} Place` : `Place #${rank}`}
+                            {/* Corner Medal Badge (Flat minimalist SVG design with exact mathematical centering) */}
+                            <svg
+                              viewBox="0 0 20 20"
+                              className="absolute -bottom-0.5 -right-0.5 w-[18px] h-[18px] sm:w-5 sm:h-5 rounded-full select-none pointer-events-none shadow-sm ring-[1.5px] ring-[#181818]"
                             >
-                              <span className="leading-none text-center -translate-y-[0.5px]">
+                              <title>{rank <= 3 ? `${rank === 1 ? '1st' : rank === 2 ? '2nd' : '3rd'} Place` : `Place #${rank}`}</title>
+                              <circle
+                                cx="10"
+                                cy="10"
+                                r="10"
+                                fill={
+                                  rank === 1
+                                    ? "#FFC837"
+                                    : rank === 2
+                                    ? "#DDE3EA"
+                                    : rank === 3
+                                    ? "#D97736"
+                                    : "#242424"
+                                }
+                              />
+                              <text
+                                x="10"
+                                y="10"
+                                textAnchor="middle"
+                                dominantBaseline="central"
+                                fill={
+                                  rank === 1
+                                    ? "#9A5800"
+                                    : rank === 2
+                                    ? "#5A6B82"
+                                    : rank === 3
+                                    ? "#8A3712"
+                                    : "#D4D4D8"
+                                }
+                                fontSize={rank >= 10 ? "10" : "11.5"}
+                                fontWeight="900"
+                                fontFamily="inherit"
+                              >
                                 {rank}
-                              </span>
-                            </div>
+                              </text>
+                            </svg>
                           </div>
 
                           {/* Beat Name & Beatmaker Name */}

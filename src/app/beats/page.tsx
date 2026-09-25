@@ -470,7 +470,7 @@ export default function BeatsDiscoveryPage() {
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 min-w-0">
                   
                   {/* Left: Beat Title + Producer Avatar/Tag + Badges */}
-                  <div className="flex items-center gap-3.5 min-w-0 flex-1 pr-9 sm:pr-0">
+                  <div className="flex items-center gap-3.5 min-w-0 flex-1 pr-14 sm:pr-0">
                     <Link
                       href={`/${beat.beatmaker.id}`}
                       className="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden relative shrink-0 hover:opacity-80 transition-opacity bg-[#121212]"
@@ -534,7 +534,7 @@ export default function BeatsDiscoveryPage() {
                     </div>
                   </div>
 
-                  {/* Right: Meta Badges (BPM, Price, Flames, Fav) */}
+                  {/* Right: Meta Badges (BPM, Price, Jury, Fav) */}
                   <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 flex-wrap sm:flex-nowrap select-none self-start">
                     {/* BPM */}
                     {beat.bpm ? (
@@ -566,16 +566,6 @@ export default function BeatsDiscoveryPage() {
                       </Tooltip>
                     ) : null}
 
-                    {/* Community Flames (Public Rating Avg) */}
-                    {typeof beat.flames === "number" && beat.flames >= 1 ? (
-                      <Tooltip content="Public Rating Average">
-                        <div className="flex items-center gap-1 text-xs text-[#FF5E3A] font-bold px-1.5 select-none cursor-default">
-                          <Flame className="w-4 h-4 fill-current" />
-                          <span>{beat.flames.toFixed(2)}</span>
-                        </div>
-                      </Tooltip>
-                    ) : null}
-
                     {/* Favorite Button */}
                     <button
                       type="button"
@@ -591,6 +581,16 @@ export default function BeatsDiscoveryPage() {
                     </button>
                   </div>
                 </div>
+
+                {/* Public Rating Average — pinned top-right corner (left of fav button on mobile) */}
+                {typeof beat.flames === "number" && beat.flames >= 1 ? (
+                  <Tooltip content="Public Rating Average">
+                    <div className="absolute top-4 right-14 sm:right-4 flex items-center gap-1 text-xs text-[#FF5E3A] font-bold select-none cursor-default leading-none z-10">
+                      <Flame className="w-4 h-4 fill-current" />
+                      <span>{beat.flames.toFixed(2)}</span>
+                    </div>
+                  </Tooltip>
+                ) : null}
 
                 {/* Row 2: Full Waveform Player */}
                 <AudioWaveformPlayer

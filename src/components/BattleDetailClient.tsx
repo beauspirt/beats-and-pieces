@@ -2095,7 +2095,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 min-w-0">
                         
                         {/* Left: Beatmaker Avatar (with Corner Medal Badge) + Info (Title & Beatmaker Name) */}
-                        <div className="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
+                        <div className="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1 pr-14 sm:pr-0">
                           {/* Beatmaker Avatar with Corner Medal */}
                           <div className="relative shrink-0">
                             <Link
@@ -2166,18 +2166,19 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                               <span className="text-[11px] text-[#A0A0A0]">Jury Avg</span>
                             </div>
                           )}
-
-                          {hasFlame && (
-                            <Tooltip content="Public Rating Average">
-                              <div className="flex items-center gap-1 text-xs text-[#FF5E3A] font-bold px-1.5 select-none cursor-default leading-none">
-                                <Flame className="w-4 h-4 fill-current" />
-                                <span>{Number(sub.flameRating).toFixed(2)}</span>
-                              </div>
-                            </Tooltip>
-                          )}
                         </div>
 
                       </div>
+
+                      {/* Public Rating Average — pinned top-right corner */}
+                      {hasFlame && (
+                        <Tooltip content="Public Rating Average">
+                          <div className="absolute top-4 right-4 flex items-center gap-1 text-xs text-[#FF5E3A] font-bold select-none cursor-default leading-none z-10">
+                            <Flame className="w-4 h-4 fill-current" />
+                            <span>{Number(sub.flameRating).toFixed(2)}</span>
+                          </div>
+                        </Tooltip>
+                      )}
 
                       {/* Waveform Scrubber with real audio */}
                       <AudioWaveformPlayer

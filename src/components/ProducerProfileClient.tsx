@@ -1945,7 +1945,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 min-w-0">
                   
                   {/* Left: Beat Title + Quick Link Badge + Rank Badge */}
-                  <div className="flex items-center gap-3.5 min-w-0 flex-1 pr-9 sm:pr-0">
+                  <div className="flex items-center gap-3.5 min-w-0 flex-1 pr-14 sm:pr-0">
                     <div className="min-w-0 flex-1">
                       {/* Title & Desktop Inline Badges */}
                       <div className="flex flex-wrap items-center gap-2 min-w-0">
@@ -2034,7 +2034,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                     </div>
                   </div>
 
-                  {/* Right: BPM, Price Tag, Flames, Edit Button */}
+                  {/* Right: BPM, Price Tag, Edit Button */}
                   <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 self-start select-none">
                     {beat.bpm ? (
                       <span className="text-xs font-bold px-3.5 py-1.5 rounded-full bg-[#121212] text-[#888888] select-none inline-flex items-center justify-center text-center leading-none">
@@ -2064,16 +2064,6 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                       </Tooltip>
                     ) : null}
 
-                    {/* Public Rating Avg */}
-                    {typeof beat.flames === "number" && beat.flames >= 1 ? (
-                      <Tooltip content="Public Rating Average">
-                        <div className="flex items-center gap-1 text-xs text-[#FF5E3A] font-bold px-1.5 select-none cursor-default">
-                          <Flame className="w-4 h-4 fill-current" />
-                          <span>{beat.flames.toFixed(2)}</span>
-                        </div>
-                      </Tooltip>
-                    ) : null}
-
                     {/* Edit Beat Button (Profile Owner only) */}
                     {isProfileOwner && (
                       <Tooltip content="Edit beat details" className="absolute top-4 right-4 z-10 sm:static sm:top-auto sm:right-auto sm:z-auto">
@@ -2089,6 +2079,16 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                   </div>
 
                 </div>
+
+                {/* Public Rating Average — pinned top-right corner */}
+                {typeof beat.flames === "number" && beat.flames >= 1 ? (
+                  <Tooltip content="Public Rating Average">
+                    <div className={`absolute top-4 flex items-center gap-1 text-xs text-[#FF5E3A] font-bold select-none cursor-default leading-none z-10 ${isProfileOwner ? "right-14 sm:right-4" : "right-4"}`}>
+                      <Flame className="w-4 h-4 fill-current" />
+                      <span>{beat.flames.toFixed(2)}</span>
+                    </div>
+                  </Tooltip>
+                ) : null}
 
                 {/* Row 2: Full Waveform Player */}
                 <AudioWaveformPlayer

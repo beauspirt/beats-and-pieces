@@ -2131,10 +2131,12 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                               title={rank <= 3 ? `${rank === 1 ? '1st' : rank === 2 ? '2nd' : '3rd'} Place` : `Place #${rank}`}
                             >
                               <span
-                                className={`font-black leading-none text-center select-none -translate-y-px ${
+                                className={`font-black leading-none text-center select-none ${
                                   rank >= 10
-                                    ? "text-[9px] tracking-tighter"
-                                    : "text-[11px]"
+                                    ? "text-[9px] tracking-tight translate-y-[0.5px]"
+                                    : rank === 1
+                                    ? "text-[11px] -translate-x-[0.5px] translate-y-[0.5px]"
+                                    : "text-[11px] translate-y-[0.5px]"
                                 }`}
                               >
                                 {rank}

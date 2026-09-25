@@ -306,6 +306,19 @@ export function BeatDetailClient() {
                 {beat.title}
               </h1>
 
+              {/* Attribution Text (Under beat name, above beatmaker name) */}
+              {battleInfo && (
+                <p className="text-xs text-zinc-400 select-none mb-1 leading-snug">
+                  <Link
+                    href={battleInfo.battleUrl}
+                    className="text-[#7B61FF] hover:underline font-semibold"
+                  >
+                    {battleInfo.battleName}
+                  </Link>{" "}
+                  <span>{battleInfo.statusText}</span>
+                </p>
+              )}
+
               {/* Beatmaker name */}
               <Link
                 href={`/${beat.beatmaker.id}`}
@@ -333,17 +346,10 @@ export function BeatDetailClient() {
           />
         </div>
 
-        {/* Row 3: Bottom Tags (BPM, Sale Status, Genres & Styles) */}
-        {(beat.bpm || beat.priceTag || (beat.genres && beat.genres.length > 0) || (beat.tags && beat.tags.length > 0)) ? (
+        {/* Row 3: Bottom Tags (Sale Status, BPM, Genres & Styles) */}
+        {(beat.priceTag || beat.bpm || (beat.genres && beat.genres.length > 0) || (beat.tags && beat.tags.length > 0)) ? (
           <div className="flex flex-wrap items-center gap-2 pt-4 text-xs select-none mt-2">
-            {/* 1. BPM tag */}
-            {beat.bpm ? (
-              <span className="h-7 px-3.5 rounded-full bg-[#121212] text-[#888888] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
-                {beat.bpm} BPM
-              </span>
-            ) : null}
-
-            {/* 2. For sale / not for sale tag */}
+            {/* 1. For sale / not for sale tag */}
             {beat.priceTag ? (
               <span
                 className={`h-7 px-3.5 rounded-full text-xs font-bold select-none inline-flex items-center justify-center text-center leading-none shrink-0 ${
@@ -353,6 +359,13 @@ export function BeatDetailClient() {
                 }`}
               >
                 {beat.priceTag}
+              </span>
+            ) : null}
+
+            {/* 2. BPM tag */}
+            {beat.bpm ? (
+              <span className="h-7 px-3.5 rounded-full bg-[#121212] text-[#888888] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
+                {beat.bpm} BPM
               </span>
             ) : null}
 
@@ -376,19 +389,6 @@ export function BeatDetailClient() {
             ))}
           </div>
         ) : null}
-
-        {/* Separate small text under the tags section */}
-        {battleInfo && (
-          <p className="text-xs text-zinc-400 select-none pt-2.5">
-            <Link
-              href={battleInfo.battleUrl}
-              className="text-[#7B61FF] hover:underline font-semibold"
-            >
-              {battleInfo.battleName}
-            </Link>{" "}
-            <span>{battleInfo.statusText}</span>
-          </p>
-        )}
 
       </div>
     </div>

@@ -1957,6 +1957,19 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                             {beat.title}
                           </h3>
                         </Link>
+
+                        {/* Attribution Text (Under beat name) */}
+                        {battleInfo && (
+                          <p className="text-xs text-zinc-400 select-none mt-0.5 leading-snug">
+                            <Link
+                              href={battleInfo.battleUrl}
+                              className="text-[#7B61FF] hover:underline font-semibold"
+                            >
+                              {battleInfo.battleName}
+                            </Link>{" "}
+                            <span>{battleInfo.statusText}</span>
+                          </p>
+                        )}
                       </div>
                     </div>
 
@@ -2014,17 +2027,10 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                     compact={true}
                   />
 
-                  {/* Row 3: Bottom Tags (BPM, Sale Status, Genres & Styles) */}
-                  {(beat.bpm || beat.priceTag || (beat.genres && beat.genres.length > 0) || (beat.tags && beat.tags.length > 0)) ? (
+                  {/* Row 3: Bottom Tags (Sale Status, BPM, Genres & Styles) */}
+                  {(beat.priceTag || beat.bpm || (beat.genres && beat.genres.length > 0) || (beat.tags && beat.tags.length > 0)) ? (
                     <div className="flex flex-wrap items-center gap-2 pt-0.5 select-none">
-                      {/* 1. BPM tag */}
-                      {beat.bpm ? (
-                        <span className="h-7 px-3.5 rounded-full bg-[#121212] text-[#888888] text-xs font-bold select-none inline-flex items-center justify-center text-center leading-none shrink-0">
-                          {beat.bpm} BPM
-                        </span>
-                      ) : null}
-
-                      {/* 2. For sale / not for sale tag */}
+                      {/* 1. For sale / not for sale tag */}
                       {beat.priceTag ? (
                         <span
                           className={`h-7 px-3.5 rounded-full text-xs font-bold select-none inline-flex items-center justify-center text-center leading-none shrink-0 ${
@@ -2034,6 +2040,13 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                           }`}
                         >
                           {beat.priceTag}
+                        </span>
+                      ) : null}
+
+                      {/* 2. BPM tag */}
+                      {beat.bpm ? (
+                        <span className="h-7 px-3.5 rounded-full bg-[#121212] text-[#888888] text-xs font-bold select-none inline-flex items-center justify-center text-center leading-none shrink-0">
+                          {beat.bpm} BPM
                         </span>
                       ) : null}
 
@@ -2057,19 +2070,6 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                       ))}
                     </div>
                   ) : null}
-
-                  {/* Separate small text under the tags section */}
-                  {battleInfo && (
-                    <p className="text-xs text-zinc-400 select-none pt-0.5">
-                      <Link
-                        href={battleInfo.battleUrl}
-                        className="text-[#7B61FF] hover:underline font-semibold"
-                      >
-                        {battleInfo.battleName}
-                      </Link>{" "}
-                      <span>{battleInfo.statusText}</span>
-                    </p>
-                  )}
 
                   {/* Row 4: Judge Feedback Loop / Ticker */}
                   {beat.juryFeedbacksList && beat.juryFeedbacksList.length > 0 && (

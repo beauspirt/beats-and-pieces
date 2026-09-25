@@ -2117,9 +2117,9 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                               />
                             </Link>
 
-                            {/* Corner Medal Badge (Smooth, flat minimalist design with clean optical centering) */}
+                            {/* Corner Medal Badge */}
                             <div
-                              className={`absolute -bottom-0.5 -right-0.5 w-[18px] h-[18px] rounded-full flex items-center justify-center ring-[1.5px] ring-[#181818] select-none pointer-events-none ${
+                              className={`absolute -bottom-0.5 -right-0.5 w-[18px] h-[18px] rounded-full text-center leading-[18px] font-black ring-[1.5px] ring-[#181818] select-none pointer-events-none ${
                                 rank === 1
                                   ? "bg-[#FFC837] text-[#9A5800]"
                                   : rank === 2
@@ -2127,20 +2127,10 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                                   : rank === 3
                                   ? "bg-[#D97736] text-[#8A3712]"
                                   : "bg-[#242424] text-zinc-300"
-                              }`}
+                              } ${rank >= 10 ? "text-[9px] tracking-tight" : "text-[11px]"}`}
                               title={rank <= 3 ? `${rank === 1 ? '1st' : rank === 2 ? '2nd' : '3rd'} Place` : `Place #${rank}`}
                             >
-                              <span
-                                className={`font-black leading-none text-center select-none ${
-                                  rank >= 10
-                                    ? "text-[9px] tracking-tight translate-y-[0.5px]"
-                                    : rank === 1
-                                    ? "text-[11px] -translate-x-[0.5px] translate-y-[0.5px]"
-                                    : "text-[11px] translate-y-[0.5px]"
-                                }`}
-                              >
-                                {rank}
-                              </span>
+                              {rank}
                             </div>
                           </div>
 

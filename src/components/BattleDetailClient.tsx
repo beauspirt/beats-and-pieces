@@ -2166,19 +2166,22 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                               <span className="text-[11px] text-[#A0A0A0]">Jury Avg</span>
                             </div>
                           )}
+                          
+                          {/* Top Right Corner Actions (Absolute on mobile, inline on desktop) */}
+                          <div className="absolute top-4 right-4 sm:static sm:top-auto sm:right-auto z-10 flex items-center gap-3">
+                            {/* Public Rating Average */}
+                            {hasFlame && (
+                              <Tooltip content="Public Rating Average">
+                                <div className="flex items-center gap-1 text-xs text-[#FF5E3A] font-bold select-none cursor-default leading-none">
+                                  <Flame className="w-4 h-4 fill-current" />
+                                  <span>{Number(sub.flameRating).toFixed(2)}</span>
+                                </div>
+                              </Tooltip>
+                            )}
+                          </div>
                         </div>
 
                       </div>
-
-                      {/* Public Rating Average — pinned top-right corner */}
-                      {hasFlame && (
-                        <Tooltip content="Public Rating Average" className="!absolute top-4 right-4 z-10">
-                          <div className="flex items-center gap-1 text-xs text-[#FF5E3A] font-bold select-none cursor-default leading-none">
-                            <Flame className="w-4 h-4 fill-current" />
-                            <span>{Number(sub.flameRating).toFixed(2)}</span>
-                          </div>
-                        </Tooltip>
-                      )}
 
                       {/* Waveform Scrubber with real audio */}
                       <AudioWaveformPlayer

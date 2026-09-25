@@ -566,31 +566,34 @@ export default function BeatsDiscoveryPage() {
                       </Tooltip>
                     ) : null}
 
-                    {/* Favorite Button */}
-                    <button
-                      type="button"
-                      onClick={() => toggleFavorite(beat.id)}
-                      className="p-1.5 rounded-full bg-[#121212] hover:bg-[#202020] transition-colors text-[#888888] hover:text-amber-400 cursor-pointer select-none absolute top-4 right-4 z-10 sm:static sm:top-auto sm:right-auto sm:z-auto ml-auto sm:ml-0"
-                      title={beat.isFavorite ? "Remove from favorites" : "Add to favorites"}
-                    >
-                      <Star
-                        className={`w-4 h-4 ${
-                          beat.isFavorite ? "fill-amber-400 text-amber-400" : ""
-                        }`}
-                      />
-                    </button>
+                    {/* Top Right Corner Actions (Absolute on mobile, inline on desktop) */}
+                    <div className="absolute top-4 right-4 sm:static sm:top-auto sm:right-auto z-10 flex items-center gap-3">
+                      {/* Favorite Button */}
+                      <button
+                        type="button"
+                        onClick={() => toggleFavorite(beat.id)}
+                        className="p-1.5 rounded-full bg-[#121212] hover:bg-[#202020] transition-colors text-[#888888] hover:text-amber-400 cursor-pointer select-none ml-auto sm:ml-0"
+                        title={beat.isFavorite ? "Remove from favorites" : "Add to favorites"}
+                      >
+                        <Star
+                          className={`w-4 h-4 ${
+                            beat.isFavorite ? "fill-amber-400 text-amber-400" : ""
+                          }`}
+                        />
+                      </button>
+
+                      {/* Community Flames (Public Rating Avg) */}
+                      {typeof beat.flames === "number" && beat.flames >= 1 ? (
+                        <Tooltip content="Public Rating Average">
+                          <div className="flex items-center gap-1 text-xs text-[#FF5E3A] font-bold select-none cursor-default leading-none">
+                            <Flame className="w-4 h-4 fill-current" />
+                            <span>{beat.flames.toFixed(2)}</span>
+                          </div>
+                        </Tooltip>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
-
-                {/* Public Rating Average — pinned top-right corner (left of fav button on mobile) */}
-                {typeof beat.flames === "number" && beat.flames >= 1 ? (
-                  <Tooltip content="Public Rating Average" className="!absolute top-4 right-14 sm:right-4 z-10">
-                    <div className="flex items-center gap-1 text-xs text-[#FF5E3A] font-bold select-none cursor-default leading-none">
-                      <Flame className="w-4 h-4 fill-current" />
-                      <span>{beat.flames.toFixed(2)}</span>
-                    </div>
-                  </Tooltip>
-                ) : null}
 
                 {/* Row 2: Full Waveform Player */}
                 <AudioWaveformPlayer

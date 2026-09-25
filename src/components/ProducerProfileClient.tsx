@@ -2064,31 +2064,33 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                       </Tooltip>
                     ) : null}
 
-                    {/* Edit Beat Button (Profile Owner only) */}
-                    {isProfileOwner && (
-                      <Tooltip content="Edit beat details" className="absolute top-4 right-4 z-10 sm:static sm:top-auto sm:right-auto sm:z-auto">
-                        <button
-                          type="button"
-                          onClick={() => handleOpenEditModal(beat)}
-                          className="p-1.5 rounded-full bg-[#7B61FF]/15 hover:bg-[#7B61FF]/25 text-[#7B61FF] hover:text-white transition-colors cursor-pointer select-none"
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                        </button>
-                      </Tooltip>
-                    )}
-                  </div>
+                    {/* Top Right Corner Actions (Absolute on mobile, inline on desktop) */}
+                    <div className="absolute top-4 right-4 sm:static sm:top-auto sm:right-auto z-10 flex items-center gap-3">
+                      {/* Edit Beat Button (Profile Owner only) */}
+                      {isProfileOwner && (
+                        <Tooltip content="Edit beat details">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditModal(beat)}
+                            className="p-1.5 rounded-full bg-[#7B61FF]/15 hover:bg-[#7B61FF]/25 text-[#7B61FF] hover:text-white transition-colors cursor-pointer select-none"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                        </Tooltip>
+                      )}
 
-                </div>
-
-                {/* Public Rating Average — pinned top-right corner */}
-                {typeof beat.flames === "number" && beat.flames >= 1 ? (
-                  <Tooltip content="Public Rating Average" className={`!absolute top-4 z-10 ${isProfileOwner ? "right-14 sm:right-4" : "right-4"}`}>
-                    <div className="flex items-center gap-1 text-xs text-[#FF5E3A] font-bold select-none cursor-default leading-none">
-                      <Flame className="w-4 h-4 fill-current" />
-                      <span>{beat.flames.toFixed(2)}</span>
+                      {/* Public Rating Average */}
+                      {typeof beat.flames === "number" && beat.flames >= 1 ? (
+                        <Tooltip content="Public Rating Average">
+                          <div className="flex items-center gap-1 text-xs text-[#FF5E3A] font-bold select-none cursor-default leading-none">
+                            <Flame className="w-4 h-4 fill-current" />
+                            <span>{beat.flames.toFixed(2)}</span>
+                          </div>
+                        </Tooltip>
+                      ) : null}
                     </div>
-                  </Tooltip>
-                ) : null}
+                  </div>
+                </div>
 
                 {/* Row 2: Full Waveform Player */}
                 <AudioWaveformPlayer

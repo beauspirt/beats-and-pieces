@@ -2149,7 +2149,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                         </div>
 
                         {/* Right: Scores & BPM */}
-                        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 text-xs font-bold flex-wrap select-none self-start sm:self-center">
+                        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 text-xs font-bold flex-wrap sm:flex-nowrap select-none self-start">
                           {sub.bpm ? (
                             <span className="text-xs font-bold px-3.5 py-1.5 rounded-full bg-[#121212] text-[#888888] select-none inline-flex items-center justify-center text-center leading-none">
                               {sub.bpm} BPM

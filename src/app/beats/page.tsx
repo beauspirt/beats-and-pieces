@@ -492,9 +492,11 @@ export default function BeatsDiscoveryPage() {
                     <div className="min-w-0 flex-1">
                       {/* Title & Badges */}
                       <div className="flex flex-wrap items-center gap-2 min-w-0">
-                        <h3 className="font-bold text-white text-lg leading-snug break-words [overflow-wrap:anywhere]">
-                          {beat.title}
-                        </h3>
+                        <Link href={`/${beat.beatmaker.id}/beat?id=${beat.id}`} className="hover:text-[#7B61FF] hover:underline">
+                          <h3 className="font-bold text-white text-lg leading-snug break-words [overflow-wrap:anywhere]">
+                            {beat.title}
+                          </h3>
+                        </Link>
 
                         {beat.rank === 1 && (
                           <span className="h-6 px-3.5 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">

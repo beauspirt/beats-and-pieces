@@ -2117,55 +2117,29 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                               />
                             </Link>
 
-                            {/* Corner Medal Badge (Flat minimalist SVG design with exact mathematical centering & subtle glow) */}
-                            <svg
-                              viewBox="0 0 20 20"
-                              className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 sm:w-[17px] sm:h-[17px] rounded-full select-none pointer-events-none ring-[1.5px] ring-[#181818] ${
+                            {/* Corner Medal Badge (Smooth, flat minimalist design with clean centering and zero glow) */}
+                            <div
+                              className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 sm:w-[17px] sm:h-[17px] rounded-full flex items-center justify-center ring-[1.5px] ring-[#181818] select-none pointer-events-none ${
                                 rank === 1
-                                  ? "shadow-[0_0_8px_rgba(255,200,55,0.5)]"
+                                  ? "bg-[#FFC837] text-[#9A5800]"
                                   : rank === 2
-                                  ? "shadow-[0_0_8px_rgba(221,227,234,0.45)]"
+                                  ? "bg-[#DDE3EA] text-[#5A6B82]"
                                   : rank === 3
-                                  ? "shadow-[0_0_8px_rgba(217,119,54,0.45)]"
-                                  : "shadow-sm"
+                                  ? "bg-[#D97736] text-[#8A3712]"
+                                  : "bg-[#242424] text-zinc-300"
                               }`}
+                              title={rank <= 3 ? `${rank === 1 ? '1st' : rank === 2 ? '2nd' : '3rd'} Place` : `Place #${rank}`}
                             >
-                              <title>{rank <= 3 ? `${rank === 1 ? '1st' : rank === 2 ? '2nd' : '3rd'} Place` : `Place #${rank}`}</title>
-                              <circle
-                                cx="10"
-                                cy="10"
-                                r="10"
-                                fill={
-                                  rank === 1
-                                    ? "#FFC837"
-                                    : rank === 2
-                                    ? "#DDE3EA"
-                                    : rank === 3
-                                    ? "#D97736"
-                                    : "#242424"
-                                }
-                              />
-                              <text
-                                x="10"
-                                y="10"
-                                textAnchor="middle"
-                                dominantBaseline="central"
-                                fill={
-                                  rank === 1
-                                    ? "#9A5800"
-                                    : rank === 2
-                                    ? "#5A6B82"
-                                    : rank === 3
-                                    ? "#8A3712"
-                                    : "#D4D4D8"
-                                }
-                                fontSize={rank >= 10 ? "10" : "12"}
-                                fontWeight="900"
-                                fontFamily="inherit"
+                              <span
+                                className={`font-black leading-none text-center select-none tabular-nums ${
+                                  rank >= 10
+                                    ? "text-[8.5px] sm:text-[9px] tracking-tighter"
+                                    : "text-[10px] sm:text-[10.5px]"
+                                }`}
                               >
                                 {rank}
-                              </text>
-                            </svg>
+                              </span>
+                            </div>
                           </div>
 
                           {/* Beat Name & Beatmaker Name */}

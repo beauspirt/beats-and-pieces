@@ -10,7 +10,7 @@ import { producerService } from "@/services/producerService";
 import { DiscoveryBeat } from "@/lib/types";
 import { AudioWaveformPlayer } from "@/components/AudioWaveformPlayer";
 import { Tooltip } from "@/components/Tooltip";
-import { toBeatSlug } from "@/lib/utils";
+import { toBeatSlug, normalizeBeatId } from "@/lib/utils";
 import { Flame, Star, ArrowLeft, Loader2, Share2, Check } from "lucide-react";
 
 export function BeatDetailClient() {
@@ -49,7 +49,7 @@ export function BeatDetailClient() {
 
       const cleanSlug = toBeatSlug(rawTarget);
       const lowerRaw = rawTarget.toLowerCase();
-      const strippedRaw = lowerRaw.replace(/^sub-/, "");
+      const normTarget = normalizeBeatId(rawTarget);
 
       // 1. All discovery beats
       const allDiscovery = beatService.getAllDiscoveryBeats();
@@ -98,29 +98,49 @@ export function BeatDetailClient() {
       // Priority 1: Exact ID match (case-insensitive)
       let found = pool.find((b) => b.id.toLowerCase() === lowerRaw);
 
-      // Priority 2: ID match without sub- prefix
-      if (!found) {
-        found = pool.find((b) => b.id.replace(/^sub-/, "").toLowerCase() === strippedRaw);
+      // Priority 2: Normalized ID match (stripping sub-, disc-)
+      if (!found && normTarget) {
+        found = pool.find((b) => normalizeBeatId(b.id) === normTarget);
       }
 
-      // Priority 3: Match producer + title slug
+      // Priority 3: Match producer + clean slug
       if (!found && producerSlug) {
         found = pool.find((b) => {
           const prodMatch =
             b.beatmaker.id.toLowerCase() === producerSlug ||
             b.beatmaker.tag.toLowerCase() === producerSlug;
-          return prodMatch && toBeatSlug(b.title) === cleanSlug;
+          return prodMatch && toBeatSlug(b.title, b.id) === cleanSlug;
         });
       }
 
       // Priority 4: Match title slug across pool
       if (!found) {
-        found = pool.find((b) => toBeatSlug(b.title) === cleanSlug);
+        found = pool.find((b) => toBeatSlug(b.title, b.id) === cleanSlug);
       }
 
-      // Priority 5: Substring match in ID (e.g. if partial timestamp or sub id)
-      if (!found) {
-        found = pool.find((b) => b.id.toLowerCase().includes(strippedRaw) || strippedRaw.includes(b.id.toLowerCase()));
+      // Priority 5: If target was generic battle slug (e.g. "bb8-1" or "beat-battle-8-entry"), match producer + battle number
+      if (!found && producerSlug) {
+        const battleNumMatch = rawTarget.match(/battle-?(\d+)/i) || rawTarget.match(/bb(\d+)/i);
+        if (battleNumMatch) {
+          const battleNum = battleNumMatch[1];
+          found = pool.find((b) => {
+            const prodMatch =
+              b.beatmaker.id.toLowerCase() === producerSlug ||
+              b.beatmaker.tag.toLowerCase() === producerSlug;
+            const battleMatch =
+              (b.battleSource && b.battleSource.includes(battleNum)) ||
+              (b.id && b.id.includes(`bb${battleNum}`));
+            return prodMatch && battleMatch;
+          });
+        }
+      }
+
+      // Priority 6: Substring match in ID
+      if (!found && normTarget.length >= 3) {
+        found = pool.find((b) => {
+          const bNorm = normalizeBeatId(b.id);
+          return bNorm.includes(normTarget) || normTarget.includes(bNorm);
+        });
       }
 
       setBeat(found || null);
@@ -218,7 +238,7 @@ export function BeatDetailClient() {
           <div className="flex items-start gap-4 min-w-0 flex-1 pr-24 sm:pr-0">
             <Link
               href={`/${beat.beatmaker.id}`}
-              className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden relative shrink-0 hover:opacity-80 transition-opacity bg-[#121212] ring-2 ring-white/10"
+              className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden relative shrink-0 hover:opacity-80 transition-opacity bg-[#121212]"
             >
               <Image
                 src={displayAvatar}
@@ -314,25 +334,15 @@ export function BeatDetailClient() {
             {/* Top Right Corner Actions (Absolute on mobile, inline on desktop) */}
             <div className="absolute top-5 right-5 sm:static sm:top-auto sm:right-auto z-10 flex items-center gap-3">
               {/* Share Button */}
-              <div className="relative flex items-center justify-center">
-                <Tooltip content="Copy link to beat">
-                  <button
-                    type="button"
-                    onClick={handleShare}
-                    className="p-2 rounded-full bg-[#121212] hover:bg-[#202020] transition-colors text-[#888888] hover:text-white cursor-pointer select-none shadow-sm"
-                  >
-                    {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Share2 className="w-4 h-4" />}
-                  </button>
-                </Tooltip>
-                
-                {copied && (
-                  <div className="absolute bottom-full right-0 sm:left-1/2 sm:-translate-x-1/2 mb-2 px-3 py-1 bg-[#222222] text-white text-[11px] font-bold rounded-full shadow-2xl whitespace-nowrap z-50 flex items-center gap-1.5 leading-none pointer-events-none animate-in fade-in zoom-in-95 duration-150">
-                    <Check className="w-3 h-3 text-emerald-400 shrink-0" />
-                    <span>Beat link copied!</span>
-                    <div className="absolute top-full right-3 sm:left-1/2 sm:-translate-x-1/2 border-4 border-transparent border-t-[#222222]" />
-                  </div>
-                )}
-              </div>
+              <Tooltip content={copied ? "Link copied!" : "Copy link to beat"}>
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  className="p-2 rounded-full bg-[#121212] hover:bg-[#202020] transition-colors text-[#888888] hover:text-white cursor-pointer select-none shadow-sm"
+                >
+                  {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Share2 className="w-4 h-4" />}
+                </button>
+              </Tooltip>
 
               {/* Favorite Button */}
               <Tooltip content={beat.isFavorite ? "Remove from favorites" : "Add to favorites"}>

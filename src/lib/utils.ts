@@ -106,17 +106,41 @@ export function fromDatetimeLocalString(localStr?: string | null): string {
 }
 
 /**
+ * Strips known technical prefixes from beat IDs (sub-, disc-) to get the base ID.
+ * e.g. "sub-bb8-1" -> "bb8-1", "disc-bb8-1" -> "bb8-1", "sub-sub-bb1-1" -> "bb1-1"
+ */
+export function normalizeBeatId(id?: string | null): string {
+  if (!id || typeof id !== "string") return "";
+  return id
+    .trim()
+    .toLowerCase()
+    .replace(/^(sub-|disc-)+/, "");
+}
+
+/**
  * Generates a clean, simple, human-readable slug for a beat based on its title.
  * Handles diacritics, spaces, punctuation.
- * Falls back to fallbackId or 'beat'.
+ * For generic titles like "Beat Battle #8 Entry" or "Z3nn's Beat", falls back to the clean beat ID (e.g. "bb8-1").
  */
 export function toBeatSlug(title?: string, fallbackId?: string): string {
+  const cleanFallback = normalizeBeatId(fallbackId) || "beat";
+
   if (!title || typeof title !== "string") {
-    if (!fallbackId) return "beat";
-    return fallbackId.replace(/^sub-/, "").toLowerCase();
+    return cleanFallback;
   }
 
-  const normalized = title
+  const cleanTitle = title.trim();
+
+  // If title is generic like "Beat Battle #8 Entry", "Beat Battle #8", "Producer's Beat", "Untitled Beat"
+  if (
+    /^beat\s*battle\s*#?\d+(\s*entry)?$/i.test(cleanTitle) ||
+    /^[a-z0-9_-]+'s\s*beat$/i.test(cleanTitle) ||
+    /^untitled(\s*beat)?$/i.test(cleanTitle)
+  ) {
+    return cleanFallback;
+  }
+
+  const normalized = cleanTitle
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
@@ -126,6 +150,6 @@ export function toBeatSlug(title?: string, fallbackId?: string): string {
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
 
-  return normalized || (fallbackId ? fallbackId.replace(/^sub-/, "").toLowerCase() : "beat");
+  return normalized || cleanFallback;
 }
 

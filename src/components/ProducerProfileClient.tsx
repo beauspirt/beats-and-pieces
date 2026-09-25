@@ -2082,8 +2082,8 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
                 {/* Public Rating Average — pinned top-right corner */}
                 {typeof beat.flames === "number" && beat.flames >= 1 ? (
-                  <Tooltip content="Public Rating Average">
-                    <div className={`absolute top-4 flex items-center gap-1 text-xs text-[#FF5E3A] font-bold select-none cursor-default leading-none z-10 ${isProfileOwner ? "right-14 sm:right-4" : "right-4"}`}>
+                  <Tooltip content="Public Rating Average" className={`!absolute top-4 z-10 ${isProfileOwner ? "right-14 sm:right-4" : "right-4"}`}>
+                    <div className="flex items-center gap-1 text-xs text-[#FF5E3A] font-bold select-none cursor-default leading-none">
                       <Flame className="w-4 h-4 fill-current" />
                       <span>{beat.flames.toFixed(2)}</span>
                     </div>

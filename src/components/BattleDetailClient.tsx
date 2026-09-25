@@ -2172,8 +2172,8 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
                       {/* Public Rating Average — pinned top-right corner */}
                       {hasFlame && (
-                        <Tooltip content="Public Rating Average">
-                          <div className="absolute top-4 right-4 flex items-center gap-1 text-xs text-[#FF5E3A] font-bold select-none cursor-default leading-none z-10">
+                        <Tooltip content="Public Rating Average" className="!absolute top-4 right-4 z-10">
+                          <div className="flex items-center gap-1 text-xs text-[#FF5E3A] font-bold select-none cursor-default leading-none">
                             <Flame className="w-4 h-4 fill-current" />
                             <span>{Number(sub.flameRating).toFixed(2)}</span>
                           </div>

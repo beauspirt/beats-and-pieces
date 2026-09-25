@@ -584,8 +584,8 @@ export default function BeatsDiscoveryPage() {
 
                 {/* Public Rating Average — pinned top-right corner (left of fav button on mobile) */}
                 {typeof beat.flames === "number" && beat.flames >= 1 ? (
-                  <Tooltip content="Public Rating Average">
-                    <div className="absolute top-4 right-14 sm:right-4 flex items-center gap-1 text-xs text-[#FF5E3A] font-bold select-none cursor-default leading-none z-10">
+                  <Tooltip content="Public Rating Average" className="!absolute top-4 right-14 sm:right-4 z-10">
+                    <div className="flex items-center gap-1 text-xs text-[#FF5E3A] font-bold select-none cursor-default leading-none">
                       <Flame className="w-4 h-4 fill-current" />
                       <span>{beat.flames.toFixed(2)}</span>
                     </div>

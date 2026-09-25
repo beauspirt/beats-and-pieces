@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { BattleDetailClient } from "@/components/BattleDetailClient";
 import { ProducerProfileClient } from "@/components/ProducerProfileClient";
+import { BeatDetailClient } from "@/components/BeatDetailClient";
 import { ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
@@ -39,6 +40,15 @@ export default function NotFound() {
     if (producerId) {
       return <ProducerProfileClient producerId={producerId} />;
     }
+  }
+
+  // Handle dynamic /[producerId]/beat routes created at runtime
+  if (pathname.includes("/beat")) {
+    return (
+      <Suspense fallback={<div className="min-h-[70vh] flex items-center justify-center"><div className="w-8 h-8 rounded-full border-2 border-[#FF5E3A] border-t-transparent animate-spin" /></div>}>
+        <BeatDetailClient />
+      </Suspense>
+    );
   }
 
   // Handle direct root producer routes e.g. /nerub or /[producerId]

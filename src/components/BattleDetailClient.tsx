@@ -23,7 +23,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { ClientPortal } from "./ClientPortal";
 import { Tooltip } from "./Tooltip";
-import { formatTime } from "@/lib/utils";
+import { formatTime, toBeatSlug } from "@/lib/utils";
 
 // Deterministic pseudo-random seeded shuffle (Mulberry32 PRNG)
 function seededShuffle<T>(array: T[], seedStr: string): T[] {
@@ -629,9 +629,9 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
       }
 
       // Register submission in database service
-      const slugBase = `${uploaderId}-${finalTitle}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const cleanSubId = toBeatSlug(finalTitle, `${uploaderId}-${Date.now()}`);
       const newSub = battleService.submitEntry({
-        id: slugBase || `sub-${Date.now()}`,
+        id: cleanSubId,
         battleId: battle.id,
         userId: uploaderId,
         beatmakerTag: uploaderTag,
@@ -2137,7 +2137,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
                           {/* Beat Name & Beatmaker Name */}
                           <div className="min-w-0 flex-1">
-                            <Link href={`/${profileId}/beat?id=${sub.id}`} className="active:opacity-70 transition-opacity">
+                            <Link href={`/${profileId}/beat?id=${toBeatSlug(displayTitle, sub.id)}`} className="active:opacity-70 transition-opacity">
                               <h3 className="font-bold text-white text-lg leading-snug break-words [overflow-wrap:anywhere]">
                                 {displayTitle}
                               </h3>

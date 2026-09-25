@@ -12,6 +12,7 @@ import { JudgeFeedbackTicker } from "@/components/JudgeFeedbackTicker";
 import { useAuth } from "@/lib/auth-context";
 import { Search, Filter, SlidersHorizontal, Star, Flame, ChevronDown, Upload, Check } from "lucide-react";
 import { Tooltip } from "@/components/Tooltip";
+import { toBeatSlug } from "@/lib/utils";
 
 export default function BeatsDiscoveryPage() {
   const { user: currentUser } = useAuth();
@@ -492,7 +493,7 @@ export default function BeatsDiscoveryPage() {
                     <div className="min-w-0 flex-1">
                       {/* Title & Badges */}
                       <div className="flex flex-wrap items-center gap-2 min-w-0">
-                        <Link href={`/${beat.beatmaker.id}/beat?id=${beat.id}`} className="active:opacity-70 transition-opacity">
+                        <Link href={`/${beat.beatmaker.id}/beat?id=${toBeatSlug(beat.title, beat.id)}`} className="active:opacity-70 transition-opacity">
                           <h3 className="font-bold text-white text-lg leading-snug break-words [overflow-wrap:anywhere]">
                             {beat.title}
                           </h3>

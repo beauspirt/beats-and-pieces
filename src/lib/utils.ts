@@ -105,3 +105,27 @@ export function fromDatetimeLocalString(localStr?: string | null): string {
   return d.toISOString();
 }
 
+/**
+ * Generates a clean, simple, human-readable slug for a beat based on its title.
+ * Handles diacritics, spaces, punctuation.
+ * Falls back to fallbackId or 'beat'.
+ */
+export function toBeatSlug(title?: string, fallbackId?: string): string {
+  if (!title || typeof title !== "string") {
+    if (!fallbackId) return "beat";
+    return fallbackId.replace(/^sub-/, "").toLowerCase();
+  }
+
+  const normalized = title
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+
+  return normalized || (fallbackId ? fallbackId.replace(/^sub-/, "").toLowerCase() : "beat");
+}
+

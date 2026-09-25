@@ -5,21 +5,35 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { beatService } from "@/services/beatService";
+import { battleService } from "@/services/battleService";
+import { producerService } from "@/services/producerService";
 import { DiscoveryBeat } from "@/lib/types";
 import { AudioWaveformPlayer } from "@/components/AudioWaveformPlayer";
 import { Tooltip } from "@/components/Tooltip";
+import { toBeatSlug } from "@/lib/utils";
 import { Flame, Star, ArrowLeft, Loader2, Share2, Check } from "lucide-react";
 
 export function BeatDetailClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const beatId = searchParams.get("id");
-  
+  const rawQueryId = searchParams?.get("id");
+
+  const [beatId, setBeatId] = useState<string | null>(rawQueryId || null);
   const [beat, setBeat] = useState<DiscoveryBeat | null>(null);
   const [hasChecked, setHasChecked] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // Re-fetch beat when storage updates
+  useEffect(() => {
+    if (rawQueryId) {
+      setBeatId(rawQueryId);
+    } else if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryId = urlParams.get("id");
+      if (queryId) setBeatId(queryId);
+    }
+  }, [rawQueryId]);
+
+  // Re-fetch beat when storage updates or beatId changes
   useEffect(() => {
     if (!beatId) {
       setHasChecked(true);
@@ -27,19 +41,105 @@ export function BeatDetailClient() {
     }
 
     const fetchBeat = () => {
-      const allBeats = beatService.getAllDiscoveryBeats();
-      const found = allBeats.find((b) => b.id === beatId);
+      const rawTarget = beatId.trim();
+      if (!rawTarget) {
+        setBeat(null);
+        return;
+      }
+
+      const cleanSlug = toBeatSlug(rawTarget);
+      const lowerRaw = rawTarget.toLowerCase();
+      const strippedRaw = lowerRaw.replace(/^sub-/, "");
+
+      // 1. All discovery beats
+      const allDiscovery = beatService.getAllDiscoveryBeats();
+
+      // 2. All battle submissions (from ALL battles, active or completed)
+      const allSubs = battleService.getAllSubmissions();
+      const mappedBattleBeats: DiscoveryBeat[] = allSubs.map((sub) => {
+        const prod = producerService.getProducerById(sub.userId) || producerService.getProducerByTag(sub.beatmakerTag);
+        const battle = battleService.getBattleById(sub.battleId);
+        let title = sub.beatTitle || (battle?.title ? `${battle.title} Entry` : "Untitled Beat");
+        if (/^Beat Battle #\d+$/i.test(title.trim())) {
+          title = `${title.trim()} Entry`;
+        }
+        return {
+          id: sub.id,
+          title,
+          beatmaker: {
+            id: sub.userId || prod?.id || "producer",
+            tag: sub.beatmakerTag || prod?.nickname || "Producer",
+            avatarUrl: prod?.avatarUrl || "/avatars/default-avatar.png",
+          },
+          audioUrl: sub.audioUrl,
+          duration: sub.duration || 120,
+          waveform: sub.waveform || [],
+          bpm: typeof sub.bpm === "number" ? sub.bpm : undefined,
+          priceTag: "Not For Sale",
+          genres: [],
+          tags: [],
+          flames: typeof sub.flameRating === "number" && sub.flameRating >= 1 ? Math.min(5.0, Math.max(1.0, sub.flameRating)) : undefined,
+          juryScore: typeof sub.juryScore === "number" && !isNaN(sub.juryScore) ? Number(sub.juryScore) : undefined,
+          juryFeedbacks: sub.juryFeedbacks || [],
+          battleSource: battle?.title,
+          tier: sub.rank === 1 ? 1 : sub.rank === 2 ? 2 : sub.rank === 3 ? 3 : 4,
+          rank: sub.rank,
+          createdAt: sub.submittedAt || new Date().toISOString(),
+        };
+      });
+
+      const pool = [...allDiscovery, ...mappedBattleBeats];
+
+      let producerSlug = "";
+      if (typeof window !== "undefined") {
+        producerSlug = window.location.pathname.replace(/^\//, "").split("/")[0].toLowerCase();
+      }
+
+      // Priority 1: Exact ID match (case-insensitive)
+      let found = pool.find((b) => b.id.toLowerCase() === lowerRaw);
+
+      // Priority 2: ID match without sub- prefix
+      if (!found) {
+        found = pool.find((b) => b.id.replace(/^sub-/, "").toLowerCase() === strippedRaw);
+      }
+
+      // Priority 3: Match producer + title slug
+      if (!found && producerSlug) {
+        found = pool.find((b) => {
+          const prodMatch =
+            b.beatmaker.id.toLowerCase() === producerSlug ||
+            b.beatmaker.tag.toLowerCase() === producerSlug;
+          return prodMatch && toBeatSlug(b.title) === cleanSlug;
+        });
+      }
+
+      // Priority 4: Match title slug across pool
+      if (!found) {
+        found = pool.find((b) => toBeatSlug(b.title) === cleanSlug);
+      }
+
+      // Priority 5: Substring match in ID (e.g. if partial timestamp or sub id)
+      if (!found) {
+        found = pool.find((b) => b.id.toLowerCase().includes(strippedRaw) || strippedRaw.includes(b.id.toLowerCase()));
+      }
+
       setBeat(found || null);
     };
 
-    beatService.syncFromSupabase().then(() => {
+    Promise.allSettled([
+      beatService.syncFromSupabase(),
+      battleService.syncFromSupabase(),
+      producerService.syncFromSupabase(),
+    ]).then(() => {
       fetchBeat();
       setHasChecked(true);
     });
 
     window.addEventListener("bnp_beats_updated", fetchBeat);
+    window.addEventListener("bnp_battles_updated", fetchBeat);
     return () => {
       window.removeEventListener("bnp_beats_updated", fetchBeat);
+      window.removeEventListener("bnp_battles_updated", fetchBeat);
     };
   }, [beatId]);
 
@@ -51,7 +151,8 @@ export function BeatDetailClient() {
 
   const handleShare = () => {
     if (!beat) return;
-    const url = `${window.location.origin}/${beat.beatmaker.id}/beat?id=${beat.id}`;
+    const cleanSlug = toBeatSlug(beat.title, beat.id);
+    const url = `${window.location.origin}/${beat.beatmaker.id}/beat?id=${cleanSlug}`;
     navigator.clipboard.writeText(url).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -225,10 +326,10 @@ export function BeatDetailClient() {
                 </Tooltip>
                 
                 {copied && (
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-[#222222] text-white text-[11px] font-bold rounded-full shadow-2xl whitespace-nowrap z-50 flex items-center gap-1.5 leading-none pointer-events-none animate-in fade-in zoom-in-95 duration-150">
+                  <div className="absolute bottom-full right-0 sm:left-1/2 sm:-translate-x-1/2 mb-2 px-3 py-1 bg-[#222222] text-white text-[11px] font-bold rounded-full shadow-2xl whitespace-nowrap z-50 flex items-center gap-1.5 leading-none pointer-events-none animate-in fade-in zoom-in-95 duration-150">
                     <Check className="w-3 h-3 text-emerald-400 shrink-0" />
                     <span>Beat link copied!</span>
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#222222]" />
+                    <div className="absolute top-full right-3 sm:left-1/2 sm:-translate-x-1/2 border-4 border-transparent border-t-[#222222]" />
                   </div>
                 )}
               </div>

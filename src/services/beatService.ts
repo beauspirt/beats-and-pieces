@@ -5,6 +5,7 @@ import { battleService } from "./battleService";
 import { producerService } from "./producerService";
 import { activityLogService } from "./activityLogService";
 import { storageService } from "./storageService";
+import { toBeatSlug } from "@/lib/utils";
 
 const STORAGE_KEY_CUSTOM_BEATS = "bnp_custom_beats";
 const STORAGE_KEY_BEAT_OVERRIDES = "bnp_beats_overrides";
@@ -357,7 +358,7 @@ export const beatService = {
   async createBeat(beat: Omit<DiscoveryBeat, "id"> & { id?: string }): Promise<DiscoveryBeat> {
     const newBeat: DiscoveryBeat = {
       ...beat,
-      id: beat.id || beat.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `beat-${Date.now()}`,
+      id: beat.id || toBeatSlug(beat.title, `beat-${Date.now()}`),
     };
 
     const custom = loadCustomBeats();

@@ -1951,7 +1951,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                     <div className="min-w-0 flex-1">
                       {/* Title & Desktop Inline Badges */}
                       <div className="flex flex-wrap items-center gap-2 min-w-0">
-                        <Link href={`/${producer.id}/beat?id=${beat.id}`} className="hover:text-[#7B61FF] hover:underline">
+                        <Link href={`/${producer.id}/beat?id=${beat.id}`} className="active:opacity-70 transition-opacity">
                           <h3 className="font-bold text-white text-lg leading-snug break-words [overflow-wrap:anywhere]">
                             {beat.title}
                           </h3>

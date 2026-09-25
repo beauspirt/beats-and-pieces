@@ -1365,14 +1365,15 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       });
   }, [producer?.links, KNOWN_PLATFORMS]);
 
+  if (!hasChecked) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center animate-in fade-in duration-200">
+        <Loader2 className="w-8 h-8 text-[#FF5E3A] animate-spin" />
+      </div>
+    );
+  }
+
   if (!producer) {
-    if (!hasChecked) {
-      return (
-        <div className="min-h-[70vh] flex items-center justify-center animate-in fade-in duration-200">
-          <div className="w-8 h-8 rounded-full border-2 border-[#FF5E3A] border-t-transparent animate-spin" />
-        </div>
-      );
-    }
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4 space-y-4">
         <h1 className="text-3xl font-black text-[#FF5E3A]">404</h1>

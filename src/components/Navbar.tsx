@@ -216,7 +216,7 @@ export const Navbar: React.FC = () => {
                 </Link>
               )
             ) : (
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/5 opacity-0" />
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 animate-pulse" />
             )}
 
           </div>

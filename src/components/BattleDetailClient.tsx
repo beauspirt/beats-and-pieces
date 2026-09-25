@@ -2117,9 +2117,9 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                               />
                             </Link>
 
-                            {/* Corner Medal Badge (Smooth, flat minimalist design with clean centering and zero glow) */}
+                            {/* Corner Medal Badge (Smooth, flat minimalist design with clean optical centering) */}
                             <div
-                              className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 sm:w-[17px] sm:h-[17px] rounded-full flex items-center justify-center ring-[1.5px] ring-[#181818] select-none pointer-events-none ${
+                              className={`absolute -bottom-0.5 -right-0.5 w-[18px] h-[18px] rounded-full flex items-center justify-center ring-[1.5px] ring-[#181818] select-none pointer-events-none ${
                                 rank === 1
                                   ? "bg-[#FFC837] text-[#9A5800]"
                                   : rank === 2
@@ -2131,10 +2131,10 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                               title={rank <= 3 ? `${rank === 1 ? '1st' : rank === 2 ? '2nd' : '3rd'} Place` : `Place #${rank}`}
                             >
                               <span
-                                className={`font-black leading-none text-center select-none tabular-nums ${
+                                className={`font-black leading-none text-center select-none -translate-y-px ${
                                   rank >= 10
-                                    ? "text-[8.5px] sm:text-[9px] tracking-tighter"
-                                    : "text-[10px] sm:text-[10.5px]"
+                                    ? "text-[9px] tracking-tighter"
+                                    : "text-[11px]"
                                 }`}
                               >
                                 {rank}

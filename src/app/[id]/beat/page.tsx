@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 import type { Metadata } from "next";
 import { producerService } from "@/services/producerService";
 import { buildOgMetadata } from "@/lib/metadata";
-
+import { BeatDetailClient } from "@/components/BeatDetailClient";
 
 export const dynamicParams = false;
 
@@ -53,17 +53,10 @@ export async function generateMetadata({
   });
 }
 
-import { ProducerProfileClient } from "@/components/ProducerProfileClient";
-
-export default async function ProducerBeatPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
+export default async function ProducerBeatPage() {
   return (
     <Suspense fallback={<div className="min-h-[70vh] flex items-center justify-center"><div className="w-8 h-8 rounded-full border-2 border-[#FF5E3A] border-t-transparent animate-spin" /></div>}>
-      <ProducerProfileClient producerId={id} />
+      <BeatDetailClient />
     </Suspense>
   );
 }

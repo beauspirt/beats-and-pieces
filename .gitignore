@@ -52,3 +52,5 @@ next-env.d.ts
 /Sample Beats/
 BNP_Specs*
 .FullName
+*.mp3
+*.wav

@@ -114,7 +114,7 @@ export const beatService = {
             beatTitle = `${beatTitle.trim()} Entry`;
           }
           battleBeats.push({
-            id: `sub-${sub.id}`,
+            id: sub.id,
             title: beatTitle,
             beatmaker: {
               id: sub.userId || "producer",
@@ -357,7 +357,7 @@ export const beatService = {
   async createBeat(beat: Omit<DiscoveryBeat, "id"> & { id?: string }): Promise<DiscoveryBeat> {
     const newBeat: DiscoveryBeat = {
       ...beat,
-      id: beat.id || `beat-custom-${Date.now()}`,
+      id: beat.id || beat.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `beat-${Date.now()}`,
     };
 
     const custom = loadCustomBeats();

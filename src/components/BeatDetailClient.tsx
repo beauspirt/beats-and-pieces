@@ -8,7 +8,7 @@ import { beatService } from "@/services/beatService";
 import { DiscoveryBeat } from "@/lib/types";
 import { AudioWaveformPlayer } from "@/components/AudioWaveformPlayer";
 import { Tooltip } from "@/components/Tooltip";
-import { Flame, Star, ArrowLeft, Loader2 } from "lucide-react";
+import { Flame, Star, ArrowLeft, Loader2, Share2, Check } from "lucide-react";
 
 export function BeatDetailClient() {
   const router = useRouter();
@@ -17,6 +17,7 @@ export function BeatDetailClient() {
   
   const [beat, setBeat] = useState<DiscoveryBeat | null>(null);
   const [hasChecked, setHasChecked] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   // Re-fetch beat when storage updates
   useEffect(() => {
@@ -46,6 +47,15 @@ export function BeatDetailClient() {
     if (!beat) return;
     const isFav = beatService.toggleFavorite(beat.id);
     setBeat({ ...beat, isFavorite: isFav });
+  };
+
+  const handleShare = () => {
+    if (!beat) return;
+    const url = `${window.location.origin}/${beat.beatmaker.id}/beat?id=${beat.id}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
 
   if (!beatId || (!beat && hasChecked)) {
@@ -89,16 +99,16 @@ export function BeatDetailClient() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8 animate-in fade-in duration-300">
-      <button
-        onClick={() => router.back()}
-        className="flex items-center gap-2 text-xs font-bold text-zinc-400 hover:text-white transition-colors cursor-pointer w-max"
+      <Link
+        href={`/${beat.beatmaker.id}`}
+        className="flex items-center gap-2 text-sm text-white hover:text-zinc-300 transition-colors cursor-pointer w-max"
       >
         <ArrowLeft className="w-4 h-4" />
-        <span>Go Back</span>
-      </button>
+        <span>Go back to {displayTag}&apos;s profile</span>
+      </Link>
 
       {/* Main Beat Card (Using the exact layout from Beats Discovery) */}
-      <div className="bg-[#181818] rounded-[32px] p-5 sm:p-6 shadow-2xl relative border border-white/5">
+      <div className="bg-[#181818] rounded-[32px] p-5 sm:p-6 shadow-2xl relative">
         
         {/* Row 1: Header (Title, Producer, Avatar, Badges, Meta) */}
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 min-w-0">
@@ -126,22 +136,22 @@ export function BeatDetailClient() {
             <div className="min-w-0 flex-1 pt-1">
               {/* Title & Badges */}
               <div className="flex flex-wrap items-center gap-2.5 min-w-0 mb-1.5">
-                <h1 className="font-black text-white text-2xl sm:text-3xl leading-tight break-words [overflow-wrap:anywhere]">
+                <h1 className="font-bold text-white text-lg leading-snug break-words [overflow-wrap:anywhere]">
                   {beat.title}
                 </h1>
 
                 {beat.rank === 1 && (
-                  <span className="h-7 px-3.5 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0 border border-[#FF5E3A]/30">
+                  <span className="h-7 px-3.5 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
                     1st Place
                   </span>
                 )}
                 {beat.rank === 2 && (
-                  <span className="h-7 px-3.5 rounded-full bg-[#1E1E1E] text-[#AAAAAA] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0 border border-white/10">
+                  <span className="h-7 px-3.5 rounded-full bg-[#1E1E1E] text-[#AAAAAA] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
                     2nd Place
                   </span>
                 )}
                 {beat.rank === 3 && (
-                  <span className="h-7 px-3.5 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0 border border-[#FF8A65]/30">
+                  <span className="h-7 px-3.5 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
                     3rd Place
                   </span>
                 )}
@@ -149,7 +159,7 @@ export function BeatDetailClient() {
                 {match && (
                   <Link
                     href={`/battles/battle-${match[1]}`}
-                    className="px-3.5 h-7 rounded-full bg-[#7B61FF]/15 text-zinc-300 hover:bg-[#7B61FF]/25 hover:text-white text-xs font-bold shrink-0 transition-all inline-flex items-center gap-1.5 leading-none border border-[#7B61FF]/30"
+                    className="px-3.5 h-7 rounded-full bg-[#7B61FF]/15 text-zinc-300 hover:bg-[#7B61FF]/25 hover:text-white text-xs font-bold shrink-0 transition-all inline-flex items-center gap-1.5 leading-none"
                     title={`View ${beat.battleSource || `Beat Battle #${match[1]}`}`}
                   >
                     <span>BB#{match[1]}</span>
@@ -172,7 +182,7 @@ export function BeatDetailClient() {
           <div className="flex flex-wrap items-center gap-3 sm:gap-3.5 shrink-0 select-none sm:self-start">
             {/* BPM */}
             {beat.bpm ? (
-              <span className="text-xs font-bold px-3.5 py-2 rounded-full bg-[#121212] text-[#888888] select-none inline-flex items-center justify-center text-center leading-none border border-white/5">
+              <span className="text-xs font-bold px-3.5 py-2 rounded-full bg-[#121212] text-[#888888] select-none inline-flex items-center justify-center text-center leading-none">
                 {beat.bpm} BPM
               </span>
             ) : null}
@@ -180,10 +190,10 @@ export function BeatDetailClient() {
             {/* Price Tag Pill */}
             {beat.priceTag ? (
               <span
-                className={`px-3.5 py-2 rounded-full text-xs font-bold select-none inline-flex items-center justify-center text-center leading-none border ${
+                className={`px-3.5 py-2 rounded-full text-xs font-bold select-none inline-flex items-center justify-center text-center leading-none ${
                   beat.priceTag === "Not For Sale"
-                    ? "bg-[#121212] text-[#666666] border-white/5"
-                    : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                    ? "bg-[#121212] text-[#666666]"
+                    : "bg-emerald-500/10 text-emerald-400"
                 }`}
               >
                 {beat.priceTag}
@@ -202,11 +212,21 @@ export function BeatDetailClient() {
 
             {/* Top Right Corner Actions (Absolute on mobile, inline on desktop) */}
             <div className="absolute top-5 right-5 sm:static sm:top-auto sm:right-auto z-10 flex items-center gap-3">
+              {/* Share Button */}
+              <button
+                type="button"
+                onClick={handleShare}
+                className="p-2 rounded-full bg-[#121212] hover:bg-[#202020] transition-colors text-[#888888] hover:text-white cursor-pointer select-none shadow-sm"
+                title="Copy link to beat"
+              >
+                {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Share2 className="w-4 h-4" />}
+              </button>
+
               {/* Favorite Button */}
               <button
                 type="button"
                 onClick={toggleFavorite}
-                className="p-2 rounded-full bg-[#121212] hover:bg-[#202020] transition-colors text-[#888888] hover:text-amber-400 cursor-pointer select-none border border-white/5 shadow-sm"
+                className="p-2 rounded-full bg-[#121212] hover:bg-[#202020] transition-colors text-[#888888] hover:text-amber-400 cursor-pointer select-none shadow-sm"
                 title={beat.isFavorite ? "Remove from favorites" : "Add to favorites"}
               >
                 <Star
@@ -247,11 +267,11 @@ export function BeatDetailClient() {
 
         {/* Row 3: Clickable Genre & Tags */}
         {((beat.genres && beat.genres.length > 0) || (beat.tags && beat.tags.length > 0)) ? (
-          <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-white/5 text-xs select-none mt-2">
+          <div className="flex flex-wrap items-center gap-2 pt-4 text-xs select-none mt-2">
             {beat.genres?.map((g) => (
               <span
                 key={g}
-                className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#121212] text-[#888888] border border-white/5"
+                className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#121212] text-[#888888]"
               >
                 {g}
               </span>
@@ -260,7 +280,7 @@ export function BeatDetailClient() {
             {beat.tags?.map((t) => (
               <span
                 key={t}
-                className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#121212] text-[#777777] border border-white/5"
+                className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#121212] text-[#777777]"
               >
                 {t}
               </span>

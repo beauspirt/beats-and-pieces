@@ -2136,7 +2136,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
 
                           {/* Beat Name & Beatmaker Name */}
                           <div className="min-w-0 flex-1">
-                            <Link href={`/${profileId}/beat?id=sub-${sub.id}`} className="hover:text-[#7B61FF] hover:underline">
+                            <Link href={`/${profileId}/beat?id=${sub.id}`} className="hover:text-[#7B61FF] hover:underline">
                               <h3 className="font-bold text-white text-lg leading-snug break-words [overflow-wrap:anywhere]">
                                 {displayTitle}
                               </h3>

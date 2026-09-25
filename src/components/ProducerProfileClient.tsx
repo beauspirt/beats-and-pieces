@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { sampleProducers, sampleDiscoveryBeats, sampleSubmissions } from "@/lib/mock-data";
 import { 
   AudioWaveformPlayer,
@@ -274,8 +274,6 @@ function Tooltip({
 export function ProducerProfileClient({ producerId }: { producerId: string }) {
   const { user: authUser, updateUser } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const singleBeatId = searchParams.get("id");
 
   const [producer, setProducer] = useState<UserProfile | null | undefined>(() => {
     return producerService.getProducerById(producerId) || producerService.getProducerByTag(producerId) || sampleProducers[producerId];
@@ -605,10 +603,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
 
   // Apply active sorting mode matching Beats discovery page
   const displayedBeats = useMemo(() => {
-    let list = [...prioritizedBeats];
-    if (singleBeatId) {
-      list = list.filter((b) => b.id === singleBeatId);
-    }
+    const list = [...prioritizedBeats];
     if (beatsSortBy === "recent") {
       return list.sort((a, b) => {
         const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
@@ -1844,22 +1839,13 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       <div className="space-y-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            {singleBeatId ? (
-              <Link href={`/${producer.id}`} className="flex items-center gap-2 text-[#7B61FF] hover:text-[#684DE6] transition-colors cursor-pointer w-max group">
-                <ArrowLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
-                <h2 className="text-xl sm:text-2xl font-bold">Show all beats</h2>
-              </Link>
-            ) : (
-              <h2 className="text-2xl font-bold text-white">Beats</h2>
-            )}
+            <h2 className="text-2xl font-bold text-white">Beats</h2>
           </div>
           
           <div className="flex items-center gap-2 sm:gap-2.5">
-            {!singleBeatId && (
-              <>
-                {/* Sorting Dropdown Button (Sits to the left of Add Beat) */}
-                {prioritizedBeats.length > 0 && (
-                  <div className="relative" ref={sortMenuRef}>
+            {/* Sorting Dropdown Button (Sits to the left of Add Beat) */}
+            {prioritizedBeats.length > 0 && (
+              <div className="relative" ref={sortMenuRef}>
                 <button
                   type="button"
                   onClick={(e) => {
@@ -1932,13 +1918,11 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                 <span>Add Beat</span>
               </button>
             )}
-              </>
-            )}
           </div>
         </div>
 
         {/* Max Upload Limit Notice */}
-        {isProfileOwner && isAtBeatLimit && !singleBeatId && (
+        {isProfileOwner && isAtBeatLimit && (
           <div className="bg-[#1C1A24] rounded-3xl p-4 flex items-center gap-3.5 text-xs text-zinc-300 animate-in fade-in duration-200">
             <div className="w-8 h-8 rounded-3xl bg-[#7B61FF]/15 flex items-center justify-center shrink-0 text-[#7B61FF]">
               <Music className="w-4 h-4" />
@@ -2150,7 +2134,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
         ) : (
           <div className="bg-[#181818] rounded-[28px] p-8 text-center space-y-2">
             <p className="text-zinc-400 text-sm">
-              {singleBeatId ? "Beat not found." : "This producer hasn't submitted any beats."}
+              This producer hasn&apos;t submitted any beats.
             </p>
           </div>
         )}

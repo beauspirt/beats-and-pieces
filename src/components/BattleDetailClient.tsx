@@ -2117,10 +2117,18 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                               />
                             </Link>
 
-                            {/* Corner Medal Badge (Flat minimalist SVG design with exact mathematical centering) */}
+                            {/* Corner Medal Badge (Flat minimalist SVG design with exact mathematical centering & subtle glow) */}
                             <svg
                               viewBox="0 0 20 20"
-                              className="absolute -bottom-0.5 -right-0.5 w-[18px] h-[18px] sm:w-5 sm:h-5 rounded-full select-none pointer-events-none shadow-sm ring-[1.5px] ring-[#181818]"
+                              className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 sm:w-[17px] sm:h-[17px] rounded-full select-none pointer-events-none ring-[1.5px] ring-[#181818] ${
+                                rank === 1
+                                  ? "shadow-[0_0_8px_rgba(255,200,55,0.5)]"
+                                  : rank === 2
+                                  ? "shadow-[0_0_8px_rgba(221,227,234,0.45)]"
+                                  : rank === 3
+                                  ? "shadow-[0_0_8px_rgba(217,119,54,0.45)]"
+                                  : "shadow-sm"
+                              }`}
                             >
                               <title>{rank <= 3 ? `${rank === 1 ? '1st' : rank === 2 ? '2nd' : '3rd'} Place` : `Place #${rank}`}</title>
                               <circle
@@ -2151,7 +2159,7 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                                     ? "#8A3712"
                                     : "#D4D4D8"
                                 }
-                                fontSize={rank >= 10 ? "10" : "11.5"}
+                                fontSize={rank >= 10 ? "10" : "12"}
                                 fontWeight="900"
                                 fontFamily="inherit"
                               >

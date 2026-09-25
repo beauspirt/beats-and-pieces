@@ -887,8 +887,9 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
     const bpmValue = editingBeat.bpm !== "" && !isNaN(Number(editingBeat.bpm)) ? Number(editingBeat.bpm) : undefined;
 
     if (editingBeat.isBattleSubmission) {
-      // Battle submissions: update BPM, priceTag, and tags only
+      // Battle submissions: update title, BPM, priceTag, and tags only (not audio)
       beatService.updateBeat(editingBeat.id, {
+        title: editingBeat.title.trim() || "Untitled Beat",
         bpm: bpmValue,
         priceTag: priceTag,
         tags: editingTags,
@@ -2222,25 +2223,15 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                           <span>Beat Title</span>
                           <span className="text-[#FF5E3A]">*</span>
                         </div>
-                        {editingBeat.isBattleSubmission && (
-                          <span className="text-xs text-zinc-500 flex items-center gap-1">
-                            <Lock className="w-3 h-3" /> Locked
-                          </span>
-                        )}
                       </label>
                       <input
                         type="text"
-                        disabled={editingBeat.isBattleSubmission}
                         value={editingBeat.title}
                         onChange={(e) =>
                           setEditingBeat({ ...editingBeat, title: e.target.value })
                         }
                         placeholder="e.g. Midnight Heat"
-                        className={`w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none transition-all ${
-                          editingBeat.isBattleSubmission
-                            ? "opacity-60 cursor-not-allowed"
-                            : "focus:ring-1 focus:ring-[#7B61FF]"
-                        }`}
+                        className="w-full bg-[#121212] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#7B61FF] transition-all"
                         required
                       />
                       <p className="text-xs text-[#888888]">
@@ -2362,7 +2353,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                       <div className="p-3.5 rounded-xl bg-amber-500/10 text-amber-300 text-xs flex items-start gap-2.5 leading-relaxed mt-3">
                         <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                         <p>
-                          This beat is part of a historical battle archive ({((editingBeat.battleSource || "Beat Battle").replace(/\s*\([^)]*\)/g, "")).trim()}). The <strong>Beat Title</strong> and <strong>Audio Master</strong> cannot be changed or deleted to preserve competition records.
+                          This beat is part of a historical battle archive ({((editingBeat.battleSource || "Beat Battle").replace(/\s*\([^)]*\)/g, "")).trim()}). The <strong>Audio Master</strong> cannot be changed or deleted to preserve competition records.
                         </p>
                       </div>
                     )}

@@ -12,7 +12,7 @@ import { JudgeFeedbackTicker } from "@/components/JudgeFeedbackTicker";
 import { useAuth } from "@/lib/auth-context";
 import { Search, Filter, SlidersHorizontal, Star, Flame, ChevronDown, Upload, Check } from "lucide-react";
 import { Tooltip } from "@/components/Tooltip";
-import { toBeatSlug } from "@/lib/utils";
+import { toBeatSlug, getBeatBattleInfo } from "@/lib/utils";
 
 export default function BeatsDiscoveryPage() {
   const { user: currentUser } = useAuth();
@@ -458,9 +458,7 @@ export default function BeatsDiscoveryPage() {
                 : (beat.beatmaker.avatarUrl && !beat.beatmaker.avatarUrl.includes("supabase.co/storage"))
                 ? beat.beatmaker.avatarUrl
                 : "/avatars/default-avatar.png";
-            const match =
-              (beat.battleSource && beat.battleSource.match(/Beat Battle #?(\d+)/i)) ||
-              (beat.id && beat.id.match(/disc-bb(\d+)/));
+            const battleInfo = getBeatBattleInfo(beat);
 
             return (
               <div
@@ -563,46 +561,17 @@ export default function BeatsDiscoveryPage() {
                   compact={true}
                 />
 
-                {/* Row 3: Bottom Tags (Place, Beat Battle, BPM, Sale Status, Genres & Styles) */}
-                {(beat.rank || match || beat.bpm || beat.priceTag || (beat.genres && beat.genres.length > 0) || (beat.tags && beat.tags.length > 0)) ? (
+                {/* Row 3: Bottom Tags (BPM, Sale Status, Genres & Styles) */}
+                {(beat.bpm || beat.priceTag || (beat.genres && beat.genres.length > 0) || (beat.tags && beat.tags.length > 0)) ? (
                   <div className="flex flex-wrap items-center gap-2 pt-0.5 text-xs select-none">
-                    {/* 1. Place tag */}
-                    {beat.rank === 1 && (
-                      <span className="h-7 px-3.5 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
-                        1st Place
-                      </span>
-                    )}
-                    {beat.rank === 2 && (
-                      <span className="h-7 px-3.5 rounded-full bg-[#1E1E1E] text-[#AAAAAA] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
-                        2nd Place
-                      </span>
-                    )}
-                    {beat.rank === 3 && (
-                      <span className="h-7 px-3.5 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
-                        3rd Place
-                      </span>
-                    )}
-
-                    {/* 2. Beat battle tag */}
-                    {match && (
-                      <Link
-                        href={`/battles/battle-${match[1]}`}
-                        className="px-3.5 h-7 rounded-full bg-[#7B61FF]/15 text-zinc-300 hover:bg-[#7B61FF]/25 hover:text-white text-xs font-bold shrink-0 transition-all inline-flex items-center gap-1.5 leading-none select-none"
-                        title={`View ${beat.battleSource || `Beat Battle #${match[1]}`}`}
-                      >
-                        <span>BB#{match[1]}</span>
-                        <span className="text-[10px]">↗</span>
-                      </Link>
-                    )}
-
-                    {/* 3. BPM tag */}
+                    {/* 1. BPM tag */}
                     {beat.bpm ? (
                       <span className="h-7 px-3.5 rounded-full bg-[#121212] text-[#888888] text-xs font-bold select-none inline-flex items-center justify-center text-center leading-none shrink-0">
                         {beat.bpm} BPM
                       </span>
                     ) : null}
 
-                    {/* 4. For sale / not for sale tag */}
+                    {/* 2. For sale / not for sale tag */}
                     {beat.priceTag ? (
                       <span
                         className={`h-7 px-3.5 rounded-full text-xs font-bold select-none inline-flex items-center justify-center text-center leading-none shrink-0 ${
@@ -615,7 +584,7 @@ export default function BeatsDiscoveryPage() {
                       </span>
                     ) : null}
 
-                    {/* 5. Genre / style tags */}
+                    {/* 3. Genre / style tags */}
                     {beat.genres?.map((g) => (
                       <button
                         key={g}
@@ -647,6 +616,19 @@ export default function BeatsDiscoveryPage() {
                     ))}
                   </div>
                 ) : null}
+
+                {/* Separate small text under the tags section */}
+                {battleInfo && (
+                  <p className="text-xs text-zinc-400 select-none pt-0.5">
+                    <Link
+                      href={battleInfo.battleUrl}
+                      className="text-[#7B61FF] hover:underline font-semibold"
+                    >
+                      {battleInfo.battleName}
+                    </Link>{" "}
+                    <span>{battleInfo.statusText}</span>
+                  </p>
+                )}
 
                 {/* Row 4: Judge Feedback Ticker */}
                 {beat.juryFeedbacks && beat.juryFeedbacks.length > 0 && (

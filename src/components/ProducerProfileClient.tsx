@@ -14,7 +14,7 @@ import {
 import { DiscoveryBeat, JudgeFeedbackItem, UserProfile, STANDARD_BEAT_TAGS, VaultItem } from "@/lib/types";
 import { producerService, battleService, beatService, storageService, vaultService, activityLogService } from "@/services";
 import { validateHandle, sanitizeHandle } from "@/services/producerService";
-import { normalizeUrl, toBeatSlug } from "@/lib/utils";
+import { normalizeUrl, toBeatSlug, getBeatBattleInfo } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { JudgeFeedbackTicker } from "@/components/JudgeFeedbackTicker";
@@ -1939,10 +1939,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
         {displayedBeats.length > 0 ? (
           <div className="space-y-4">
             {displayedBeats.map((beat) => {
-              const match =
-                (beat.battleSource && beat.battleSource.match(/Beat Battle #?(\d+)/i)) ||
-                (beat.competitionTitle && beat.competitionTitle.match(/Beat Battle #?(\d+)/i)) ||
-                (beat.id && beat.id.match(/disc-bb(\d+)/));
+              const battleInfo = getBeatBattleInfo(beat);
 
               return (
                 <div
@@ -2017,46 +2014,17 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                     compact={true}
                   />
 
-                  {/* Row 3: Bottom Tags (Place, Beat Battle, BPM, Sale Status, Genres & Styles) */}
-                  {(beat.rank || match || beat.bpm || beat.priceTag || (beat.genres && beat.genres.length > 0) || (beat.tags && beat.tags.length > 0)) ? (
+                  {/* Row 3: Bottom Tags (BPM, Sale Status, Genres & Styles) */}
+                  {(beat.bpm || beat.priceTag || (beat.genres && beat.genres.length > 0) || (beat.tags && beat.tags.length > 0)) ? (
                     <div className="flex flex-wrap items-center gap-2 pt-0.5 select-none">
-                      {/* 1. Place tag */}
-                      {beat.rank === 1 && (
-                        <span className="h-7 px-3.5 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
-                          1st Place
-                        </span>
-                      )}
-                      {beat.rank === 2 && (
-                        <span className="h-7 px-3.5 rounded-full bg-[#1E1E1E] text-[#AAAAAA] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
-                          2nd Place
-                        </span>
-                      )}
-                      {beat.rank === 3 && (
-                        <span className="h-7 px-3.5 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
-                          3rd Place
-                        </span>
-                      )}
-
-                      {/* 2. Beat battle tag */}
-                      {match && (
-                        <Link
-                          href={`/battles/battle-${match[1]}`}
-                          className="px-3.5 h-7 rounded-full bg-[#7B61FF]/15 text-zinc-300 hover:bg-[#7B61FF]/25 hover:text-white text-xs font-bold shrink-0 transition-all inline-flex items-center gap-1.5 leading-none select-none"
-                          title={`View ${beat.battleSource || beat.competitionTitle || `Beat Battle #${match[1]}`}`}
-                        >
-                          <span>BB#{match[1]}</span>
-                          <span className="text-[10px]">↗</span>
-                        </Link>
-                      )}
-
-                      {/* 3. BPM tag */}
+                      {/* 1. BPM tag */}
                       {beat.bpm ? (
                         <span className="h-7 px-3.5 rounded-full bg-[#121212] text-[#888888] text-xs font-bold select-none inline-flex items-center justify-center text-center leading-none shrink-0">
                           {beat.bpm} BPM
                         </span>
                       ) : null}
 
-                      {/* 4. For sale / not for sale tag */}
+                      {/* 2. For sale / not for sale tag */}
                       {beat.priceTag ? (
                         <span
                           className={`h-7 px-3.5 rounded-full text-xs font-bold select-none inline-flex items-center justify-center text-center leading-none shrink-0 ${
@@ -2069,7 +2037,7 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                         </span>
                       ) : null}
 
-                      {/* 5. Genre / style tags */}
+                      {/* 3. Genre / style tags */}
                       {beat.genres?.map((genre) => (
                         <span
                           key={genre}
@@ -2089,6 +2057,19 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
                       ))}
                     </div>
                   ) : null}
+
+                  {/* Separate small text under the tags section */}
+                  {battleInfo && (
+                    <p className="text-xs text-zinc-400 select-none pt-0.5">
+                      <Link
+                        href={battleInfo.battleUrl}
+                        className="text-[#7B61FF] hover:underline font-semibold"
+                      >
+                        {battleInfo.battleName}
+                      </Link>{" "}
+                      <span>{battleInfo.statusText}</span>
+                    </p>
+                  )}
 
                   {/* Row 4: Judge Feedback Loop / Ticker */}
                   {beat.juryFeedbacksList && beat.juryFeedbacksList.length > 0 && (

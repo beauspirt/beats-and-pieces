@@ -10,7 +10,7 @@ import { producerService } from "@/services/producerService";
 import { DiscoveryBeat } from "@/lib/types";
 import { AudioWaveformPlayer } from "@/components/AudioWaveformPlayer";
 import { Tooltip } from "@/components/Tooltip";
-import { toBeatSlug, normalizeBeatId } from "@/lib/utils";
+import { toBeatSlug, normalizeBeatId, getBeatBattleInfo } from "@/lib/utils";
 import { Flame, Star, ArrowLeft, Loader2, Share2, Check } from "lucide-react";
 
 export function BeatDetailClient() {
@@ -214,9 +214,7 @@ export function BeatDetailClient() {
       : "/avatars/default-avatar.png";
   const displayTag = beat.beatmaker.tag || beat.beatmaker.id;
 
-  const match =
-    (beat.battleSource && beat.battleSource.match(/Beat Battle #?(\d+)/i)) ||
-    (beat.id && beat.id.match(/disc-bb(\d+)/));
+  const battleInfo = getBeatBattleInfo(beat);
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8 animate-in fade-in duration-300">
@@ -231,46 +229,11 @@ export function BeatDetailClient() {
       {/* Main Beat Card (Using the exact layout from Beats Discovery) */}
       <div className="bg-[#181818] rounded-[32px] p-5 sm:p-6 relative">
         
-        {/* Row 1: Header (Avatar + Title + Producer on Left, Actions on Right) */}
-        <div className="flex items-start justify-between gap-4 min-w-0">
+        {/* Row 1: Header (Actions at top right on mobile, and avatar/title under actions on mobile; side-by-side on desktop) */}
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 min-w-0">
           
-          {/* Left: Beat Title + Producer Avatar/Tag */}
-          <div className="flex items-start gap-3.5 sm:gap-4 min-w-0 flex-1">
-            <Link
-              href={`/${beat.beatmaker.id}`}
-              className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden relative shrink-0 hover:opacity-80 transition-opacity bg-[#121212]"
-            >
-              <Image
-                src={displayAvatar}
-                alt={displayTag}
-                fill
-                className="object-cover"
-                onError={(e) => {
-                  const img = e.currentTarget as HTMLImageElement;
-                  if (img && !img.src.endsWith("/avatars/default-avatar.png")) {
-                    img.src = "/avatars/default-avatar.png";
-                  }
-                }}
-              />
-            </Link>
-
-            <div className="min-w-0 flex-1 pt-0.5 sm:pt-1">
-              <h1 className="font-bold text-white text-lg leading-snug break-words [overflow-wrap:anywhere] mb-1">
-                {beat.title}
-              </h1>
-
-              {/* Beatmaker name */}
-              <Link
-                href={`/${beat.beatmaker.id}`}
-                className="text-sm text-[#7B61FF] hover:underline font-bold block truncate"
-              >
-                {displayTag}
-              </Link>
-            </div>
-          </div>
-
           {/* Right: Actions (Share, Favorite, Flames, Jury Score) */}
-          <div className="flex items-center gap-3 shrink-0 select-none self-start">
+          <div className="flex items-center gap-3 shrink-0 select-none self-end sm:self-start order-1 sm:order-2">
             {/* Jury Score Avg */}
             {typeof beat.juryScore === "number" && beat.juryScore > 0 ? (
               <Tooltip content="Jury Score Average">
@@ -317,6 +280,41 @@ export function BeatDetailClient() {
               </Tooltip>
             ) : null}
           </div>
+
+          {/* Left: Beat Title + Producer Avatar/Tag */}
+          <div className="flex items-start gap-3.5 sm:gap-4 min-w-0 flex-1 order-2 sm:order-1">
+            <Link
+              href={`/${beat.beatmaker.id}`}
+              className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden relative shrink-0 hover:opacity-80 transition-opacity bg-[#121212]"
+            >
+              <Image
+                src={displayAvatar}
+                alt={displayTag}
+                fill
+                className="object-cover"
+                onError={(e) => {
+                  const img = e.currentTarget as HTMLImageElement;
+                  if (img && !img.src.endsWith("/avatars/default-avatar.png")) {
+                    img.src = "/avatars/default-avatar.png";
+                  }
+                }}
+              />
+            </Link>
+
+            <div className="min-w-0 flex-1 pt-0.5 sm:pt-1">
+              <h1 className="font-bold text-white text-lg leading-snug break-words [overflow-wrap:anywhere] mb-1">
+                {beat.title}
+              </h1>
+
+              {/* Beatmaker name */}
+              <Link
+                href={`/${beat.beatmaker.id}`}
+                className="text-sm text-[#7B61FF] hover:underline font-bold block truncate"
+              >
+                {displayTag}
+              </Link>
+            </div>
+          </div>
         </div>
 
         {/* Row 2: Full Waveform Player */}
@@ -335,46 +333,17 @@ export function BeatDetailClient() {
           />
         </div>
 
-        {/* Row 3: Bottom Tags (Place, Beat Battle, BPM, Sale Status, Genres & Styles) */}
-        {(beat.rank || match || beat.bpm || beat.priceTag || (beat.genres && beat.genres.length > 0) || (beat.tags && beat.tags.length > 0)) ? (
+        {/* Row 3: Bottom Tags (BPM, Sale Status, Genres & Styles) */}
+        {(beat.bpm || beat.priceTag || (beat.genres && beat.genres.length > 0) || (beat.tags && beat.tags.length > 0)) ? (
           <div className="flex flex-wrap items-center gap-2 pt-4 text-xs select-none mt-2">
-            {/* 1. Place tag */}
-            {beat.rank === 1 && (
-              <span className="h-7 px-3.5 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
-                1st Place
-              </span>
-            )}
-            {beat.rank === 2 && (
-              <span className="h-7 px-3.5 rounded-full bg-[#1E1E1E] text-[#AAAAAA] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
-                2nd Place
-              </span>
-            )}
-            {beat.rank === 3 && (
-              <span className="h-7 px-3.5 rounded-full bg-[#FF5E3A]/10 text-[#FF8A65] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
-                3rd Place
-              </span>
-            )}
-
-            {/* 2. Beat battle tag */}
-            {match && (
-              <Link
-                href={`/battles/battle-${match[1]}`}
-                className="px-3.5 h-7 rounded-full bg-[#7B61FF]/15 text-zinc-300 hover:bg-[#7B61FF]/25 hover:text-white text-xs font-bold shrink-0 transition-all inline-flex items-center gap-1.5 leading-none"
-                title={`View ${beat.battleSource || `Beat Battle #${match[1]}`}`}
-              >
-                <span>BB#{match[1]}</span>
-                <span className="text-[10px]">↗</span>
-              </Link>
-            )}
-
-            {/* 3. BPM tag */}
+            {/* 1. BPM tag */}
             {beat.bpm ? (
               <span className="h-7 px-3.5 rounded-full bg-[#121212] text-[#888888] text-xs font-bold inline-flex items-center justify-center text-center leading-none select-none shrink-0">
                 {beat.bpm} BPM
               </span>
             ) : null}
 
-            {/* 4. For sale / not for sale tag */}
+            {/* 2. For sale / not for sale tag */}
             {beat.priceTag ? (
               <span
                 className={`h-7 px-3.5 rounded-full text-xs font-bold select-none inline-flex items-center justify-center text-center leading-none shrink-0 ${
@@ -387,7 +356,7 @@ export function BeatDetailClient() {
               </span>
             ) : null}
 
-            {/* 5. Genre / style tags */}
+            {/* 3. Genre / style tags */}
             {beat.genres?.map((g) => (
               <span
                 key={g}
@@ -407,6 +376,19 @@ export function BeatDetailClient() {
             ))}
           </div>
         ) : null}
+
+        {/* Separate small text under the tags section */}
+        {battleInfo && (
+          <p className="text-xs text-zinc-400 select-none pt-2.5">
+            <Link
+              href={battleInfo.battleUrl}
+              className="text-[#7B61FF] hover:underline font-semibold"
+            >
+              {battleInfo.battleName}
+            </Link>{" "}
+            <span>{battleInfo.statusText}</span>
+          </p>
+        )}
 
       </div>
     </div>

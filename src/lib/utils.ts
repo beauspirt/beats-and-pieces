@@ -153,3 +153,87 @@ export function toBeatSlug(title?: string, fallbackId?: string): string {
   return normalized || cleanFallback;
 }
 
+export interface BeatBattleInfo {
+  battleName: string;
+  battleUrl: string;
+  statusText: string;
+}
+
+export function getBeatBattleInfo(beat: {
+  battleSource?: string;
+  competitionTitle?: string;
+  id?: string;
+  rank?: number;
+}): BeatBattleInfo | null {
+  if (!beat) return null;
+  const rawSource = (beat.battleSource || beat.competitionTitle || "").trim();
+  const rawId = (beat.id || "").trim();
+
+  // 1. Determine rank (1, 2, 3)
+  let rank = typeof beat.rank === "number" && beat.rank > 0 ? beat.rank : undefined;
+  if (!rank && rawSource) {
+    if (/1st\s*Place/i.test(rawSource)) rank = 1;
+    else if (/2nd\s*Place/i.test(rawSource)) rank = 2;
+    else if (/3rd\s*Place/i.test(rawSource)) rank = 3;
+  }
+
+  // 2. Extract Battle Number and Clean Name
+  const sourceMatch = rawSource.match(/Beat Battle #?(\d+)/i);
+  const idMatch = rawId.match(/disc-bb(\d+)/i) || rawId.match(/battle-(\d+)/i) || rawId.match(/sub-battle-(\d+)/i);
+  const battleNum = sourceMatch ? sourceMatch[1] : idMatch ? idMatch[1] : undefined;
+
+  const cleanName = rawSource.replace(/\s*\([123](st|nd|rd)\s*Place\)/i, "").trim();
+
+  let battleName = "";
+  let battleUrl = "";
+
+  if (cleanName) {
+    battleName = cleanName;
+    if (battleNum) {
+      battleUrl = `/battles/battle-${battleNum}`;
+    } else {
+      const slug = cleanName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      battleUrl = `/battles/${slug}`;
+    }
+  } else if (battleNum) {
+    battleName = `Beat Battle #${battleNum}`;
+    battleUrl = `/battles/battle-${battleNum}`;
+  }
+
+  // Check localStorage for custom battle titles & IDs if available
+  if (typeof window !== "undefined") {
+    try {
+      const rawStorage = localStorage.getItem("bnp_custom_battles");
+      if (rawStorage) {
+        const customBattles = JSON.parse(rawStorage);
+        if (Array.isArray(customBattles)) {
+          const found = customBattles.find(
+            (b: any) =>
+              (battleNum && (b.number === Number(battleNum) || b.id === `battle-${battleNum}`)) ||
+              (cleanName && b.title && b.title.toLowerCase() === cleanName.toLowerCase()) ||
+              (rawId && rawId.includes(b.id))
+          );
+          if (found) {
+            battleName = found.title;
+            battleUrl = `/battles/${found.id}`;
+          }
+        }
+      }
+    } catch {}
+  }
+
+  if (!battleName) return null;
+
+  // 3. Status text: 1st place winner, 2nd place winner, 3rd place winner, or entry
+  let statusText = "entry";
+  if (rank === 1) statusText = "1st place winner";
+  else if (rank === 2) statusText = "2nd place winner";
+  else if (rank === 3) statusText = "3rd place winner";
+
+  return {
+    battleName,
+    battleUrl,
+    statusText,
+  };
+}
+

@@ -2121,12 +2121,12 @@ export function BattleDetailClient({ battleId }: { battleId: string }) {
                             <div
                               className={`absolute -bottom-0.5 -right-0.5 w-[18px] h-[18px] sm:w-5 sm:h-5 rounded-full grid place-items-center ring-[1.5px] ring-[#181818] select-none pointer-events-none shadow-sm ${
                                 rank === 1
-                                  ? "bg-[#FFC72C] text-[#78350F] font-black text-[9px] sm:text-[10px]"
+                                  ? "bg-[#FFC72C] text-[#78350F] font-black text-[11px] sm:text-xs"
                                   : rank === 2
-                                  ? "bg-[#DDE3EA] text-[#334155] font-black text-[9px] sm:text-[10px]"
+                                  ? "bg-[#DDE3EA] text-[#334155] font-black text-[11px] sm:text-xs"
                                   : rank === 3
-                                  ? "bg-[#D97736] text-[#4A1D08] font-black text-[9px] sm:text-[10px]"
-                                  : `bg-[#242424] text-zinc-300 font-bold ${rank >= 10 ? "text-[8px] sm:text-[9px] tracking-tighter" : "text-[9px] sm:text-[10px]"}`
+                                  ? "bg-[#D97736] text-[#4A1D08] font-black text-[11px] sm:text-xs"
+                                  : `bg-[#242424] text-zinc-300 font-bold ${rank >= 10 ? "text-[9px] sm:text-[10px] tracking-tight" : "text-[11px] sm:text-xs"}`
                               }`}
                               title={rank <= 3 ? `${rank === 1 ? '1st' : rank === 2 ? '2nd' : '3rd'} Place` : `Place #${rank}`}
                             >

@@ -50,11 +50,17 @@ export async function generateMetadata({
   });
 }
 
+import { Suspense } from "react";
+
 export default async function ProducerDirectProfilePage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  return <ProducerProfileClient producerId={id} />;
+  return (
+    <Suspense fallback={<div className="min-h-[70vh] flex items-center justify-center"><div className="w-8 h-8 rounded-full border-2 border-[#FF5E3A] border-t-transparent animate-spin" /></div>}>
+      <ProducerProfileClient producerId={id} />
+    </Suspense>
+  );
 }

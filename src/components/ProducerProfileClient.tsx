@@ -1836,8 +1836,9 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
       </div>
 
       {/* SECTION 2: PRODUCER BEATS */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between gap-3">
+      {(displayedBeats.length > 0 || isProfileOwner) && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <h2 className="text-2xl font-bold text-white">Beats</h2>
           </div>
@@ -2082,11 +2083,14 @@ export function ProducerProfileClient({ producerId }: { producerId: string }) {
         ) : (
           <div className="bg-[#181818] rounded-[28px] p-8 text-center space-y-2">
             <p className="text-zinc-400 text-sm">
-              This producer hasn&apos;t submitted any beats.
+              {isProfileOwner
+                ? "You haven't added any beats yet."
+                : "This producer hasn't submitted any beats."}
             </p>
           </div>
         )}
       </div>
+    )}
 
       {/* SECTION 3: FEATURED VAULT MEDIA */}
       {producerVaultItems.length > 0 && (
